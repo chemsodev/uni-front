@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Groupe et Section - Profil Étudiant</title>
+    <link href="style/group-section.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">ID</div>
+                <div class="user-name">Imane Heeni Douma</div>
+                <div class="user-id">20230456</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link">Profil Personnel</a>
+                </li>
+                <li class="nav-item">
+                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
+                </li>
+                <li class="nav-item">
+                    <a href="demandes.html" class="nav-link">Demandes</a>
+                </li>
+                <li class="nav-item">
+                    <a href="notification.html" class="nav-link">Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Groupe et Section</h1>
+            </div>
+            
+            <div class="group-container">
+                <!-- Information sur les affectations -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <span class="card-title-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+                            </svg>
+                        </span>
+                        Mes affectations
+                    </h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Section</div>
+                            <div class="info-value">Section B</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Groupe TD</div>
+                            <div class="info-value">Groupe 3</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Groupe TP</div>
+                            <div class="info-value">Groupe 2</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Année académique</div>
+                            <div class="info-value">2023-2024</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Emploi du temps (remplace la section timetable) -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <span class="card-title-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                            </svg>
+                        </span>
+                        Emploi du temps personnalisé
+                    </h2>
+                    
+                    <div class="file-upload-container">
+                        <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
+                        <div class="upload-area" id="uploadArea">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div class="upload-text">Glissez et déposez votre emploi du temps</div>
+                            <div class="upload-hint">Format accepté: JPG, PNG, PDF (max. 5 Mo)</div>
+                            <button class="upload-btn" id="selectFileBtn">Sélectionner un fichier</button>
+                        </div>
+                        
+                        <div class="preview-container" id="previewContainer">
+                            <div class="preview-header">
+                                <div class="preview-title">Aperçu de l'emploi du temps</div>
+                                <div class="preview-actions">
+                                    <button class="preview-btn" id="downloadBtn">Télécharger</button>
+                                    <button class="preview-btn preview-delete" id="deleteBtn">Supprimer</button>
+                                </div>
+                            </div>
+                            <div class="preview-content" id="previewContent">
+                                <!-- Preview content will be inserted here -->
+                            </div>
+                            <div class="file-name" id="fileName"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informations sur les responsables -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <span class="card-title-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                            </svg>
+                        </span>
+                        Responsables pédagogiques
+                    </h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Responsable filière Informatique</div>
+                            <div class="info-value">Dr. Mohammed BENSAAD</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Responsable de section B</div>
+                            <div class="info-value">Dr. RAHMANI AHMED</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Responsable TD Groupe 3</div>
+                            <div class="info-value">Dr. Karim MEZIANI</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Responsable TP Groupe 2</div>
+                            <div class="info-value">Dr. Samira TALEB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File upload functionality
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const selectFileBtn = document.getElementById('selectFileBtn');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewContent = document.getElementById('previewContent');
+        const fileName = document.getElementById('fileName');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        
+        // Open file selector when clicking on the upload area or button
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        selectFileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+        
+        // Handle drag and drop events
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.backgroundColor = '#DBEAFE';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.backgroundColor = '#EBF8FF';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.backgroundColor = '#EBF8FF';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Handle file selection
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                handleFileUpload(fileInput.files[0]);
+            }
+        });
+        
+        // Process the uploaded file
+        function handleFileUpload(file) {
+            // Check file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Le fichier est trop volumineux. Taille maximale: 5 Mo.');
+                return;
+            }
+            
+            // Display file name
+            fileName.textContent = file.name;
+            
+            // Clear previous preview
+            previewContent.innerHTML = '';
+            
+            // Create preview based on file type
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'preview-img';
+                img.src = URL.createObjectURL(file);
+                previewContent.appendChild(img);
+            } else if (file.type === 'application/pdf') {
+                const embed = document.createElement('embed');
+                embed.className = 'pdf-embed';
+                embed.src = URL.createObjectURL(file);
+                embed.type = 'application/pdf';
+                previewContent.appendChild(embed);
+            } else {
+                fileName.textContent = 'Format de fichier non pris en charge';
+                return;
+            }
+            
+            // Show preview container
+            previewContainer.style.display = 'block';
+            
+            // Setup download functionality
+            downloadBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(file);
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+            
+            // Setup delete functionality
+            deleteBtn.onclick = () => {
+                previewContainer.style.display = 'none';
+                fileInput.value = '';
+                URL.revokeObjectURL(img?.src || embed?.src);
+            };
+        }
+    </script>
+</body>
+</html>

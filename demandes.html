@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Demandes Étudiant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sora:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style/demandes.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">AR</div>
+                <div class="user-name">Ahmed Rahmani</div>
+                <div class="user-id">20230456</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link">Profil Personnel</a>
+                </li>
+                <li class="nav-item">
+                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
+                </li>
+                <li class="nav-item">
+                    <a href="demandes.html" class="nav-link">Demandes</a>
+                </li>
+                <li class="nav-item">
+                    <a href="notification.html" class="nav-link">Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Mes Demandes</h1>
+                <div class="header-actions">
+                    <button>Nouvelle Demande</button>
+                </div>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="openTab(event, 'formulaires')">Formulaires de demande</button>
+                    <button class="tab-button" onclick="openTab(event, 'suivi')">Suivi des demandes</button>
+                </div>
+                
+                <!-- Onglet Formulaires -->
+                <div id="formulaires" class="tab-content active">
+                    <div class="alert alert-info">
+                        Veuillez remplir le formulaire correspondant à votre type de demande. Une fois soumise, vous pourrez suivre l'état de votre demande dans l'onglet "Suivi des demandes".
+                    </div>
+                    
+                    <!-- Sous-onglets pour les différents formulaires -->
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="openSubTab(event, 'section-form')">Changement de Section</button>
+                        <button class="tab-button" onclick="openSubTab(event, 'td-form')">Changement de Groupe TD</button>
+                        <button class="tab-button" onclick="openSubTab(event, 'tp-form')">Changement de Groupe TP</button>
+                    </div>
+                    
+                    <!-- Formulaire de changement de section -->
+                    <div id="section-form" class="tab-content active form-card">
+                        <h2 class="card-title">Formulaire de demande de changement de section</h2>
+                        <form>
+                            <div class="form-group">
+                                <label for="current-section">Section actuelle</label>
+                                <input type="text" id="current-section" value="B" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="requested-section">Section demandée</label>
+                                <select id="requested-section" required>
+                                    <option value="">Sélectionnez une section</option>
+                                    <option value="A">Section A</option>
+                                    <option value="C">Section C</option>
+                                    <option value="D">Section D</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="section-reason">Motif de la demande</label>
+                                <select id="section-reason" required>
+                                    <option value="">Sélectionnez un motif</option>
+                                    <option value="schedule">Conflit d'horaire</option>
+                                    <option value="medical">Raison médicale</option>
+                                    <option value="transport">Problème de transport</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="section-justification">Justification détaillée</label>
+                                <textarea id="section-justification" placeholder="Veuillez expliquer en détail les raisons de votre demande..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="section-document">Document justificatif (PDF, JPG, PNG)</label>
+                                <input type="file" id="section-document">
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">Soumettre la demande</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Formulaire de changement de groupe TD -->
+                    <div id="td-form" class="tab-content form-card">
+                        <h2 class="card-title">Formulaire de demande de changement de groupe TD</h2>
+                        <form>
+                            <div class="form-group">
+                                <label for="current-td">Groupe TD actuel</label>
+                                <input type="text" id="current-td" value="3" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="requested-td">Groupe TD demandé</label>
+                                <select id="requested-td" required>
+                                    <option value="">Sélectionnez un groupe</option>
+                                    <option value="1">Groupe TD 1</option>
+                                    <option value="2">Groupe TD 2</option>
+                                    <option value="4">Groupe TD 4</option>
+                                    <option value="5">Groupe TD 5</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="td-reason">Motif de la demande</label>
+                                <select id="td-reason" required>
+                                    <option value="">Sélectionnez un motif</option>
+                                    <option value="schedule">Conflit d'horaire</option>
+                                    <option value="group">Travail en groupe</option>
+                                    <option value="transport">Problème de transport</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="td-justification">Justification détaillée</label>
+                                <textarea id="td-justification" placeholder="Veuillez expliquer en détail les raisons de votre demande..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="td-document">Document justificatif (PDF, JPG, PNG)</label>
+                                <input type="file" id="td-document">
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">Soumettre la demande</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Formulaire de changement de groupe TP -->
+                    <div id="tp-form" class="tab-content form-card">
+                        <h2 class="card-title">Formulaire de demande de changement de groupe TP</h2>
+                        <form>
+                            <div class="form-group">
+                                <label for="current-tp">Groupe TP actuel</label>
+                                <input type="text" id="current-tp" value="2" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="requested-tp">Groupe TP demandé</label>
+                                <select id="requested-tp" required>
+                                    <option value="">Sélectionnez un groupe</option>
+                                    <option value="1">Groupe TP 1</option>
+                                    <option value="3">Groupe TP 3</option>
+                                    <option value="4">Groupe TP 4</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="tp-reason">Motif de la demande</label>
+                                <select id="tp-reason" required>
+                                    <option value="">Sélectionnez un motif</option>
+                                    <option value="schedule">Conflit d'horaire</option>
+                                    <option value="group">Binôme/groupe de projet</option>
+                                    <option value="material">Accès au matériel</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="tp-justification">Justification détaillée</label>
+                                <textarea id="tp-justification" placeholder="Veuillez expliquer en détail les raisons de votre demande..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="tp-document">Document justificatif (PDF, JPG, PNG)</label>
+                                <input type="file" id="tp-document">
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">Soumettre la demande</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Onglet Suivi des demandes -->
+                <div id="suivi" class="tab-content">
+                    <div class="form-card">
+                        <h2 class="card-title">Suivi de mes demandes</h2>
+                        
+                        <table class="requests-table">
+                            <thead>
+                                <tr>
+                                    <th>Type de demande</th>
+                                    <th>Date de soumission</th>
+                                    <th>Changement demandé</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Changement de Groupe TD</td>
+                                    <td>10/04/2025</td>
+                                    <td>3 → 2</td>
+                                    <td><span class="status-chip status-pending">En cours</span></td>
+                                    <td>
+                                        <button class="action-btn">Voir détails</button>
+                                        <button class="action-btn">Annuler</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Changement de Section</td>
+                                    <td>05/04/2025</td>
+                                    <td>A → B</td>
+                                    <td><span class="status-chip status-approved">Acceptée</span></td>
+                                    <td>
+                                        <button class="action-btn">Voir détails</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Changement de Groupe TP</td>
+                                    <td>01/04/2025</td>
+                                    <td>1 → 2</td>
+                                    <td><span class="status-chip status-approved">Acceptée</span></td>
+                                    <td>
+                                        <button class="action-btn">Voir détails</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Changement de Groupe TD</td>
+                                    <td>15/03/2025</td>
+                                    <td>4 → 3</td>
+                                    <td><span class="status-chip status-rejected">Refusée</span></td>
+                                    <td>
+                                        <button class="action-btn">Voir détails</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour gérer les onglets principaux
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            // Masquer tous les contenus d'onglets
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                if (tabcontent[i].parentElement.className === "tab-container") {
+                    tabcontent[i].style.display = "none";
+                }
+            }
+            
+            // Désactiver tous les boutons d'onglets
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                if (tablinks[i].parentElement.className === "tab-buttons") {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+            }
+            
+            // Afficher l'onglet actif et activer le bouton
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        // Fonction pour gérer les sous-onglets (formulaires)
+        function openSubTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            // Masquer tous les contenus des sous-onglets
+            tabcontent = document.querySelectorAll(".form-card.tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            
+            // Désactiver tous les boutons des sous-onglets
+            tablinks = document.querySelectorAll(".tab-buttons:nth-of-type(2) .tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            // Afficher le sous-onglet actif et activer le bouton
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>

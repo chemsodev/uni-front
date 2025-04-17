@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion Espace Administration</title>
+    <link href="style/admin-login.css" rel="stylesheet">
+  
+</head>
+<body>
+    <div class="login-container">
+        <h2 class="login-title">Connexion Espace Administration</h2>
+        
+        <form action="admin-dashboard.html" method="post">
+            <div class="form-group">
+                <label class="form-label" for="email">Adresse Email Professionnel</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="votrenom@gmail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Se souvenir de moi</label>
+            </div>
+
+            <a href="mdps-oublier-admin.html" class="forgot-password">Mot de passe oublié?</a>
+
+            <button type="submit" class="login-button">Se connecter</button>
+        </form>
+
+        <div class="divider">
+            <span class="divider-text">OU</span>
+        </div>
+
+        <div class="signup-link">
+            Vous n'avez pas encore de compte? <a href="admin-signup.html">S'inscrire</a>
+        </div>
+
+        <a href="index.html" class="back-button">Retour à la page de sélection</a>
+    </div>
+</body>
+</html>

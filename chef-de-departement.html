@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Chef de Département - Gestion Académique</title>
+    <link href="style/chef-de-departement.css" rel="stylesheet">
+  
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo">Chef de Département</div>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-name">Prof. Mohamed Belhadi</div>
+                <div class="user-role">Chef Dépt. Informatique</div>
+            </div>
+            
+            <div class="menu-title">Navigation</div>
+            <ul class="menu">
+                <li class="menu-item" onclick="changeTab('tableau-bord')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    Tableau de Bord
+                </li>
+                <li class="menu-item active" onclick="changeTab('specialites')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    Gestion des Spécialités
+                </li>
+                <li class="menu-item" onclick="changeTab('enseignants')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Gestion des Enseignants
+                </li>
+                <li class="menu-item" onclick="changeTab('etudiants')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Gestion des Étudiants
+                </li>
+                <li class="menu-item" onclick="changeTab('sanctions')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    Sanctions et Validations
+                </li>
+                <li class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Paramètres
+                </li>
+            </ul>
+            
+            <div class="logout">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Déconnexion
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="welcome-text">Bonjour, Prof. Belhadi</h1>
+                    <p class="dashboard-date">Dimanche 13 avril 2025</p>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab" onclick="activateTab(this, 'tableau-bord-content')">Vue d'ensemble</div>
+                <div class="tab active" onclick="activateTab(this, 'specialites-content')">Gestion des Spécialités</div>
+                <div class="tab" onclick="activateTab(this, 'enseignants-content')">Gestion des Enseignants</div>
+                <div class="tab" onclick="activateTab(this, 'etudiants-content')">Gestion des Étudiants</div>
+                <div class="tab" onclick="activateTab(this, 'sanctions-content')">Sanctions et Validations</div>
+            </div>
+            
+            <!-- Tab 1: Vue d'ensemble -->
+            <div class="tab-content" id="tableau-bord-content">
+                <div class="cards-container">
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                            </svg>
+                            Étudiants
+                        </div>
+                        <div class="card-value">512</div>
+                        <div class="card-label">Total d'étudiants en informatique</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Enseignants
+                        </div>
+                        <div class="card-value">32</div>
+                        <div class="card-label">Nombre d'enseignants</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            Spécialités
+                        </div>
+                        <div class="card-value">3</div>
+                        <div class="card-label">Options disponibles</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Demandes
+                        </div>
+                        <div class="card-value">8</div>
+                        <div class="card-label">Demandes à traiter</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 2: Gestion des Spécialités -->
+            <div class="tab-content active" id="specialites-content">
+                <div class="content-section">
+                    <h2 class="section-title">Gestion des Spécialités</h2>
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-input" placeholder="Rechercher une spécialité...">
+                        <select class="filter-select">
+                            <option value="">Tous les niveaux</option>
+                            <option value="L1">L1</option>
+                            <option value="L2">L2</option>
+                            <option value="L3">L3</option>
+                            <option value="M1">M1</option>
+                            <option value="M2">M2</option>
+                        </select>
+                        <button class="search-btn">Rechercher</button>
+                        <button class="action-btn success" onclick="openModal('modal-ajout-specialite')">Ajouter une spécialité</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Nom de la spécialité</th>
+                                <th>Niveau</th>
+                                <th>Nombre d'étudiants</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>INF-GL</td>
+                                <td>Génie Logiciel</td>
+                                <td>L3</td>
+                                <td>78</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-specialite')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>INF-SI</td>
+                                <td>Systèmes d'Information</td>
+                                <td>L3</td>
+                                <td>65</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-specialite')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>INF-IA</td>
+                                <td>Intelligence Artificielle</td>
+                                <td>M1</td>
+                                <td>42</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-specialite')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tab 3: Gestion des Enseignants -->
+            <div class="tab-content" id="enseignants-content">
+                <div class="content-section">
+                    <h2 class="section-title">Gestion des Enseignants</h2>
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-input" placeholder="Rechercher un enseignant...">
+                        <select class="filter-select">
+                            <option value="">Tous les grades</option>
+                            <option value="prof">Professeur</option>
+                            <option value="mca">Maître de Conférences A</option>
+                           
+
+
+
+
+                                <option value="mcb">Maître de Conférences B</option>
+                            <option value="maa">Maître Assistant A</option>
+                            <option value="mab">Maître Assistant B</option>
+                            <option value="vacataire">Vacataire</option>
+                        </select>
+                        <button class="search-btn">Rechercher</button>
+                        <button class="action-btn success" onclick="openModal('modal-ajout-enseignant')">Ajouter un enseignant</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Grade</th>
+                                <th>Spécialité</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ENS-001</td>
+                                <td>Dr. Ahmed Mebarki</td>
+                                <td>Maître de Conférences A</td>
+                                <td>Génie Logiciel</td>
+                                <td>a.mebarki@univ.dz</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-enseignant')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ENS-002</td>
+                                <td>Dr. Samia Benali</td>
+                                <td>Professeur</td>
+                                <td>Intelligence Artificielle</td>
+                                <td>s.benali@univ.dz</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-enseignant')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ENS-003</td>
+                                <td>M. Karim Hadjali</td>
+                                <td>Maître Assistant A</td>
+                                <td>Systèmes d'Information</td>
+                                <td>k.hadjali@univ.dz</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-enseignant')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tab 4: Gestion des Étudiants -->
+            <div class="tab-content" id="etudiants-content">
+                <div class="content-section">
+                    <h2 class="section-title">Gestion des Étudiants</h2>
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-input" placeholder="Rechercher un étudiant...">
+                        <select class="filter-select">
+                            <option value="">Toutes les spécialités</option>
+                            <option value="GL">Génie Logiciel</option>
+                            <option value="SI">Systèmes d'Information</option>
+                            <option value="IA">Intelligence Artificielle</option>
+                        </select>
+                        <button class="search-btn">Rechercher</button>
+                        <button class="action-btn success" onclick="openModal('modal-ajout-etudiant')">Ajouter un étudiant</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Matricule</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Niveau</th>
+                                <th>Spécialité</th>
+                                <th>Moyenne</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2022-0123</td>
+                                <td>Bencherif</td>
+                                <td>Yasmine</td>
+                                <td>L3</td>
+                                <td>Génie Logiciel</td>
+                                <td>15.75</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-etudiant')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2022-0234</td>
+                                <td>Boudiaf</td>
+                                <td>Mohamed</td>
+                                <td>L3</td>
+                                <td>Systèmes d'Information</td>
+                                <td>13.20</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-etudiant')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2021-0456</td>
+                                <td>Amrani</td>
+                                <td>Sofiane</td>
+                                <td>M1</td>
+                                <td>Intelligence Artificielle</td>
+                                <td>14.90</td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-modifier-etudiant')">Modifier</button>
+                                    <button class="action-btn danger">Supprimer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tab 5: Sanctions et Validations -->
+            <div class="tab-content" id="sanctions-content">
+                <div class="content-section">
+                    <h2 class="section-title">Sanctions et Validations</h2>
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-input" placeholder="Rechercher...">
+                        <select class="filter-select">
+                            <option value="">Tous les types</option>
+                            <option value="sanction">Sanctions</option>
+                            <option value="validation">Validations</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="pending">En attente</option>
+                            <option value="approved">Approuvé</option>
+                            <option value="denied">Refusé</option>
+                        </select>
+                        <button class="search-btn">Rechercher</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Réf.</th>
+                                <th>Étudiant</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SAN-2025-001</td>
+                                <td>Mohamed Boudiaf</td>
+                                <td>Sanction</td>
+                                <td>Absence non justifiée (3 séances)</td>
+                                <td>05/04/2025</td>
+                                <td><span class="status status-pending">En attente</span></td>
+                                <td>
+                                    <button class="action-btn success">Approuver</button>
+                                    <button class="action-btn danger">Refuser</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>VAL-2025-007</td>
+                                <td>Yasmine Bencherif</td>
+                                <td>Validation</td>
+                                <td>Validation de stage</td>
+                                <td>02/04/2025</td>
+                                <td><span class="status status-approved">Approuvé</span></td>
+                                <td>
+                                    <button class="action-btn secondary">Détails</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>SAN-2025-002</td>
+                                <td>Sofiane Amrani</td>
+                                <td>Sanction</td>
+                                <td>Plagiat détecté dans le projet</td>
+                                <td>01/04/2025</td>
+                                <td><span class="status status-denied">Refusé</span></td>
+                                <td>
+                                    <button class="action-btn secondary">Détails</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <!-- Modal Ajout Spécialité -->
+    <div class="modal-backdrop" id="modal-ajout-specialite">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Ajouter une nouvelle spécialité</h2>
+                <button class="modal-close" onclick="closeModal('modal-ajout-specialite')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label class="form-label">Code de la spécialité</label>
+                    <input type="text" class="form-input" placeholder="Ex: INF-GL">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nom de la spécialité</label>
+                    <input type="text" class="form-input" placeholder="Ex: Génie Logiciel">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Niveau</label>
+                    <select class="form-select">
+                        <option value="">Sélectionner un niveau</option>
+                        <option value="L1">L1</option>
+                        <option value="L2">L2</option>
+                        <option value="L3">L3</option>
+                        <option value="M1">M1</option>
+                        <option value="M2">M2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" placeholder="Description de la spécialité..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="action-btn secondary" onclick="closeModal('modal-ajout-specialite')">Annuler</button>
+                    <button class="action-btn success">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Modifier Spécialité -->
+    <div class="modal-backdrop" id="modal-modifier-specialite">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Modifier la spécialité</h2>
+                <button class="modal-close" onclick="closeModal('modal-modifier-specialite')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label class="form-label">Code de la spécialité</label>
+                    <input type="text" class="form-input" value="INF-GL">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nom de la spécialité</label>
+                    <input type="text" class="form-input" value="Génie Logiciel">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Niveau</label>
+                    <select class="form-select">
+                        <option value="L1">L1</option>
+                        <option value="L2">L2</option>
+                        <option value="L3" selected>L3</option>
+                        <option value="M1">M1</option>
+                        <option value="M2">M2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea">La spécialité Génie Logiciel forme des informaticiens spécialisés dans la conception et le développement d'applications logicielles robustes et évolutives.</textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="action-btn secondary" onclick="closeModal('modal-modifier-specialite')">Annuler</button>
+                    <button class="action-btn success">Enregistrer les modifications</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script>
+        // Function to change tab
+        function changeTab(tabId) {
+            // Hide all tab contents
+            var tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(function(content) {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all menu items
+            var menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(function(item) {
+                item.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            document.getElementById(tabId + '-content').classList.add('active');
+            
+            // Add active class to the clicked menu item
+            event.currentTarget.classList.add('active');
+            
+            // Update tabs at the top
+            var tabs = document.querySelectorAll('.tab');
+            tabs.forEach(function(tab) {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase().includes(tabId)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        // Function to activate tab
+        function activateTab(tabElement, contentId) {
+            // Remove active class from all tabs
+            var tabs = document.querySelectorAll('.tab');
+            tabs.forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            tabElement.classList.add('active');
+            
+            // Hide all tab contents
+            var tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(function(content) {
+                content.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(contentId).classList.add('active');
+            
+            // Update sidebar menu active state
+            var menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(function(item) {
+                item.classList.remove('active');
+                var itemText = item.textContent.trim().toLowerCase();
+                var contentName = contentId.replace('-content', '').toLowerCase();
+                
+                if (itemText.includes(contentName)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+        
+        // Function to open modal
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        // Function to close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-backdrop')) {
+                event.target.style.display = 'none';
+            }
+        }
+        
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create mobile menu toggle button if it doesn't exist
+            if (!document.querySelector('.mobile-menu-toggle')) {
+                var toggleBtn = document.createElement('div');
+                toggleBtn.className = 'mobile-menu-toggle';
+                toggleBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+                document.body.appendChild(toggleBtn);
+                
+                toggleBtn.addEventListener('click', function() {
+                    var sidebar = document.getElementById('sidebar');
+                    sidebar.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

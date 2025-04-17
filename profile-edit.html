@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier mes coordonnées - Profil Étudiant</title>
+    <link href="style/profile-edit.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">ID</div>
+                <div class="user-name">Imane Heeni Douma</div>
+                <div class="user-id">20230456</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link">Profil Personnel</a>
+                </li>
+                <li class="nav-item">
+                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
+                </li>
+                <li class="nav-item">
+                    <a href="demandes.html" class="nav-link">Demandes</a>
+                </li>
+                <li class="nav-item">
+                    <a href="notification.html" class="nav-link">Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Modifier mes coordonnées</h1>
+            </div>
+            
+            <div class="profile-container">
+                <!-- Status Messages -->
+                <div id="success-message" class="status-message success-message">
+                    Vos coordonnées ont été mises à jour avec succès !
+                </div>
+                
+                <div id="error-message" class="status-message error-message">
+                    Une erreur s'est produite. Veuillez réessayer.
+                </div>
+                
+                <h2 class="section-title">Modification des informations de contact</h2>
+                
+                <form class="profile-form">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Adresse Email*</label>
+                        <input type="email" id="email" class="form-input" value="imane.douma@etudiant.universite.fr" required>
+                        <div class="form-help">Cette adresse sera utilisée pour les communications officielles de l'université.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="email-personnel">Adresse Email Personnelle</label>
+                        <input type="email" id="email-personnel" class="form-input" placeholder="votre@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="telephone">Numéro de Téléphone Principal*</label>
+                        <input type="tel" id="telephone" class="form-input" value="+213 5 55 78 92 31" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="telephone-secondaire">Numéro de Téléphone Secondaire</label>
+                        <input type="tel" id="telephone-secondaire" class="form-input" placeholder="+213 0 00 00 00 00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="adresse">Adresse Postale*</label>
+                        <input type="text" id="adresse" class="form-input" value="123 Rue des Étudiants, Alger" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="code-postal">Code Postal*</label>
+                        <input type="text" id="code-postal" class="form-input" value="16000" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ville">Ville*</label>
+                        <input type="text" id="ville" class="form-input" value="Alger" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="contact-urgence">Contact en cas d'urgence</label>
+                        <input type="text" id="contact-urgence" class="form-input" placeholder="Nom et numéro de téléphone">
+                        <div class="form-help">Veuillez indiquer le nom et le numéro de téléphone d'une personne à contacter en cas d'urgence.</div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple form submission handler
+        document.querySelector('.profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulate form submission
+            setTimeout(function() {
+                // Show success message
+                document.getElementById('success-message').style.display = 'block';
+                
+                // Hide success message after 3 seconds
+                setTimeout(function() {
+                    document.getElementById('success-message').style.display = 'none';
+                }, 3000);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

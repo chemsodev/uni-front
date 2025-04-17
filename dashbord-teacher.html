@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Enseignant</title>
+    <link href="style/dashbord-teacher.css" rel="stylesheet">
+   
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">MB</div>
+                <div class="user-name">Mohamed Belkacem</div>
+                <div class="user-id">Enseignant</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
+                </li>
+                <li class="nav-item">
+                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
+                </li>
+                <li class="nav-item">
+                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Tableau de bord Enseignant</h1>
+                <div class="header-actions">
+                    <button>Emploi du temps</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-cards">
+                <!-- Sections Assignées -->
+                <div class="card">
+                    <h2 class="card-title">Mes Sections</h2>
+                    <div class="card-content">
+                        <div class="section-item">
+                            <div>Informatique - Section B</div>
+                            <div>28 étudiants</div>
+                        </div>
+                        <div class="section-item">
+                            <div>Informatique - Section A</div>
+                            <div>32 étudiants</div>
+                        </div>
+                        <div class="section-item">
+                            <div>Mathématiques - Section C</div>
+                            <div>25 étudiants</div>
+                        </div>
+                        <a href="#" class="see-all">Voir toutes les sections</a>
+                    </div>
+                </div>
+                
+                <!-- Emploi du temps aujourd'hui -->
+                <div class="card">
+                    <h2 class="card-title">Emploi du temps aujourd'hui</h2>
+                    <div class="card-content">
+                        <div class="schedule-item">
+                            <div>
+                                <div>Cours - Algorithmique</div>
+                                <div class="schedule-location">Salle: Amphi A</div>
+                            </div>
+                            <div class="schedule-time">08:00 - 09:30</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div>
+                                <div>TD - Algèbre</div>
+                                <div class="schedule-location">Salle: TD12</div>
+                            </div>
+                            <div class="schedule-time">09:45 - 11:15</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div>
+                                <div>TP - Programmation</div>
+                                <div class="schedule-location">Salle: Lab2</div>
+                            </div>
+                            <div class="schedule-time">13:00 - 14:30</div>
+                        </div>
+                        <a href="#" class="see-all">Voir tout l'emploi du temps</a>
+                    </div>
+                </div>
+                
+                <!-- Gestion des Étudiants -->
+                <div class="card">
+                    <h2 class="card-title">Gestion des Étudiants</h2>
+                    <div class="card-content">
+                        <div class="search-box">
+                            <input type="text" placeholder="Rechercher un étudiant...">
+                            <button>🔍</button>
+                        </div>
+                        <div class="student-list">
+                            <div class="student-item">
+                                <div class="student-name">Ahmed Saidi</div>
+                                <div class="student-group">TD3 / TP2</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Fatima Benali</div>
+                                <div class="student-group">TD1 / TP3</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Karim Hadj</div>
+                                <div class="student-group">TD2 / TP1</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Lina Mansouri</div>
+                                <div class="student-group">TD3 / TP2</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Yacine Boudiaf</div>
+                                <div class="student-group">TD1 / TP1</div>
+                            </div>
+                        </div>
+                        <a href="#" class="see-all">Gérer tous les étudiants</a>
+                    </div>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="card">
+                    <h2 class="card-title">Notifications Récentes</h2>
+                    <div class="card-content">
+                        <div class="notification-item">
+                            <div class="notification-dot"></div>
+                            <div class="notification-content">
+                                <div class="notification-title">Réservation de salle confirmée</div>
+                                <div class="notification-text">Amphi B pour le 15 avril.</div>
+                                <div class="notification-date">Aujourd'hui, 10:30</div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="notification-dot"></div>
+                            <div class="notification-content">
+                                <div class="notification-title">3 nouvelles demandes</div>
+                                <div class="notification-text">Demandes de changement de groupe</div>
+                                <div class="notification-date">Hier, 14:15</div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="notification-dot"></div>
+                            <div class="notification-content">
+                                <div class="notification-title">Rappel: Échéance de notation</div>
+                                <div class="notification-text">Remise des notes pour le module Algorithmique</div>
+                                <div class="notification-date">18/04/2025</div>
+                            </div>
+                        </div>
+                        
+                        <a href="#" class="see-all">Voir toutes les notifications</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Notes et Évaluations - Dashboard Enseignant</title>
+    <link href="style/note-evaluation.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">MB</div>
+                <div class="user-name">Mohamed Belkacem</div>
+                <div class="user-id">Enseignant</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
+                </li>
+                <li class="nav-item">
+                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
+                </li>
+                <li class="nav-item">
+                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Notes et Évaluations</h1>
+                <div class="header-actions">
+                    <button>Importer des notes</button>
+                    <button>Exporter des notes</button>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <div class="tab active">Saisie des notes</div>
+                <div class="tab">Validation académique</div>
+                <div class="tab">Statistiques par groupe</div>
+            </div>
+            
+            <!-- Tab Content: Saisie des notes -->
+            <div class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">Saisie des notes</h2>
+                    
+                    <div class="grades-entry-container">
+                        <!-- Module & Group Selector -->
+                        <div class="module-selector">
+                            <h3 class="card-title">Modules</h3>
+                            <ul class="module-list">
+                                <li class="module-item active">Algorithmique</li>
+                                <li class="module-item">Algèbre</li>
+                                <li class="module-item">Programmation</li>
+                                <li class="module-item">Probabilités</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Grades Entry Area -->
+                        <div>
+                            <div class="filter-bar">
+                                <div class="filter-item">
+                                    <div class="filter-label">Section:</div>
+                                    <select class="filter-select">
+                                        <option>Informatique - Section B</option>
+                                        <option>Informatique - Section A</option>
+                                        <option>Mathématiques - Section C</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-item">
+                                    <div class="filter-label">Type:</div>
+                                    <select class="filter-select">
+                                        <option>Tous les types</option>
+                                        <option>Examen</option>
+                                        <option>TD</option>
+                                        <option>TP</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="search-box">
+                                    <input type="text" placeholder="Rechercher un étudiant..." class="search-input">
+                                    <button class="search-btn">🔍</button>
+                                </div>
+                            </div>
+                            
+                            <div class="group-selector">
+                                <div class="group-item active">Tous</div>
+                                <div class="group-item">TD1</div>
+                                <div class="group-item">TD2</div>
+                                <div class="group-item">TD3</div>
+                                <div class="group-item">TP1</div>
+                                <div class="group-item">TP2</div>
+                                <div class="group-item">TP3</div>
+                            </div>
+                            
+                            <table class="grades-table">
+                                <thead>
+                                    <tr>
+                                        <th width="40">N°</th>
+                                        <th>Étudiant</th>
+                                        <th>Groupe TD/TP</th>
+                                        <th>Examen</th>
+                                        <th>TD</th>
+                                        <th>TP</th>
+                                        <th>Moyenne</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Ahmed Saidi</td>
+                                        <td>TD3 / TP2</td>
+                                        <td><input type="text" class="grade-input" value="14.5"></td>
+                                        <td><input type="text" class="grade-input" value="16.0"></td>
+                                        <td><input type="text" class="grade-input" value="15.0"></td>
+                                        <td>15.17</td>
+                                        <td><span class="student-status status-valid">Validé</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Fatima Benali</td>
+                                        <td>TD1 / TP3</td>
+                                        <td><input type="text" class="grade-input" value="12.0"></td>
+                                        <td><input type="text" class="grade-input" value="13.5"></td>
+                                        <td><input type="text" class="grade-input" value="14.0"></td>
+                                        <td>13.17</td>
+                                        <td><span class="student-status status-valid">Validé</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Karim Hadj</td>
+                                        <td>TD2 / TP1</td>
+                                        <td><input type="text" class="grade-input" value=""></td>
+                                        <td><input type="text" class="grade-input" value="11.5"></td>
+                                        <td><input type="text" class="grade-input" value="12.0"></td>
+                                        <td>-</td>
+                                        <td><span class="student-status status-warning">Incomplet</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>Lina Mansouri</td>
+                                        <td>TD3 / TP2</td>
+                                        <td><input type="text" class="grade-input" value="16.5"></td>
+                                        <td><input type="text" class="grade-input" value="17.0"></td>
+                                        <td><input type="text" class="grade-input" value="18.0"></td>
+                                        <td>17.17</td>
+                                        <td><span class="student-status status-valid">Validé</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>Yacine Boudiaf</td>
+                                        <td>TD1 / TP1</td>
+                                        <td><input type="text" class="grade-input" value="8.5"></td>
+                                        <td><input type="text" class="grade-input" value="10.0"></td>
+                                        <td><input type="text" class="grade-input" value=""></td>
+                                        <td>-</td>
+                                        <td><span class="student-status status-warning">Incomplet</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td>Samia Khalfi</td>
+                                        <td>TD2 / TP3</td>
+                                        <td><input type="text" class="grade-input" value="13.0"></td>
+                                        <td><input type="text" class="grade-input" value="14.5"></td>
+                                        <td><input type="text" class="grade-input" value="12.0"></td>
+                                        <td>13.17</td>
+                                        <td><span class="student-status status-valid">Validé</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>7</td>
+                                        <td>Omar Daoudi</td>
+                                        <td>TD1 / TP2</td>
+                                        <td><input type="text" class="grade-input" value="ABS"></td>
+                                        <td><input type="text" class="grade-input" value="7.5"></td>
+                                        <td><input type="text" class="grade-input" value="9.0"></td>
+                                        <td>5.5</td>
+                                        <td><span class="student-status status-danger">Non Validé</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="actions-bar">
+                                <div>
+                                    <strong>Coefficient:</strong> Examen: 0.6 / TD: 0.2 / TP: 0.2
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary">Réinitialiser</button>
+                                    <button class="btn btn-primary">Enregistrer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Validation académique (Initially Hidden) -->
+                <div class="card" style="display: none;">
+                    <h2 class="card-title">Validation académique</h2>
+                    
+                    <div class="validation-container">
+                        <div>
+                            <h3 class="card-title">État de validation par module</h3>
+                            <ul class="validation-list">
+                                <li class="validation-item">
+                                    <div>Algorithmique</div>
+                                    <div class="validation-status">
+                                        <div class="status-icon completed"></div>
+                                        <div>Complet (100%)</div>
+                                    </div>
+                                </li>
+                                <li class="validation-item">
+                                    <div>Algèbre</div>
+                                    <div class="validation-status">
+                                        <div class="status-icon pending"></div>
+                                        <div>En cours (65%)</div>
+                                    </div>
+                                </li>
+                                <li class="validation-item">
+                                    <div>Programmation</div>
+                                    <div class="validation-status">
+                                        <div class="status-icon pending"></div>
+                                        <div>En cours (45%)</div>
+                                    </div>
+                                </li>
+                                <li class="validation-item">
+                                    <div>Probabilités</div>
+                                    <div class="validation-status">
+                                        <div class="status-icon not-started"></div>
+                                        <div>Non commencé (0%)</div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                            <div class="validation-progress">
+                                <div class="validation-summary">
+                                    <div>Progression globale</div>
+                                    <div class="validation-percent">52%</div>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 52%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="actions-bar">
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary">Soumettre pour validation</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="card-title">Récapitulatif des validations</h3>
+                            <table class="summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Module</th>
+                                        <th>Étud. validés</th>
+                                        <th>Étud. rattrapages</th>
+                                        <th>Taux de réussite</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Algorithmique</td>
+                                        <td>22</td>
+                                        <td>6</td>
+                                        <td>78.6%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Algèbre</td>
+                                        <td>18</td>
+                                        <td>10</td>
+                                        <td>64.3%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Programmation</td>
+                                        <td>20</td>
+                                        <td>8</<td>Programmation</td>
+                                        <td>20</td>
+                                        <td>8</td>
+                                        <td>71.4%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Probabilités</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="validation-progress">
+                                <div class="validation-summary">
+                                    <div>Taux de réussite global</div>
+                                    <div class="validation-percent">71.4%</div>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 71.4%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistiques par groupe (Initially Hidden) -->
+                <div class="card" style="display: none;">
+                    <h2 class="card-title">Statistiques par groupe</h2>
+                    
+                    <div class="filter-bar">
+                        <div class="filter-item">
+                            <div class="filter-label">Module:</div>
+                            <select class="filter-select">
+                                <option>Algorithmique</option>
+                                <option>Algèbre</option>
+                                <option>Programmation</option>
+                                <option>Probabilités</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-item">
+                            <div class="filter-label">Groupe:</div>
+                            <select class="filter-select">
+                                <option>Tous les groupes</option>
+                                <option>TD1</option>
+                                <option>TD2</option>
+                                <option>TD3</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-item">
+                            <div class="filter-label">Type:</div>
+                            <select class="filter-select">
+                                <option>Tous les types</option>
+                                <option>Examen</option>
+                                <option>TD</option>
+                                <option>TP</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <h3 class="card-title">Performance globale</h3>
+                            <div class="stat-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">13.2</div>
+                                    <div class="stat-label">Moyenne</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">18.5</div>
+                                    <div class="stat-label">Note max</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">7.5</div>
+                                    <div class="stat-label">Note min</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">2.8</div>
+                                    <div class="stat-label">Écart type</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3 class="card-title">Répartition</h3>
+                            <div class="stat-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">28</div>
+                                    <div class="stat-label">Nombre d'étudiants</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">22</div>
+                                    <div class="stat-label">Notes ≥ 10</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">6</div>
+                                    <div class="stat-label">Notes < 10</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">78.6%</div>
+                                    <div class="stat-label">Taux de réussite</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-placeholder">Graphique de distribution des notes</div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-placeholder">Comparaison des moyennes par groupe</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Fonction pour changer d'onglet
+        document.querySelectorAll('.tab').forEach((tab, index) => {
+            tab.addEventListener('click', () => {
+                // Désactiver tous les onglets
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Activer l'onglet cliqué
+                tab.classList.add('active');
+                
+                // Masquer tous les contenus d'onglet
+                document.querySelectorAll('.card').forEach(card => card.style.display = 'none');
+                // Afficher le contenu de l'onglet correspondant
+                document.querySelectorAll('.card')[index].style.display = 'block';
+            });
+        });
+        
+        // Fonction pour changer de module
+        document.querySelectorAll('.module-item').forEach(module => {
+            module.addEventListener('click', () => {
+                document.querySelectorAll('.module-item').forEach(m => m.classList.remove('active'));
+                module.classList.add('active');
+            });
+        });
+        
+        // Fonction pour changer de groupe
+        document.querySelectorAll('.group-item').forEach(group => {
+            group.addEventListener('click', () => {
+                document.querySelectorAll('.group-item').forEach(g => g.classList.remove('active'));
+                group.classList.add('active');
+            });
+        });
+        
+        // Calcul automatique des moyennes lors de la saisie
+        document.querySelectorAll('.grade-input').forEach(input => {
+            input.addEventListener('input', () => {
+                // Logique de calcul des moyennes (à implémenter)
+                console.log('Recalcul des moyennes...');
+            });
+        });
+    </script>
+</body>
+</html>

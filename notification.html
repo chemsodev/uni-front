@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications</title>
+    <link href="style/notification.css" rel="stylesheet">
+    
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">AR</div>
+                <div class="user-name">Ahmed Rahmani</div>
+                <div class="user-id">20230456</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link">Profil Personnel</a>
+                </li>
+                <li class="nav-item">
+                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
+                </li>
+                <li class="nav-item">
+                    <a href="demandes.html" class="nav-link">Demandes</a>
+                </li>
+                <li class="nav-item">
+                    <a href="notification.html" class="nav-link">Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Notifications</h1>
+                <div class="header-actions">
+                    <button onclick="markAllAsRead()">Tout marquer comme lu</button>
+                </div>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div class="content-card">
+                <div class="card-title">
+                    <span>Mes notifications</span>
+                    <div class="card-title-actions">
+                        <button onclick="deleteAllRead()">Supprimer lues</button>
+                    </div>
+                </div>
+                
+                <div class="notification-filters">
+                    <button class="filter-btn active" onclick="filterNotifications('all')">Toutes</button>
+                    <button class="filter-btn" onclick="filterNotifications('admin')">Administration</button>
+                    <button class="filter-btn" onclick="filterNotifications('cours')">Cours</button>
+                    <button class="filter-btn" onclick="filterNotifications('examen')">Examens</button>
+                    <button class="filter-btn" onclick="filterNotifications('unread')">Non lues</button>
+                </div>
+                
+                <div class="notification-list">
+                    <!-- Notification 1 -->
+                    <div class="notification-item unread admin" data-type="admin" data-read="false">
+                        <div class="notification-badge"></div>
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-admin">A</span>
+                                Mise à jour de votre demande de changement de groupe TD
+                            </div>
+                            <div class="notification-date">12/04/2025 • 09:15</div>
+                        </div>
+                        <div class="notification-content">
+                            Votre demande de changement de groupe TD (DEM-2546) a été examinée et est actuellement en cours de traitement par l'administration. Vous recevrez une réponse dans les prochains jours.
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="markAsRead(this)">Marquer comme lu</button>
+                            <button class="notification-btn primary" onclick="viewDetails('DEM-2546')">Voir détails</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification 2 -->
+                    <div class="notification-item unread cours" data-type="cours" data-read="false">
+                        <div class="notification-badge"></div>
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-cours">C</span>
+                                Modification d'horaire - Cours d'Algorithmique
+                            </div>
+                            <div class="notification-date">11/04/2025 • 14:30</div>
+                        </div>
+                        <div class="notification-content">
+                            Le cours d'Algorithmique prévu le 15/04/2025 à 10:00 est exceptionnellement déplacé à 13:30 dans la salle B204. Veuillez ajuster votre emploi du temps en conséquence.
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="markAsRead(this)">Marquer comme lu</button>
+                            <button class="notification-btn primary" onclick="viewCalendar('ALG-425')">Voir calendrier</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification 3 -->
+                    <div class="notification-item unread examen" data-type="examen" data-read="false">
+                        <div class="notification-badge"></div>
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-examen">E</span>
+                                Publication des résultats - Examen de Mathématiques
+                            </div>
+                            <div class="notification-date">10/04/2025 • 16:45</div>
+                        </div>
+                        <div class="notification-content">
+                            Les résultats de l'examen de Mathématiques du 01/04/2025 sont désormais disponibles. Vous pouvez consulter votre note et le corrigé dans la section "Notes et Résultats" de votre espace étudiant.
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="markAsRead(this)">Marquer comme lu</button>
+                            <button class="notification-btn primary" onclick="viewResults('MAT-125')">Voir résultats</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification 4 -->
+                    <div class="notification-item unread admin" data-type="admin" data-read="false">
+                        <div class="notification-badge"></div>
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-admin">A</span>
+                                Changement de section approuvé
+                            </div>
+                            <div class="notification-date">08/04/2025 • 11:20</div>
+                        </div>
+                        <div class="notification-content">
+                            Votre demande de changement de section (DEM-2498) a été approuvée. Vous êtes désormais affecté à la Section B. Ce changement sera effectif à partir du 10/04/2025. Veuillez consulter votre nouvel emploi du temps.
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="markAsRead(this)">Marquer comme lu</button>
+                            <button class="notification-btn primary" onclick="viewSchedule()">Voir emploi du temps</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification 5 -->
+                    <div class="notification-item unread cours" data-type="cours" data-read="false">
+                        <div class="notification-badge"></div>
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-cours">C</span>
+                                Nouveau document - Cours de Structures de Données
+                            </div>
+                            <div class="notification-date">07/04/2025 • 09:35</div>
+                        </div>
+                        <div class="notification-content">
+                            Un nouveau support de cours intitulé "Introduction aux Arbres Binaires" a été mis en ligne pour le module de Structures de Données. Vous pouvez le télécharger depuis la plateforme de cours.
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="markAsRead(this)">Marquer comme lu</button>
+                            <button class="notification-btn primary" onclick="viewDocument('SD-215')">Voir document</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification 6 -->
+                    <div class="notification-item cours" data-type="cours" data-read="true">
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-cours">C</span>
+                                Annulation de séance - TP Bases de Données
+                            </div>
+                            <div class="notification-date">05/04/2025 • 13:10</div>
+                        </div>
+                        <div class="notification-content">
+                            La séance de TP de Bases de Données prévue le 07/04/2025 à 14:00 est annulée en raison de l'indisponibilité du professeur. Une séance de rattrapage sera programmée ultérieurement.
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="deleteNotification(this)">Supprimer</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification 7 -->
+                    <div class="notification-item examen" data-type="examen" data-read="true">
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-examen">E</span>
+                                Rappel - Examen de Programmation Orientée Objet
+                            </div>
+                            <div class="notification-date">03/04/2025 • 10:25</div>
+                        </div>
+                        <div class="notification-content">
+                            Rappel : l'examen de Programmation Orientée Objet aura lieu le 20/04/2025 à 09:00 en salle A310. N'oubliez pas d'apporter votre carte d'étudiant et vos fournitures. Les calculatrices ne sont pas autorisées.
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="deleteNotification(this)">Supprimer</button>
+                            <button class="notification-btn primary" onclick="addToCalendar('POO-EX1')">Ajouter au calendrier</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification 8 -->
+                    <div class="notification-item admin" data-type="admin" data-read="true">
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <span class="notification-icon icon-admin">A</span>
+                                Confirmation de votre inscription
+                            </div>
+                            <div class="notification-date">01/04/2025 • 08:50</div>
+                        </div>
+                        <div class="notification-content">
+                            Votre inscription pour l'année académique 2024-2025 a été confirmée. Vous pouvez désormais accéder à tous les services de la plateforme étudiante. Bienvenue!
+                        </div>
+                        <div class="notification-actions">
+                            <button class="notification-btn" onclick="deleteNotification(this)">Supprimer</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="pagination-btn">&laquo;</button>
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                    <button class="pagination-btn">&raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour filtrer les notifications
+        function filterNotifications(type) {
+            // Mettre à jour les boutons de filtre
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.textContent.toLowerCase().includes(type) || 
+                   (type === 'unread' && button.textContent.includes('Non lues')) ||
+                   (type === 'all' && button.textContent.includes('Toutes'))) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // Filtrer les notifications
+            const notifications = document.querySelectorAll('.notification-item');
+            notifications.forEach(notification => {
+                if (type === 'all') {
+                    notification.style.display = 'block';
+                } else if (type === 'unread') {
+                    if (notification.getAttribute('data-read') === 'false') {
+                        notification.style.display = 'block';
+                    } else {
+                        notification.style.display = 'none';
+                    }
+                } else {
+                    if (notification.getAttribute('data-type') === type) {
+                        notification.style.display = 'block';
+                    } else {
+                        notification.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Vérifier s'il y a des notifications affichées
+            checkEmptyState();
+        }
+        
+        // Fonction pour vérifier s'il n'y a aucune notification à afficher
+        function checkEmptyState() {
+            const notificationList = document.querySelector('.notification-list');
+            const visibleNotifications = document.querySelectorAll('.notification-item[style="display: block"]');
+            
+            // Supprimer l'état vide s'il existe déjà
+            const existingEmptyState = document.querySelector('.empty-state');
+            if (existingEmptyState) {
+                existingEmptyState.remove();
+            }
+            
+            // Ajouter l'état vide si nécessaire
+            if (visibleNotifications.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-text">Aucune notification à afficher</div>
+                `;
+                notificationList.appendChild(emptyState);
+            }
+        }
+        
+        // Fonction pour marquer une notification comme lue
+        function markAsRead(button) {
+            const notification = button.closest('.notification-item');
+            notification.classList.remove('unread');
+            notification.setAttribute('data-read', 'true');
+            
+            // Supprimer le badge
+            const badge = notification.querySelector('.notification-badge');
+            if (badge) {
+                badge.remove();
+            }
+            
+            // Remplacer le bouton "Marquer comme lu" par "Supprimer"
+            button.textContent = 'Supprimer';
+            button.onclick = function() { deleteNotification(this); };
+            
+            // Mettre à jour le compteur dans le menu
+            updateNotificationCounter();
+        }
+        
+        // Fonction pour supprimer une notification
+        function deleteNotification(button) {
+            const notification = button.closest('.notification-item');
+            notification.style.opacity = '0';
+            setTimeout(() => {
+                notification.remove();
+                checkEmptyState();
+            }, 300);
+            
+            // Mettre à jour le compteur si nécessaire
+            if (notification.classList.contains('unread')) {
+                updateNotificationCounter();
+            }
+        }
+        
+        // Fonction pour marquer toutes les notifications comme lues
+        function markAllAsRead() {
+            const unreadNotifications = document.querySelectorAll('.notification-item.unread');
+            unreadNotifications.forEach(notification => {
+                notification.classList.remove('unread');
+                notification.setAttribute('data-read', 'true');
+                
+                // Supprimer le badge
+                const badge = notification.querySelector('.notification-badge');
+                if (badge) {
+                    badge.remove();
+                }
+                
+                // Mettre à jour le bouton
+                const readButton = notification.querySelector('button:first-of-type');
+                if (readButton) {
+                    readButton.textContent = 'Supprimer';
+                    readButton.onclick = function() { deleteNotification(this); };
+                }
+            });
+            
+            // Mettre à jour le compteur
+            updateNotificationCounter();
+        }
+        
+        // Fonction pour supprimer toutes les notifications lues
+        function deleteAllRead() {
+            const readNotifications = document.querySelectorAll('.notification-item:not(.unread)');
+            readNotifications.forEach(notification => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                    checkEmptyState();
+                }, 300);
+            });
+        }
+        
+        // Fonction pour mettre à jour le compteur de notifications
+        function updateNotificationCounter() {
+            const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+            const badge = document.querySelector('.nav-item .badge');
+            
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // Fonctions pour les actions de notification
+        function viewDetails(id) {
+            alert(`Redirection vers les détails de la demande ${id}`);
+        }
+        
+        function viewCalendar(id) {
+            alert(`Ouverture du calendrier - Événement ${id}`);
+        }
+        
+        function viewResults(id) {
+            alert(`Consultation des résultats pour ${id}`);
+        }
+        
+        function viewSchedule() {
+            alert('Ouverture de l\'emploi du temps');
+        }
+        
+        function viewDocument(id) {
+            alert(`Téléchargement du document ${id}`);
+        }
+        
+        function addToCalendar(id) {
+            alert(`Événement ${id} ajouté au calendrier`);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Emploi du temps - Enseignant</title>
+   <link href="style/emploi.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">MB</div>
+                <div class="user-name">Mohamed Belkacem</div>
+                <div class="user-id">Enseignant</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
+                </li>
+                <li class="nav-item">
+                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
+                </li>
+                <li class="nav-item">
+                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Emploi du temps</h1>
+                <div class="header-actions">
+                    <button onclick="openModal('requestRoomModal')">Demander une salle</button>
+                    <button onclick="openModal('addEventModal')">Ajouter un évènement</button>
+                </div>
+            </div>
+            
+            <div class="content-container">
+                <!-- Information sur les affectations -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <span class="card-title-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+                            </svg>
+                        </span>
+                        Mes affectations
+                    </h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Département</div>
+                            <div class="info-value">Informatique</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Grade</div>
+                            <div class="info-value">Maître de Conférences</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Responsabilité</div>
+                            <div class="info-value">Resp. Module Algorithmique</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Année académique</div>
+                            <div class="info-value">2023-2024</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Emploi du temps -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <span class="card-title-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                            </svg>
+                        </span>
+                        Emploi du temps personnalisé
+                    </h2>
+                    
+                    <div class="file-upload-container">
+                        <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
+                        <div class="upload-area" id="uploadArea">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div class="upload-text">Glissez et déposez votre emploi du temps</div>
+                            <div class="upload-hint">Format accepté: JPG, PNG, PDF (max. 5 Mo)</div>
+                            <button class="upload-btn" id="selectFileBtn">Sélectionner un fichier</button>
+                        </div>
+                        
+                        <div class="preview-container" id="previewContainer">
+                            <div class="preview-header">
+                                <div class="preview-title">Aperçu de l'emploi du temps</div>
+                                <div class="preview-actions">
+                                    <button class="preview-btn" id="downloadBtn">Télécharger</button>
+                                    <button class="preview-btn preview-delete" id="deleteBtn">Supprimer</button>
+                                </div>
+                            </div>
+                            <div class="preview-content" id="previewContent">
+                                <!-- Preview content will be inserted here -->
+                            </div>
+                            <div class="file-name" id="fileName"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Salles assignées -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <span class="card-title-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z"/>
+                            </svg>
+                        </span>
+                        Salles assignées
+                    </h2>
+                    
+                    <div class="filter-container">
+                        <input type="date" value="2025-04-12">
+                        <select>
+                            <option>Tous les types</option>
+                            <option>Amphi</option>
+                            <option>TD</option>
+                            <option>TP</option>
+                        </select>
+                        <button>Filtrer</button>
+                    </div>
+                    
+                    <div class="assigned-rooms">
+                        <div class="room-card">
+                            <div class="room-info">
+                                <div class="room-name">Amphi A</div>
+                                <div class="room-schedule">Lundi 08:00 - 09:30</div>
+                                <div class="room-schedule">Algorithmique - Informatique Section B</div>
+                            </div>
+                            <div class="room-type">Amphi</div>
+                        </div>
+                        
+                        <div class="room-card">
+                            <div class="room-info">
+                                <div class="room-name">TD12</div>
+                                <div class="room-schedule">Mardi 09:45 - 11:15</div>
+                                <div class="room-schedule">TD Algèbre - Mathématiques Section C</div>
+                            </div>
+                            <div class="room-type">TD</div>
+                        </div>
+                        
+                        <div class="room-card">
+                            <div class="room-info">
+                                <div class="room-name">Lab2</div>
+                                <div class="room-schedule">Lundi 13:00 - 14:30</div>
+                                <div class="room-schedule">TP Programmation - Informatique Section B</div>
+                            </div>
+                            <div class="room-type">TP</div>
+                        </div>
+                        
+                        <div class="room-card">
+                            <div class="room-info">
+                                <div class="room-name">Amphi B</div>
+                                <div class="room-schedule">Jeudi 08:00 - 09:30</div>
+                                <div class="room-schedule">Algorithmique - Informatique Section A</div>
+                            </div>
+                            <div class="room-type">Amphi</div>
+                        </div>
+                        
+                        <div class="room-card">
+                            <div class="room-info">
+                                <div class="room-name">TD14</div>
+                                <div class="room-schedule">Vendredi 09:45 - 11:15</div>
+                                <div class="room-schedule">TD Algèbre - Mathématiques Section C</div>
+                            </div>
+                            <div class="room-type">TD</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal pour demander une salle -->
+    <div id="requestRoomModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Demande de salle</h2>
+                <button class="close-modal" onclick="closeModal('requestRoomModal')">&times;</button>
+            </div>
+            
+            <form>
+                <div class="form-group">
+                    <label for="room-type">Type de salle</label>
+                    <select id="room-type">
+                        <option>Amphi</option>
+                        <option>Salle TD</option>
+                        <option>Laboratoire</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="time-slot">Créneau horaire</label>
+                    <select id="time-slot">
+                        <option>08:00 - 09:30</option>
+                        <option>09:45 - 11:15</option>
+                        <option>11:30 - 13:00</option>
+                        <option>13:00 - 14:30</option>
+                        <option>14:45 - 16:15</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="section">Section</label>
+                    <select id="section">
+                        <option>Informatique - Section A</option>
+                        <option>Informatique - Section B</option>
+                        <option>Mathématiques - Section C</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="course">Cours</label>
+                    <select id="course">
+                        <option>Algorithmique</option>
+                        <option>Algèbre</option>
+                        <option>Programmation</option>
+                        <option>Base de données</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reason">Motif de la demande</label>
+                    <textarea id="reason" rows="3" placeholder="Expliquez le motif de votre demande..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('requestRoomModal')">Annuler</button>
+                    <button type="submit" class="btn-save">Soumettre la demande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal pour ajouter un évènement -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ajouter un évènement</h2>
+                <button class="close-modal" onclick="closeModal('addEventModal')">&times;</button>
+            </div>
+            
+            <form>
+                <div class="form-group">
+                    <label for="event-title">Titre</label>
+                    <input type="text" id="event-title" placeholder="Titre de l'évènement">
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-type">Type</label>
+                    <select id="event-type">
+                        <option>Cours</option>
+                        <option>TD</option>
+                        <option>TP</option>
+                        <option>Examen</option>
+                        <option>Réunion</option>
+                        <option>Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-date">Date</label>
+                    <input type="date" id="event-date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-start">Heure de début</label>
+                    <input type="time" id="event-start">
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-start">Heure de début</label>
+                    <input type="time" id="event-start">
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-end">Heure de fin</label>
+                    <input type="time" id="event-end">
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-location">Lieu</label>
+                    <input type="text" id="event-location" placeholder="Salle, bâtiment, etc.">
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-description">Description</label>
+                    <textarea id="event-description" rows="3" placeholder="Description de l'événement..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Participants</label>
+                    <select multiple>
+                        <option>Informatique - Section A</option>
+                        <option>Informatique - Section B</option>
+                        <option>Mathématiques - Section C</option>
+                        <option>Corps enseignant</option>
+                        <option>Administration</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('addEventModal')">Annuler</button>
+                    <button type="submit" class="btn-save">Ajouter l'événement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- JavaScript pour les interactions -->
+    <script>
+        // Fonction pour ouvrir les modals
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = "flex";
+        }
+        
+        // Fonction pour fermer les modals
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+        
+        // Gestion de l'upload de fichiers
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewContent = document.getElementById('previewContent');
+            const fileName = document.getElementById('fileName');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            // Ouvrir le sélecteur de fichier quand le bouton est cliqué
+            selectFileBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+            
+            // Gestion du glisser-déposer
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#D1FAE5';
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.style.backgroundColor = '#ECFDF5';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#ECFDF5';
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            });
+            
+            // Gestion de la sélection de fichier
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            function handleFileSelect() {
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                // Vérifier la taille du fichier (max 5Mo)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Le fichier est trop volumineux. Taille maximale: 5 Mo');
+                    return;
+                }
+                
+                // Afficher le nom du fichier
+                fileName.textContent = file.name;
+                
+                // Créer la prévisualisation
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.className = 'preview-img';
+                    img.file = file;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (function(aImg) {
+                        return function(e) {
+                            aImg.src = e.target.result;
+                        };
+                    })(img);
+                    
+                    reader.readAsDataURL(file);
+                    previewContent.innerHTML = '';
+                    previewContent.appendChild(img);
+                } else if (file.type === 'application/pdf') {
+                    const embed = document.createElement('embed');
+                    embed.className = 'pdf-embed';
+                    embed.src = URL.createObjectURL(file);
+                    embed.type = 'application/pdf';
+                    
+                    previewContent.innerHTML = '';
+                    previewContent.appendChild(embed);
+                } else {
+                    previewContent.innerHTML = '<div style="padding: 20px; text-align: center;">Ce format de fichier ne peut pas être prévisualisé.</div>';
+                }
+                
+                // Afficher le conteneur de prévisualisation
+                previewContainer.style.display = 'block';
+                uploadArea.style.display = 'none';
+            }
+            
+            // Bouton de suppression
+            deleteBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                uploadArea.style.display = 'block';
+            });
+            
+            // Bouton de téléchargement
+            downloadBtn.addEventListener('click', function() {
+                if (!fileInput.files[0]) return;
+                
+                const url = URL.createObjectURL(fileInput.files[0]);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileInput.files[0].name;
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            });
+        });
+    </script>
+</body>
+</html>

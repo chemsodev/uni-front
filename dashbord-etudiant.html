@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Étudiant</title>
+    <link href="style/dashbord-etudiant.css" rel="stylesheet">
+   
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">AS</div>
+                <div class="user-name">Ahmed Saidi</div>
+                <div class="user-id">20230456</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashbord-etudiant.html" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link">Profil Personnel</a>
+                </li>
+                <li class="nav-item">
+                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
+                </li>
+                <li class="nav-item">
+                    <a href="demandes.html" class="nav-link">Demandes</a>
+                </li>
+                <li class="nav-item">
+                    <a href="notification.html" class="nav-link">Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Tableau de bord</h1>
+                <div class="header-actions">
+                    <button>Emploi du temps</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-cards">
+                <!-- Informations Personnelles -->
+                <div class="card">
+                    <h2 class="card-title">Informations Personnelles</h2>
+                    <div class="card-content">
+                        <p><strong>Nom:</strong> Saidi</p>
+                        <p><strong>Prénom:</strong> Ahmed</p>
+                        <p><strong>Filière:</strong> Informatique</p>
+                        <p><strong>Section:</strong> B</p>
+                        <p><strong>Groupe TD:</strong> 3</p>
+                        <p><strong>Groupe TP:</strong> 2</p>
+                    </div>
+                </div>
+                
+                <!-- Emploi du temps aujourd'hui -->
+                <div class="card">
+                    <h2 class="card-title">Emploi du temps aujourd'hui</h2>
+                    <div class="card-content">
+                        <div class="schedule-item">
+                            <div>Cours - Algorithmique</div>
+                            <div class="schedule-time">08:00 - 09:30</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div>TD - Algèbre</div>
+                            <div class="schedule-time">09:45 - 11:15</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div>TP - Programmation</div>
+                            <div class="schedule-time">13:00 - 14:30</div>
+                        </div>
+                        <a href="#" class="see-all">Voir tout l'emploi du temps</a>
+                    </div>
+                </div>
+                
+                <!-- Demandes -->
+                <div class="card">
+                    <h2 class="card-title">Mes Demandes</h2>
+                    <div class="card-content">
+                        <p>Changement de Groupe TD</p>
+                        <div class="status-chip status-in-progress">En cours</div>
+                        
+                        <p style="margin-top: 15px;">Changement de Section</p>
+                        <div class="status-chip status-complete">Acceptée</div>
+                        
+                        <a href="demandes.html" class="see-all">Voir toutes mes demandes</a>
+                    </div>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="card">
+                    <h2 class="card-title">Notifications Récentes</h2>
+                    <div class="card-content">
+                        <div class="notification-item">
+                            <div class="notification-dot"></div>
+                            <div class="notification-content">
+                                <div class="notification-title">Examen d'Algorithmique reporté</div>
+                                <div class="notification-text">L'examen est reporté au 15 avril.</div>
+                                <div class="notification-date">Aujourd'hui, 10:30</div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="notification-dot"></div>
+                            <div class="notification-content">
+                                <div class="notification-title">Nouvelle ressource disponible</div>
+                                <div class="notification-text">TD d'Algèbre Linéaire</div>
+                                <div class="notification-date">Hier, 14:15</div>
+                            </div>
+                        </div>
+                        
+                        <a href="#" class="see-all">Voir toutes les notifications</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

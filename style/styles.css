@@ -1,0 +1,149 @@
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(240deg, #B0E0E6, #E6F2FF, #87CEFA, #F0F8FF);
+            background-size: 100% 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #1A365D;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            max-width: 1300px;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        .space-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(100, 149, 237, 0.2);
+        }
+
+        .space-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(173, 216, 230, 0.1), transparent);
+            transform: rotate(-45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .space-card:hover::before {
+            opacity: 1;
+        }
+
+        .space-card:hover {
+            transform: translateY(-15px) rotateX(3deg) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+
+        .space-card-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .space-card-icon svg {
+            filter: drop-shadow(0 0 8px rgba(0,0,0,0.1));
+        }
+
+        .space-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #1A78C2;
+            font-weight: 700;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .space-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #1A78C2, transparent);
+            transform: translateX(-50%);
+        }
+
+        .space-description {
+            color: #2D3748;
+            margin-bottom: 30px;
+            font-size: 1rem;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            transform: perspective(1px) translateZ(0);
+        }
+
+        .student-button {
+            background: linear-gradient(to right, #3B82F6, #1E40AF);
+            color: white;
+        }
+
+        .teacher-button {
+            background: linear-gradient(to right, #10B981, #047857);
+            color: white;
+        }
+
+        .admin-button {
+            background: linear-gradient(to right, #8B5CF6, #5B21B6);
+            color: white;
+        }
+
+        .login-button:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }

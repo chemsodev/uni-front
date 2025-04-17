@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Doyen - Gestion Académique</title>
+    <link href="style/doyen.css" rel="stylesheet">
+   
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo">Doyen</div>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-name">Prof. Samir Meziane</div>
+                <div class="user-role">Doyen - Faculté des Sciences</div>
+            </div>
+            
+            <div class="menu-title">Navigation</div>
+            <ul class="menu">
+                <li class="menu-item active" onclick="changeTab('tableau-bord')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    Tableau de Bord
+                </li>
+                <li class="menu-item" onclick="changeTab('supervision')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 3h18v18H3zM8 12h8M12 8v8"></path>
+                    </svg>
+                    Supervision des Départements
+                </li>
+                <li class="menu-item" onclick="changeTab('demandes')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Demandes Importantes
+                </li>
+                <li class="menu-item" onclick="changeTab('statistiques')">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M18 20V10M12 20V4M6 20v-6"></path>
+                    </svg>
+                    Statistiques Globales
+                </li>
+                <li class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    Gestion des Signatures
+                </li>
+                <li class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Paramètres
+                </li>
+            </ul>
+            
+            <div class="logout">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Déconnexion
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="welcome-text">Bonjour, Prof. Meziane</h1>
+                    <p class="dashboard-date">Dimanche 13 avril 2025</p>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="activateTab(this, 'tableau-bord-content')">Vue d'ensemble</div>
+                <div class="tab" onclick="activateTab(this, 'supervision-content')">Supervision des Départements</div>
+                <div class="tab" onclick="activateTab(this, 'demandes-content')">Demandes Importantes</div>
+                <div class="tab" onclick="activateTab(this, 'statistiques-content')">Statistiques Globales</div>
+            </div>
+            
+            <!-- Tab 1: Vue d'ensemble -->
+            <div class="tab-content active" id="tableau-bord-content">
+                <div class="cards-container">
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                            </svg>
+                            Étudiants
+                        </div>
+                        <div class="card-value">5,823</div>
+                        <div class="card-label">Total d'étudiants inscrits</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Enseignants
+                        </div>
+                        <div class="card-value">243</div>
+                        <div class="card-label">Nombre d'enseignants</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            Départements
+                        </div>
+                        <div class="card-value">7</div>
+                        <div class="card-label">Nombre de départements</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Demandes
+                        </div>
+                        <div class="card-value">32</div>
+                        <div class="card-label">Demandes en attente</div>
+                    </div>
+                </div>
+                
+                <div class="content-section">
+                    <h2 class="section-title">Activités Récentes</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Département</th>
+                                <th>Activité</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>13/04/2025</td>
+                                <td>Informatique</td>
+                                <td>Validation des notes du semestre</td>
+                                <td><span class="status status-approved">Approuvée</span></td>
+                            </tr>
+                            <tr>
+                                <td>12/04/2025</td>
+                                <td>Mathématiques</td>
+                                <td>Demande d'équipement supplémentaire</td>
+                                <td><span class="status status-pending">En attente</span></td>
+                            </tr>
+                            <tr>
+                                <td>11/04/2025</td>
+                                <td>Physique</td>
+                                <td>Recrutement d'enseignant associé</td>
+                                <td><span class="status status-pending">En attente</span></td>
+                            </tr>
+                            <tr>
+                                <td>10/04/2025</td>
+                                <td>Chimie</td>
+                                <td>Modification de programme de master</td>
+                                <td><span class="status status-approved">Approuvée</span></td>
+                            </tr>
+                            <tr>
+                                <td>09/04/2025</td>
+                                <td>Biologie</td>
+                                <td>Demande de financement laboratoire</td>
+                                <td><span class="status status-denied">Refusée</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tab 2: Supervision des Départements -->
+            <div class="tab-content" id="supervision-content">
+                <div class="content-section">
+                    <h2 class="section-title">Vue d'ensemble des Départements</h2>
+                    
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-input" placeholder="Rechercher un département...">
+                        <select class="filter-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="active">Actif</option>
+                            <option value="issue">Problèmes signalés</option>
+                        </select>
+                        <button class="search-btn">Rechercher</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Département</th>
+                                <th>Chef de Département</th>
+                                <th>Étudiants</th>
+                                <th>Enseignants</th>
+                                <th>Performance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Informatique</td>
+                                <td>Dr. Ahmed Touati</td>
+                                <td>1,245</td>
+                                <td>56</td>
+                                <td>
+                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
+                                        <div style="width:85%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="action-btn success" onclick="openModal('modal-department-details')">Détails</button>
+                                    <button class="action-btn secondary">Rapports</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Mathématiques</td>
+                                <td>Prof. Nadia Belkadi</td>
+                                <td>965</td>
+                                <td>42</td>
+                                <td>
+                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
+                                        <div style="width:78%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="action-btn success">Détails</button>
+                                    <button class="action-btn secondary">Rapports</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Physique</td>
+                                <td>Prof. Karim Hamdi</td>
+                                <td>875</td>
+                                <td>38</td>
+                                <td>
+                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
+                                        <div style="width:92%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="action-btn success">Détails</button>
+                                    <button class="action-btn secondary">Rapports</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Chimie</td>
+                                <td>Dr. Leila Benziane</td>
+                                <td>798</td>
+                                <td>35</td>
+                                <td>
+                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
+                                        <div style="width:65%; background:linear-gradient(to right, var(--warning-color), #d97706); height:10px; border-radius:10px;"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="action-btn success">Détails</button>
+                                    <button class="action-btn secondary">Rapports</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Biologie</td>
+                                <td>Prof. Mohammed Kamli</td>
+                                <td>1,025</td>
+                                <td>45</td>
+                                <td>
+                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
+                                        <div style="width:72%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="action-btn success">Détails</button>
+                                    <button class="action-btn secondary">Rapports</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Géologie</td>
+                                <td>Dr. Samira Tazi</td>
+                                <td>542</td>
+                                <td>27</td>
+                                <td>
+                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
+                                        <div style="width:59%; background:linear-gradient(to right, var(--warning-color), #d97706); height:10px; border-radius:10px;"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="action-btn success">Détails</button>
+                                    <button class="action-btn secondary">Rapports</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="grid-2col">
+                    <div class="content-section">
+                        <h2 class="section-title">Rapports de Performance</h2>
+                        <div class="chart-container">
+                            <!-- Placeholder for chart -->
+                            <div style="width:100%; height:100%; background:rgba(226, 232, 240, 0.3); border-radius:10px; display:flex; justify-content:center; align-items:center; color:var(--gray-color);">
+                                Graphique des performances départementales
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="section-title">Répartition des Ressources</h2>
+                        <div class="chart-container">
+                            <!-- Placeholder for chart -->
+                            <div style="width:100%; height:100%; background:rgba(226, 232, 240, 0.3); border-radius:10px; display:flex; justify-content:center; align-items:center; color:var(--gray-color);">
+                                Graphique de répartition des ressources
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 3: Demandes Importantes -->
+            <div class="tab-content" id="demandes-content">
+                <div class="content-section">
+                    <h2 class="section-title">Demandes en Attente</h2>
+                    
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-input" placeholder="Rechercher des demandes...">
+                        <select class="filter-select">
+                            <option value="">Tous les types</option>
+                            <option value="financial">Financier</option>
+                            <option value="academic">Académique</option>
+                            <option value="hr">Ressources Humaines</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">Tous les départements</option>
+                            <option value="info">Informatique</option>
+                            <option value="math">Mathématiques</option>
+                            <option value="phys">Physique</option>
+                            <option value="chimie">Chimie</option>
+                            <option value="bio">Biologie</option>
+                            <option value="geo">Géologie</option>
+                        </select>
+                        <button class="search-btn">Rechercher</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Département</th>
+                                <th>Type</th>
+                                <th>Objet</th>
+                                <th>Priorité</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>DEM-2025-0142</td>
+                                <td>12/04/2025</td>
+                                <td>Mathématiques</td>
+                                <td>Financier</td>
+                                <td>Demande d'équipement supplémentaire</td>
+                                <td><span class="status status-pending">Moyenne</span></td>
+                                <td>
+                                    <button class="action-btn" onclick="openModal('modal-request-details')">Examiner</button>
+                                    <button class="action-btn success">Approuver</button>
+                                    <button class="action-btn danger">Refuser</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>DEM-2025-0141</td>
+                                <td>11/04/2025</td>
+                                <td>Physique</td>
+                                <td>RH</td>
+                                <td>Recrutement d'enseignant associé</td>
+                                <td><span class="status status-approved">Haute</span></td>
+                                <td>
+                                    <button class="action-btn">Examiner</button>
+                                    <button class="action-btn success">Approuver</button>
+                                    <button class="action-btn danger">Refuser</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>DEM-2025-0140</td>
+                                <td>09/04/2025</td>
+                                <td>Biologie</td>
+                                <td>Financier</td>
+                                <td>Demande de financement laboratoire</td>
+                                <td><span class="status status-denied">Haute</span></td>
+                                <td>
+                                    <button class="action-btn">Examiner</button>
+                                    <button class="action-btn secondary">Reconsidérer</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>DEM-2025-0139</td>
+                                <td>08/04/2025</td>
+                                <td>Informatique</td>
+                                <td>Académique</td>
+                                <td>Modification de programme de licence</td>
+                                <td><span class="status status-pending">Moyenne</span></td>
+                                <td>
+                                    <button class="action-btn">Examiner</button>
+                                    <button class="action-btn success">Approuver</button>
+                                    <button class="action-btn danger">Refuser</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>DEM-2025-0138</td>
+                                <td>07/04/2025</td>
+                                <td>Géologie</td>
+                                <td>Académique</td>
+                                <td>Organisation de conférence internationale</td>
+                                <td><span class="status status-pending">Basse</span></td>
+                                <td>
+                                    <button class="action-btn">Examiner</button>
+                                    <button class="action-btn success">Approuver</button>
+                                    <button class="action-btn danger">Refuser</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="content-section">
+                    <h2 class="section-title">Demandes Récemment Traitées</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Département</th>
+                                <th>Type</th>
+                                <th>Objet</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>DEM-2025-0137</td>
+                                <td>05/04/2025</td>
+                                <td>Chimie</td>
+                                <td>Financier</td>
+                                <td>Acquisition de matériel laboratoire</td>
+                                <td><span class="status status-approved">Approuvée</span></td>
+                                <td>
+                                    <button class="action-btn">Détails</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>DEM-2025-0136</td>
+                                <td>04/04/2025</td>
+                                <td>Informatique</td>
+                                <td>RH</td>
+                                <td>Recrutement de vacataires</td>
+                                <td><span class="status status-approved">Approuvée</span></td>
+                                <td>
+                                    <button class="action-btn">Détails</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>DEM-2025-0135</td>
+                                <td>03/04/2025</td>
+                                <td>Mathématiques</td>
+                                <td>Académique</td>
+                                <td>Création d'une nouvelle spécialité</td>
+                                <td><span class="status status-denied">Refusée</span></td>
+                                <td>
+                                    <button class="action-btn">Détails</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tab 4: Statistiques Globales -->
+            <div class="tab-content" id="statistiques-content">
+                <div class="cards-container">
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            Taux de Satisfaction
+                        </div>
+                        <div class="card-value">87%</div>
+                        <div class="card-label">Satisfaction étudiante</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            Taux de Réussite
+                        </div>
+                        <div class="card-value">76%</div>
+                        <div class="card-label">Moyenne annuelle</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Complétion des Cours
+                        </div>
+                        <div class="card-value">93%</div>
+                        <div class="card-label">Cours terminés</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+                                <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path>
+                                <path d="M18 12a2 2 0 0 0 0 4h2v-4h-2z"></path>
+                            </svg>
+                            Budget Utilisé
+                        </div>
+                        <div class="card-value">62%</div>
+                        <div class="card-label">du budget annuel</div>
+                    </div>
+                </div>
+                
+                <div class="grid-2col">
+                    <div class="content-section">
+                        <h2 class="section-title">Évolution des Effectifs</h2>
+                        <div class="chart-container">
+                            <!-- Placeholder for chart -->
+                            <div style="width:100%; height:100%; background:rgba(226, 232, 240, 0.3); border-radius:10px; display:flex; justify-content:center; align-items:center; color:var(--gray-color);">
+                                Graphique d'évolution des effectifs
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h2 class="section-title">Publications Scientifiques</h2>
+                        <div class="chart-container">
+                            <!-- Placeholder for chart -->
+                            <div style="width:100%; height:100%; background:rgba(226, 232, 240, 0.3); border-radius:10px; display:flex; justify-content:center; align-items:center; color:var(--gray-color);">
+                                Graphique des publications scientifiques
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-section">
+                    <h2 class="section-title">Répartition des Étudiants par Département</h2>
+                    <div class="chart-container">
+                        <!-- Placeholder for chart -->
+                        <div style="width:100%; height:100%; background:rgba(226, 232, 240, 0.3); border-radius:10px; display:flex; justify-content:center; align-items:center; color:var(--gray-color);">
+                            Graphique de répartition des étudiants
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-section">
+                    <h2 class="section-title">Comparaison des Résultats Académiques</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Département</th>
+                                <th>Taux de Réussite (%)</th>
+                                <th>Moyenne Générale</th>
+                                <th>Abandons (%)</th>
+                                <th>Étudiants Excellents (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Informatique</td>
+                                <td>78</td>
+                                <td>13.2/20</td>
+                                <td>5</td>
+                                <td>22</td>
+                            </tr>
+                            <tr>
+                                <td>Mathématiques</td>
+                                <td>74</td>
+                                <td>12.8/20</td>
+                                <td>9</td>
+                                <td>18</td>
+                            </tr>
+                            <tr>
+                                <td>Physique</td>
+                                <td>82</td>
+                                <td>13.6/20</td>
+                                <td>4</td>
+                                <td>25</td>
+                            </tr>
+                            <tr>
+                                <td>Chimie</td>
+                                <td>71</td>
+                                <td>12.4/20</td>
+                                <td>11</td>
+                                <td>16</td>
+                            </tr>
+                            <tr>
+                                <td>Biologie</td>
+                                <td>79</td>
+                                <td>13.5/20</td>
+                                <td>7</td>
+                                <td>23</td>
+                            </tr>
+                            <tr>
+                                <td>Géologie</td>
+                                <td>68</td>
+                                <td>11.9/20</td>
+                                <td>14</td>
+                                <td>12</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div class="modal-backdrop" id="modal-department-details">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Détails du Département d'Informatique</h3>
+                <button class="modal-close" onclick="closeModal('modal-department-details')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <div class="grid-2col">
+                        <div>
+                            <label class="form-label">Nom du Département</label>
+                            <input type="text" class="form-input" value="Informatique" readonly>
+                        </div>
+                        <div>
+                            <label class="form-label">Chef de Département</label>
+                            <input type="text" class="form-input" value="Dr. Ahmed Touati" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="grid-2col">
+                        <div>
+                            <label class="form-label">Nombre d'Étudiants</label>
+                            <input type="text" class="form-input" value="1,245" readonly>
+                        </div>
+                        <div>
+                            <label class="form-label">Nombre d'Enseignants</label>
+                            <input type="text" class="form-input" value="56" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Formations Proposées</label>
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li>Licence en Informatique</li>
+                        <li>Master en Intelligence Artificielle</li>
+                        <li>Master en Sécurité Informatique</li>
+                        <li>Master en Systèmes d'Information</li>
+                        <li>Doctorat en Informatique</li>
+                    </ul>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Performance Académique</label>
+                    <div class="chart-container" style="height: 150px;">
+                        <!-- Placeholder for chart -->
+                        <div style="width:100%; height:100%; background:rgba(226, 232, 240, 0.3); border-radius:10px; display:flex; justify-content:center; align-items:center; color:var(--gray-color);">
+                            Graphique de performance académique
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="action-btn secondary" onclick="closeModal('modal-department-details')">Fermer</button>
+                    <button class="action-btn">Générer Rapport Complet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-backdrop" id="modal-request-details">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Détails de la Demande DEM-2025-0142</h3>
+                <button class="modal-close" onclick="closeModal('modal-request-details')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <div class="grid-2col">
+                        <div>
+                            <label class="form-label">ID de Demande</label>
+                            <input type="text" class="form-input" value="DEM-2025-0142" readonly>
+                        </div>
+                        <div>
+                            <label class="form-label">Date de Soumission</label>
+                            <input type="text" class="form-input" value="12/04/2025" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="grid-2col">
+                        <div>
+                            <label class="form-label">Département</label>
+                            <input type="text" class="form-input" value="Mathématiques" readonly>
+                        </div>
+                        <div>
+                            <label class="form-label">Type de Demande</label>
+                            <input type="text" class="form-input" value="Financier" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Objet</label>
+                    <input type="text" class="form-input" value="Demande d'équipement supplémentaire" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" readonly>Le département de Mathématiques demande l'acquisition de 25 ordinateurs portables pour équiper la nouvelle salle de travaux pratiques. Ces équipements sont nécessaires pour les cours d'analyse numérique et de modélisation mathématique. Le budget estimé est de 35,000 DZD par unité, soit un total de 875,000 DZD.</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Pièces Jointes</label>
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li><a href="#" style="color: var(--primary-color);">Devis_Fournisseur.pdf</a></li>
+                        <li><a href="#" style="color: var(--primary-color);">Justification_Pedagogique.pdf</a></li>
+                        <li><a href="#" style="color: var(--primary-color);">Planning_Utilisation.xlsx</a></li>
+                    </ul>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Ajouter un Commentaire</label>
+                    <textarea class="form-textarea" placeholder="Votre commentaire ici..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="action-btn danger" onclick="closeModal('modal-request-details')">Refuser</button>
+                    <button class="action-btn secondary" onclick="closeModal('modal-request-details')">Demander Plus d'Informations</button>
+                    <button class="action-btn success">Approuver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu Toggle Button for responsive design -->
+    <div class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleSidebar()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </div>
+    
+    <script>
+        // Function to change active tab
+        function activateTab(element, contentId) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            element.classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            document.getElementById(contentId).classList.add('active');
+        }
+        
+        // Function to change section based on sidebar menu
+        function changeTab(tabId) {
+            // Remove active class from all menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked menu item
+            event.currentTarget.classList.add('active');
+            
+            // Get corresponding tab content
+            let contentId = tabId + '-content';
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            document.getElementById(contentId).classList.add('active');
+            
+            // Update the tab navigation to reflect the current section
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Find the corresponding tab and make it active
+            let tabSelector = '.tab:nth-child(' + (Array.from(document.querySelectorAll('.menu-item')).indexOf(event.currentTarget) + 1) + ')';
+            document.querySelector(tabSelector).classList.add('active');
+            
+            // On mobile, close the sidebar after selection
+            if (window.innerWidth < 992) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+        
+        // Function to toggle sidebar on mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+        
+        // Function to open modal
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        // Function to close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-backdrop')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

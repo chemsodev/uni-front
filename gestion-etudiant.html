@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Étudiants - Dashboard Enseignant</title>
+    <link href="style/gestion-etudiant.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">MB</div>
+                <div class="user-name">Mohamed Belkacem</div>
+                <div class="user-id">Enseignant</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
+                </li>
+                <li class="nav-item">
+                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
+                </li>
+                <li class="nav-item">
+                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Gestion des Étudiants</h1>
+                <!-- Boutons d'action supprimés -->
+            </div>
+            
+            <div class="student-management">
+                <!-- Left Column - Student List -->
+                <div class="left-column">
+                    <div class="card">
+                        <h2 class="card-title">Liste des Étudiants</h2>
+                        
+                        <div class="search-section">
+                            <div class="search-box">
+                                <input type="text" placeholder="Rechercher un étudiant...">
+                                <button>🔍</button>
+                            </div>
+                            
+                            <select class="section-selector">
+                                <option value="">Toutes les sections</option>
+                                <option value="info-a">Informatique - Section A</option>
+                                <option value="info-b">Informatique - Section B</option>
+                                <option value="math-c">Mathématiques - Section C</option>
+                            </select>
+                        </div>
+                        
+                        <div class="student-list">
+                            <div class="student-item selected">
+                                <div class="student-avatar">AS</div>
+                                <div class="student-info">
+                                    <div class="student-name">Ahmed Saidi</div>
+                                    <div class="student-id">ID: 202345678</div>
+                                </div>
+                            </div>
+                            
+                            <div class="student-item">
+                                <div class="student-avatar">FB</div>
+                                <div class="student-info">
+                                    <div class="student-name">Fatima Benali</div>
+                                    <div class="student-id">ID: 202345679</div>
+                                </div>
+                            </div>
+                            
+                            <div class="student-item">
+                                <div class="student-avatar">KH</div>
+                                <div class="student-info">
+                                    <div class="student-name">Karim Hadj</div>
+                                    <div class="student-id">ID: 202345680</div>
+                                </div>
+                            </div>
+                            
+                            <div class="student-item">
+                                <div class="student-avatar">LM</div>
+                                <div class="student-info">
+                                    <div class="student-name">Lina Mansouri</div>
+                                    <div class="student-id">ID: 202345681</div>
+                                </div>
+                            </div>
+                            
+                            <div class="student-item">
+                                <div class="student-avatar">YB</div>
+                                <div class="student-info">
+                                    <div class="student-name">Yacine Boudiaf</div>
+                                    <div class="student-id">ID: 202345682</div>
+                                </div>
+                            </div>
+                            
+                            <div class="student-item">
+                                <div class="student-avatar">SM</div>
+                                <div class="student-info">
+                                    <div class="student-name">Sara Messaoudi</div>
+                                    <div class="student-id">ID: 202345683</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pagination">
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn">2</button>
+                            <button class="pagination-btn">3</button>
+                            <button class="pagination-btn">></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Student Profile -->
+                <div class="right-column">
+                    <div class="student-profile">
+                        <div class="card">
+                            <div class="profile-header">
+                                <div class="profile-avatar">AS</div>
+                                <div>
+                                    <div class="profile-name">Ahmed Saidi</div>
+                                    <div class="student-id">ID: 202345678 | Informatique - Section B</div>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-details">
+                                <div>
+                                    <div class="detail-group">
+                                        <div class="detail-label">Email</div>
+                                        <div class="detail-value">ahmed.saidi@etudiant.university.dz</div>
+                                    </div>
+                                    
+                                    <div class="detail-group">
+                                        <div class="detail-label">Téléphone</div>
+                                        <div class="detail-value">+213 555 123 456</div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="detail-group">
+                                        <div class="detail-label">Année d'Inscription</div>
+                                        <div class="detail-value">2023</div>
+                                    </div>
+                                    
+                                    <div class="detail-group">
+                                        <div class="detail-label">Présence Globale</div>
+                                        <div class="detail-value">92%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="group-management">
+                                <h3 class="detail-label">Modification des Groupes</h3>
+                                
+                                <div class="group-selector">
+                                    <select>
+                                        <option value="td1">TD1</option>
+                                        <option value="td2">TD2</option>
+                                        <option value="td3" selected>TD3</option>
+                                    </select>
+                                    
+                                    <select>
+                                        <option value="tp1">TP1</option>
+                                        <option value="tp2" selected>TP2</option>
+                                        <option value="tp3">TP3</option>
+                                    </select>
+                                    
+                                    <button>Modifier</button>
+                                </div>
+                            </div>
+                            
+                            <div class="attendance-summary">
+                                <h3 class="detail-label">Assiduité par Module</h3>
+                                
+                                <div class="attendance-chart">
+                                    <div class="chart-bar" style="height: 90%;" data-label="95%"></div>
+                                    <div class="chart-bar" style="height: 85%;" data-label="85%"></div>
+                                    <div class="chart-bar" style="height: 98%;" data-label="98%"></div>
+                                    <div class="chart-bar" style="height: 88%;" data-label="88%"></div>
+                                    <div class="chart-bar" style="height: 92%;" data-label="92%"></div>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between;">
+                                    <div class="chart-label">Algo</div>
+                                    <div class="chart-label">Algèbre</div>
+                                    <div class="chart-label">Prog</div>
+                                    <div class="chart-label">Analyse</div>
+                                    <div class="chart-label">Archi</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

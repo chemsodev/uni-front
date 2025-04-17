@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Sections</title>
+    <link href="style/gestion-section.css" rel="stylesheet">
+   
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">MB</div>
+                <div class="user-name">Mohamed Belkacem</div>
+                <div class="user-id">Enseignant</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
+                </li>
+                <li class="nav-item">
+                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
+                </li>
+                <li class="nav-item">
+                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Gestion des Sections</h1>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Mes Sections</h2>
+                
+                <div class="search-section">
+                    <div class="search-box">
+                        <input type="text" placeholder="Rechercher une section...">
+                        <button>🔍</button>
+                    </div>
+                </div>
+                
+                <div class="sections-list">
+                    <div class="section-item">
+                        <div class="section-info">
+                            <div class="section-name">Informatique - Section B</div>
+                            <div class="section-details">Module: Algorithmique | Semestre 2</div>
+                        </div>
+                        <div class="student-count">28 étudiants</div>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" onclick="toggleStudents('section1')">Voir étudiants</button>
+                            <button class="btn btn-primary">Gérer</button>
+                        </div>
+                    </div>
+                    
+                    <div class="student-panel" id="section1-students">
+                        <div class="panel-header">
+                            <div class="panel-title">Étudiants - Informatique Section B</div>
+                            <button class="btn btn-secondary" onclick="toggleStudents('section1')">Fermer</button>
+                        </div>
+                        <div class="student-list">
+                            <div class="student-item">
+                                <div class="student-name">Ahmed Saidi</div>
+                                <div class="student-group">TD3 / TP2</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Fatima Benali</div>
+                                <div class="student-group">TD1 / TP3</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Karim Hadj</div>
+                                <div class="student-group">TD2 / TP1</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Lina Mansouri</div>
+                                <div class="student-group">TD3 / TP2</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Yacine Boudiaf</div>
+                                <div class="student-group">TD1 / TP1</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-item">
+                        <div class="section-info">
+                            <div class="section-name">Informatique - Section A</div>
+                            <div class="section-details">Module: Algorithmique | Semestre 2</div>
+                        </div>
+                        <div class="student-count">32 étudiants</div>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" onclick="toggleStudents('section2')">Voir étudiants</button>
+                            <button class="btn btn-primary">Gérer</button>
+                        </div>
+                    </div>
+                    
+                    <div class="student-panel" id="section2-students">
+                        <div class="panel-header">
+                            <div class="panel-title">Étudiants - Informatique Section A</div>
+                            <button class="btn btn-secondary" onclick="toggleStudents('section2')">Fermer</button>
+                        </div>
+                        <div class="student-list">
+                            <div class="student-item">
+                                <div class="student-name">Mohamed Amin</div>
+                                <div class="student-group">TD1 / TP2</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Sarah Haddad</div>
+                                <div class="student-group">TD2 / TP3</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Omar Bennani</div>
+                                <div class="student-group">TD1 / TP1</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Amina Kadi</div>
+                                <div class="student-group">TD3 / TP2</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Tarik Sahraoui</div>
+                                <div class="student-group">TD2 / TP1</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-item">
+                        <div class="section-info">
+                            <div class="section-name">Mathématiques - Section C</div>
+                            <div class="section-details">Module: Algèbre | Semestre 2</div>
+                        </div>
+                        <div class="student-count">25 étudiants</div>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" onclick="toggleStudents('section3')">Voir étudiants</button>
+                            <button class="btn btn-primary">Gérer</button>
+                        </div>
+                    </div>
+                    
+                    <div class="student-panel" id="section3-students">
+                        <div class="panel-header">
+                            <div class="panel-title">Étudiants - Mathématiques Section C</div>
+                            <button class="btn btn-secondary" onclick="toggleStudents('section3')">Fermer</button>
+                        </div>
+                        <div class="student-list">
+                            <div class="student-item">
+                                <div class="student-name">Nadir Meziane</div>
+                                <div class="student-group">TD2 / TP3</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Yasmine Taleb</div>
+                                <div class="student-group">TD1 / TP2</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Riad Belhadj</div>
+                                <div class="student-group">TD3 / TP1</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Nour Bouzidi</div>
+                                <div class="student-group">TD1 / TP1</div>
+                            </div>
+                            <div class="student-item">
+                                <div class="student-name">Salim Khaldi</div>
+                                <div class="student-group">TD2 / TP2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript simple pour afficher/cacher la liste des étudiants
+        function toggleStudents(sectionId) {
+            const studentPanel = document.getElementById(sectionId + '-students');
+            if (studentPanel.style.display === 'block') {
+                studentPanel.style.display = 'none';
+            } else {
+                studentPanel.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

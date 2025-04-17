@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion Espace Enseignant</title>
+    <link href="style/enseignant-login.css" rel="stylesheet">
+   
+</head>
+<body>
+    <div class="login-container">
+        <h2 class="login-title">Connexion Espace Enseignant</h2>
+        
+        <div class="login-tabs">
+            <div class="login-tab active" onclick="switchTab('email-tab', 'id-tab')">Email</div>
+            <div class="login-tab" onclick="switchTab('id-tab', 'email-tab')">ID Enseignant</div>
+        </div>
+        
+        <form action="teacher-dashboard.html" method="post">
+            <div id="email-tab" class="tab-content active">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Professionnel</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="votrenom@gmail.com">
+                </div>
+            </div>
+            
+            <div id="id-tab" class="tab-content">
+                <div class="form-group">
+                    <label class="form-label" for="id">ID Enseignant</label>
+                    <input type="text" id="id" name="id" class="form-input" placeholder="ex: 20230001">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Se souvenir de moi</label>
+            </div>
+
+            <a href="mdps-oublier-teacher.html" class="forgot-password">Mot de passe oublié?</a>
+
+            <button type="submit" class="login-button">Se connecter</button>
+        </form>
+
+        <div class="divider">
+            <span class="divider-text">OU</span>
+        </div>
+
+        <div class="signup-link">
+            Vous n'avez pas encore de compte? <a href="enseignant-signup.html">S'inscrire</a>
+        </div>
+        
+        <a href="index.html" class="back-button">Retour à la page de sélection</a>
+    </div>
+
+    <script>
+        function switchTab(showTabId, hideTabId) {
+            // Show the selected tab content
+            document.getElementById(showTabId).classList.add('active');
+            document.getElementById(hideTabId).classList.remove('active');
+            
+            // Update the tab styling
+            const tabs = document.querySelectorAll('.login-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Find the tab that was clicked and make it active
+            event.currentTarget.classList.add('active');
+            
+            // Clear the input field of the hidden tab
+            const hiddenInput = document.getElementById(hideTabId).querySelector('input');
+            if (hiddenInput) {
+                hiddenInput.value = '';
+            }
+        }
+    </script>
+</body>
+</html>

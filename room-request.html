@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Demande de Salle - Enseignant</title>
+    <link href="style/room-request.css" rel="stylesheet">
+  
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#" class="back-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Retour à l'emploi du temps
+            </a>
+        </div>
+        
+        <div class="card">
+            <div class="form-header">
+                <h1 class="form-title">Demande de Salle</h1>
+                <p class="form-message">Veuillez remplir ce formulaire pour demander une salle. Les champs marqués d'un <span class="required-mark">*</span> sont obligatoires. Votre demande sera traitée par l'administration dans les plus brefs délais.</p>
+            </div>
+            
+            <form>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="room-type">Type de salle <span class="required-mark">*</span></label>
+                        <select id="room-type" required>
+                            <option value="" disabled selected>Sélectionnez un type</option>
+                            <option value="amphi">Amphithéâtre</option>
+                            <option value="td">Salle TD</option>
+                            <option value="tp">Laboratoire</option>
+                            <option value="reunion">Salle de réunion</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="capacity">Capacité minimale <span class="required-mark">*</span></label>
+                        <select id="capacity" required>
+                            <option value="" disabled selected>Nombre d'étudiants</option>
+                            <option value="small">Petite (< 30 étudiants)</option>
+                            <option value="medium">Moyenne (30-60 étudiants)</option>
+                            <option value="large">Grande (60-120 étudiants)</option>
+                            <option value="xlarge">Très grande (> 120 étudiants)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="date">Date <span class="required-mark">*</span></label>
+                        <input type="date" id="date" required min="2025-04-12">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time-slot">Créneau horaire <span class="required-mark">*</span></label>
+                        <select id="time-slot" required>
+                            <option value="" disabled selected>Sélectionnez un créneau</option>
+                            <option value="8h-9h30">08:00 - 09:30</option>
+                            <option value="9h45-11h15">09:45 - 11:15</option>
+                            <option value="11h30-13h">11:30 - 13:00</option>
+                            <option value="13h-14h30">13:00 - 14:30</option>
+                            <option value="14h45-16h15">14:45 - 16:15</option>
+                            <option value="16h30-18h">16:30 - 18:00</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="section">Section <span class="required-mark">*</span></label>
+                        <select id="section" required>
+                            <option value="" disabled selected>Sélectionnez une section</option>
+                            <option value="info-a">Informatique - Section A</option>
+                            <option value="info-b">Informatique - Section B</option>
+                            <option value="math-c">Mathématiques - Section C</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="course">Cours/Module <span class="required-mark">*</span></label>
+                        <select id="course" required>
+                            <option value="" disabled selected>Sélectionnez un cours</option>
+                            <option value="algo">Algorithmique</option>
+                            <option value="algebre">Algèbre</option>
+                            <option value="prog">Programmation</option>
+                            <option value="bd">Base de données</option>
+                            <option value="autre">Autre (préciser dans "Motif")</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="equipment">Équipement nécessaire</label>
+                    <select id="equipment">
+                        <option value="" disabled selected>Sélectionnez les équipements</option>
+                        <option value="standard">Standard (Projecteur + Tableau)</option>
+                        <option value="computers">Ordinateurs pour TP</option>
+                        <option value="audio">Système audio</option>
+                        <option value="visio">Équipement visioconférence</option>
+                    </select>
+                    <p class="info-text">Équipement standard disponible dans toutes les salles : tableau, projecteur</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reason">Motif de la demande <span class="required-mark">*</span></label>
+                    <textarea id="reason" rows="4" placeholder="Veuillez expliquer le motif de votre demande..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comments">Commentaires additionnels</label>
+                    <textarea id="comments" rows="3" placeholder="Informations supplémentaires à fournir..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel">Annuler</button>
+                    <button type="submit" class="btn-submit">Soumettre la demande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

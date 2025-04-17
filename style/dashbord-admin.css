@@ -1,0 +1,458 @@
+ :root {
+            --primary-color: #8B5CF6;      /* Changé de #2563eb à #8B5CF6 (violet) */
+            --secondary-color: #5B21B6;    /* Changé de #1e40af à #5B21B6 (violet foncé) */
+            --success-color: #10b981;      /* Gardé la même couleur de succès */
+            --warning-color: #f59e0b;      /* Gardé la même couleur d'avertissement */
+            --danger-color: #ef4444;       /* Gardé la même couleur de danger */
+            --light-color: #f8f9fa;        /* Gardé la même couleur claire */
+            --dark-color: #1A365D;         /* Changé de #1e293b à #1A365D pour correspondre à la page de connexion */
+            --gray-color: #718096;         /* Changé de #64748b à #718096 pour correspondre à la page de connexion */
+            --bg-light: #F0F8FF;           /* Changé de #f1f5f9 à #F0F8FF pour plus de cohérence avec le dégradé */
+            --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-light);
+            color: var(--dark-color);
+            min-height: 100vh;
+            background: linear-gradient(240deg, #B0E0E6, #E6F2FF, #87CEFA, #F0F8FF);
+            background-size: 100% 100%;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background-color: rgba(255, 255, 255, 0.9);  /* Légère transparence comme la page de connexion */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);     /* Ombre plus prononcée comme la page de connexion */
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        
+        .logo-container {
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            position: relative;
+        }
+        
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), transparent);
+        }
+        
+        .user-info {
+            padding: 1rem;
+            background-color: rgba(226, 232, 240, 0.3);  /* Plus léger, comme les onglets de connexion */
+            border-radius: 10px;  /* Plus arrondis comme dans la page de connexion */
+            margin-bottom: 2rem;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .user-role {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+        }
+        
+        .menu-title {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-color);
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;  /* Plus arrondis, comme dans la page de connexion */
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;  /* Transition plus douce */
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(226, 232, 240, 0.3);  /* Plus léger, comme les onglets de connexion */
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));  /* Dégradé comme le bouton de connexion */
+            color: white;
+        }
+        
+        .menu-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+            stroke-width: 2;
+        }
+        
+        .logout {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;  /* Plus arrondis */
+            cursor: pointer;
+            color: var(--danger-color);
+            transition: all 0.3s ease;
+        }
+        
+        .logout:hover {
+            background-color: rgba(226, 232, 240, 0.3);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            margin-left: 280px;
+            overflow-y: auto;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .welcome-text {
+            font-family: 'Sora', sans-serif;  /* Cohérent avec la page de connexion */
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--primary-color);  /* Violet pour correspondre au thème */
+        }
+        
+        .dashboard-date {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+        
+        /* Role Selection */
+        .role-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .role-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: rgba(255, 255, 255, 0.9);  /* Légère transparence comme la page de connexion */
+            border-radius: 20px;  /* Plus arrondis comme dans la page de connexion */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);  /* Ombre plus prononcée comme dans la page de connexion */
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;  /* Transition plus douce */
+        }
+        
+        .role-card:hover {
+            transform: translateY(-5px);  /* Même effet que le bouton de connexion */
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .role-card.active {
+            border: 2px solid var(--primary-color);
+        }
+        
+        .role-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(139, 92, 246, 0.1);  /* Couleur de fond liée au violet #8B5CF6 */
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+        
+        .role-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--primary-color);
+            stroke-width: 2;
+        }
+        
+        .role-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .role-description {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+        }
+        
+        /* Role Content Sections */
+        .role-content {
+            display: none;
+        }
+        
+        .role-content.active {
+            display: block;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .content-title {
+            font-family: 'Sora', sans-serif;  /* Cohérent avec la page de connexion */
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            flex: 1;
+            min-width: 240px;
+            background-color: rgba(255, 255, 255, 0.9);  /* Légère transparence comme la page de connexion */
+            border-radius: 20px;  /* Plus arrondis comme dans la page de connexion */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);  /* Ombre plus prononcée comme dans la page de connexion */
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--gray-color);
+        }
+        
+        .card-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.5rem;
+            stroke: var(--gray-color);
+            stroke-width: 2;
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .card-label {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+        }
+        
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-link {
+            background-color: rgba(255, 255, 255, 0.9);  /* Légère transparence comme la page de connexion */
+            border-radius: 10px;  /* Plus arrondis */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);  /* Ombre plus prononcée comme dans la page de connexion */
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));  /* Dégradé comme le bouton de connexion */
+            color: white;
+        }
+        
+        .nav-link:hover .nav-icon {
+            stroke: white;
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.75rem;
+            stroke: var(--primary-color);
+            stroke-width: 2;
+        }
+        
+        /* Table Styles */
+        .content-section {
+            background-color: rgba(255, 255, 255, 0.9);  /* Légère transparence comme la page de connexion */
+            border-radius: 20px;  /* Plus arrondis comme dans la page de connexion */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);  /* Ombre plus prononcée comme dans la page de connexion */
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .content-section[data-role-section="specialite"] {
+            display: block;
+        }
+        
+        .section-title {
+            font-family: 'Sora', sans-serif;  /* Cohérent avec la page de connexion */
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead th {
+            text-align: left;
+            padding: 1rem;
+            background-color: rgba(226, 232, 240, 0.3);  /* Plus léger, comme les onglets de connexion */
+            color: var(--gray-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--bg-light);
+        }
+        
+        tr:hover td {
+            background-color: rgba(139, 92, 246, 0.05);  /* Léger survol en violet */
+        }
+        
+        .action-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));  /* Dégradé comme le bouton de connexion */
+            color: white;
+            border: none;
+            border-radius: 10px;  /* Plus arrondis */
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--warning-color);
+        }
+        
+        .status-approved {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+        }
+        
+        .mobile-menu-button {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));  /* Dégradé comme le bouton de connexion */
+            color: white;
+            border-radius: 50%;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 101;
+            cursor: pointer;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+        }
+        
+        @media (max-width: 992px) {
+            .dashboard-container {
+                position: relative;
+            }
+        
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                transition: left 0.3s ease;
+            }
+        
+            .sidebar.active {
+                left: 0;
+            }
+        
+            .main-content {
+                margin-left: 0;
+            }
+        
+            .mobile-menu-button {
+                display: flex;
+            }
+        }
