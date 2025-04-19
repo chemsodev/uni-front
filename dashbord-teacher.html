@@ -1,20 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Enseignant</title>
     <link href="style/dashbord-teacher.css" rel="stylesheet">
-   
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="user-info">
-                <div class="user-avatar">MB</div>
-                <div class="user-name">Mohamed Belkacem</div>
-                <div class="user-id">Enseignant</div>
+                <div class="user-avatar" id="userAvatar">MB</div>
+                <div class="user-name" id="userFullName">Chargement...</div>
+                <div class="user-id" id="userId">Enseignant</div>
             </div>
             
             <ul class="nav-menu">
@@ -34,7 +32,7 @@
                     <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
+                    <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
                 </li>
             </ul>
         </div>
@@ -52,122 +50,315 @@
                 <!-- Sections Assignées -->
                 <div class="card">
                     <h2 class="card-title">Mes Sections</h2>
-                    <div class="card-content">
-                        <div class="section-item">
-                            <div>Informatique - Section B</div>
-                            <div>28 étudiants</div>
-                        </div>
-                        <div class="section-item">
-                            <div>Informatique - Section A</div>
-                            <div>32 étudiants</div>
-                        </div>
-                        <div class="section-item">
-                            <div>Mathématiques - Section C</div>
-                            <div>25 étudiants</div>
-                        </div>
-                        <a href="#" class="see-all">Voir toutes les sections</a>
+                    <div class="card-content" id="sectionsList">
+                        <div class="loading-message">Chargement des sections...</div>
                     </div>
                 </div>
                 
                 <!-- Emploi du temps aujourd'hui -->
                 <div class="card">
                     <h2 class="card-title">Emploi du temps aujourd'hui</h2>
-                    <div class="card-content">
-                        <div class="schedule-item">
-                            <div>
-                                <div>Cours - Algorithmique</div>
-                                <div class="schedule-location">Salle: Amphi A</div>
-                            </div>
-                            <div class="schedule-time">08:00 - 09:30</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div>
-                                <div>TD - Algèbre</div>
-                                <div class="schedule-location">Salle: TD12</div>
-                            </div>
-                            <div class="schedule-time">09:45 - 11:15</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div>
-                                <div>TP - Programmation</div>
-                                <div class="schedule-location">Salle: Lab2</div>
-                            </div>
-                            <div class="schedule-time">13:00 - 14:30</div>
-                        </div>
-                        <a href="#" class="see-all">Voir tout l'emploi du temps</a>
+                    <div class="card-content" id="todaySchedule">
+                        <div class="loading-message">Chargement de l'emploi du temps...</div>
                     </div>
                 </div>
                 
                 <!-- Gestion des Étudiants -->
                 <div class="card">
                     <h2 class="card-title">Gestion des Étudiants</h2>
-                    <div class="card-content">
-                        <div class="search-box">
-                            <input type="text" placeholder="Rechercher un étudiant...">
-                            <button>🔍</button>
-                        </div>
-                        <div class="student-list">
-                            <div class="student-item">
-                                <div class="student-name">Ahmed Saidi</div>
-                                <div class="student-group">TD3 / TP2</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Fatima Benali</div>
-                                <div class="student-group">TD1 / TP3</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Karim Hadj</div>
-                                <div class="student-group">TD2 / TP1</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Lina Mansouri</div>
-                                <div class="student-group">TD3 / TP2</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Yacine Boudiaf</div>
-                                <div class="student-group">TD1 / TP1</div>
-                            </div>
-                        </div>
-                        <a href="#" class="see-all">Gérer tous les étudiants</a>
+                    <div class="card-content" id="studentsList">
+                        <div class="loading-message">Chargement des étudiants...</div>
                     </div>
                 </div>
                 
                 <!-- Notifications -->
                 <div class="card">
                     <h2 class="card-title">Notifications Récentes</h2>
-                    <div class="card-content">
-                        <div class="notification-item">
-                            <div class="notification-dot"></div>
-                            <div class="notification-content">
-                                <div class="notification-title">Réservation de salle confirmée</div>
-                                <div class="notification-text">Amphi B pour le 15 avril.</div>
-                                <div class="notification-date">Aujourd'hui, 10:30</div>
-                            </div>
-                        </div>
-                        
-                        <div class="notification-item">
-                            <div class="notification-dot"></div>
-                            <div class="notification-content">
-                                <div class="notification-title">3 nouvelles demandes</div>
-                                <div class="notification-text">Demandes de changement de groupe</div>
-                                <div class="notification-date">Hier, 14:15</div>
-                            </div>
-                        </div>
-                        
-                        <div class="notification-item">
-                            <div class="notification-dot"></div>
-                            <div class="notification-content">
-                                <div class="notification-title">Rappel: Échéance de notation</div>
-                                <div class="notification-text">Remise des notes pour le module Algorithmique</div>
-                                <div class="notification-date">18/04/2025</div>
-                            </div>
-                        </div>
-                        
-                        <a href="#" class="see-all">Voir toutes les notifications</a>
+                    <div class="card-content" id="notificationsList">
+                        <div class="loading-message">Chargement des notifications...</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check for token in storage
+            authToken = localStorage.getItem('enseignant_token') || sessionStorage.getItem('enseignant_token');
+            
+            if (!authToken) {
+                window.location.href = 'enseignant-login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/auth/verify', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Token verification failed');
+                
+                const userData = await response.json();
+                currentUser = userData;
+                
+                // Load user data and dashboard content
+                loadUserData();
+                loadDashboardData();
+            } catch (error) {
+                console.error('Erreur:', error);
+                window.location.href = 'enseignant-login.html';
+            }
+        });
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const response = await fetch(`http://localhost:3000/api/enseignants/${currentUser.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    
+                    // Update UI
+                    document.getElementById('userFullName').textContent = `${user.prenom} ${user.nom}`;
+                    document.getElementById('userId').textContent = user.id_enseignant;
+                    document.getElementById('userAvatar').textContent = 
+                        `${user.prenom.charAt(0)}${user.nom.charAt(0)}`.toUpperCase();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load assigned sections
+                const sectionsResponse = await fetch(
+                    `http://localhost:3000/api/enseignants/${currentUser.id}/sections`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    }
+                );
+
+                // Load today's schedule
+                const today = new Date().toISOString().split('T')[0];
+                const scheduleResponse = await fetch(
+                    `http://localhost:3000/api/enseignants/${currentUser.id}/emploi-du-temps?date=${today}`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    }
+                );
+
+                // Load students
+                const studentsResponse = await fetch(
+                    `http://localhost:3000/api/enseignants/${currentUser.id}/etudiants`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    }
+                );
+
+                // Load notifications
+                const notificationsResponse = await fetch(
+                    `http://localhost:3000/api/enseignants/${currentUser.id}/notifications`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    }
+                );
+
+                // Process responses
+                if (sectionsResponse.ok) {
+                    const sections = await sectionsResponse.json();
+                    renderSections(sections);
+                }
+
+                if (scheduleResponse.ok) {
+                    const schedule = await scheduleResponse.json();
+                    renderTodaySchedule(schedule);
+                }
+
+                if (studentsResponse.ok) {
+                    const students = await studentsResponse.json();
+                    renderStudents(students);
+                }
+
+                if (notificationsResponse.ok) {
+                    const notifications = await notificationsResponse.json();
+                    renderNotifications(notifications);
+                }
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Render sections
+        function renderSections(sections) {
+            const container = document.getElementById('sectionsList');
+            
+            if (!sections || sections.length === 0) {
+                container.innerHTML = '<p>Aucune section assignée</p>';
+                return;
+            }
+            
+            let html = '';
+            sections.slice(0, 3).forEach(section => {
+                html += `
+                    <div class="section-item">
+                        <div>${section.filiere} - Section ${section.section}</div>
+                        <div>${section.nombre_etudiants} étudiants</div>
+                    </div>
+                `;
+            });
+            
+            if (sections.length > 3) {
+                html += `<a href="gestion-section.html" class="see-all">Voir toutes les sections</a>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Render today's schedule
+        function renderTodaySchedule(schedule) {
+            const container = document.getElementById('todaySchedule');
+            
+            if (!schedule || schedule.length === 0) {
+                container.innerHTML = '<p>Aucun cours aujourd\'hui</p>';
+                return;
+            }
+            
+            let html = '';
+            schedule.slice(0, 3).forEach(item => {
+                html += `
+                    <div class="schedule-item">
+                        <div>
+                            <div>${item.type} - ${item.matiere}</div>
+                            <div class="schedule-location">Salle: ${item.salle}</div>
+                        </div>
+                        <div class="schedule-time">${item.heure_debut} - ${item.heure_fin}</div>
+                    </div>
+                `;
+            });
+            
+            if (schedule.length > 3) {
+                html += `<a href="emploi.html" class="see-all">Voir tout l'emploi du temps</a>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Render students
+        function renderStudents(students) {
+            const container = document.getElementById('studentsList');
+            
+            if (!students || students.length === 0) {
+                container.innerHTML = '<p>Aucun étudiant trouvé</p>';
+                return;
+            }
+            
+            let html = `
+                <div class="search-box">
+                    <input type="text" placeholder="Rechercher un étudiant...">
+                    <button>🔍</button>
+                </div>
+                <div class="student-list">
+            `;
+            
+            students.slice(0, 5).forEach(student => {
+                html += `
+                    <div class="student-item">
+                        <div class="student-name">${student.prenom} ${student.nom}</div>
+                        <div class="student-group">TD${student.groupe_td} / TP${student.groupe_tp}</div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            if (students.length > 5) {
+                html += `<a href="gestion-etudiant.html" class="see-all">Gérer tous les étudiants</a>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Render notifications
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notificationsList');
+            
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = '<p>Aucune notification</p>';
+                return;
+            }
+            
+            let html = '';
+            notifications.slice(0, 3).forEach(notification => {
+                const date = new Date(notification.date).toLocaleString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                html += `
+                    <div class="notification-item">
+                        <div class="notification-dot ${notification.lue ? '' : 'unread'}"></div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notification.titre}</div>
+                            <div class="notification-text">${notification.contenu}</div>
+                            <div class="notification-date">${date}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (notifications.length > 3) {
+                html += `<a href="#" class="see-all">Voir toutes les notifications</a>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('http://localhost:3000/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                // Clear storage and redirect
+                localStorage.removeItem('enseignant_token');
+                localStorage.removeItem('enseignant_data');
+                sessionStorage.removeItem('enseignant_token');
+                sessionStorage.removeItem('enseignant_data');
+                window.location.href = 'enseignant-login.html';
+            }
+        }
+    </script>
 </body>
 </html>

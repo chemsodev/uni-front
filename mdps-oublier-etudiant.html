@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Mot de passe oublié - Espace Étudiant</title>
     <link href="style/mdps-oublier-etudiant.css" rel="stylesheet">
-
 </head>
 <body>
     <div class="forgot-container">
@@ -18,7 +17,58 @@
             Veuillez contacter l'administration pour récupérer/changer votre mot de passe.
         </p>
         
-        <a href="etudiant-login.html" class="back-button">Retour</a>
+        <div class="contact-form">
+            <div class="form-group">
+                <label for="contactEmail">Votre email universitaire</label>
+                <input type="email" id="contactEmail" placeholder="votrenom@univ.edu">
+            </div>
+            
+            <div class="form-group">
+                <label for="contactMessage">Message</label>
+                <textarea id="contactMessage" rows="4" placeholder="Décrivez votre problème..."></textarea>
+            </div>
+            
+            <button class="submit-button" onclick="sendContactRequest()">Envoyer la demande</button>
+        </div>
+        
+        <div id="successMessage" style="display: none; color: green; margin: 15px 0;">
+            Votre demande a été envoyée avec succès. L'administration vous contactera sous 48 heures.
+        </div>
+        
+        <a href="etudiant-login.html" class="back-button">Retour à la connexion</a>
     </div>
+
+    <script>
+        async function sendContactRequest() {
+            const email = document.getElementById('contactEmail').value;
+            const message = document.getElementById('contactMessage').value;
+            const successMessage = document.getElementById('successMessage');
+            
+            // Simple validation
+            if (!email || !email.includes('@') || !message) {
+                alert('Veuillez remplir tous les champs correctement');
+                return;
+            }
+            
+            try {
+                // In a real app, this would send to your backend
+                console.log('Sending contact request:', { email, message });
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Clear form
+                document.getElementById('contactEmail').value = '';
+                document.getElementById('contactMessage').value = '';
+                
+            } catch (error) {
+                console.error('Error sending contact request:', error);
+                alert('Une erreur est survenue. Veuillez réessayer plus tard.');
+            }
+        }
+    </script>
 </body>
 </html>

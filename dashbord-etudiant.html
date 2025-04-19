@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <title>Dashboard Étudiant</title>
     <link href="style/dashbord-etudiant.css" rel="stylesheet">
-   
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="user-info">
-                <div class="user-avatar">AS</div>
-                <div class="user-name">Ahmed Saidi</div>
-                <div class="user-id">20230456</div>
+                <div class="user-avatar" id="userAvatar">AS</div>
+                <div class="user-name" id="userFullName">Chargement...</div>
+                <div class="user-id" id="userId">Chargement...</div>
             </div>
             
             <ul class="nav-menu">
@@ -33,7 +32,7 @@
                     <a href="notification.html" class="nav-link">Notifications</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
+                    <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
                 </li>
             </ul>
         </div>
@@ -43,7 +42,7 @@
             <div class="header">
                 <h1 class="page-title">Tableau de bord</h1>
                 <div class="header-actions">
-                    <button>Emploi du temps</button>
+                    <button onclick="window.location.href='schedule.html'">Emploi du temps</button>
                 </div>
             </div>
             
@@ -51,78 +50,269 @@
                 <!-- Informations Personnelles -->
                 <div class="card">
                     <h2 class="card-title">Informations Personnelles</h2>
-                    <div class="card-content">
-                        <p><strong>Nom:</strong> Saidi</p>
-                        <p><strong>Prénom:</strong> Ahmed</p>
-                        <p><strong>Filière:</strong> Informatique</p>
-                        <p><strong>Section:</strong> B</p>
-                        <p><strong>Groupe TD:</strong> 3</p>
-                        <p><strong>Groupe TP:</strong> 2</p>
+                    <div class="card-content" id="personalInfo">
+                        <p><strong>Nom:</strong> <span id="lastName">Chargement...</span></p>
+                        <p><strong>Prénom:</strong> <span id="firstName">Chargement...</span></p>
+                        <p><strong>Filière:</strong> <span id="major">Chargement...</span></p>
+                        <p><strong>Section:</strong> <span id="section">Chargement...</span></p>
+                        <p><strong>Groupe TD:</strong> <span id="tdGroup">Chargement...</span></p>
+                        <p><strong>Groupe TP:</strong> <span id="tpGroup">Chargement...</span></p>
                     </div>
                 </div>
                 
                 <!-- Emploi du temps aujourd'hui -->
                 <div class="card">
                     <h2 class="card-title">Emploi du temps aujourd'hui</h2>
-                    <div class="card-content">
-                        <div class="schedule-item">
-                            <div>Cours - Algorithmique</div>
-                            <div class="schedule-time">08:00 - 09:30</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div>TD - Algèbre</div>
-                            <div class="schedule-time">09:45 - 11:15</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div>TP - Programmation</div>
-                            <div class="schedule-time">13:00 - 14:30</div>
-                        </div>
-                        <a href="#" class="see-all">Voir tout l'emploi du temps</a>
+                    <div class="card-content" id="todaySchedule">
+                        <div class="loading-message">Chargement de l'emploi du temps...</div>
                     </div>
                 </div>
                 
                 <!-- Demandes -->
                 <div class="card">
                     <h2 class="card-title">Mes Demandes</h2>
-                    <div class="card-content">
-                        <p>Changement de Groupe TD</p>
-                        <div class="status-chip status-in-progress">En cours</div>
-                        
-                        <p style="margin-top: 15px;">Changement de Section</p>
-                        <div class="status-chip status-complete">Acceptée</div>
-                        
-                        <a href="demandes.html" class="see-all">Voir toutes mes demandes</a>
+                    <div class="card-content" id="requestsList">
+                        <div class="loading-message">Chargement des demandes...</div>
                     </div>
                 </div>
                 
                 <!-- Notifications -->
                 <div class="card">
                     <h2 class="card-title">Notifications Récentes</h2>
-                    <div class="card-content">
-                        <div class="notification-item">
-                            <div class="notification-dot"></div>
-                            <div class="notification-content">
-                                <div class="notification-title">Examen d'Algorithmique reporté</div>
-                                <div class="notification-text">L'examen est reporté au 15 avril.</div>
-                                <div class="notification-date">Aujourd'hui, 10:30</div>
-                            </div>
-                        </div>
-                        
-                        <div class="notification-item">
-                            <div class="notification-dot"></div>
-                            <div class="notification-content">
-                                <div class="notification-title">Nouvelle ressource disponible</div>
-                                <div class="notification-text">TD d'Algèbre Linéaire</div>
-                                <div class="notification-date">Hier, 14:15</div>
-                            </div>
-                        </div>
-                        
-                        <a href="#" class="see-all">Voir toutes les notifications</a>
+                    <div class="card-content" id="notificationsList">
+                        <div class="loading-message">Chargement des notifications...</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check for token in storage
+            authToken = sessionStorage.getItem('etudiant_token')
+            
+            if (!authToken) {
+                window.location.href = 'etudiant-login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/auth/verify', {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': `Bearer ${authToken}`
+                  }
+                });
+            
+                if (!response.ok) throw new Error('Token verification failed');
+                
+                const userData = await response.json();
+                console.log('User data:', userData);
+                return userData;
+              } catch (error) {
+                console.error('Erreur:', error);
+                window.location.href = 'etudiant-login.html';
+            }
+        });
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const response = await fetch(`http://localhost:3000/api/etudiants/${currentUser.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    
+                    // Update UI
+                    document.getElementById('userFullName').textContent = `${user.prenom} ${user.nom}`;
+                    document.getElementById('userId').textContent = user.matricule;
+                    document.getElementById('userAvatar').textContent = 
+                        `${user.prenom.charAt(0)}${user.nom.charAt(0)}`.toUpperCase();
+                    
+                    document.getElementById('lastName').textContent = user.nom;
+                    document.getElementById('firstName').textContent = user.prenom;
+                    document.getElementById('major').textContent = user.filiere;
+                    document.getElementById('section').textContent = user.section;
+                    document.getElementById('tdGroup').textContent = user.groupe_td;
+                    document.getElementById('tpGroup').textContent = user.groupe_tp;
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load today's schedule
+                const today = new Date().toISOString().split('T')[0];
+                const scheduleResponse = await fetch(
+                    `http://localhost:3000/api/etudiants/${currentUser.id}/emploi-du-temps?date=${today}`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    }
+                );
+
+                // Load requests
+                const requestsResponse = await fetch(
+                    `http://localhost:3000/api/etudiants/${currentUser.id}/demandes`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    }
+                );
+
+                // Load notifications
+                const notificationsResponse = await fetch(
+                    `http://localhost:3000/api/etudiants/${currentUser.id}/notifications`, 
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    }
+                );
+
+                // Process responses
+                if (scheduleResponse.ok) {
+                    const schedule = await scheduleResponse.json();
+                    renderTodaySchedule(schedule);
+                }
+
+                if (requestsResponse.ok) {
+                    const requests = await requestsResponse.json();
+                    renderRequests(requests);
+                }
+
+                if (notificationsResponse.ok) {
+                    const notifications = await notificationsResponse.json();
+                    renderNotifications(notifications);
+                }
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Render today's schedule
+        function renderTodaySchedule(schedule) {
+            const container = document.getElementById('todaySchedule');
+            
+            if (!schedule || schedule.length === 0) {
+                container.innerHTML = '<p>Aucun cours aujourd\'hui</p>';
+                return;
+            }
+            
+            let html = '';
+            schedule.forEach(item => {
+                html += `
+                    <div class="schedule-item">
+                        <div>${item.type} - ${item.matiere}</div>
+                        <div class="schedule-time">${item.heure_debut} - ${item.heure_fin}</div>
+                    </div>
+                `;
+            });
+            
+            html += `<a href="schedule.html" class="see-all">Voir tout l'emploi du temps</a>`;
+            container.innerHTML = html;
+        }
+
+        // Render requests
+        function renderRequests(requests) {
+            const container = document.getElementById('requestsList');
+            
+            if (!requests || requests.length === 0) {
+                container.innerHTML = '<p>Aucune demande enregistrée</p>';
+                return;
+            }
+            
+            let html = '';
+            requests.slice(0, 2).forEach(request => {
+                const statusClass = request.statut === 'Acceptée' ? 'status-complete' : 
+                                  request.statut === 'Refusée' ? 'status-error' : 'status-in-progress';
+                
+                html += `
+                    <p>${request.type}</p>
+                    <div class="status-chip ${statusClass}">${request.statut}</div>
+                `;
+            });
+            
+            if (requests.length > 2) {
+                html += `<a href="demandes.html" class="see-all">Voir toutes mes demandes</a>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Render notifications
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notificationsList');
+            
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = '<p>Aucune notification</p>';
+                return;
+            }
+            
+            let html = '';
+            notifications.slice(0, 2).forEach(notification => {
+                const date = new Date(notification.date).toLocaleString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                html += `
+                    <div class="notification-item">
+                        <div class="notification-dot ${notification.lue ? '' : 'unread'}"></div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notification.titre}</div>
+                            <div class="notification-text">${notification.contenu}</div>
+                            <div class="notification-date">${date}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (notifications.length > 2) {
+                html += `<a href="notification.html" class="see-all">Voir toutes les notifications</a>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('http://localhost:3000/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                // Clear storage and redirect
+                sessionStorage.removeItem('etudiant_token');
+                sessionStorage.removeItem('etudiant_data');
+                sessionStorage.removeItem('etudiant_token');
+                sessionStorage.removeItem('etudiant_data');
+                window.location.href = 'etudiant-login.html';
+            }
+        }
+    </script>
 </body>
 </html>
-

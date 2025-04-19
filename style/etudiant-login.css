@@ -200,3 +200,9 @@
         .back-button:hover {
             text-decoration: underline;
         }
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }

@@ -2,9 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion Espace Étudiant</title>
-    <link href="style/etudiant-login.css" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="style/etudiant-login.css">
 </head>
 <body>
     <div class="login-container">
@@ -15,11 +16,12 @@
             <div class="login-tab" onclick="switchTab('matricule-tab', 'email-tab')">Matricule</div>
         </div>
         
-        <form action="student-dashboard.html" method="post">
+        <form id="loginForm">
             <div id="email-tab" class="tab-content active">
                 <div class="form-group">
                     <label class="form-label" for="email">Email</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="votrenom@gmail.com">
+                    <input type="email" id="email" name="email" class="form-input" placeholder="votrenom@univ.edu" required>
+                    <div id="email-error" class="error-message"></div>
                 </div>
             </div>
             
@@ -27,12 +29,14 @@
                 <div class="form-group">
                     <label class="form-label" for="matricule">Numéro de matricule</label>
                     <input type="text" id="matricule" name="matricule" class="form-input" placeholder="ex: 20230001">
+                    <div id="matricule-error" class="error-message"></div>
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="password">Mot de passe</label>
                 <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+                <div id="password-error" class="error-message"></div>
             </div>
 
             <div class="remember-me">
@@ -42,7 +46,7 @@
 
             <a href="mdps-oublier-etudiant.html" class="forgot-password">Mot de passe oublié?</a>
 
-            <button type="submit" class="login-button">Se connecter</button>
+            <button type="button" class="login-button" onclick="handleLogin()">Se connecter</button>
         </form>
 
         <div class="divider">
@@ -57,26 +61,127 @@
     </div>
 
     <script>
+        // Tab switching
         function switchTab(showTabId, hideTabId) {
-            // Show the selected tab content
             document.getElementById(showTabId).classList.add('active');
             document.getElementById(hideTabId).classList.remove('active');
             
-            // Update the tab styling
             const tabs = document.querySelectorAll('.login-tab');
-            tabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
+            tabs.forEach(tab => tab.classList.remove('active'));
             
-            // Find the tab that was clicked and make it active
             event.currentTarget.classList.add('active');
             
-            // Clear the input field of the hidden tab
             const hiddenInput = document.getElementById(hideTabId).querySelector('input');
-            if (hiddenInput) {
-                hiddenInput.value = '';
+            if (hiddenInput) hiddenInput.value = '';
+        }
+
+        // Display error message
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Hide error message
+        function hideError(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+
+        // Validate email format
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        // Handle login
+        async function handleLogin() {
+            // Reset errors
+            hideError('email-error');
+            hideError('password-error');
+            hideError('matricule-error');
+
+            // Get form values
+            const email = document.getElementById('email').value;
+            const matricule = document.getElementById('matricule').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember').checked;
+
+            // Validate inputs
+            let isValid = true;
+            const activeTab = document.querySelector('.tab-content.active').id;
+
+            if (activeTab === 'email-tab' && !isValidEmail(email)) {
+                showError('email-error', 'Veuillez entrer une adresse email valide');
+                isValid = false;
+            }
+
+            if (activeTab === 'matricule-tab' && matricule.trim() === '') {
+                showError('matricule-error', 'Veuillez entrer votre numéro de matricule');
+                isValid = false;
+            }
+
+            if (password.length < 6) {
+                showError('password-error', 'Le mot de passe doit contenir au moins 6 caractères');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                // Show loading state
+                const loginBtn = document.querySelector('.login-button');
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Connexion en cours...';
+
+                // Prepare request data
+                const requestData = { password };
+                if (activeTab === 'email-tab') {
+                    requestData.email = email;
+                } else {
+                    requestData.matricule = matricule;
+                }
+
+                const response = await fetch('http://localhost:3000/auth/etudiant/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData),
+                    mode: 'cors' // Ensure CORS mode is enabled
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store token and user data
+                    if (rememberMe) {
+                        localStorage.setItem('etudiant_token', data.access_token);
+                        localStorage.setItem('etudiant_data', JSON.stringify(data.user));
+                    } else {
+                        sessionStorage.setItem('etudiant_token', data.access_token);
+                        sessionStorage.setItem('etudiant_data', JSON.stringify(data.user));
+                    }
+
+                    // Redirect to dashboard
+                    window.location.href = 'dashbord-etudiant.html';
+                } else {
+                    showError('password-error', data.message || 'Email/Matricule ou mot de passe incorrect');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('password-error', 'Erreur de connexion au serveur');
+            } finally {
+                // Reset button state
+                const loginBtn = document.querySelector('.login-button');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Se connecter';
             }
         }
+
+        // Auto-focus email field on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('email').focus();
+        });
     </script>
 </body>
 </html>

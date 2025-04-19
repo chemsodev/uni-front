@@ -533,6 +533,32 @@
                 }
             });
         });
+       // Add this to each admin dashboard page (chef-de-departement.html, etc.)
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+    const storedRole = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
+    const currentPageRole = document.body.dataset.requiredRole; // Add data-required-role to body
+    
+    if (!token || storedRole !== "vice-doyen") {
+      window.location.href = 'admin-login.html?requestedRole=vice-doyen';
+    }
+    
+  /* Verify token with backend
+    fetch('http://localhost:3000/auth/verify', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).then(response => {
+      if (!response.ok) {
+        window.location.href = 'admin-login.html?requestedRole=vice-doyen';
+      }
+      return response.json();
+    }).then(profile => {
+      if (profile.role !== currentPageRole) {
+        window.location.href = 'admin-login.html?requestedRole=vice-doyen';
+      }
+    });*/
+  });
     </script>
 </body>
 </html>
