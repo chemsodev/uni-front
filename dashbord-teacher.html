@@ -86,39 +86,55 @@
         // Global variables
         let currentUser = null;
         let authToken = null;
-
-        // Check authentication on page load
+    
         document.addEventListener('DOMContentLoaded', async () => {
-            // Check for token in storage
-            authToken = localStorage.getItem('enseignant_token') || sessionStorage.getItem('enseignant_token');
-            
-            if (!authToken) {
-                window.location.href = 'enseignant-login.html';
-                return;
-            }
-
             try {
-                const response = await fetch('http://localhost:3000/auth/verify', {
+                // 1. Retrieve token from storage
+                authToken = localStorage.getItem('enseignant_token') || 
+                            sessionStorage.getItem('enseignant_token');
+                
+                if (!authToken) {
+                    window.location.href = 'enseignant-login.html';
+                    return;
+                }
+    
+                // 2. Verify token and role
+                const verificationResponse = await fetch('http://localhost:3000/auth/verify', {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
                     }
                 });
-
-                if (!response.ok) throw new Error('Token verification failed');
+    
+                if (!verificationResponse.ok) throw new Error('Token verification failed');
                 
-                const userData = await response.json();
-                currentUser = userData;
+                const userData = await verificationResponse.json();
                 
-                // Load user data and dashboard content
+                // 3. Validate teacher role
+                if (userData.adminRole !== 'enseignant') {
+                    throw new Error('Access restricted to teachers');
+                }
+    
+                // 4. Set current user
+                currentUser = {
+                    id: userData.userId,
+                    email: userData.email
+                };
+    
+                // 5. Load data
                 loadUserData();
                 loadDashboardData();
+    
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Access denied:', error);
+                // Clear storage and redirect
+                localStorage.removeItem('enseignant_token');
+                sessionStorage.removeItem('enseignant_token');
                 window.location.href = 'enseignant-login.html';
             }
         });
-
+    
         // Load user data
         async function loadUserData() {
             try {
@@ -127,7 +143,7 @@
                         'Authorization': `Bearer ${authToken}`
                     }
                 });
-
+    
                 if (response.ok) {
                     const user = await response.json();
                     
@@ -141,7 +157,7 @@
                 console.error('Error loading user data:', error);
             }
         }
-
+    
         // Load dashboard data
         async function loadDashboardData() {
             try {
@@ -154,7 +170,7 @@
                         }
                     }
                 );
-
+    
                 // Load today's schedule
                 const today = new Date().toISOString().split('T')[0];
                 const scheduleResponse = await fetch(
@@ -165,7 +181,7 @@
                         }
                     }
                 );
-
+    
                 // Load students
                 const studentsResponse = await fetch(
                     `http://localhost:3000/api/enseignants/${currentUser.id}/etudiants`, 
@@ -175,7 +191,7 @@
                         }
                     }
                 );
-
+    
                 // Load notifications
                 const notificationsResponse = await fetch(
                     `http://localhost:3000/api/enseignants/${currentUser.id}/notifications`, 
@@ -185,33 +201,33 @@
                         }
                     }
                 );
-
+    
                 // Process responses
                 if (sectionsResponse.ok) {
                     const sections = await sectionsResponse.json();
                     renderSections(sections);
                 }
-
+    
                 if (scheduleResponse.ok) {
                     const schedule = await scheduleResponse.json();
                     renderTodaySchedule(schedule);
                 }
-
+    
                 if (studentsResponse.ok) {
                     const students = await studentsResponse.json();
                     renderStudents(students);
                 }
-
+    
                 if (notificationsResponse.ok) {
                     const notifications = await notificationsResponse.json();
                     renderNotifications(notifications);
                 }
-
+    
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
         }
-
+    
         // Render sections
         function renderSections(sections) {
             const container = document.getElementById('sectionsList');
@@ -237,7 +253,7 @@
             
             container.innerHTML = html;
         }
-
+    
         // Render today's schedule
         function renderTodaySchedule(schedule) {
             const container = document.getElementById('todaySchedule');
@@ -266,7 +282,7 @@
             
             container.innerHTML = html;
         }
-
+    
         // Render students
         function renderStudents(students) {
             const container = document.getElementById('studentsList');
@@ -301,7 +317,7 @@
             
             container.innerHTML = html;
         }
-
+    
         // Render notifications
         function renderNotifications(notifications) {
             const container = document.getElementById('notificationsList');
@@ -338,7 +354,7 @@
             
             container.innerHTML = html;
         }
-
+    
         // Logout function
         async function logout() {
             try {
@@ -353,9 +369,7 @@
             } finally {
                 // Clear storage and redirect
                 localStorage.removeItem('enseignant_token');
-                localStorage.removeItem('enseignant_data');
                 sessionStorage.removeItem('enseignant_token');
-                sessionStorage.removeItem('enseignant_data');
                 window.location.href = 'enseignant-login.html';
             }
         }

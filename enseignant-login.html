@@ -60,85 +60,117 @@
     </div>
 
     <script>
-        // Tab switching
-        function switchTab(showTabId, hideTabId) {
-            document.getElementById(showTabId).classList.add('active');
-            document.getElementById(hideTabId).classList.remove('active');
-            
-            const tabs = document.querySelectorAll('.login-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            event.currentTarget.classList.add('active');
-            
-            const hiddenInput = document.getElementById(hideTabId).querySelector('input');
-            if (hiddenInput) hiddenInput.value = '';
+        // Auto-check on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Check for existing token
+                const existingToken = localStorage.getItem('enseignant_token') || 
+                                    sessionStorage.getItem('enseignant_token');
+                
+                if (!existingToken) return;
+
+                // Verify existing token
+                const verificationResponse = await fetch('http://localhost:3000/auth/verify', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${existingToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!verificationResponse.ok) throw new Error('Invalid token');
+                
+                const userData = await verificationResponse.json();
+                
+                // Validate teacher role
+                if (userData.adminRole !== 'enseignant') {
+                    throw new Error('Invalid user type');
+                }
+
+                // Redirect to dashboard if valid
+                window.location.href = 'dashbord-teacher.html';
+
+            } catch (error) {
+                console.error('Auto-login failed:', error);
+                // Clear invalid tokens
+                localStorage.removeItem('enseignant_token');
+                sessionStorage.removeItem('enseignant_token');
+            }
+        });
+          // Email validation function
+          function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        // Display error message
+        // Error display function
         function showError(elementId, message) {
             const errorElement = document.getElementById(elementId);
             errorElement.textContent = message;
             errorElement.style.display = 'block';
         }
 
-        // Hide error message
         function hideError(elementId) {
-            document.getElementById(elementId).style.display = 'none';
+            const errorElement = document.getElementById(elementId);
+            errorElement.style.display = 'none';
         }
-
-        // Validate email format
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        // Handle login
+        // Enhanced login handler
         async function handleLogin() {
-            // Reset errors
+            // Clear previous errors and tokens
             hideError('email-error');
             hideError('password-error');
             hideError('id-error');
-
+            localStorage.removeItem('enseignant_token');
+            sessionStorage.removeItem('enseignant_token');
+        
             // Get form values
-            const email = document.getElementById('email').value;
-            const id = document.getElementById('id').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const id = document.getElementById('id').value.trim();
+            const password = document.getElementById('password').value.trim();
             const rememberMe = document.getElementById('remember').checked;
-
-            // Validate inputs
+          
+           // Validation
             let isValid = true;
             const activeTab = document.querySelector('.tab-content.active').id;
-
+        
+            // Validate at least one identifier
+            if (activeTab === 'email-tab' && !email) {
+              showError('email-error', 'Email is required');
+              return;
+            }
+            if (activeTab === 'id-tab' && !id) {
+              showError('id-error', 'Teacher ID is required');
+              return;
+            }
+           
             if (activeTab === 'email-tab' && !isValidEmail(email)) {
-                showError('email-error', 'Veuillez entrer une adresse email valide');
+                showError('email-error', 'Adresse email invalide');
                 isValid = false;
             }
 
-            if (activeTab === 'id-tab' && id.trim() === '') {
-                showError('id-error', 'Veuillez entrer votre ID enseignant');
+        
+            if (password.length < 8) {
+                showError('password-error', 'Le mot de passe doit contenir au moins 8 caractères');
                 isValid = false;
             }
-
-            if (password.length < 6) {
-                showError('password-error', 'Le mot de passe doit contenir au moins 6 caractères');
-                isValid = false;
-            }
-
+        
             if (!isValid) return;
-
+        
             try {
-                // Show loading state
+                // Set loading state
                 const loginBtn = document.querySelector('.login-button');
                 loginBtn.disabled = true;
-                loginBtn.textContent = 'Connexion en cours...';
+                loginBtn.innerHTML = '<div class="spinner"></div>Connexion...';
+        
+                // Prepare request
+                const requestData = {
+                    password,
+                    [activeTab === 'email-tab' ? 'email' : 'teacherId']: activeTab === 'email-tab' ? email : id
+                };
 
-                // Prepare request data
-                const requestData = { password };
-                if (activeTab === 'email-tab') {
-                    requestData.email = email;
-                } else {
-                    requestData.teacherId = id;
-                }
-
+                // Add timeout handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
                 const response = await fetch('http://localhost:3000/auth/enseignant/login', {
                     method: 'POST',
                     headers: {
@@ -146,41 +178,65 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify(requestData),
-                    mode: 'cors'
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
+
+                // Handle HTTP errors
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Échec de la connexion');
+                }
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    // Store token and user data
-                    if (rememberMe) {
-                        localStorage.setItem('enseignant_token', data.access_token);
-                        localStorage.setItem('enseignant_data', JSON.stringify(data.user));
-                    } else {
-                        sessionStorage.setItem('enseignant_token', data.access_token);
-                        sessionStorage.setItem('enseignant_data', JSON.stringify(data.user));
-                    }
-
-                    // Redirect to dashboard
-                    window.location.href = 'dashbord-teacher.html';
-                } else {
-                    showError('password-error', data.message || 'Email/ID ou mot de passe incorrect');
+                // Validate response structure
+                if (!data?.access_token) {
+                    throw new Error('Réponse invalide du serveur');
                 }
+
+                // Store token
+                const storage = rememberMe ? localStorage : sessionStorage;
+                storage.setItem('enseignant_token', data.access_token);
+                
+                // Redirect with delay
+                setTimeout(() => {
+                    window.location.href = 'dashbord-teacher.html';
+                }, 100);
+
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('password-error', 'Erreur de connexion au serveur');
+                console.error('Login error:', error);
+                const message = error.name === 'AbortError' 
+                    ? 'Connexion au serveur trop longue'
+                    : error.message || 'Erreur inconnue';
+                showError('password-error', message);
             } finally {
-                // Reset button state
                 const loginBtn = document.querySelector('.login-button');
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Se connecter';
             }
         }
-
-        // Auto-focus email field on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('email').focus();
-        });
-    </script>
+               // Tab switching function
+               function switchTab(showTabId, hideTabId) {
+                // Hide all error messages when switching tabs
+                hideError('email-error');
+                hideError('id-error');
+                hideError('password-error');
+    
+                // Toggle active class on tabs
+                document.getElementById(showTabId).classList.add('active');
+                document.getElementById(hideTabId).classList.remove('active');
+    
+                // Toggle active class on tab buttons
+                const tabs = document.querySelectorAll('.login-tab');
+                tabs.forEach(tab => tab.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+    
+                // Clear hidden input values
+                const hiddenInput = document.getElementById(hideTabId).querySelector('input[type="text"], input[type="email"]');
+                if (hiddenInput) hiddenInput.value = '';
+            }
+</script>
 </body>
 </html>

@@ -7,44 +7,153 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="login-container">
-        <h2 class="login-title">Connexion Espace Administration</h2>
-        
-        <form id="loginForm">
-            <div class="form-group">
-                <label class="form-label" for="email">Adresse Email Professionnel</label>
-                <input type="email" id="email" name="email" class="form-input" placeholder="admin@univ.edu" required>
-                <div id="email-error" class="error-message"></div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
-                <div id="password-error" class="error-message"></div>
-            </div>
-
-            <div class="remember-me">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember">Se souvenir de moi</label>
-            </div>
-
-            <a href="mdps-oublier-admin.html" class="forgot-password">Mot de passe oublié?</a>
-
-            <button type="button" class="login-button" onclick="handleLogin()">Se connecter</button>
-        </form>
-
-        <div class="divider">
-            <span class="divider-text">OU</span>
+  <div class="login-container">
+    <h2 class="login-title">Connexion Espace Administration</h2>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label class="form-label" for="email">Adresse Email Professionnel</label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="admin@univ.edu" required>
+            <div id="email-error" class="error-message"></div>
         </div>
 
-        <div class="signup-link">
-            Vous n'avez pas encore de compte? <a href="admin-signup.html">S'inscrire</a>
+        <div class="form-group">
+            <label class="form-label" for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            <div id="password-error" class="error-message"></div>
         </div>
 
-        <a href="index.html" class="back-button">Retour à la page de sélection</a>
+        <div class="remember-me">
+            <input type="checkbox" id="remember" name="remember">
+            <label for="remember">Se souvenir de moi</label>
+        </div>
+
+        <a href="mdps-oublier-admin.html" class="forgot-password">Mot de passe oublié?</a>
+
+        <button type="button" class="login-button" onclick="handleLogin()">Se connecter</button>
+    </form>
+
+    <div class="divider">
+        <span class="divider-text">OU</span>
     </div>
 
+    <div class="signup-link">
+        Vous n'avez pas encore de compte? <a href="admin-signup.html">S'inscrire</a>
+    </div>
+
+    <a href="index.html" class="back-button">Retour à la page de sélection</a>
+</div>
+
     <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedRole = urlParams.get('requestedRole');
+        
+        // Silent redirect if missing role parameter
+        if (!requestedRole) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Check for existing token
+        const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
+        if (!token) return;
+
+        // Silent token verification
+        fetch('http://localhost:3000/auth/verify', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Invalid token');
+            return response.json();
+        })
+        .then(data => {
+            // Silent role validation
+            if (data.adminRole === requestedRole) {
+                const rolePages = {
+                    'chef-de-departement': 'chef-de-departement.html',
+                    'chef-de-specialite': 'chef-de-specialite.html',
+                    'secretaire': 'secretaire-agent.html',
+                    'vice-doyen': 'vice-doyen.html',
+                    'doyen': 'doyen.html'
+                };
+                window.location.href = rolePages[requestedRole];
+            }
+        })
+        .catch(error => {
+            // Silent token cleanup
+            console.error('Token verification failed:', error);
+            sessionStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_role');
+            sessionStorage.removeItem('admin_role');
+        });
+    });
+
+        // Modified handleLogin function with corrected fetch URL
+        async function handleLogin() {
+            clearErrors();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember').checked;
+            const urlParams = new URLSearchParams(window.location.search);
+            const requestedRole = urlParams.get('requestedRole');
+
+            if (!requestedRole) {
+                alert('Paramètre de rôle manquant dans l\'URL');
+                return;
+            }
+
+            // Validation remains the same
+            if (!email) {
+                showError('email-error', 'Veuillez entrer votre email');
+                return;
+            }
+            
+            if (!password) {
+                showError('password-error', 'Veuillez entrer votre mot de passe');
+                return;
+            }
+
+            try {
+                // Corrected fetch URL with proper parameter formatting
+                const response = await fetch(`http://localhost:3000/auth/administrateur/login?requestedRole=${requestedRole}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+
+                // Rest of the login logic remains the same
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const storage = rememberMe ? localStorage : sessionStorage;
+                    storage.setItem('admin_token', data.access_token);
+                    storage.setItem('admin_role', data.adminRole);
+                    storage.setItem('admin_email', data.email);
+                    storage.setItem('admin_id', data.userId);
+
+                    const rolePages = {
+                        'chef-de-departement': 'chef-de-departement.html',
+                        'chef-de-specialite': 'chef-de-specialite.html',
+                        'secretaire': 'secretaire-agent.html',
+                        'vice-doyen': 'vice-doyen.html',
+                        'doyen': 'doyen.html'
+                    };
+                    
+                    window.location.href = rolePages[data.adminRole];
+                } else {
+                    showError('password-error', data.message || 'Email ou mot de passe incorrect');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('password-error', 'Erreur de connexion au serveur');
+            }
+        }
+
+        // Existing helper functions remain the same
         function clearErrors() {
             document.getElementById('email-error').textContent = '';
             document.getElementById('password-error').textContent = '';
@@ -55,63 +164,6 @@
             element.textContent = message;
             element.style.color = 'red';
         }
-
-        async function handleLogin() {
-            clearErrors();
-            
-            // Get form values and URL parameters
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const rememberMe = document.getElementById('remember').checked;
-            const urlParams = new URLSearchParams(window.location.search);
-            const requestedRole = urlParams.get('requestedRole');
-          
-            // Basic validation
-            if (!email) {
-              showError('email-error', 'Veuillez entrer votre email');
-              return;
-            }
-            
-            if (!password) {
-              showError('password-error', 'Veuillez entrer votre mot de passe');
-              return;
-            }
-          
-            try {
-              const response = await fetch(`http://localhost:3000/auth/administrateur/login?${requestedRole}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email, password })
-              });
-          
-              const data = await response.json();
-          
-              if (response.ok) {
-                // Store token and user info
-                const storage = rememberMe ? localStorage : sessionStorage;
-                storage.setItem('admin_token', data.access_token);
-                storage.setItem('admin_role', data.adminRole);
-                storage.setItem('admin_email', data.email);
-                storage.setItem('admin_id', data.userId);
-                
-                // Redirect to the appropriate dashboard
-                const rolePages = {
-                  'chef-de-departement': 'chef-de-departement.html',
-                  'chef-de-specialite': 'chef-de-specialite.html',
-                  'secretaire': 'secretaire-agent.html',
-                  'vice-doyen': 'vice-doyen.html',
-                  'doyen': 'doyen.html'
-                };
-                
-                window.location.href = rolePages[data.adminRole];
-              } else {
-                showError('password-error', data.message || 'Email ou mot de passe incorrect');
-              }
-            } catch (error) {
-              console.error('Erreur:', error);
-              showError('password-error', 'Erreur de connexion au serveur');
-            }
-          }
     </script>
 </body>
 </html>

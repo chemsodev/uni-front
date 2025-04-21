@@ -606,33 +606,41 @@
                 });
             }
         });
-       // Add this to each admin dashboard page (chef-de-departement.html, etc.)
-document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
-    const storedRole = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
-    const currentPageRole = document.body.dataset.requiredRole; // Add data-required-role to body
-    
-    if (!token || storedRole !== "chef-de-departement") {
-    
-      window.location.href = 'admin-login.html?requestedRole=chef-de-departement';
-    }
-    
-     /* Verify token with backend
-    fetch('http://localhost:3000/auth/verify', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    }).then(response => {
-      if (!response.ok) {
-        window.location.href = 'admin-login.html?requestedRole=chef-de-departement';
-      }
-      return response.json();
-    }).then(profile => {
-      if (profile.role !== currentPageRole) {
-        window.location.href = 'admin-login.html?requestedRole=chef-de-departement';
-      }
-    })*/
-  });
+        document.addEventListener('DOMContentLoaded', function() {
+            const REQUIRED_ROLE = 'chef-de-departement'; // Hardcoded role
+            const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
+            
+            if (!token) {
+                window.location.href = `admin-login.html?requestedRole=${REQUIRED_ROLE}`;
+                return;
+            }
+        
+            fetch('http://localhost:3000/auth/verify', {
+                method: 'GET',
+                headers: { 
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                mode: 'cors',
+                credentials: 'include'
+              })
+            .then(response => {
+                if (!response.ok) throw new Error('Invalid token');
+                return response.json();
+            })
+            .then(data => {
+                if (data.adminRole !== REQUIRED_ROLE) {
+                    throw new Error('Role mismatch');
+                }
+                // Load protected content here
+            })
+            .catch(error => {
+                console.error('Access denied:', error);
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.href = `admin-login.html?requestedRole=${REQUIRED_ROLE}`;
+            });
+        });
     </script>
 </body>
 </html>

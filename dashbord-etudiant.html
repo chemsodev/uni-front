@@ -92,31 +92,50 @@
         let currentUser = null;
         let authToken = null;
 
-        // Check authentication on page load
         document.addEventListener('DOMContentLoaded', async () => {
-            // Check for token in storage
-            authToken = sessionStorage.getItem('etudiant_token')
-            
-            if (!authToken) {
-                window.location.href = 'etudiant-login.html';
-                return;
-            }
-
             try {
-                const response = await fetch('http://localhost:3000/auth/verify', {
-                  method: 'GET',
-                  headers: {
-                    'Authorization': `Bearer ${authToken}`
-                  }
-                });
-            
-                if (!response.ok) throw new Error('Token verification failed');
+                // 1. Retrieve token from storage
+                authToken = sessionStorage.getItem('etudiant_token') || 
+                          localStorage.getItem('etudiant_token');
                 
-                const userData = await response.json();
-                console.log('User data:', userData);
-                return userData;
-              } catch (error) {
-                console.error('Erreur:', error);
+                if (!authToken) {
+                    window.location.href = 'etudiant-login.html';
+                    return;
+                }
+
+                // 2. Verify token and role
+                const verificationResponse = await fetch('http://localhost:3000/auth/verify', {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!verificationResponse.ok) throw new Error('Token verification failed');
+                
+                const userData = await verificationResponse.json();
+                
+                // 3. Validate student role
+                if (userData.adminRole !== 'etudiant') {
+                    throw new Error('Access restricted to students');
+                }
+
+                // 4. Set current user
+                currentUser = {
+                    id: userData.userId,
+                    email: userData.email
+                };
+
+                // 5. Load data
+                loadUserData();
+                loadDashboardData();
+
+            } catch (error) {
+                console.error('Access denied:', error);
+                // Clear storage and redirect
+                sessionStorage.removeItem('etudiant_token');
+                localStorage.removeItem('etudiant_token');
                 window.location.href = 'etudiant-login.html';
             }
         });
@@ -206,93 +225,6 @@
             }
         }
 
-        // Render today's schedule
-        function renderTodaySchedule(schedule) {
-            const container = document.getElementById('todaySchedule');
-            
-            if (!schedule || schedule.length === 0) {
-                container.innerHTML = '<p>Aucun cours aujourd\'hui</p>';
-                return;
-            }
-            
-            let html = '';
-            schedule.forEach(item => {
-                html += `
-                    <div class="schedule-item">
-                        <div>${item.type} - ${item.matiere}</div>
-                        <div class="schedule-time">${item.heure_debut} - ${item.heure_fin}</div>
-                    </div>
-                `;
-            });
-            
-            html += `<a href="schedule.html" class="see-all">Voir tout l'emploi du temps</a>`;
-            container.innerHTML = html;
-        }
-
-        // Render requests
-        function renderRequests(requests) {
-            const container = document.getElementById('requestsList');
-            
-            if (!requests || requests.length === 0) {
-                container.innerHTML = '<p>Aucune demande enregistrée</p>';
-                return;
-            }
-            
-            let html = '';
-            requests.slice(0, 2).forEach(request => {
-                const statusClass = request.statut === 'Acceptée' ? 'status-complete' : 
-                                  request.statut === 'Refusée' ? 'status-error' : 'status-in-progress';
-                
-                html += `
-                    <p>${request.type}</p>
-                    <div class="status-chip ${statusClass}">${request.statut}</div>
-                `;
-            });
-            
-            if (requests.length > 2) {
-                html += `<a href="demandes.html" class="see-all">Voir toutes mes demandes</a>`;
-            }
-            
-            container.innerHTML = html;
-        }
-
-        // Render notifications
-        function renderNotifications(notifications) {
-            const container = document.getElementById('notificationsList');
-            
-            if (!notifications || notifications.length === 0) {
-                container.innerHTML = '<p>Aucune notification</p>';
-                return;
-            }
-            
-            let html = '';
-            notifications.slice(0, 2).forEach(notification => {
-                const date = new Date(notification.date).toLocaleString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                html += `
-                    <div class="notification-item">
-                        <div class="notification-dot ${notification.lue ? '' : 'unread'}"></div>
-                        <div class="notification-content">
-                            <div class="notification-title">${notification.titre}</div>
-                            <div class="notification-text">${notification.contenu}</div>
-                            <div class="notification-date">${date}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            if (notifications.length > 2) {
-                html += `<a href="notification.html" class="see-all">Voir toutes les notifications</a>`;
-            }
-            
-            container.innerHTML = html;
-        }
-
         // Logout function
         async function logout() {
             try {
@@ -307,12 +239,10 @@
             } finally {
                 // Clear storage and redirect
                 sessionStorage.removeItem('etudiant_token');
-                sessionStorage.removeItem('etudiant_data');
-                sessionStorage.removeItem('etudiant_token');
-                sessionStorage.removeItem('etudiant_data');
+                localStorage.removeItem('etudiant_token');
                 window.location.href = 'etudiant-login.html';
             }
         }
-    </script>
+</script>
 </body>
 </html>
