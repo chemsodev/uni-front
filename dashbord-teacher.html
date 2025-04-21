@@ -99,7 +99,7 @@
                 }
     
                 // 2. Verify token and role
-                const verificationResponse = await fetch('http://localhost:3000/auth/verify', {
+                const verificationResponse = await fetch('https://unicersityback-production.up.railway.app/auth/verify', {
                     method: 'GET',
                     headers: { 
                         'Authorization': `Bearer ${authToken}`,
@@ -138,7 +138,7 @@
         // Load user data
         async function loadUserData() {
             try {
-                const response = await fetch(`http://localhost:3000/api/enseignants/${currentUser.id}`, {
+                const response = await fetch(`https://unicersityback-production.up.railway.app/api/enseignants/${currentUser.id}`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`
                     }
@@ -163,7 +163,7 @@
             try {
                 // Load assigned sections
                 const sectionsResponse = await fetch(
-                    `http://localhost:3000/api/enseignants/${currentUser.id}/sections`, 
+                    `https://unicersityback-production.up.railway.app/api/enseignants/${currentUser.id}/sections`, 
                     {
                         headers: {
                             'Authorization': `Bearer ${authToken}`
@@ -174,7 +174,7 @@
                 // Load today's schedule
                 const today = new Date().toISOString().split('T')[0];
                 const scheduleResponse = await fetch(
-                    `http://localhost:3000/api/enseignants/${currentUser.id}/emploi-du-temps?date=${today}`, 
+                    `https://unicersityback-production.up.railway.app/api/enseignants/${currentUser.id}/emploi-du-temps?date=${today}`, 
                     {
                         headers: {
                             'Authorization': `Bearer ${authToken}`
@@ -184,7 +184,7 @@
     
                 // Load students
                 const studentsResponse = await fetch(
-                    `http://localhost:3000/api/enseignants/${currentUser.id}/etudiants`, 
+                    `https://unicersityback-production.up.railway.app/api/enseignants/${currentUser.id}/etudiants`, 
                     {
                         headers: {
                             'Authorization': `Bearer ${authToken}`
@@ -194,7 +194,7 @@
     
                 // Load notifications
                 const notificationsResponse = await fetch(
-                    `http://localhost:3000/api/enseignants/${currentUser.id}/notifications`, 
+                    `https://unicersityback-production.up.railway.app/api/enseignants/${currentUser.id}/notifications`, 
                     {
                         headers: {
                             'Authorization': `Bearer ${authToken}`
@@ -358,7 +358,7 @@
         // Logout function
         async function logout() {
             try {
-                await fetch('http://localhost:3000/auth/logout', {
+                await fetch('https://unicersityback-production.up.railway.app/auth/logout', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${authToken}`
