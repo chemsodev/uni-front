@@ -60,7 +60,7 @@
         if (!token) return;
 
         // Silent token verification
-        fetch('https://unicersityback-production.up.railway.app/auth/verify', {
+        fetch('http://localhost:3000/api/auth/verify', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -119,7 +119,7 @@
 
             try {
                 // Corrected fetch URL with proper parameter formatting
-                const response = await fetch(`https://unicersityback-production.up.railway.app/auth/administrateur/login?requestedRole=${requestedRole}`, {
+                const response = await fetch(`http://localhost:3000/api/auth/administrateur/login?requestedRole=${requestedRole}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ email, password })

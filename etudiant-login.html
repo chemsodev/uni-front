@@ -70,7 +70,7 @@
                 if (!existingToken) return;  // No token found, show login form
         
                 // Verify existing token
-                const verificationResponse = await fetch('https://unicersityback-production.up.railway.app/auth/verify', {
+                const verificationResponse = await fetch('http://localhost:3000/api/auth/verify', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${existingToken}`,
@@ -172,7 +172,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000);
         
-                const response = await fetch('https://unicersityback-production.up.railway.app/auth/etudiant/login', {
+                const response = await fetch('http://localhost:3000/api/auth/etudiant/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
