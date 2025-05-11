@@ -4,43 +4,24 @@
     <meta charset="UTF-8">
     <title>Groupe et Section - Profil Étudiant</title>
     <link href="style/group-section.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar">ID</div>
-                <div class="user-name">Imane Heeni Douma</div>
-                <div class="user-id">20230456</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashbord-etudiant.html" class="nav-link">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="profile.html" class="nav-link">Profil Personnel</a>
-                </li>
-                <li class="nav-item">
-                    <a href="group-section.html" class="nav-link active">Groupe et Section</a>
-                </li>
-                <li class="nav-item">
-                    <a href="demandes.html" class="nav-link">Demandes</a>
-                </li>
-                <li class="nav-item">
-                    <a href="notification.html" class="nav-link">Notifications</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
+        <div id="navbar-container"></div>
         
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
                 <h1 class="page-title">Groupe et Section</h1>
+                <div class="header-actions">
+                    <button id="refresh-btn" class="btn-icon" title="Actualiser">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 3a5 5 0 0 0-5 5h1a1 1 0 0 1 1 1 1 1 0 0 1-1 1H3a6 6 0 1 1 6 6v1a1 1 0 0 1-1 1 1 1 0 0 1-1-1v-1a5 5 0 0 0 5-5h1a1 1 0 0 1 1 1 1 1 0 0 1-1 1h-1a6 6 0 0 1-6 6v1a1 1 0 0 1-1 1 1 1 0 0 1-1-1v-1a5 5 0 0 0-5-5H1a1 1 0 0 1-1-1 1 1 0 0 1 1-1h1a6 6 0 0 1 6-6V1a1 1 0 0 1 1-1 1 1 0 0 1 1 1v1a5 5 0 0 0 5 5h1a1 1 0 0 1 1 1 1 1 0 0 1-1 1H8z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             
             <div class="group-container">
@@ -54,30 +35,12 @@
                         </span>
                         Mes affectations
                     </h2>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Section</div>
-                            <div class="info-value">Section B</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">Groupe TD</div>
-                            <div class="info-value">Groupe 3</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">Groupe TP</div>
-                            <div class="info-value">Groupe 2</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">Année académique</div>
-                            <div class="info-value">2023-2024</div>
-                        </div>
+                    <div class="info-grid" id="affectations-grid">
+                        <!-- Les données seront chargées dynamiquement -->
                     </div>
                 </div>
                 
-                <!-- Upload Emploi du temps (remplace la section timetable) -->
+                <!-- Upload Emploi du temps -->
                 <div class="card">
                     <h2 class="card-title">
                         <span class="card-title-icon">
@@ -85,11 +48,11 @@
                                 <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                             </svg>
                         </span>
-                        Emploi du temps personnalisé
+                        Emploi du temps
                     </h2>
                     
                     <div class="file-upload-container">
-                        <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
+                        <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                         <div class="upload-area" id="uploadArea">
                             <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -97,22 +60,36 @@
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
                             <div class="upload-text">Glissez et déposez votre emploi du temps</div>
-                            <div class="upload-hint">Format accepté: JPG, PNG, PDF (max. 5 Mo)</div>
+                            <div class="upload-hint">Formats acceptés: JPG, PNG, PDF, DOCX (max. 10 Mo)</div>
                             <button class="upload-btn" id="selectFileBtn">Sélectionner un fichier</button>
                         </div>
                         
-                        <div class="preview-container" id="previewContainer">
+                        <div class="preview-container" id="previewContainer" style="display: none;">
                             <div class="preview-header">
-                                <div class="preview-title">Aperçu de l'emploi du temps</div>
+                                <div class="preview-title">Aperçu du fichier</div>
                                 <div class="preview-actions">
-                                    <button class="preview-btn" id="downloadBtn">Télécharger</button>
-                                    <button class="preview-btn preview-delete" id="deleteBtn">Supprimer</button>
+                                    <button class="preview-btn" id="downloadBtn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                        </svg>
+                                        Télécharger
+                                    </button>
+                                    <button class="preview-btn preview-delete" id="deleteBtn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                        </svg>
+                                        Supprimer
+                                    </button>
                                 </div>
                             </div>
-                            <div class="preview-content" id="previewContent">
-                                <!-- Preview content will be inserted here -->
+                            <div class="preview-content" id="previewContent"></div>
+                            <div class="file-info">
+                                <span id="fileName"></span>
+                                <span id="fileSize"></span>
+                                <span id="uploadDate"></span>
                             </div>
-                            <div class="file-name" id="fileName"></div>
                         </div>
                     </div>
                 </div>
@@ -127,26 +104,7 @@
                         </span>
                         Responsables pédagogiques
                     </h2>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Responsable filière Informatique</div>
-                            <div class="info-value">Dr. Mohammed BENSAAD</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">Responsable de section B</div>
-                            <div class="info-value">Dr. RAHMANI AHMED</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">Responsable TD Groupe 3</div>
-                            <div class="info-value">Dr. Karim MEZIANI</div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-label">Responsable TP Groupe 2</div>
-                            <div class="info-value">Dr. Samira TALEB</div>
-                        </div>
+                    <div class="info-grid" id="responsables-grid">
                     </div>
                 </div>
             </div>
@@ -154,103 +112,353 @@
     </div>
 
     <script>
-        // File upload functionality
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const selectFileBtn = document.getElementById('selectFileBtn');
-        const previewContainer = document.getElementById('previewContainer');
-        const previewContent = document.getElementById('previewContent');
-        const fileName = document.getElementById('fileName');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const deleteBtn = document.getElementById('deleteBtn');
-        
-        // Open file selector when clicking on the upload area or button
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
+        // Configuration
+        const API_BASE_URL = 'https://api.universite.fr/v1';
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+        const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Charger la navbar
+                await loadNavbar();
+                
+                // Charger les données étudiant
+                await loadStudentData();
+                
+                // Initialiser les composants
+                initFileUpload();
+                setupEventListeners();
+                
+                // Charger les données des groupes et responsables
+                await loadGroupData();
+                await loadTimetable();
+                
+            } catch (error) {
+                console.error("Erreur d'initialisation:", error);
+                showToast("Erreur lors du chargement des données", "error");
+            }
         });
-        
-        selectFileBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            fileInput.click();
-        });
-        
-        // Handle drag and drop events
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.backgroundColor = '#DBEAFE';
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.backgroundColor = '#EBF8FF';
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.backgroundColor = '#EBF8FF';
+
+        async function loadNavbar() {
+            try {
+                const response = await fetch('etudiant-nav.html');
+                if (!response.ok) throw new Error('Erreur de chargement de la navbar');
+                
+                document.getElementById('navbar-container').innerHTML = await response.text();
+                updateNavbarActiveLinks();
+            } catch (error) {
+                console.error('Erreur:', error);
+                throw error;
+            }
+        }
+
+        function updateNavbarActiveLinks() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === 'group-section.html') {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        async function loadStudentData() {
+            const studentData = JSON.parse(localStorage.getItem('studentData'));
+            if (!studentData) {
+                // Si pas de données en cache, charger depuis l'API
+                try {
+                    const response = await fetch(`${API_BASE_URL}/students/me`, {
+                        headers: getAuthHeaders()
+                    });
+                    
+                    if (!response.ok) throw new Error('Erreur de chargement des données étudiant');
+                    
+                    const data = await response.json();
+                    localStorage.setItem('studentData', JSON.stringify(data));
+                    return data;
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    throw error;
+                }
+            }
+            return studentData;
+        }
+
+        async function loadGroupData() {
+            try {
+                const studentData = await loadStudentData();
+                
+                // Mettre à jour les affectations
+                const affectationsGrid = document.getElementById('affectations-grid');
+                affectationsGrid.innerHTML = `
+                    <div class="info-item">
+                        <div class="info-label">Filière</div>
+                        <div class="info-value">${studentData.filiere || 'Non spécifié'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Section</div>
+                        <div class="info-value">${studentData.section || 'Non spécifié'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Groupe TD</div>
+                        <div class="info-value">${studentData.groupeTD || 'Non spécifié'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Groupe TP</div>
+                        <div class="info-value">${studentData.groupeTP || 'Non spécifié'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Année académique</div>
+                        <div class="info-value">${studentData.anneeAcademique || '2023-2024'}</div>
+                    </div>
+                `;
+                
+                // Mettre à jour les responsables
+                const responsablesGrid = document.getElementById('responsables-grid');
+                responsablesGrid.innerHTML = `
+                    <div class="info-item">
+                        <div class="info-label">Responsable de filière</div>
+                        <div class="info-value">${studentData.responsables?.filiere || 'Dr. Mohammed BENSAAD'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Responsable de section</div>
+                        <div class="info-value">${studentData.responsables?.section || 'Dr. RAHMANI AHMED'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Responsable TD</div>
+                        <div class="info-value">${studentData.responsables?.td || 'Dr. Karim MEZIANI'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Responsable TP</div>
+                        <div class="info-value">${studentData.responsables?.tp || 'Dr. Samira TALEB'}</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                throw error;
+            }
+        }
+
+        async function loadTimetable() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/students/timetable`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    const timetable = await response.json();
+                    if (timetable.fileUrl) {
+                        displayUploadedFile(timetable);
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        function initFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const selectFileBtn = document.getElementById('selectFileBtn');
             
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleFileUpload(e.dataTransfer.files[0]);
-            }
-        });
-        
-        // Handle file selection
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length) {
-                handleFileUpload(fileInput.files[0]);
-            }
-        });
-        
-        // Process the uploaded file
-        function handleFileUpload(file) {
-            // Check file size (5MB max)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Le fichier est trop volumineux. Taille maximale: 5 Mo.');
+            // Gestion du clic
+            uploadArea.addEventListener('click', () => fileInput.click());
+            selectFileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
+            
+            // Gestion du drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload(fileInput.files[0]);
+                }
+            });
+            
+            // Gestion de la sélection de fichier
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    handleFileUpload(fileInput.files[0]);
+                }
+            });
+            
+            // Gestion des boutons
+            document.getElementById('downloadBtn').addEventListener('click', downloadFile);
+            document.getElementById('deleteBtn').addEventListener('click', deleteFile);
+        }
+
+        async function handleFileUpload(file) {
+            // Validation du fichier
+            if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+                showToast("Type de fichier non supporté", "error");
                 return;
             }
             
-            // Display file name
-            fileName.textContent = file.name;
+            if (file.size > MAX_FILE_SIZE) {
+                showToast("Fichier trop volumineux (max 10 Mo)", "error");
+                return;
+            }
             
-            // Clear previous preview
-            previewContent.innerHTML = '';
+            try {
+                // Afficher le loader
+                document.getElementById('previewContainer').style.display = 'block';
+                document.getElementById('previewContent').innerHTML = '<div class="loader">Chargement...</div>';
+                
+                // Envoyer le fichier au serveur
+                const formData = new FormData();
+                formData.append('timetable', file);
+                
+                const response = await fetch(`${API_BASE_URL}/students/timetable`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(false),
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'upload');
+                }
+                
+                const result = await response.json();
+                displayUploadedFile(result);
+                showToast("Emploi du temps mis à jour avec succès", "success");
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast("Erreur lors de l'envoi du fichier", "error");
+                document.getElementById('previewContainer').style.display = 'none';
+            }
+        }
+
+        function displayUploadedFile(fileInfo) {
+            const previewContent = document.getElementById('previewContent');
+            const previewContainer = document.getElementById('previewContainer');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const uploadDate = document.getElementById('uploadDate');
             
-            // Create preview based on file type
-            if (file.type.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.className = 'preview-img';
-                img.src = URL.createObjectURL(file);
-                previewContent.appendChild(img);
-            } else if (file.type === 'application/pdf') {
-                const embed = document.createElement('embed');
-                embed.className = 'pdf-embed';
-                embed.src = URL.createObjectURL(file);
-                embed.type = 'application/pdf';
-                previewContent.appendChild(embed);
+            // Afficher les infos du fichier
+            fileName.textContent = fileInfo.fileName;
+            fileSize.textContent = formatFileSize(fileInfo.fileSize);
+            uploadDate.textContent = new Date(fileInfo.uploadDate).toLocaleDateString();
+            
+            // Afficher l'aperçu selon le type de fichier
+            if (fileInfo.fileType.startsWith('image/')) {
+                previewContent.innerHTML = `<img src="${fileInfo.fileUrl}" alt="Aperçu emploi du temps" class="preview-img">`;
+            } else if (fileInfo.fileType === 'application/pdf') {
+                previewContent.innerHTML = `
+                    <embed src="${fileInfo.fileUrl}#toolbar=0&navpanes=0" type="application/pdf" class="pdf-embed">
+                    <div class="pdf-alternative">
+                        <a href="${fileInfo.fileUrl}" target="_blank">Ouvrir dans un nouvel onglet</a>
+                    </div>
+                `;
             } else {
-                fileName.textContent = 'Format de fichier non pris en charge';
-                return;
+                previewContent.innerHTML = `
+                    <div class="file-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M4 0h5.5v1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h1V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z"/>
+                            <path d="M9.5 3V0L14 4.5h-3A1.5 1.5 0 0 1 9.5 3z"/>
+                        </svg>
+                    </div>
+                    <div class="file-alternative">
+                        <a href="${fileInfo.fileUrl}" target="_blank">Télécharger le fichier</a>
+                    </div>
+                `;
             }
             
-            // Show preview container
+            // Sauvegarder l'URL pour le téléchargement
+            previewContainer.dataset.fileUrl = fileInfo.fileUrl;
             previewContainer.style.display = 'block';
-            
-            // Setup download functionality
-            downloadBtn.onclick = () => {
+        }
+
+        function downloadFile() {
+            const fileUrl = document.getElementById('previewContainer').dataset.fileUrl;
+            if (fileUrl) {
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(file);
-                a.download = file.name;
+                a.href = fileUrl;
+                a.download = document.getElementById('fileName').textContent;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+            }
+        }
+
+        async function deleteFile() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/students/timetable`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la suppression');
+                }
+                
+                document.getElementById('previewContainer').style.display = 'none';
+                document.getElementById('fileInput').value = '';
+                showToast("Emploi du temps supprimé", "success");
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast("Erreur lors de la suppression", "error");
+            }
+        }
+
+        function setupEventListeners() {
+            // Bouton d'actualisation
+            document.getElementById('refresh-btn').addEventListener('click', async () => {
+                try {
+                    await loadGroupData();
+                    await loadTimetable();
+                    showToast("Données actualisées", "success");
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast("Erreur lors de l'actualisation", "error");
+                }
+            });
+        }
+
+        function getAuthHeaders(includeJson = true) {
+            const token = localStorage.getItem('etudiant_token') || sessionStorage.getItem('etudiant_token');
+            const headers = {
+                'Authorization': `Bearer ${token}`
             };
+            if (includeJson) {
+                headers['Content-Type'] = 'application/json';
+            }
+            return headers;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
             
-            // Setup delete functionality
-            deleteBtn.onclick = () => {
-                previewContainer.style.display = 'none';
-                fileInput.value = '';
-                URL.revokeObjectURL(img?.src || embed?.src);
-            };
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
     </script>
 </body>

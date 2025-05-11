@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -48,12 +49,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Emploi du temps aujourd'hui -->
-                <div class="card">
-                    <h2 class="card-title">Emploi du temps aujourd'hui</h2>
-                    <div class="card-content" id="todaySchedule"></div>
-                </div>
 
                 <!-- Demandes -->
                 <div class="card">
@@ -72,95 +67,73 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        fetch('etudiant-nav.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('navbar-container').innerHTML = html;
-                // Initialiser les données
-                afficherDonnees(); 
-                // Marquer le lien actif après chargement
-                const navScript = document.createElement('script');
-                navScript.innerHTML = `
-                    document.querySelectorAll('.nav-link').forEach(link => {
-                        link.classList.remove('active');
-                        if(link.getAttribute('href') === '${window.location.pathname.split('/').pop()}') {
-                            link.classList.add('active');
-                        }
-                    });
-                `;
-                document.body.appendChild(navScript);
+            fetch('etudiant-nav.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('navbar-container').innerHTML = html;
+                    
+                    afficherDonnees(); 
+                    
+                    const navScript = document.createElement('script');
+                    navScript.innerHTML = `
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.remove('active');
+                            if(link.getAttribute('href') === '${window.location.pathname.split('/').pop()}') {
+                                link.classList.add('active');
+                            }
+                        });
+                    `;
+                    document.body.appendChild(navScript);
+                });
+        });
+
+        const studentData = JSON.parse(localStorage.getItem('studentData'));
+
+        const demandes = [
+            { type: "Attestation de scolarité", statut: "Approuvée", date: "15/10/2023" },
+            { type: "Changement de groupe", statut: "En attente", date: "20/10/2023" }
+        ];
+
+        const notifications = [
+            { titre: "note", details: "Algorithmique", temps: "il y a 2h" },
+            { titre: "Demande", details: "Attestation de scolarité", temps: "hier" }
+        ];
+
+        function afficherDonnees() {
+            
+            document.getElementById('userAvatar').textContent = 
+                studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+            document.getElementById('userFullName').textContent = 
+                studentData.nom + " " + studentData.prenom;
+            document.getElementById('userId').textContent = 
+                "Matricule: " + studentData.matricule;
+            
+            document.getElementById('lastName').textContent = studentData.nom;
+            document.getElementById('firstName').textContent = studentData.prenom;
+            document.getElementById('major').textContent = studentData.filiere;
+            document.getElementById('section').textContent = studentData.section;
+            document.getElementById('tdGroup').textContent = studentData.groupeTD;
+            document.getElementById('tpGroup').textContent = studentData.groupeTP;
+
+            // Demandes
+            const demandesElement = document.getElementById('requestsList');
+            demandes.forEach(demande => {
+                const div = document.createElement('div');
+                div.className = 'request-item';
+                div.innerHTML = `<strong>${demande.type}</strong> - ${demande.statut} (${demande.date})`;
+                demandesElement.appendChild(div);
             });
-    });
 
-    // Récupérer les données depuis localStorage
-    const studentData = JSON.parse(localStorage.getItem('studentData'));
+            // Notifications
+            const notifsElement = document.getElementById('notificationsList');
+            notifications.forEach(notif => {
+                const div = document.createElement('div');
+                div.className = 'notification-item';
+                div.innerHTML = `<strong>${notif.titre}</strong> - ${notif.details} (${notif.temps})`;
+                notifsElement.appendChild(div);
+            });
+        }
 
-    const emploiDuTemps = [
-        { heure: "08:30-10:00", cours: "Algorithmique", salle: "Amphi C" },
-        { heure: "10:15-12:00", cours: "Base de données", salle: "Salle B12" },
-        { heure: "14:00-16:00", cours: "Réseaux", salle: "Labo Info 3" }
-    ];
-
-    const demandes = [
-        { type: "Attestation de scolarité", statut: "Approuvée", date: "15/10/2023" },
-        { type: "Changement de groupe", statut: "En attente", date: "20/10/2023" }
-    ];
-
-    const notifications = [
-        { titre: "note", details: "Algorithmique", temps: "il y a 2h" },
-        { titre: "Demande", details: "Attestation de scolarité", temps: "hier" }
-    ];
-
-    function afficherDonnees() {
-        // Infos personnelles
-        document.getElementById('userAvatar').textContent = 
-            studentData.prenom.charAt(0) + studentData.nom.charAt(0);
-        document.getElementById('userFullName').textContent = 
-            studentData.nom + " " + studentData.prenom;
-        document.getElementById('userId').textContent = 
-            "Matricule: " + studentData.matricule;
-        
-        document.getElementById('lastName').textContent = studentData.nom;
-        document.getElementById('firstName').textContent = studentData.prenom;
-        document.getElementById('major').textContent = studentData.filiere;
-        document.getElementById('section').textContent = studentData.section;
-        document.getElementById('tdGroup').textContent = studentData.groupeTD;
-        document.getElementById('tpGroup').textContent = studentData.groupeTP;
-
-        // Emploi du temps
-        const edtElement = document.getElementById('todaySchedule');
-        emploiDuTemps.forEach(cours => {
-            const div = document.createElement('div');
-            div.className = 'schedule-item';
-            div.innerHTML = `<strong>${cours.heure}</strong> - ${cours.cours} (${cours.salle})`;
-            edtElement.appendChild(div);
-        });
-
-        // Demandes
-        const demandesElement = document.getElementById('requestsList');
-        demandes.forEach(demande => {
-            const div = document.createElement('div');
-            div.className = 'request-item';
-            div.innerHTML = `<strong>${demande.type}</strong> - ${demande.statut} (${demande.date})`;
-            demandesElement.appendChild(div);
-        });
-
-        // Notifications
-        const notifsElement = document.getElementById('notificationsList');
-        notifications.forEach(notif => {
-            const div = document.createElement('div');
-            div.className = 'notification-item';
-            div.innerHTML = `<strong>${notif.titre}</strong> - ${notif.details} (${notif.temps})`;
-            notifsElement.appendChild(div);
-        });
-    }
-
-    function logout() {
-        localStorage.removeItem('studentData');
-        localStorage.removeItem('etudiant_token');
-        sessionStorage.removeItem('etudiant_token');
-        window.location.href = 'index.html';
-    }
         /* Global variables
         let currentUser = null;
         let authToken = null;
