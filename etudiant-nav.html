@@ -1,0 +1,53 @@
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar" id="userAvatar"></div>
+        <div class="user-name" id="userFullName"></div>
+        <div class="user-id" id="userId"></div>
+    </div>
+    
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <a href="dashbord-etudiant.html" class="nav-link">Tableau de bord</a>
+        </li>
+        <li class="nav-item">
+            <a href="profile.html" class="nav-link active">Profil Personnel</a>
+        </li>
+        <li class="nav-item">
+            <a href="group-section.html" class="nav-link">Groupe et Section</a>
+        </li>
+        <li class="nav-item">
+            <a href="demandes.html" class="nav-link">Demandes</a>
+        </li>
+        <li class="nav-item">
+            <a href="notification.html" class="nav-link">Notifications</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
+        </li>
+    </ul>
+</div>
+
+<script>
+    // Fonction pour marquer le lien actif
+    function setActiveLink() {
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        
+        // Activer le lien parent si on est sur une sous-page du profil
+        if(link.getAttribute('href') === currentPage || 
+           (currentPage.startsWith('profile') && link.getAttribute('href') === 'profile.html')) {
+            link.classList.add('active');
+        }
+    });
+}aQXET
+    
+    // Fonction globale de déconnexion
+
+    function logout() {
+        localStorage.removeItem('studentData');
+        localStorage.removeItem('etudiant_token');
+        sessionStorage.removeItem('etudiant_token');
+        window.location.href = 'index.html';
+    }
+</script>

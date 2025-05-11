@@ -61,7 +61,26 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
+function handleLogin() {
+        // Rediriger directement vers le tableau de bord
+        window.location.href = 'dashbord-etudiant.html';
+    }
+
+    // Tab switching (gardé pour la navigation entre onglets)
+    function switchTab(showTabId, hideTabId) {
+        document.getElementById(showTabId).classList.add('active');
+        document.getElementById(hideTabId).classList.remove('active');
+        
+        const tabs = document.querySelectorAll('.login-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        
+        event.currentTarget.classList.add('active');
+        
+        const hiddenInput = document.getElementById(hideTabId).querySelector('input');
+        if (hiddenInput) hiddenInput.value = '';
+    }
+
+        /*document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Check for existing token
                 const existingToken = sessionStorage.getItem('etudiant_token') || 
@@ -220,9 +239,7 @@
         // Enhanced validation
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-    
+        }*/
     </script>
 </body>
 </html>

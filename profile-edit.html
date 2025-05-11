@@ -4,40 +4,11 @@
     <meta charset="UTF-8">
     <title>Modifier mes coordonnées - Profil Étudiant</title>
     <link href="style/profile-edit.css" rel="stylesheet">
-
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar">ID</div>
-                <div class="user-name">Imane Heeni Douma</div>
-                <div class="user-id">20230456</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="profile.html" class="nav-link">Profil Personnel</a>
-                </li>
-                <li class="nav-item">
-                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
-                </li>
-                <li class="nav-item">
-                    <a href="demandes.html" class="nav-link">Demandes</a>
-                </li>
-                <li class="nav-item">
-                    <a href="notification.html" class="nav-link">Notifications</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
-        
+        <div id="navbar-container"></div>
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
@@ -46,62 +17,56 @@
             
             <div class="profile-container">
                 <!-- Status Messages -->
-                <div id="success-message" class="status-message success-message">
-                    Vos coordonnées ont été mises à jour avec succès !
-                </div>
-                
-                <div id="error-message" class="status-message error-message">
-                    Une erreur s'est produite. Veuillez réessayer.
-                </div>
+                <div id="status-message" class="status-message" style="display: none;"></div>
                 
                 <h2 class="section-title">Modification des informations de contact</h2>
                 
-                <form class="profile-form">
+                <form id="contact-form" class="profile-form">
                     <div class="form-group">
                         <label class="form-label" for="email">Adresse Email*</label>
-                        <input type="email" id="email" class="form-input" value="imane.douma@etudiant.universite.fr" required>
-                        <div class="form-help">Cette adresse sera utilisée pour les communications officielles de l'université.</div>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                        <span class="form-help">Cette adresse sera utilisée pour les communications officielles de l'université.</span>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="email-personnel">Adresse Email Personnelle</label>
-                        <input type="email" id="email-personnel" class="form-input" placeholder="votre@email.com">
+                        <label class="form-label" for="personal_email">Adresse Email Personnelle</label>
+                        <input type="email" id="personal_email" name="personal_email" class="form-input">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="telephone">Numéro de Téléphone Principal*</label>
-                        <input type="tel" id="telephone" class="form-input" value="+213 5 55 78 92 31" required>
+                        <label class="form-label" for="phone">Numéro de Téléphone Principal*</label>
+                        <input type="tel" id="phone" name="phone" class="form-input" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="telephone-secondaire">Numéro de Téléphone Secondaire</label>
-                        <input type="tel" id="telephone-secondaire" class="form-input" placeholder="+213 0 00 00 00 00">
+                        <label class="form-label" for="secondary_phone">Numéro de Téléphone Secondaire</label>
+                        <input type="tel" id="secondary_phone" name="secondary_phone" class="form-input">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="adresse">Adresse Postale*</label>
-                        <input type="text" id="adresse" class="form-input" value="123 Rue des Étudiants, Alger" required>
+                        <label class="form-label" for="address">Adresse Postale*</label>
+                        <input type="text" id="address" name="address" class="form-input" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="code-postal">Code Postal*</label>
-                        <input type="text" id="code-postal" class="form-input" value="16000" required>
+                        <label class="form-label" for="postal_code">Code Postal*</label>
+                        <input type="text" id="postal_code" name="postal_code" class="form-input" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="ville">Ville*</label>
-                        <input type="text" id="ville" class="form-input" value="Alger" required>
+                        <label class="form-label" for="city">Ville*</label>
+                        <input type="text" id="city" name="city" class="form-input" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="contact-urgence">Contact en cas d'urgence</label>
-                        <input type="text" id="contact-urgence" class="form-input" placeholder="Nom et numéro de téléphone">
+                        <label class="form-label" for="emergency_contact">Contact en cas d'urgence</label>
+                        <input type="text" id="emergency_contact" name="emergency_contact" class="form-input">
                         <div class="form-help">Veuillez indiquer le nom et le numéro de téléphone d'une personne à contacter en cas d'urgence.</div>
                     </div>
                     
                     <div class="button-group">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Enregistrer les modifications</button>
                     </div>
                 </form>
             </div>
@@ -109,21 +74,210 @@
     </div>
 
     <script>
-        // Simple form submission handler
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('etudiant-nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+                afficherDonnees();
+                
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === 'profile.html' || 
+                    link.getAttribute('href') === 'profile-edit.html') {
+                        link.classList.add('active');
+                    }
+                });
+            });
+    });
+
+    const studentData = JSON.parse(localStorage.getItem('studentData'));
+
+    document.addEventListener('DOMContentLoaded', function() {
+    fetch('etudiant-nav.html')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('navbar-container').innerHTML = html;
+            afficherDonnees();
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === 'profile.html' || 
+                   link.getAttribute('href') === 'profile-edit.html') {
+                    link.classList.add('active');
+                }
+            });
+        });
+});
+
+    function afficherDonnees() {
+        document.getElementById('userAvatar').textContent = 
+            studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+        document.getElementById('userFullName').textContent = 
+            studentData.nom + " " + studentData.prenom;
+        document.getElementById('userId').textContent = 
+            "Matricule: " + studentData.matricule;
+        
+        document.getElementById('lastName').textContent = studentData.nom;
+        document.getElementById('firstName').textContent = studentData.prenom;
+        document.getElementById('major').textContent = studentData.filiere;
+        document.getElementById('section').textContent = studentData.section;
+        document.getElementById('tdGroup').textContent = studentData.groupeTD;
+        document.getElementById('tpGroup').textContent = studentData.groupeTP;
+    }
+
         document.querySelector('.profile-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            // Simulate form submission
             setTimeout(function() {
-                // Show success message
                 document.getElementById('success-message').style.display = 'block';
-                
-                // Hide success message after 3 seconds
                 setTimeout(function() {
                     document.getElementById('success-message').style.display = 'none';
                 }, 3000);
             }, 1000);
         });
+        
+        /* Constantes pour les endpoints API
+        const API_BASE_URL = 'https://votre-api.universite.fr';
+        const STUDENT_CONTACT_API = `${API_BASE_URL}/api/students/contact`;
+        const TOKEN = localStorage.getItem('etudiant_token') || sessionStorage.getItem('etudiant_token');
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Charger la navbar
+            await loadNavbar();
+            
+            // Charger les données de l'étudiant
+            await loadStudentData();
+            
+            // Remplir le formulaire avec les données existantes
+            await fillFormWithStudentData();
+            
+            // Configurer le formulaire
+            setupForm();
+        });
+
+        async function loadNavbar() {
+            try {
+                const response = await fetch('etudiant-nav.html');
+                if (!response.ok) throw new Error('Erreur de chargement de la navbar');
+                
+                document.getElementById('navbar-container').innerHTML = await response.text();
+                
+                // Activer les liens du profil
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === 'profile.html' || 
+                       link.getAttribute('href') === 'profile-edit.html') {
+                        link.classList.add('active');
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur de chargement de la navbar', 'error');
+            }
+        }
+
+        async function loadStudentData() {
+            try {
+                // Vérifier si le token existe
+                if (!TOKEN) {
+                    throw new Error('Non authentifié');
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/students/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur de chargement des données');
+                }
+
+                const data = await response.json();
+                localStorage.setItem('studentData', JSON.stringify(data));
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur de chargement des données étudiant', 'error');
+            }
+        }
+
+        function fillFormWithStudentData() {
+            const studentData = JSON.parse(localStorage.getItem('studentData'));
+            if (!studentData) return;
+
+            // Remplir les champs du formulaire
+            document.getElementById('email').value = studentData.email || '';
+            document.getElementById('personal_email').value = studentData.personal_email || '';
+            document.getElementById('phone').value = studentData.phone || '';
+            document.getElementById('secondary_phone').value = studentData.secondary_phone || '';
+            document.getElementById('address').value = studentData.address || '';
+            document.getElementById('postal_code').value = studentData.postal_code || '';
+            document.getElementById('city').value = studentData.city || '';
+            document.getElementById('emergency_contact').value = studentData.emergency_contact || '';
+        }
+
+        function setupForm() {
+            const form = document.getElementById('contact-form');
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Enregistrement...';
+                
+                try {
+                    const formData = {
+                        email: document.getElementById('email').value,
+                        personal_email: document.getElementById('personal_email').value,
+                        phone: document.getElementById('phone').value,
+                        secondary_phone: document.getElementById('secondary_phone').value,
+                        address: document.getElementById('address').value,
+                        postal_code: document.getElementById('postal_code').value,
+                        city: document.getElementById('city').value,
+                        emergency_contact: document.getElementById('emergency_contact').value
+                    };
+
+                    const response = await fetch(STUDENT_CONTACT_API, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Erreur lors de la mise à jour');
+                    }
+
+                    const updatedData = await response.json();
+                    localStorage.setItem('studentData', JSON.stringify(updatedData));
+                    
+                    showMessage('Vos coordonnées ont été mises à jour avec succès !', 'success');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showMessage(error.message || 'Une erreur s\'est produite. Veuillez réessayer.', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Enregistrer les modifications';
+                }
+            });
+        }
+
+        function showMessage(message, type) {
+            const messageElement = document.getElementById('status-message');
+            messageElement.textContent = message;
+            messageElement.className = `status-message ${type}-message`;
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }*/
     </script>
 </body>
 </html>

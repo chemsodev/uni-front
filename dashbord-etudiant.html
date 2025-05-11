@@ -7,35 +7,7 @@
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">AS</div>
-                <div class="user-name" id="userFullName">Chargement...</div>
-                <div class="user-id" id="userId">Chargement...</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashbord-etudiant.html" class="nav-link active">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="profile.html" class="nav-link">Profil Personnel</a>
-                </li>
-                <li class="nav-item">
-                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
-                </li>
-                <li class="nav-item">
-                    <a href="demandes.html" class="nav-link">Demandes</a>
-                </li>
-                <li class="nav-item">
-                    <a href="notification.html" class="nav-link">Notifications</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
-        
+        <div id="navbar-container"></div>
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
@@ -50,44 +22,146 @@
                 <div class="card">
                     <h2 class="card-title">Informations Personnelles</h2>
                     <div class="card-content" id="personalInfo">
-                        <p><strong>Nom:</strong> <span id="lastName">Chargement...</span></p>
-                        <p><strong>Prénom:</strong> <span id="firstName">Chargement...</span></p>
-                        <p><strong>Filière:</strong> <span id="major">Chargement...</span></p>
-                        <p><strong>Section:</strong> <span id="section">Chargement...</span></p>
-                        <p><strong>Groupe TD:</strong> <span id="tdGroup">Chargement...</span></p>
-                        <p><strong>Groupe TP:</strong> <span id="tpGroup">Chargement...</span></p>
+                        <div class="info-row">
+                            <span class="info-label">Nom:</span>
+                            <span class="info-value" id="lastName"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Prénom:</span>
+                            <span class="info-value" id="firstName"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Filière:</span>
+                            <span class="info-value" id="major"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Section:</span>
+                            <span class="info-value" id="section"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Groupe TD:</span>
+                            <span class="info-value" id="tdGroup"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Groupe TP:</span>
+                            <span class="info-value" id="tpGroup"></span>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Emploi du temps aujourd'hui -->
                 <div class="card">
                     <h2 class="card-title">Emploi du temps aujourd'hui</h2>
-                    <div class="card-content" id="todaySchedule">
-                        <div class="loading-message">Chargement de l'emploi du temps...</div>
-                    </div>
+                    <div class="card-content" id="todaySchedule"></div>
                 </div>
-                
+
                 <!-- Demandes -->
                 <div class="card">
                     <h2 class="card-title">Mes Demandes</h2>
-                    <div class="card-content" id="requestsList">
-                        <div class="loading-message">Chargement des demandes...</div>
-                    </div>
+                    <div class="card-content" id="requestsList"></div>
                 </div>
-                
+
                 <!-- Notifications -->
                 <div class="card">
                     <h2 class="card-title">Notifications Récentes</h2>
-                    <div class="card-content" id="notificationsList">
-                        <div class="loading-message">Chargement des notifications...</div>
-                    </div>
+                    <div class="card-content" id="notificationsList"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('etudiant-nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+                // Initialiser les données
+                afficherDonnees(); 
+                // Marquer le lien actif après chargement
+                const navScript = document.createElement('script');
+                navScript.innerHTML = `
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if(link.getAttribute('href') === '${window.location.pathname.split('/').pop()}') {
+                            link.classList.add('active');
+                        }
+                    });
+                `;
+                document.body.appendChild(navScript);
+            });
+    });
+
+    // Récupérer les données depuis localStorage
+    const studentData = JSON.parse(localStorage.getItem('studentData'));
+
+    const emploiDuTemps = [
+        { heure: "08:30-10:00", cours: "Algorithmique", salle: "Amphi C" },
+        { heure: "10:15-12:00", cours: "Base de données", salle: "Salle B12" },
+        { heure: "14:00-16:00", cours: "Réseaux", salle: "Labo Info 3" }
+    ];
+
+    const demandes = [
+        { type: "Attestation de scolarité", statut: "Approuvée", date: "15/10/2023" },
+        { type: "Changement de groupe", statut: "En attente", date: "20/10/2023" }
+    ];
+
+    const notifications = [
+        { titre: "note", details: "Algorithmique", temps: "il y a 2h" },
+        { titre: "Demande", details: "Attestation de scolarité", temps: "hier" }
+    ];
+
+    function afficherDonnees() {
+        // Infos personnelles
+        document.getElementById('userAvatar').textContent = 
+            studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+        document.getElementById('userFullName').textContent = 
+            studentData.nom + " " + studentData.prenom;
+        document.getElementById('userId').textContent = 
+            "Matricule: " + studentData.matricule;
+        
+        document.getElementById('lastName').textContent = studentData.nom;
+        document.getElementById('firstName').textContent = studentData.prenom;
+        document.getElementById('major').textContent = studentData.filiere;
+        document.getElementById('section').textContent = studentData.section;
+        document.getElementById('tdGroup').textContent = studentData.groupeTD;
+        document.getElementById('tpGroup').textContent = studentData.groupeTP;
+
+        // Emploi du temps
+        const edtElement = document.getElementById('todaySchedule');
+        emploiDuTemps.forEach(cours => {
+            const div = document.createElement('div');
+            div.className = 'schedule-item';
+            div.innerHTML = `<strong>${cours.heure}</strong> - ${cours.cours} (${cours.salle})`;
+            edtElement.appendChild(div);
+        });
+
+        // Demandes
+        const demandesElement = document.getElementById('requestsList');
+        demandes.forEach(demande => {
+            const div = document.createElement('div');
+            div.className = 'request-item';
+            div.innerHTML = `<strong>${demande.type}</strong> - ${demande.statut} (${demande.date})`;
+            demandesElement.appendChild(div);
+        });
+
+        // Notifications
+        const notifsElement = document.getElementById('notificationsList');
+        notifications.forEach(notif => {
+            const div = document.createElement('div');
+            div.className = 'notification-item';
+            div.innerHTML = `<strong>${notif.titre}</strong> - ${notif.details} (${notif.temps})`;
+            notifsElement.appendChild(div);
+        });
+    }
+
+    function logout() {
+        localStorage.removeItem('studentData');
+        localStorage.removeItem('etudiant_token');
+        sessionStorage.removeItem('etudiant_token');
+        window.location.href = 'index.html';
+    }
+        /* Global variables
         let currentUser = null;
         let authToken = null;
 
@@ -242,7 +316,7 @@
                 localStorage.removeItem('etudiant_token');
                 window.location.href = 'etudiant-login.html';
             }
-        }
+        }*/
 </script>
 </body>
 </html>
