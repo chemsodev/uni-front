@@ -10,7 +10,7 @@
             <a href="dashbord-etudiant.html" class="nav-link">Tableau de bord</a>
         </li>
         <li class="nav-item">
-            <a href="profile.html" class="nav-link">Profil Personnel</a>
+            <a href="profile.html" class="nav-link active">Profil Personnel</a>
         </li>
         <li class="nav-item">
             <a href="group-section.html" class="nav-link">Groupe et Section</a>
@@ -30,17 +30,17 @@
 <script>
     // Fonction pour marquer le lien actif
     function setActiveLink() {
-        const currentPage = window.location.pathname.split('/').pop();
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            
-            // Activer le lien parent si on est sur une sous-page du profil
-            if(link.getAttribute('href') === currentPage || 
-               (currentPage.startsWith('profile') && link.getAttribute('href') === 'profile.html')) {
-                link.classList.add('active');
-            }
-        });
-    }
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        
+        // Activer le lien parent si on est sur une sous-page du profil
+        if(link.getAttribute('href') === currentPage || 
+           (currentPage.startsWith('profile') && link.getAttribute('href') === 'profile.html')) {
+            link.classList.add('active');
+        }
+    });
+}aQXET
     
     // Fonction globale de déconnexion
 
