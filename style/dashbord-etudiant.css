@@ -134,7 +134,7 @@
 
         .page-title {
             font-family: 'Sora', sans-serif;
-            font-size: 1.8rem;
+            font-size: 2vw;
             color: #3B82F6;
         }
 
@@ -278,4 +278,13 @@
 
         .see-all:hover {
             text-decoration: underline;
+        }
+
+
+        @media (max-width: 767px) {
+            .page-title {
+                font-family: 'Sora', sans-serif;
+                font-size: 3vw;
+                color: #3B82F6;
+            }
         }

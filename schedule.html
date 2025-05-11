@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Personnel Étudiant</title>
+    <link href="style/profile.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div id="navbar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Emploi du temps</h1>
+            </div>
+
+            <div class="profile-container">
+                <!-- Contenu ici -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const studentData = JSON.parse(localStorage.getItem('studentData'));
+        if (!studentData) {
+            console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
+            return;
+        }
+
+        // Charger la navbar
+        fetch('etudiant-nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                const avatar = document.getElementById('userAvatar');
+                const fullName = document.getElementById('userFullName');
+                const userId = document.getElementById('userId');
+
+                if (avatar) avatar.textContent = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+                if (fullName) fullName.textContent = `${studentData.nom} ${studentData.prenom}`;
+                if (userId) userId.textContent = `Matricule: ${studentData.matricule}`;
+
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                document.querySelector('a[href="dashbord-etudiant.html"]')?.classList.add('active');
+            });
+
+        Object.keys(studentData).forEach(key => {
+            const elements = document.querySelectorAll(`[data-field="${key}"]`);
+            elements.forEach(el => {
+                el.textContent = studentData[key];
+            });
+        });
+
+        const initials = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+        const profilePhoto = document.getElementById('profile-photo');
+        if (profilePhoto) {
+            profilePhoto.textContent = initials;
+        }
+    });
+    </script>
+</body>
+</html>
