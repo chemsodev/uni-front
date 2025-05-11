@@ -7,35 +7,7 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar">ID</div>
-                <div class="user-name">Imane Heeni Douma</div>
-                <div class="user-id">20230456</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashbord-etudiant.html" class="nav-link">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="profile.html" class="nav-link active">Profil Personnel</a>
-                </li>
-                <li class="nav-item">
-                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
-                </li>
-                <li class="nav-item">
-                    <a href="demandes.html" class="nav-link">Demandes</a>
-                </li>
-                <li class="nav-item">
-                    <a href="notification.html" class="nav-link">Notifications</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
+        <div id="navbar-container"></div>
         
         <!-- Main Content -->
         <div class="main-content">
@@ -54,7 +26,7 @@
                 <!-- Voir ses informations personnelles -->
                 <div class="profile-section">
                     <div class="profile-photo">
-                        <div class="photo-container">ID</div>
+                        <div class="photo-container" id="profile-photo">ID</div>
                         <label class="upload-btn">
                             Changer la photo
                             <input type="file" style="display: none;">
@@ -65,22 +37,22 @@
                     <div class="profile-info">
                         <div class="info-item">
                             <div class="info-label">Nom</div>
-                            <div class="info-value">Douma</div>
+                            <div class="info-value" data-field="nom"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Prénom</div>
-                            <div class="info-value">Imane Heeni</div>
+                            <div class="info-value" data-field="prenom"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Numéro Étudiant</div>
-                            <div class="info-value">20230456</div>
+                            <div class="info-value" data-field="matricule"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Nationalité</div>
-                            <div class="info-value">Algérienne</div>
+                            <div class="info-value" data-field="nationalite"></div>
                         </div>
                     </div>
                     
@@ -88,17 +60,17 @@
                     <div class="profile-info">
                         <div class="info-item">
                             <div class="info-label">Email</div>
-                            <div class="info-value">imane.douma@etudiant.universite.fr</div>
+                            <div class="info-value" data-field="email"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Téléphone</div>
-                            <div class="info-value">+213 5 55 78 92 31</div>
+                            <div class="info-value" data-field="telephone"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Adresse</div>
-                            <div class="info-value">123 Rue des Étudiants, Alger</div>
+                            <div class="info-value" data-field="adresse"></div>
                         </div>
                     </div>
                     
@@ -106,27 +78,27 @@
                     <div class="profile-info">
                         <div class="info-item">
                             <div class="info-label">Filière</div>
-                            <div class="info-value">Informatique</div>
+                            <div class="info-value" data-field="filiere"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Section</div>
-                            <div class="info-value">B</div>
+                            <div class="info-value" data-field="section"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Groupe TD</div>
-                            <div class="info-value">3</div>
+                            <div class="info-value" data-field="groupeTD"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Groupe TP</div>
-                            <div class="info-value">2</div>
+                            <div class="info-value" data-field="groupeTP"></div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Niveau</div>
-                            <div class="info-value">2ème année</div>
+                            <div class="info-value" data-field="niveau"></div>
                         </div>
                     </div>
                     
@@ -134,13 +106,80 @@
                     <div class="profile-info">
                         <div class="info-item">
                             <div class="info-label">Situation de handicap</div>
-                            <div class="info-value">Non</div>
+                            <div class="info-value" data-field="handicap"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        const studentData = {
+            nom: "Doumaa",
+            prenom: "Imane Heeni",
+            matricule: "20230456",
+            nationalite: "Algérienne",
+            email: "imane.douma@etudiant.universite.fr",
+            telephone: "+213 5 55 78 92 31",
+            adresse: "123 Rue des Étudiants, Alger",
+            filiere: "Informatique",
+            section: "B",
+            groupeTD: "3",
+            groupeTP: "2",
+            niveau: "2ème année",
+            handicap: "Non"
+        };
+    
+        // Sauvegarder les données dans localStorage
+        localStorage.setItem('studentData', JSON.stringify(studentData));
+    
+        function populateAllFields() {
+            // Récupérer les données depuis localStorage
+            const data = JSON.parse(localStorage.getItem('studentData')) || studentData;
+            
+            // Remplir tous les champs avec data-field
+            Object.keys(data).forEach(key => {
+                const fieldElements = document.querySelectorAll(`[data-field="${key}"]`);
+                fieldElements.forEach(element => {
+                    element.textContent = data[key];
+                });
+            });
+    
+            // Remplir la photo de profil
+            const initials = data.prenom.charAt(0) + data.nom.charAt(0);
+            document.getElementById('profile-photo').textContent = initials;
+        }
+    
+        function setupNavbar() {
+            const data = JSON.parse(localStorage.getItem('studentData')) || studentData;
+            const avatar = document.getElementById('userAvatar');
+            const fullName = document.getElementById('userFullName');
+            const userId = document.getElementById('userId');
+            
+            if (avatar) avatar.textContent = data.prenom.charAt(0) + data.nom.charAt(0);
+            if (fullName) fullName.textContent = `${data.nom} ${data.prenom}`;
+            if (userId) userId.textContent = `Matricule: ${data.matricule}`;
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('etudiant-nav.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('navbar-container').innerHTML = html;
+                    populateAllFields();
+                    setupNavbar();
+                    const navScript = document.createElement('script');
+            navScript.innerHTML = `
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === '${window.location.pathname.split('/').pop()}') {
+                        link.classList.add('active');
+                    }
+                });
+            `;
+            document.body.appendChild(navScript);
+        });
+});
+    </script>
 </body>
 </html>
-

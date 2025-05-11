@@ -9,35 +9,7 @@
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar">ID</div>
-                <div class="user-name">Imane Heeni Douma</div>
-                <div class="user-id">20230456</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="profile.html" class="nav-link">Profil Personnel</a>
-                </li>
-                <li class="nav-item">
-                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
-                </li>
-                <li class="nav-item">
-                    <a href="demandes.html" class="nav-link">Demandes</a>
-                </li>
-                <li class="nav-item">
-                    <a href="notification.html" class="nav-link">Notifications</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
-        
+        <div id="navbar-container"></div>
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
@@ -109,6 +81,46 @@
     </div>
 
     <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('etudiant-nav.html')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('navbar-container').innerHTML = html;
+            afficherDonnees();
+            
+            // Activer à la fois profile et profile-edit
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === 'profile.html' || 
+                   link.getAttribute('href') === 'profile-edit.html') {
+                    link.classList.add('active');
+                }
+            });
+        });
+});
+
+    // Récupérer les données depuis localStorage
+    const studentData = JSON.parse(localStorage.getItem('studentData'));
+
+    function afficherDonnees() {
+        // Infos personnelles
+        document.getElementById('userAvatar').textContent = 
+            studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+        document.getElementById('userFullName').textContent = 
+            studentData.nom + " " + studentData.prenom;
+        document.getElementById('userId').textContent = 
+            "Matricule: " + studentData.matricule;
+        
+        document.getElementById('lastName').textContent = studentData.nom;
+        document.getElementById('firstName').textContent = studentData.prenom;
+        document.getElementById('major').textContent = studentData.filiere;
+        document.getElementById('section').textContent = studentData.section;
+        document.getElementById('tdGroup').textContent = studentData.groupeTD;
+        document.getElementById('tpGroup').textContent = studentData.groupeTP;
+    }
+
+
         // Simple form submission handler
         document.querySelector('.profile-form').addEventListener('submit', function(e) {
             e.preventDefault();
