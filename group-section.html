@@ -112,8 +112,8 @@
     </div>
 
     <script>
-        // Configuration
-        const API_BASE_URL = 'https://api.universite.fr/v1';
+// Configuration
+const API_BASE_URL = 'https://api.universite.fr/v1';
         const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
         const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
@@ -123,14 +123,17 @@
                 await loadNavbar();
                 
                 // Charger les données étudiant
-                await loadStudentData();
+                const studentData = await loadStudentData();
+                
+                // Mettre à jour les infos utilisateur dans la navbar
+                updateNavbarUserInfo(studentData);
                 
                 // Initialiser les composants
                 initFileUpload();
                 setupEventListeners();
                 
                 // Charger les données des groupes et responsables
-                await loadGroupData();
+                await loadGroupData(studentData);
                 await loadTimetable();
                 
             } catch (error) {
@@ -144,27 +147,37 @@
                 const response = await fetch('etudiant-nav.html');
                 if (!response.ok) throw new Error('Erreur de chargement de la navbar');
                 
-                document.getElementById('navbar-container').innerHTML = await response.text();
-                updateNavbarActiveLinks();
+                const html = await response.text();
+                document.getElementById('navbar-container').innerHTML = html;
+                
+                // Activer le lien actif
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === 'group-section.html') {
+                        link.classList.add('active');
+                    }
+                });
+                
             } catch (error) {
                 console.error('Erreur:', error);
                 throw error;
             }
         }
 
-        function updateNavbarActiveLinks() {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-                if(link.getAttribute('href') === 'group-section.html') {
-                    link.classList.add('active');
-                }
-            });
+        function updateNavbarUserInfo(studentData) {
+            const avatar = document.getElementById('userAvatar');
+            const fullName = document.getElementById('userFullName');
+            const userId = document.getElementById('userId');
+            
+            if (avatar) avatar.textContent = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+            if (fullName) fullName.textContent = `${studentData.nom} ${studentData.prenom}`;
+            if (userId) userId.textContent = `Matricule: ${studentData.matricule}`;
         }
 
         async function loadStudentData() {
-            const studentData = JSON.parse(localStorage.getItem('studentData'));
+            let studentData = JSON.parse(localStorage.getItem('studentData'));
+            
             if (!studentData) {
-                // Si pas de données en cache, charger depuis l'API
                 try {
                     const response = await fetch(`${API_BASE_URL}/students/me`, {
                         headers: getAuthHeaders()
@@ -172,9 +185,9 @@
                     
                     if (!response.ok) throw new Error('Erreur de chargement des données étudiant');
                     
-                    const data = await response.json();
-                    localStorage.setItem('studentData', JSON.stringify(data));
-                    return data;
+                    studentData = await response.json();
+                    localStorage.setItem('studentData', JSON.stringify(studentData));
+                    
                 } catch (error) {
                     console.error('Erreur:', error);
                     throw error;
