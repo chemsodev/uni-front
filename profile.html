@@ -37,19 +37,16 @@
                     <div class="profile-info">
                         <div class="info-item">
                             <div class="info-label">Nom</div>
-                            <div class="info-value" data-field="nom"></div>
+                            <div class="info-value" data-field="nom" id="nom"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Prénom</div>
-                            <div class="info-value" data-field="prenom"></div>
+                            <div class="info-value" data-field="prenom" id="prenom"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Numéro Étudiant</div>
-                            <div class="info-value" data-field="matricule"></div>
+                            <div class="info-value" data-field="matricule" id="matricule"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Nationalité</div>
                             <div class="info-value" data-field="nationalite"></div>
@@ -62,12 +59,10 @@
                             <div class="info-label">Email</div>
                             <div class="info-value" data-field="email"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Téléphone</div>
                             <div class="info-value" data-field="telephone"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Adresse</div>
                             <div class="info-value" data-field="adresse"></div>
@@ -78,24 +73,20 @@
                     <div class="profile-info">
                         <div class="info-item">
                             <div class="info-label">Filière</div>
-                            <div class="info-value" data-field="filiere"></div>
+                            <div class="info-value" data-field="filiere" id="filiere"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Section</div>
-                            <div class="info-value" data-field="section"></div>
+                            <div class="info-value" data-field="section" id="section"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Groupe TD</div>
-                            <div class="info-value" data-field="groupeTD"></div>
+                            <div class="info-value" data-field="groupeTD" id="tdGroup"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Groupe TP</div>
-                            <div class="info-value" data-field="groupeTP"></div>
+                            <div class="info-value" data-field="groupeTP" id="tpGroup"></div>
                         </div>
-                        
                         <div class="info-item">
                             <div class="info-label">Niveau</div>
                             <div class="info-value" data-field="niveau"></div>
@@ -113,73 +104,51 @@
             </div>
         </div>
     </div>
+
     <script>
-        const studentData = {
-            nom: "Doumaa",
-            prenom: "Imane Heeni",
-            matricule: "20230456",
-            nationalite: "Algérienne",
-            email: "imane.douma@etudiant.universite.fr",
-            telephone: "+213 5 55 78 92 31",
-            adresse: "123 Rue des Étudiants, Alger",
-            filiere: "Informatique",
-            section: "B",
-            groupeTD: "3",
-            groupeTP: "2",
-            niveau: "2ème année",
-            handicap: "Non"
-        };
-    
-        // Sauvegarder les données dans localStorage
-        localStorage.setItem('studentData', JSON.stringify(studentData));
-    
-        function populateAllFields() {
-            // Récupérer les données depuis localStorage
-            const data = JSON.parse(localStorage.getItem('studentData')) || studentData;
-            
-            // Remplir tous les champs avec data-field
-            Object.keys(data).forEach(key => {
-                const fieldElements = document.querySelectorAll(`[data-field="${key}"]`);
-                fieldElements.forEach(element => {
-                    element.textContent = data[key];
-                });
-            });
-    
-            // Remplir la photo de profil
-            const initials = data.prenom.charAt(0) + data.nom.charAt(0);
-            document.getElementById('profile-photo').textContent = initials;
+    document.addEventListener('DOMContentLoaded', function () {
+        const studentData = JSON.parse(localStorage.getItem('studentData'));
+        if (!studentData) {
+            console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
+            return;
         }
-    
-        function setupNavbar() {
-            const data = JSON.parse(localStorage.getItem('studentData')) || studentData;
-            const avatar = document.getElementById('userAvatar');
-            const fullName = document.getElementById('userFullName');
-            const userId = document.getElementById('userId');
-            
-            if (avatar) avatar.textContent = data.prenom.charAt(0) + data.nom.charAt(0);
-            if (fullName) fullName.textContent = `${data.nom} ${data.prenom}`;
-            if (userId) userId.textContent = `Matricule: ${data.matricule}`;
-        }
-    
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('etudiant-nav.html')
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('navbar-container').innerHTML = html;
-                    populateAllFields();
-                    setupNavbar();
-                    const navScript = document.createElement('script');
-            navScript.innerHTML = `
+
+        // Charger la navbar
+        fetch('etudiant-nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                const avatar = document.getElementById('userAvatar');
+                const fullName = document.getElementById('userFullName');
+                const userId = document.getElementById('userId');
+
+                if (avatar) avatar.textContent = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+                if (fullName) fullName.textContent = `${studentData.nom} ${studentData.prenom}`;
+                if (userId) userId.textContent = `Matricule: ${studentData.matricule}`;
+
                 document.querySelectorAll('.nav-link').forEach(link => {
                     link.classList.remove('active');
-                    if(link.getAttribute('href') === '${window.location.pathname.split('/').pop()}') {
+                    if (link.getAttribute('href') === window.location.pathname.split('/').pop()) {
                         link.classList.add('active');
                     }
                 });
-            `;
-            document.body.appendChild(navScript);
+            });
+
+        Object.keys(studentData).forEach(key => {
+            const elements = document.querySelectorAll(`[data-field="${key}"]`);
+            elements.forEach(el => {
+                el.textContent = studentData[key];
+            });
         });
-});
+
+        // Initiales dans la photo de profil
+        const initials = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+        const profilePhoto = document.getElementById('profile-photo');
+        if (profilePhoto) {
+            profilePhoto.textContent = initials;
+        }
+    });
     </script>
 </body>
 </html>

@@ -61,24 +61,78 @@
     </div>
 
     <script>
-function handleLogin() {
-        // Rediriger directement vers le tableau de bord
-        window.location.href = 'dashbord-etudiant.html';
-    }
+        // Fonction de connexion modifiée
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const matricule = document.getElementById('matricule').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember').checked;
 
-    // Tab switching (gardé pour la navigation entre onglets)
-    function switchTab(showTabId, hideTabId) {
-        document.getElementById(showTabId).classList.add('active');
-        document.getElementById(hideTabId).classList.remove('active');
-        
-        const tabs = document.querySelectorAll('.login-tab');
-        tabs.forEach(tab => tab.classList.remove('active'));
-        
-        event.currentTarget.classList.add('active');
-        
-        const hiddenInput = document.getElementById(hideTabId).querySelector('input');
-        if (hiddenInput) hiddenInput.value = '';
-    }
+            try {
+                const response = await mockLoginApi(email || matricule, password);
+                
+                if (response.success) {
+                    storeStudentData(response.studentData, rememberMe);
+                    
+                    window.location.href = 'dashbord-etudiant.html';
+                } else {
+                    showError(response.message);
+                }
+            } catch (error) {
+                showError("Erreur de connexion. Veuillez réessayer.");
+            }
+        }
+
+        function storeStudentData(studentData, rememberMe) {
+            const storage = rememberMe ? localStorage : sessionStorage;
+            
+            storage.setItem('etudiant_token', studentData.token);
+            storage.setItem('studentData', JSON.stringify(studentData));
+        }
+
+        function mockLoginApi(identifier, password) {
+            return new Promise((resolve) => {
+                setTimeout(() => { 
+                    const mockStudentData = {
+                        token: 'mock-jwt-token-123456',
+                        nom: "nom1",
+                        prenom: "prenom1",
+                        matricule: "222231",
+                        nationalite: "Algérienne",
+                        email: "name1.prenom1@etudiant.universite.fr",
+                        telephone: "+213 0 00 00 00 00",
+                        adresse: "123 Rue des Étudiants, Alger",
+                        filiere: "Informatique",
+                        section: "A",
+                        groupeTD: "1",
+                        groupeTP: "3",
+                        niveau: "3ème année",
+                        handicap: "Non"
+                    };
+
+                    if ((identifier === mockStudentData.email || identifier === mockStudentData.matricule) && password) {
+                        resolve({
+                            success: true,
+                            studentData: mockStudentData
+                        });
+                    } else {
+                        resolve({
+                            success: false,
+                            message: "Identifiants incorrects"
+                        });
+                    }
+                }, 500);
+            });
+        }
+
+        // Fonction pour afficher les erreurs
+        function showError(message) {
+            const errorElement = document.getElementById('email-error') || document.getElementById('matricule-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
 
         /*document.addEventListener('DOMContentLoaded', async () => {
             try {
