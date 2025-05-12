@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des demandes de modification de profil - Administration</title>
+    <link href="style/admin.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div id="navbar-container"></div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Demandes de modification de profil</h1>
+            </div>
+            
+            <div class="content-container">
+                <!-- Status Messages -->
+                <div id="status-message" class="status-message" style="display: none;"></div>
+                
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="status-filter">Statut:</label>
+                        <select id="status-filter" class="filter-select">
+                            <option value="all">Tous</option>
+                            <option value="pending" selected>En attente</option>
+                            <option value="approved">Approuvées</option>
+                            <option value="rejected">Rejetées</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="search">Recherche:</label>
+                        <input type="text" id="search" class="filter-input" placeholder="Nom, matricule...">
+                    </div>
+                </div>
+                
+                <!-- Requests Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Étudiant</th>
+                                <th>Matricule</th>
+                                <th>Champs modifiés</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requests-table-body">
+                            <!-- Requests will be loaded here -->
+                            <tr class="loading-row">
+                                <td colspan="6">Chargement des demandes...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Request Details Modal -->
+    <div id="request-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Détails de la demande</h2>
+            
+            <div class="request-details">
+                <div class="request-info">
+                    <p><strong>ID:</strong> <span id="request-id"></span></p>
+                    <p><strong>Date:</strong> <span id="request-date"></span></p>
+                    <p><strong>Étudiant:</strong> <span id="request-student"></span></p>
+                    <p><strong>Matricule:</strong> <span id="request-matricule"></span></p>

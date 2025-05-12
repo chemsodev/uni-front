@@ -23,12 +23,17 @@
             style="display: none"
           ></div>
 
-          <!-- Local Storage Notice -->
+          <!-- Request Notice -->
           <div class="info-message" style="margin-bottom: 20px">
-            <strong>Note:</strong> Les modifications effectuées ici seront
-            enregistrées localement dans votre navigateur. En raison des
-            restrictions du système universitaire, ces modifications ne seront
-            pas synchronisées avec le serveur central.
+            <strong>Note:</strong> Les modifications que vous souhaitez apporter à votre profil seront soumises 
+            sous forme de demande. Un administrateur devra valider ces modifications avant qu'elles ne soient 
+            appliquées à votre profil.
+          </div>
+
+          <!-- Pending Requests Section -->
+          <div id="pending-requests" class="pending-requests" style="display: none;">
+            <h3>Demandes en attente</h3>
+            <div id="pending-requests-list"></div>
           </div>
 
           <h2 class="section-title">
@@ -52,96 +57,74 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="personal_email"
-                >Adresse Email Personnelle
-                <span class="local-only-badge">Local uniquement</span></label
-              >
+              <label class="form-label" for="adresseEmailPersonnelle">Email Personnel</label>
               <input
                 type="email"
-                id="personal_email"
-                name="personal_email"
+                id="adresseEmailPersonnelle"
+                name="adresseEmailPersonnelle"
                 class="form-input"
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="phone"
-                >Numéro de Téléphone Principal*
-                <span class="local-only-badge">Local uniquement</span></label
-              >
+              <label class="form-label" for="numeroTelephonePrincipal">Téléphone Principal</label>
               <input
                 type="tel"
-                id="phone"
-                name="phone"
+                id="numeroTelephonePrincipal"
+                name="numeroTelephonePrincipal"
                 class="form-input"
                 required
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="secondary_phone"
-                >Numéro de Téléphone Secondaire
-                <span class="local-only-badge">Local uniquement</span></label
-              >
+              <label class="form-label" for="numeroTelephoneSecondaire">Téléphone Secondaire</label>
               <input
                 type="tel"
-                id="secondary_phone"
-                name="secondary_phone"
+                id="numeroTelephoneSecondaire"
+                name="numeroTelephoneSecondaire"
                 class="form-input"
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="address"
-                >Adresse Postale*
-                <span class="local-only-badge">Local uniquement</span></label
-              >
+              <label class="form-label" for="adressePostale">Adresse Postale</label>
               <input
                 type="text"
-                id="address"
-                name="address"
+                id="adressePostale"
+                name="adressePostale"
                 class="form-input"
-                required
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="postal_code"
-                >Code Postal*
-                <span class="local-only-badge">Local uniquement</span></label
-              >
+              <label class="form-label" for="codePostal">Code Postal</label>
               <input
                 type="text"
-                id="postal_code"
-                name="postal_code"
+                id="codePostal"
+                name="codePostal"
                 class="form-input"
-                required
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="city"
-                >Ville*
-                <span class="local-only-badge">Local uniquement</span></label
-              >
+              <label class="form-label" for="ville">Ville</label>
               <input
                 type="text"
-                id="city"
-                name="city"
+                id="ville"
+                name="ville"
                 class="form-input"
-                required
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="emergency_contact"
-                >Contact en cas d'urgence
-                <span class="local-only-badge">Local uniquement</span></label
+              <label class="form-label" for="contactEnCasDurgence"
+                >Contact en cas d'urgence</label
               >
               <input
                 type="text"
-                id="emergency_contact"
-                name="emergency_contact"
+                id="contactEnCasDurgence"
+                name="contactEnCasDurgence"
                 class="form-input"
               />
               <div class="form-help">
@@ -159,7 +142,7 @@
                 Annuler
               </button>
               <button type="submit" class="btn btn-primary" id="submit-btn">
-                Enregistrer localement
+                Soumettre la demande
               </button>
             </div>
           </form>
@@ -171,64 +154,55 @@
       // Constantes pour les endpoints API
       const API_BASE_URL = "http://localhost:3000";
       const STUDENT_PROFILE_API = `${API_BASE_URL}/api/etudiants`;
+      const PROFILE_REQUESTS_API = `${API_BASE_URL}/api/profile-requests`;
       const TOKEN =
         localStorage.getItem("etudiant_token") ||
         sessionStorage.getItem("etudiant_token");
 
       let currentUser = null;
       let isBackendAvailable = true;
-      // Set server write permission to false since we know it's forbidden
-      let hasServerWritePermission = false;
-
+      
+      // Check authentication on page load
       document.addEventListener("DOMContentLoaded", async function () {
-        // Charger la navbar
-        await loadNavbar();
-
-        // Vérifier si le token existe
-        if (!TOKEN) {
-          window.location.href = "etudiant-login.html";
-          return;
-        }
-
         try {
-          // Vérifier le token
+          if (!TOKEN) {
+            throw new Error("No authentication token found");
+          }
+
+          // Verify token and get user info
           const verificationResponse = await fetch(
             `${API_BASE_URL}/api/auth/verify`,
             {
-              method: "GET",
               headers: {
                 Authorization: `Bearer ${TOKEN}`,
-                "Content-Type": "application/json",
               },
-              signal: AbortSignal.timeout(5000),
             }
           );
 
           if (!verificationResponse.ok) {
-            throw new Error("Token non valide");
+            throw new Error("Invalid or expired token");
           }
 
           const userData = await verificationResponse.json();
-
-          // Vérifier le rôle
+          
+          // Validate student role
           if (userData.adminRole !== "etudiant") {
-            throw new Error("Accès restreint aux étudiants");
+            throw new Error("Access restricted to students");
           }
 
-          // Définir l'utilisateur courant
+          // Set current user
           currentUser = {
             id: userData.userId,
             email: userData.email,
           };
 
-          // Charger les données de l'étudiant
-          await loadStudentData();
-
-          // Configurer le formulaire
+          // Load navbar and user data
+          await loadNavbar();
+          await loadUserData();
+          await checkPendingRequests();
           setupForm();
         } catch (error) {
-          console.error("Erreur d'authentification:", error);
-          isBackendAvailable = false;
+          console.error("Authentication error:", error);
           showMessage("Erreur d'authentification. Redirection...", "error");
           setTimeout(() => {
             window.location.href = "etudiant-login.html";
@@ -255,58 +229,41 @@
 
               // Update sidebar with student data
               document.getElementById("userFullName").textContent =
-                `${studentData.firstName || ""} ${
-                  studentData.lastName || ""
+                `${studentData.prenom || ""} ${
+                  studentData.nom || ""
                 }`.trim() || "Utilisateur";
               document.getElementById("userId").textContent =
                 studentData.matricule || "N/A";
 
               // Set avatar initials
               const firstInitial =
-                studentData.firstName && studentData.firstName.charAt
-                  ? studentData.firstName.charAt(0)
+                studentData.prenom && studentData.prenom.charAt
+                  ? studentData.prenom.charAt(0)
                   : "";
               const lastInitial =
-                studentData.lastName && studentData.lastName.charAt
-                  ? studentData.lastName.charAt(0)
+                studentData.nom && studentData.nom.charAt
+                  ? studentData.nom.charAt(0)
                   : "";
-              document.getElementById("userAvatar").textContent =
-                firstInitial && lastInitial
-                  ? `${firstInitial}${lastInitial}`.toUpperCase()
-                  : "U";
+              document.getElementById("userInitials").textContent =
+                (firstInitial + lastInitial).toUpperCase();
             } catch (e) {
               console.error("Error parsing stored student data:", e);
             }
           }
-
-          // Activer les liens du profil
-          document.querySelectorAll(".nav-link").forEach((link) => {
-            link.classList.remove("active");
-            if (
-              link.getAttribute("href") === "profile.html" ||
-              link.getAttribute("href") === "profile-edit.html"
-            ) {
-              link.classList.add("active");
-            }
-          });
         } catch (error) {
-          console.error("Erreur:", error);
-          showMessage("Erreur de chargement de la navbar", "error");
+          console.error("Error loading navbar:", error);
         }
       }
 
-      async function loadStudentData() {
+      async function loadUserData() {
         try {
-          // Try to get data from localStorage first
-          const studentDataJson =
-            localStorage.getItem("studentData") ||
-            sessionStorage.getItem("studentData");
           let studentData = null;
-
+          
+          // Try to get data from localStorage first
+          const studentDataJson = localStorage.getItem("studentData");
           if (studentDataJson) {
             try {
               studentData = JSON.parse(studentDataJson);
-              console.log("Using student data from localStorage");
             } catch (e) {
               console.error("Error parsing stored student data:", e);
             }
@@ -316,7 +273,7 @@
           if (isBackendAvailable) {
             try {
               const response = await fetch(
-                `${API_BASE_URL}/api/etudiants/${currentUser.id}`,
+                `${STUDENT_PROFILE_API}/${currentUser.id}`,
                 {
                   headers: {
                     Authorization: `Bearer ${TOKEN}`,
@@ -327,38 +284,13 @@
 
               if (response.ok) {
                 const freshData = await response.json();
-
-                // Merge with local data to preserve local-only changes
-                if (studentData) {
-                  const mergedData = {
-                    ...freshData,
-                    personal_email:
-                      studentData.personal_email || freshData.personal_email,
-                    phone: studentData.phone || freshData.phone,
-                    secondary_phone:
-                      studentData.secondary_phone || freshData.secondary_phone,
-                    address: studentData.address || freshData.address,
-                    postal_code:
-                      studentData.postal_code || freshData.postal_code,
-                    city: studentData.city || freshData.city,
-                    emergency_contact:
-                      studentData.emergency_contact ||
-                      freshData.emergency_contact,
-                  };
-                  // Store the merged data
-                  localStorage.setItem(
-                    "studentData",
-                    JSON.stringify(mergedData)
-                  );
-                  studentData = mergedData;
-                } else {
-                  // Store the updated data
-                  localStorage.setItem(
-                    "studentData",
-                    JSON.stringify(freshData)
-                  );
-                  studentData = freshData;
-                }
+                
+                // Store the updated data
+                localStorage.setItem(
+                  "studentData",
+                  JSON.stringify(freshData)
+                );
+                studentData = freshData;
               } else {
                 console.warn("Failed to fetch fresh data from API");
               }
@@ -380,22 +312,66 @@
         }
       }
 
+      async function checkPendingRequests() {
+        if (!isBackendAvailable || !currentUser) return;
+        
+        try {
+          const response = await fetch(
+            `${PROFILE_REQUESTS_API}/student/${currentUser.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${TOKEN}`,
+              }
+            }
+          );
+          
+          if (response.ok) {
+            const requests = await response.json();
+            
+            if (requests && requests.length > 0) {
+              displayPendingRequests(requests);
+            }
+          }
+        } catch (error) {
+          console.warn("Failed to check pending requests:", error);
+        }
+      }
+      
+      function displayPendingRequests(requests) {
+        const container = document.getElementById("pending-requests");
+        const list = document.getElementById("pending-requests-list");
+        list.innerHTML = "";
+        
+        requests.forEach(request => {
+          const requestItem = document.createElement("div");
+          requestItem.className = "request-item";
+          
+          const status = request.status === 'pending' ? 'En attente' : 
+                         request.status === 'approved' ? 'Approuvée' : 'Rejetée';
+          
+          const statusClass = request.status === 'pending' ? 'status-pending' : 
+                             request.status === 'approved' ? 'status-approved' : 'status-rejected';
+          
+          requestItem.innerHTML = `
+            <div class="request-date">${new Date(request.createdAt).toLocaleDateString()}</div>
+            <div class="request-status ${statusClass}">${status}</div>
+          `;
+          
+          list.appendChild(requestItem);
+        });
+        
+        container.style.display = "block";
+      }
+
       function fillFormWithStudentData(studentData) {
         if (!studentData) return;
-
-        // Remplir les champs du formulaire
-        document.getElementById("email").value = studentData.email || "";
-        document.getElementById("personal_email").value =
-          studentData.personal_email || "";
-        document.getElementById("phone").value = studentData.phone || "";
-        document.getElementById("secondary_phone").value =
-          studentData.secondary_phone || "";
-        document.getElementById("address").value = studentData.address || "";
-        document.getElementById("postal_code").value =
-          studentData.postal_code || "";
-        document.getElementById("city").value = studentData.city || "";
-        document.getElementById("emergency_contact").value =
-          studentData.emergency_contact || "";
+      
+        // Mise à jour des champs editables seulement
+        document.getElementById("nationalite").value = studentData.nationalite || "DZ";
+        document.getElementById("dateNaissance").value = studentData.dateNaissance || "2001-07-16";
+        document.getElementById("genre").value = studentData.genre || "Féminin";
+        document.getElementById("telephone").value = studentData.telephone || "0532081153";
+        document.getElementById("adresse").value = studentData.adresse || "Non fournie";
       }
 
       function setupForm() {
@@ -406,31 +382,48 @@
 
           const submitBtn = document.getElementById("submit-btn");
           submitBtn.disabled = true;
-          submitBtn.textContent = "Enregistrement...";
+          submitBtn.textContent = "Soumission en cours...";
 
           try {
             const formData = {
-              personal_email: document.getElementById("personal_email").value,
-              phone: document.getElementById("phone").value,
-              secondary_phone: document.getElementById("secondary_phone").value,
-              address: document.getElementById("address").value,
-              postal_code: document.getElementById("postal_code").value,
-              city: document.getElementById("city").value,
-              emergency_contact:
-                document.getElementById("emergency_contact").value,
+              nationalite: document.getElementById("nationalite").value,
+              dateNaissance: document.getElementById("dateNaissance").value,
+              genre: document.getElementById("genre").value,
+              telephone: document.getElementById("telephone").value,
+              adresse: document.getElementById("adresse").value,
+              studentId: currentUser.id
             };
 
-            // Since we know server updates are forbidden, just save locally
-            const currentData = JSON.parse(
-              localStorage.getItem("studentData") || "{}"
-            );
-            const updatedData = { ...currentData, ...formData };
-            localStorage.setItem("studentData", JSON.stringify(updatedData));
+            if (isBackendAvailable) {
+              // Submit the request to the backend
+              const response = await fetch(`${PROFILE_REQUESTS_API}`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${TOKEN}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+              });
 
-            showMessage(
-              "Vos modifications ont été enregistrées localement dans votre navigateur.",
-              "success"
-            );
+              if (response.ok) {
+                showMessage(
+                  "Votre demande de modification a été soumise avec succès. Un administrateur l'examinera prochainement.",
+                  "success"
+                );
+                
+                // Refresh pending requests
+                await checkPendingRequests();
+              } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Erreur lors de la soumission de la demande");
+              }
+            } else {
+              // If backend is not available, show appropriate message
+              showMessage(
+                "Le serveur n'est pas disponible. Veuillez réessayer plus tard.",
+                "error"
+              );
+            }
           } catch (error) {
             console.error("Erreur:", error);
             showMessage(
@@ -439,7 +432,7 @@
             );
           } finally {
             submitBtn.disabled = false;
-            submitBtn.textContent = "Enregistrer localement";
+            submitBtn.textContent = "Soumettre la demande";
           }
         });
       }
@@ -457,3 +450,86 @@
     </script>
   </body>
 </html>
+
+<h2 class="section-title">Informations Personnelles</h2>
+
+<div class="info-group">
+  <div class="info-item">
+    <span class="info-label">Nom :</span>
+    <span class="info-value">BOURABIA</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Prénom :</span>
+    <span class="info-value">CHEMS EDDINE</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Numéro étudiant :</span>
+    <span class="info-value">222231622113</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Nationalité :</span>
+    <span class="info-value">DZ</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Date de naissance :</span>
+    <span class="info-value">16/07/2001</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Genre :</span>
+    <span class="info-value">Féminin</span>
+  </div>
+</div>
+
+<h3 class="sub-section-title">Coordonnées</h3>
+<div class="info-group">
+  <div class="info-item">
+    <span class="info-label">Email institutionnel :</span>
+    <span class="info-value">chems.eddine.bourabia@etu.usthb.dz</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Téléphone :</span>
+    <span class="info-value">0532081153</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Adresse :</span>
+    <span class="info-value">Non fournie</span>
+  </div>
+</div>
+
+// Supprimer toutes les sections dupliquées ci-dessous...
+</form>
+
+<div class="form-group">
+  <label class="form-label" for="email">Email Institutionnel</label>
+  <input
+    type="email"
+    id="email"
+    name="email"
+    class="form-input"
+    readonly
+  />
+</div>
+
+<div class="form-group">
+  <label class="form-label" for="telephone">Téléphone</label>
+  <input
+    type="tel"
+    id="telephone"
+    name="telephone"
+    class="form-input"
+    required
+  />
+</div>
+
+<div class="form-group">
+  <label class="form-label" for="adresse">Adresse</label>
+  <textarea
+    id="adresse"
+    name="adresse"
+    class="form-input"
+    placeholder="Non fournie"
+  ></textarea>
+</div>
+
+// Supprimer les sections dupliquées ci-dessous...
+</form>
