@@ -1,154 +1,296 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Profil Personnel Étudiant</title>
-    <link href="style/profile.css" rel="stylesheet">
-</head>
-<body>
+    <link href="style/profile.css" rel="stylesheet" />
+  </head>
+  <body>
     <div class="dashboard-container">
-        <div id="navbar-container"></div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">Profil Personnel</h1>
-            </div>
-            
-            <div class="profile-container">
-                <div class="profile-tabs">
-                    <div class="profile-tab active">Voir mes informations</div>
-                    <div class="profile-tab">
-                        <a href="profile-edit.html" class="nav-link">Modifier mes coordonnées</a>
-                    </div>
-                </div>
+      <div id="navbar-container"></div>
 
-                <!-- Voir ses informations personnelles -->
-                <div class="profile-section">
-                    <div class="profile-photo">
-                        <div class="photo-container" id="profile-photo">ID</div>
-                        <label class="upload-btn">
-                            Changer la photo
-                            <input type="file" style="display: none;">
-                        </label>
-                    </div>
-                    
-                    <h2 class="section-title">Informations personnelles</h2>
-                    <div class="profile-info">
-                        <div class="info-item">
-                            <div class="info-label">Nom</div>
-                            <div class="info-value" data-field="nom" id="nom"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Prénom</div>
-                            <div class="info-value" data-field="prenom" id="prenom"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Numéro Étudiant</div>
-                            <div class="info-value" data-field="matricule" id="matricule"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Nationalité</div>
-                            <div class="info-value" data-field="nationalite"></div>
-                        </div>
-                    </div>
-                    
-                    <h2 class="section-title">Coordonnées</h2>
-                    <div class="profile-info">
-                        <div class="info-item">
-                            <div class="info-label">Email</div>
-                            <div class="info-value" data-field="email"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Téléphone</div>
-                            <div class="info-value" data-field="telephone"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Adresse</div>
-                            <div class="info-value" data-field="adresse"></div>
-                        </div>
-                    </div>
-                    
-                    <h2 class="section-title">Informations académiques</h2>
-                    <div class="profile-info">
-                        <div class="info-item">
-                            <div class="info-label">Filière</div>
-                            <div class="info-value" data-field="filiere" id="filiere"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Section</div>
-                            <div class="info-value" data-field="section" id="section"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Groupe TD</div>
-                            <div class="info-value" data-field="groupeTD" id="tdGroup"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Groupe TP</div>
-                            <div class="info-value" data-field="groupeTP" id="tpGroup"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Niveau</div>
-                            <div class="info-value" data-field="niveau"></div>
-                        </div>
-                    </div>
-                    
-                    <h2 class="section-title">Besoins spécifiques</h2>
-                    <div class="profile-info">
-                        <div class="info-item">
-                            <div class="info-label">Situation de handicap</div>
-                            <div class="info-value" data-field="handicap"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Profil Personnel</h1>
         </div>
+
+        <div class="profile-container">
+          <div class="profile-tabs">
+            <div class="profile-tab active">Voir mes informations</div>
+            <div class="profile-tab">
+              <a href="profile-edit.html" class="nav-link"
+                >Modifier mes coordonnées</a
+              >
+            </div>
+          </div>
+
+          <!-- Voir ses informations personnelles -->
+          <div class="profile-section">
+            <div class="profile-photo">
+              <div class="photo-container" id="profile-photo">ID</div>
+              <label class="upload-btn">
+                Changer la photo
+                <input type="file" style="display: none" />
+              </label>
+            </div>
+
+            <h2 class="section-title">Informations personnelles</h2>
+            <div class="profile-info">
+              <div class="info-item">
+                <div class="info-label">Nom</div>
+                <div class="info-value" data-field="nom" id="nom"></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Prénom</div>
+                <div
+                  class="info-value"
+                  data-field="firstName"
+                  id="prenom"
+                ></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Numéro Étudiant</div>
+                <div
+                  class="info-value"
+                  data-field="matricule"
+                  id="matricule"
+                ></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Nationalité</div>
+                <div class="info-value" data-field="nationality"></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Date de Naissance</div>
+                <div class="info-value" data-field="birthDate"></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Genre</div>
+                <div class="info-value" data-field="gender"></div>
+              </div>
+            </div>
+
+            <h2 class="section-title">Coordonnées</h2>
+            <div class="profile-info">
+              <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value" data-field="email"></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Téléphone</div>
+                <div class="info-value" data-field="phone"></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Adresse</div>
+                <div class="info-value" data-field="adresse"></div>
+              </div>
+            </div>
+
+            <h2 class="section-title">Informations académiques</h2>
+            <div class="profile-info">
+              <div class="info-item">
+                <div class="info-label">Filière</div>
+                <div class="info-value" data-field="filiere" id="filiere"></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Section</div>
+                <div class="info-value" data-field="section" id="section"></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Groupe TD</div>
+                <div
+                  class="info-value"
+                  data-field="groupeTD"
+                  id="tdGroup"
+                ></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Groupe TP</div>
+                <div
+                  class="info-value"
+                  data-field="groupeTP"
+                  id="tpGroup"
+                ></div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Niveau</div>
+                <div class="info-value" data-field="niveau"></div>
+              </div>
+            </div>
+
+            <h2 class="section-title">Besoins spécifiques</h2>
+            <div class="profile-info">
+              <div class="info-item">
+                <div class="info-label">Situation de handicap</div>
+                <div class="info-value" data-field="hasDisability"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const studentData = JSON.parse(localStorage.getItem('studentData'));
+      document.addEventListener("DOMContentLoaded", function () {
+        // Attempt to retrieve student data
+        let studentData = null;
+        try {
+          studentData = JSON.parse(localStorage.getItem("studentData"));
+        } catch (e) {
+          console.error("Error parsing student data from localStorage:", e);
+        }
+
         if (!studentData) {
-            console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
-            return;
+          console.warn(
+            "Aucune donnée étudiant valide trouvée dans le localStorage. Tentative de récupération..."
+          );
+          // Placeholder: Ideally, trigger a fetch here if data is missing/invalid
+          // For now, just show a message or leave fields blank
+          document.body.innerHTML =
+            "<p>Erreur: Données étudiant non disponibles. Veuillez vous reconnecter.</p>"; // Or redirect
+          // You might want to redirect to login: window.location.href = 'login.html';
+          return;
         }
 
-        // Charger la navbar
-        fetch('etudiant-nav.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('navbar-container').innerHTML = html;
+        // Charger la navbar and populate it
+        fetch("etudiant-nav.html")
+          .then((response) => response.text())
+          .then((html) => {
+            const navbarContainer = document.getElementById("navbar-container");
+            if (navbarContainer) {
+              navbarContainer.innerHTML = html;
 
-                const avatar = document.getElementById('userAvatar');
-                const fullName = document.getElementById('userFullName');
-                const userId = document.getElementById('userId');
+              const avatar = document.getElementById("userAvatar");
+              const fullName = document.getElementById("userFullName");
+              const userId = document.getElementById("userId");
 
-                if (avatar) avatar.textContent = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
-                if (fullName) fullName.textContent = `${studentData.nom} ${studentData.prenom}`;
-                if (userId) userId.textContent = `Matricule: ${studentData.matricule}`;
+              // Use firstName and lastName for Navbar
+              if (studentData.firstName && studentData.lastName) {
+                if (avatar)
+                  avatar.textContent = (
+                    studentData.firstName.charAt(0) +
+                    studentData.lastName.charAt(0)
+                  ).toUpperCase();
+                if (fullName)
+                  fullName.textContent = `${studentData.firstName} ${studentData.lastName}`;
+              } else {
+                if (fullName) fullName.textContent = "Utilisateur"; // Fallback
+                if (avatar) avatar.textContent = "U";
+              }
 
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === window.location.pathname.split('/').pop()) {
-                        link.classList.add('active');
-                    }
+              if (userId && studentData.matricule)
+                userId.textContent = `Matricule: ${studentData.matricule}`;
+
+              // Activate the correct nav link
+              document
+                .querySelectorAll("#navbar-container .nav-link")
+                .forEach((link) => {
+                  link.classList.remove("active");
+                  const linkHref = link.getAttribute("href");
+                  const currentPage = window.location.pathname.split("/").pop();
+                  // Make 'profile.html' active for both profile.html and profile-edit.html
+                  if (
+                    linkHref === "profile.html" &&
+                    (currentPage === "profile.html" ||
+                      currentPage === "profile-edit.html")
+                  ) {
+                    link.classList.add("active");
+                  } else if (linkHref === currentPage) {
+                    link.classList.add("active");
+                  }
                 });
-            });
+            } else {
+              console.error("Navbar container not found");
+            }
+          })
+          .catch((error) => console.error("Error loading navbar:", error));
 
-        Object.keys(studentData).forEach(key => {
-            const elements = document.querySelectorAll(`[data-field="${key}"]`);
-            elements.forEach(el => {
-                el.textContent = studentData[key];
+        // Populate profile fields using data-field attributes and specific IDs
+        const populateField = (field, value) => {
+          const elements = document.querySelectorAll(`[data-field="${field}"]`);
+          if (elements.length > 0) {
+            elements.forEach((el) => {
+              el.textContent =
+                value !== null && value !== undefined ? value : "N/A";
             });
-        });
+          } else {
+            // Fallback for elements without data-field but with matching ID
+            const elementById = document.getElementById(field);
+            if (elementById) {
+              elementById.textContent =
+                value !== null && value !== undefined ? value : "N/A";
+            }
+          }
+        };
 
-        // Initiales dans la photo de profil
-        const initials = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
-        const profilePhoto = document.getElementById('profile-photo');
-        if (profilePhoto) {
-            profilePhoto.textContent = initials;
+        // --- Populate Personal Info ---
+        populateField("nom", studentData.lastName); // Keep data-field="nom" but populate with lastName
+        populateField("firstName", studentData.firstName); // Changed data-field to firstName
+        populateField("matricule", studentData.matricule);
+        populateField("nationality", studentData.nationality);
+        populateField(
+          "birthDate",
+          studentData.birthDate
+            ? new Date(studentData.birthDate).toLocaleDateString("fr-FR")
+            : "N/A"
+        ); // Format date
+        populateField(
+          "gender",
+          studentData.gender === "male"
+            ? "Masculin"
+            : studentData.gender === "female"
+            ? "Féminin"
+            : "N/A"
+        ); // Map gender
+
+        // --- Populate Contact Info ---
+        populateField("email", studentData.email);
+        populateField("phone", studentData.phone);
+        // Note: 'adresse' field doesn't exist in the provided student object. Add it or remove the HTML element.
+        populateField("adresse", studentData.address || "Non fournie"); // Example if address field existed
+
+        // --- Populate Academic Info ---
+        // Assuming the student is in one section for profile display
+        const currentSection =
+          studentData.sections && studentData.sections.length > 0
+            ? studentData.sections[0]
+            : {};
+        populateField("filiere", currentSection.filiere || "N/A"); // Needs 'filiere' in section object
+        populateField("section", currentSection.nom || "N/A"); // Needs 'nom' in section object
+        populateField("groupeTD", currentSection.groupe_td || "N/A"); // Needs 'groupe_td' in section object
+        populateField("groupeTP", currentSection.groupe_tp || "N/A"); // Needs 'groupe_tp' in section object
+        // Note: 'niveau' field doesn't exist in the provided student object/section. Add it or remove the HTML element.
+        populateField("niveau", currentSection.niveau || "N/A"); // Example if niveau field existed in section
+
+        // --- Populate Specific Needs ---
+        populateField(
+          "hasDisability",
+          studentData.hasDisability ? "Oui" : "Non"
+        );
+
+        // --- Populate Profile Photo Initials ---
+        const profilePhoto = document.getElementById("profile-photo");
+        if (profilePhoto && studentData.firstName && studentData.lastName) {
+          profilePhoto.textContent = (
+            studentData.firstName.charAt(0) + studentData.lastName.charAt(0)
+          ).toUpperCase();
+        } else if (profilePhoto) {
+          profilePhoto.textContent = "U"; // Fallback
         }
-    });
+
+        // Add event listener for photo change if needed
+        const photoInput = document.querySelector(
+          '.upload-btn input[type="file"]'
+        );
+        if (photoInput) {
+          photoInput.addEventListener("change", (event) => {
+            // Handle file upload logic here - likely involves sending to backend
+            console.log("Photo change triggered:", event.target.files[0]);
+            // Example: uploadPhoto(event.target.files[0]);
+          });
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

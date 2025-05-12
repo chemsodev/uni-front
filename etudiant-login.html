@@ -1,241 +1,335 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Connexion Espace Étudiant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"> 
-    <link rel="stylesheet" href="style/etudiant-login.css">
-</head>
-<body>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style/etudiant-login.css" />
+  </head>
+  <body>
     <div class="login-container">
-        <h2 class="login-title">Connexion Espace Étudiant</h2>
-        
-        <div class="login-tabs">
-            <div class="login-tab active" onclick="switchTab('email-tab', 'matricule-tab')">Email</div>
-            <div class="login-tab" onclick="switchTab('matricule-tab', 'email-tab')">Matricule</div>
+      <h2 class="login-title">Connexion Espace Étudiant</h2>
+
+      <div class="login-tabs">
+        <div
+          class="login-tab active"
+          onclick="switchTab('email-tab', 'matricule-tab')"
+        >
+          Email
         </div>
-        
-        <form id="loginForm">
-            <div id="email-tab" class="tab-content active">
-                <div class="form-group">
-                    <label class="form-label" for="email">Email</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="votrenom@univ.edu" required>
-                    <div id="email-error" class="error-message"></div>
-                </div>
-            </div>
-            
-            <div id="matricule-tab" class="tab-content">
-                <div class="form-group">
-                    <label class="form-label" for="matricule">Numéro de matricule</label>
-                    <input type="text" id="matricule" name="matricule" class="form-input" placeholder="ex: 20230001">
-                    <div id="matricule-error" class="error-message"></div>
-                </div>
-            </div>
+        <div
+          class="login-tab"
+          onclick="switchTab('matricule-tab', 'email-tab')"
+        >
+          Matricule
+        </div>
+      </div>
 
-            <div class="form-group">
-                <label class="form-label" for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
-                <div id="password-error" class="error-message"></div>
-            </div>
-
-            <div class="remember-me">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember">Se souvenir de moi</label>
-            </div>
-
-            <a href="mdps-oublier-etudiant.html" class="forgot-password">Mot de passe oublié?</a>
-
-            <button type="button" class="login-button" onclick="handleLogin()">Se connecter</button>
-        </form>
-
-        <div class="divider">
-            <span class="divider-text">OU</span>
+      <form id="loginForm">
+        <div id="email-tab" class="tab-content active">
+          <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="votrenom@univ.edu"
+              required
+            />
+            <div id="email-error" class="error-message"></div>
+          </div>
         </div>
 
-        <div class="signup-link">
-            Vous n'avez pas encore de compte? <a href="etudiant-signup.html">S'inscrire</a>
+        <div id="matricule-tab" class="tab-content">
+          <div class="form-group">
+            <label class="form-label" for="matricule"
+              >Numéro de matricule</label
+            >
+            <input
+              type="text"
+              id="matricule"
+              name="matricule"
+              class="form-input"
+              placeholder="ex: 20230001"
+            />
+            <div id="matricule-error" class="error-message"></div>
+          </div>
         </div>
-        
-        <a href="index.html" class="back-button">Retour à la page de sélection</a>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Mot de passe</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="••••••••"
+            required
+          />
+          <div id="password-error" class="error-message"></div>
+        </div>
+
+        <div class="remember-me">
+          <input type="checkbox" id="remember" name="remember" />
+          <label for="remember">Se souvenir de moi</label>
+        </div>
+
+        <a href="mdps-oublier-etudiant.html" class="forgot-password"
+          >Mot de passe oublié?</a
+        >
+
+        <button type="button" class="login-button" onclick="handleLogin()">
+          Se connecter
+        </button>
+      </form>
+
+      <div class="divider">
+        <span class="divider-text">OU</span>
+      </div>
+
+      <div class="signup-link">
+        Vous n'avez pas encore de compte?
+        <a href="etudiant-signup.html">S'inscrire</a>
+      </div>
+
+      <a href="index.html" class="back-button">Retour à la page de sélection</a>
     </div>
 
     <script>
+      // Tab switching (gardé pour la navigation entre onglets)
+      function switchTab(showTabId, hideTabId) {
+        document.getElementById(showTabId).classList.add("active");
+        document.getElementById(hideTabId).classList.remove("active");
 
-    // Tab switching (gardé pour la navigation entre onglets)
-    function switchTab(showTabId, hideTabId) {
-        document.getElementById(showTabId).classList.add('active');
-        document.getElementById(hideTabId).classList.remove('active');
-        
-        const tabs = document.querySelectorAll('.login-tab');
-        tabs.forEach(tab => tab.classList.remove('active'));
-        
-        event.currentTarget.classList.add('active');
-        
-        const hiddenInput = document.getElementById(hideTabId).querySelector('input');
-        if (hiddenInput) hiddenInput.value = '';
-    }
+        const tabs = document.querySelectorAll(".login-tab");
+        tabs.forEach((tab) => tab.classList.remove("active"));
 
-       document.addEventListener('DOMContentLoaded', async () => {
+        event.currentTarget.classList.add("active");
+
+        const hiddenInput = document
+          .getElementById(hideTabId)
+          .querySelector("input");
+        if (hiddenInput) hiddenInput.value = "";
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          // Check for existing token
+          const existingToken =
+            sessionStorage.getItem("etudiant_token") ||
+            localStorage.getItem("etudiant_token");
+
+          if (!existingToken) return; // No token found, show login form
+
+          // Verify existing token
+          const verificationResponse = await fetch(
+            "http://localhost:3000/api/auth/verify",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${existingToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!verificationResponse.ok) throw new Error("Invalid token");
+
+          const userData = await verificationResponse.json();
+
+          // Validate student role
+          if (userData.adminRole !== "etudiant") {
+            throw new Error("Invalid user type");
+          }
+
+          // Redirect to dashboard if valid token exists
+          window.location.href = "dashbord-etudiant.html";
+        } catch (error) {
+          console.error("Auto-login failed:", error);
+          // Clear invalid tokens
+          sessionStorage.removeItem("etudiant_token");
+          localStorage.removeItem("etudiant_token");
+        }
+      });
+
+      // Tab switching
+      function switchTab(showTabId, hideTabId) {
+        document.getElementById(showTabId).classList.add("active");
+        document.getElementById(hideTabId).classList.remove("active");
+
+        const tabs = document.querySelectorAll(".login-tab");
+        tabs.forEach((tab) => tab.classList.remove("active"));
+
+        event.currentTarget.classList.add("active");
+
+        const hiddenInput = document
+          .getElementById(hideTabId)
+          .querySelector("input");
+        if (hiddenInput) hiddenInput.value = "";
+      }
+
+      // Display error message
+      function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+      }
+
+      // Hide error message
+      function hideError(elementId) {
+        document.getElementById(elementId).style.display = "none";
+      }
+
+      async function handleLogin() {
+        // Clear previous errors and tokens
+        hideError("email-error");
+        hideError("password-error");
+        hideError("matricule-error");
+        sessionStorage.removeItem("etudiant_token");
+        localStorage.removeItem("etudiant_token");
+
+        // Get form values
+        const email = document.getElementById("email").value.trim();
+        const matricule = document.getElementById("matricule").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const rememberMe = document.getElementById("remember").checked;
+
+        // Validation
+        let isValid = true;
+        const activeTab = document.querySelector(".tab-content.active").id;
+
+        if (activeTab === "email-tab") {
+          if (!isValidEmail(email)) {
+            showError("email-error", "Adresse email invalide");
+            isValid = false;
+          }
+        }
+
+        if (password.length < 8) {
+          showError(
+            "password-error",
+            "Le mot de passe doit contenir au moins 8 caractères"
+          );
+          isValid = false;
+        }
+
+        if (!isValid) return;
+
+        try {
+          // Set loading state
+          const loginBtn = document.querySelector(".login-button");
+          loginBtn.disabled = true;
+          loginBtn.innerHTML = '<div class="spinner"></div>Connexion...';
+
+          // Prepare request
+          const requestData = {
+            password,
+            [activeTab === "email-tab" ? "email" : "matricule"]:
+              activeTab === "email-tab" ? email : matricule,
+          };
+
+          // Add timeout handling
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+          const response = await fetch(
+            "http://localhost:3000/api/auth/etudiant/login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify(requestData),
+              signal: controller.signal,
+            }
+          );
+
+          clearTimeout(timeoutId);
+
+          // Handle HTTP errors
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Échec de la connexion");
+          }
+
+          const data = await response.json();
+
+          // Validate response structure
+          if (!data?.access_token) {
+            throw new Error("Réponse invalide du serveur");
+          }
+          const storage = rememberMe ? localStorage : sessionStorage;
+          storage.setItem("etudiant_token", data.access_token);
+
+          // Fetch student data immediately after successful login
+          try {
+            // Extract user ID from JWT token (if possible)
+            let userId = null;
             try {
-                // Check for existing token
-                const existingToken = sessionStorage.getItem('etudiant_token') || 
-                                    localStorage.getItem('etudiant_token');
-                
-                if (!existingToken) return;  // No token found, show login form
-        
-                // Verify existing token
-                const verificationResponse = await fetch('http://localhost:3000/api/auth/verify', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${existingToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-        
-                if (!verificationResponse.ok) throw new Error('Invalid token');
-                
-                const userData = await verificationResponse.json();
-                
-                // Validate student role
-                if (userData.adminRole !== 'etudiant') {
-                    throw new Error('Invalid user type');
-                }
-        
-                // Redirect to dashboard if valid token exists
-                window.location.href = 'dashbord-etudiant.html';
-        
-            } catch (error) {
-                console.error('Auto-login failed:', error);
-                // Clear invalid tokens
-                sessionStorage.removeItem('etudiant_token');
-                localStorage.removeItem('etudiant_token');
+              const tokenPayload = JSON.parse(
+                atob(data.access_token.split(".")[1])
+              );
+              userId = tokenPayload.userId;
+            } catch (e) {
+              console.error("Could not extract user ID from token:", e);
             }
-        });
-        
-        // Tab switching
-        function switchTab(showTabId, hideTabId) {
-            document.getElementById(showTabId).classList.add('active');
-            document.getElementById(hideTabId).classList.remove('active');
-            
-            const tabs = document.querySelectorAll('.login-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            event.currentTarget.classList.add('active');
-            
-            const hiddenInput = document.getElementById(hideTabId).querySelector('input');
-            if (hiddenInput) hiddenInput.value = '';
-        }
 
-        // Display error message
-        function showError(elementId, message) {
-            const errorElement = document.getElementById(elementId);
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
-
-        // Hide error message
-        function hideError(elementId) {
-            document.getElementById(elementId).style.display = 'none';
-        }
-
-        async function handleLogin() {
-            // Clear previous errors and tokens
-            hideError('email-error');
-            hideError('password-error');
-            hideError('matricule-error');
-            sessionStorage.removeItem('etudiant_token');
-            localStorage.removeItem('etudiant_token');
-        
-            // Get form values
-            const email = document.getElementById('email').value.trim();
-            const matricule = document.getElementById('matricule').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const rememberMe = document.getElementById('remember').checked;
-        
-            // Validation
-            let isValid = true;
-            const activeTab = document.querySelector('.tab-content.active').id;
-        
-            if (activeTab === 'email-tab') {
-                if (!isValidEmail(email)) {
-                    showError('email-error', 'Adresse email invalide');
-                    isValid = false;
+            if (userId) {
+              // Fetch the student data using the token we just received
+              const userResponse = await fetch(
+                `http://localhost:3000/api/etudiants/${userId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${data.access_token}`,
+                    "Content-Type": "application/json",
+                  },
                 }
-            } 
-        
-            if (password.length < 8) {
-                showError('password-error', 'Le mot de passe doit contenir au moins 8 caractères');
-                isValid = false;
+              );
+
+              if (userResponse.ok) {
+                const userData = await userResponse.json();
+                // Store the full student data in the same storage (local or session)
+                storage.setItem("studentData", JSON.stringify(userData));
+              } else {
+                console.warn("Failed to fetch student data after login");
+              }
             }
-        
-            if (!isValid) return;
-        
-            try {
-                // Set loading state
-                const loginBtn = document.querySelector('.login-button');
-                loginBtn.disabled = true;
-                loginBtn.innerHTML = '<div class="spinner"></div>Connexion...';
-        
-                // Prepare request
-                const requestData = {
-                    password,
-                    [activeTab === 'email-tab' ? 'email' : 'matricule']: activeTab === 'email-tab' ? email : matricule
-                };
-        
-                // Add timeout handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
-        
-                const response = await fetch('http://localhost:3000/api/auth/etudiant/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(requestData),
-                    signal: controller.signal
-                });
-        
-                clearTimeout(timeoutId);
-        
-                // Handle HTTP errors
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Échec de la connexion');
-                }
-        
-                const data = await response.json();
-        
-                // Validate response structure
-                if (!data?.access_token) {
-                    throw new Error('Réponse invalide du serveur');
-                }
-                const storage = rememberMe ? localStorage : sessionStorage;
-                storage.setItem('etudiant_token', data.access_token);
-                
-                // Delay redirect to ensure token storage
-                setTimeout(() => {
-                    window.location.href = 'dashbord-etudiant.html';
-                }, 100);
-        
-            } catch (error) {
-                console.error('Login error:', error);
-                const message = error.name === 'AbortError' 
-                    ? 'Connexion au serveur trop longue'
-                    : error.message || 'Erreur inconnue';
-                showError('password-error', message);
-            } finally {
-                const loginBtn = document.querySelector('.login-button');
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Se connecter';
-            }
+          } catch (fetchError) {
+            // If fetching user data fails, we still continue with the login
+            console.warn(
+              "Error fetching student data after login:",
+              fetchError
+            );
+          }
+
+          // Delay redirect to ensure token storage
+          setTimeout(() => {
+            window.location.href = "dashbord-etudiant.html";
+          }, 100);
+        } catch (error) {
+          console.error("Login error:", error);
+          const message =
+            error.name === "AbortError"
+              ? "Connexion au serveur trop longue"
+              : error.message || "Erreur inconnue";
+          showError("password-error", message);
+        } finally {
+          const loginBtn = document.querySelector(".login-button");
+          loginBtn.disabled = false;
+          loginBtn.textContent = "Se connecter";
         }
-        
-        // Enhanced validation
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
+      }
+
+      // Enhanced validation
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
     </script>
-</body>
+  </body>
 </html>

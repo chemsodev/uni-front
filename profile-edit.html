@@ -1,283 +1,459 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Modifier mes coordonnées - Profil Étudiant</title>
-    <link href="style/profile-edit.css" rel="stylesheet">
-</head>
-<body>
+    <link href="style/profile-edit.css" rel="stylesheet" />
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div id="navbar-container"></div>
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">Modifier mes coordonnées</h1>
-            </div>
-            
-            <div class="profile-container">
-                <!-- Status Messages -->
-                <div id="status-message" class="status-message" style="display: none;"></div>
-                
-                <h2 class="section-title">Modification des informations de contact</h2>
-                
-                <form id="contact-form" class="profile-form">
-                    <div class="form-group">
-                        <label class="form-label" for="email">Adresse Email*</label>
-                        <input type="email" id="email" name="email" class="form-input" required>
-                        <span class="form-help">Cette adresse sera utilisée pour les communications officielles de l'université.</span>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="personal_email">Adresse Email Personnelle</label>
-                        <input type="email" id="personal_email" name="personal_email" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="phone">Numéro de Téléphone Principal*</label>
-                        <input type="tel" id="phone" name="phone" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="secondary_phone">Numéro de Téléphone Secondaire</label>
-                        <input type="tel" id="secondary_phone" name="secondary_phone" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="address">Adresse Postale*</label>
-                        <input type="text" id="address" name="address" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="postal_code">Code Postal*</label>
-                        <input type="text" id="postal_code" name="postal_code" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="city">Ville*</label>
-                        <input type="text" id="city" name="city" class="form-input" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="emergency_contact">Contact en cas d'urgence</label>
-                        <input type="text" id="emergency_contact" name="emergency_contact" class="form-input">
-                        <div class="form-help">Veuillez indiquer le nom et le numéro de téléphone d'une personne à contacter en cas d'urgence.</div>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Annuler</button>
-                        <button type="submit" class="btn btn-primary" id="submit-btn">Enregistrer les modifications</button>
-                    </div>
-                </form>
-            </div>
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Modifier mes coordonnées</h1>
         </div>
+
+        <div class="profile-container">
+          <!-- Status Messages -->
+          <div
+            id="status-message"
+            class="status-message"
+            style="display: none"
+          ></div>
+
+          <!-- Local Storage Notice -->
+          <div class="info-message" style="margin-bottom: 20px">
+            <strong>Note:</strong> Les modifications effectuées ici seront
+            enregistrées localement dans votre navigateur. En raison des
+            restrictions du système universitaire, ces modifications ne seront
+            pas synchronisées avec le serveur central.
+          </div>
+
+          <h2 class="section-title">
+            Modification des informations de contact
+          </h2>
+
+          <form id="contact-form" class="profile-form">
+            <div class="form-group">
+              <label class="form-label" for="email">Adresse Email*</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-input"
+                required
+                readonly
+              />
+              <span class="form-help"
+                >Cette adresse ne peut pas être modifiée.</span
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="personal_email"
+                >Adresse Email Personnelle
+                <span class="local-only-badge">Local uniquement</span></label
+              >
+              <input
+                type="email"
+                id="personal_email"
+                name="personal_email"
+                class="form-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="phone"
+                >Numéro de Téléphone Principal*
+                <span class="local-only-badge">Local uniquement</span></label
+              >
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                class="form-input"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="secondary_phone"
+                >Numéro de Téléphone Secondaire
+                <span class="local-only-badge">Local uniquement</span></label
+              >
+              <input
+                type="tel"
+                id="secondary_phone"
+                name="secondary_phone"
+                class="form-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="address"
+                >Adresse Postale*
+                <span class="local-only-badge">Local uniquement</span></label
+              >
+              <input
+                type="text"
+                id="address"
+                name="address"
+                class="form-input"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="postal_code"
+                >Code Postal*
+                <span class="local-only-badge">Local uniquement</span></label
+              >
+              <input
+                type="text"
+                id="postal_code"
+                name="postal_code"
+                class="form-input"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="city"
+                >Ville*
+                <span class="local-only-badge">Local uniquement</span></label
+              >
+              <input
+                type="text"
+                id="city"
+                name="city"
+                class="form-input"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="emergency_contact"
+                >Contact en cas d'urgence
+                <span class="local-only-badge">Local uniquement</span></label
+              >
+              <input
+                type="text"
+                id="emergency_contact"
+                name="emergency_contact"
+                class="form-input"
+              />
+              <div class="form-help">
+                Veuillez indiquer le nom et le numéro de téléphone d'une
+                personne à contacter en cas d'urgence.
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="window.history.back()"
+              >
+                Annuler
+              </button>
+              <button type="submit" class="btn btn-primary" id="submit-btn">
+                Enregistrer localement
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script>
+      // Constantes pour les endpoints API
+      const API_BASE_URL = "http://localhost:3000";
+      const STUDENT_PROFILE_API = `${API_BASE_URL}/api/etudiants`;
+      const TOKEN =
+        localStorage.getItem("etudiant_token") ||
+        sessionStorage.getItem("etudiant_token");
 
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('etudiant-nav.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('navbar-container').innerHTML = html;
-                afficherDonnees();
-                
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if(link.getAttribute('href') === 'profile.html' || 
-                    link.getAttribute('href') === 'profile-edit.html') {
-                        link.classList.add('active');
-                    }
-                });
-            });
-    });
+      let currentUser = null;
+      let isBackendAvailable = true;
+      // Set server write permission to false since we know it's forbidden
+      let hasServerWritePermission = false;
 
-    const studentData = JSON.parse(localStorage.getItem('studentData'));
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Charger la navbar
+        await loadNavbar();
 
-    document.addEventListener('DOMContentLoaded', function() {
-    fetch('etudiant-nav.html')
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('navbar-container').innerHTML = html;
-            afficherDonnees();
-            
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-                if(link.getAttribute('href') === 'profile.html' || 
-                   link.getAttribute('href') === 'profile-edit.html') {
-                    link.classList.add('active');
-                }
-            });
-        });
-});
+        // Vérifier si le token existe
+        if (!TOKEN) {
+          window.location.href = "etudiant-login.html";
+          return;
+        }
 
-    function afficherDonnees() {
-        document.getElementById('userAvatar').textContent = 
-            studentData.prenom.charAt(0) + studentData.nom.charAt(0);
-        document.getElementById('userFullName').textContent = 
-            studentData.nom + " " + studentData.prenom;
-        document.getElementById('userId').textContent = 
-            "Matricule: " + studentData.matricule;
-        
-        document.getElementById('lastName').textContent = studentData.nom;
-        document.getElementById('firstName').textContent = studentData.prenom;
-        document.getElementById('major').textContent = studentData.filiere;
-        document.getElementById('section').textContent = studentData.section;
-        document.getElementById('tdGroup').textContent = studentData.groupeTD;
-        document.getElementById('tpGroup').textContent = studentData.groupeTP;
-    }
-
-        document.querySelector('.profile-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            setTimeout(function() {
-                document.getElementById('success-message').style.display = 'block';
-                setTimeout(function() {
-                    document.getElementById('success-message').style.display = 'none';
-                }, 3000);
-            }, 1000);
-        });
-        
-        /* Constantes pour les endpoints API
-        const API_BASE_URL = 'https://votre-api.universite.fr';
-        const STUDENT_CONTACT_API = `${API_BASE_URL}/api/students/contact`;
-        const TOKEN = localStorage.getItem('etudiant_token') || sessionStorage.getItem('etudiant_token');
-
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Charger la navbar
-            await loadNavbar();
-            
-            // Charger les données de l'étudiant
-            await loadStudentData();
-            
-            // Remplir le formulaire avec les données existantes
-            await fillFormWithStudentData();
-            
-            // Configurer le formulaire
-            setupForm();
-        });
-
-        async function loadNavbar() {
-            try {
-                const response = await fetch('etudiant-nav.html');
-                if (!response.ok) throw new Error('Erreur de chargement de la navbar');
-                
-                document.getElementById('navbar-container').innerHTML = await response.text();
-                
-                // Activer les liens du profil
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if(link.getAttribute('href') === 'profile.html' || 
-                       link.getAttribute('href') === 'profile-edit.html') {
-                        link.classList.add('active');
-                    }
-                });
-            } catch (error) {
-                console.error('Erreur:', error);
-                showMessage('Erreur de chargement de la navbar', 'error');
+        try {
+          // Vérifier le token
+          const verificationResponse = await fetch(
+            `${API_BASE_URL}/api/auth/verify`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${TOKEN}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000),
             }
-        }
+          );
 
-        async function loadStudentData() {
+          if (!verificationResponse.ok) {
+            throw new Error("Token non valide");
+          }
+
+          const userData = await verificationResponse.json();
+
+          // Vérifier le rôle
+          if (userData.adminRole !== "etudiant") {
+            throw new Error("Accès restreint aux étudiants");
+          }
+
+          // Définir l'utilisateur courant
+          currentUser = {
+            id: userData.userId,
+            email: userData.email,
+          };
+
+          // Charger les données de l'étudiant
+          await loadStudentData();
+
+          // Configurer le formulaire
+          setupForm();
+        } catch (error) {
+          console.error("Erreur d'authentification:", error);
+          isBackendAvailable = false;
+          showMessage("Erreur d'authentification. Redirection...", "error");
+          setTimeout(() => {
+            window.location.href = "etudiant-login.html";
+          }, 2000);
+        }
+      });
+
+      async function loadNavbar() {
+        try {
+          const response = await fetch("etudiant-nav.html");
+          if (!response.ok)
+            throw new Error("Erreur de chargement de la navbar");
+
+          document.getElementById("navbar-container").innerHTML =
+            await response.text();
+
+          // After the nav is loaded, populate user data from localStorage
+          const studentDataJson =
+            localStorage.getItem("studentData") ||
+            sessionStorage.getItem("studentData");
+          if (studentDataJson) {
             try {
-                // Vérifier si le token existe
-                if (!TOKEN) {
-                    throw new Error('Non authentifié');
-                }
+              const studentData = JSON.parse(studentDataJson);
 
-                const response = await fetch(`${API_BASE_URL}/api/students/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${TOKEN}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+              // Update sidebar with student data
+              document.getElementById("userFullName").textContent =
+                `${studentData.firstName || ""} ${
+                  studentData.lastName || ""
+                }`.trim() || "Utilisateur";
+              document.getElementById("userId").textContent =
+                studentData.matricule || "N/A";
 
-                if (!response.ok) {
-                    throw new Error('Erreur de chargement des données');
-                }
-
-                const data = await response.json();
-                localStorage.setItem('studentData', JSON.stringify(data));
-            } catch (error) {
-                console.error('Erreur:', error);
-                showMessage('Erreur de chargement des données étudiant', 'error');
+              // Set avatar initials
+              const firstInitial =
+                studentData.firstName && studentData.firstName.charAt
+                  ? studentData.firstName.charAt(0)
+                  : "";
+              const lastInitial =
+                studentData.lastName && studentData.lastName.charAt
+                  ? studentData.lastName.charAt(0)
+                  : "";
+              document.getElementById("userAvatar").textContent =
+                firstInitial && lastInitial
+                  ? `${firstInitial}${lastInitial}`.toUpperCase()
+                  : "U";
+            } catch (e) {
+              console.error("Error parsing stored student data:", e);
             }
+          }
+
+          // Activer les liens du profil
+          document.querySelectorAll(".nav-link").forEach((link) => {
+            link.classList.remove("active");
+            if (
+              link.getAttribute("href") === "profile.html" ||
+              link.getAttribute("href") === "profile-edit.html"
+            ) {
+              link.classList.add("active");
+            }
+          });
+        } catch (error) {
+          console.error("Erreur:", error);
+          showMessage("Erreur de chargement de la navbar", "error");
         }
+      }
 
-        function fillFormWithStudentData() {
-            const studentData = JSON.parse(localStorage.getItem('studentData'));
-            if (!studentData) return;
+      async function loadStudentData() {
+        try {
+          // Try to get data from localStorage first
+          const studentDataJson =
+            localStorage.getItem("studentData") ||
+            sessionStorage.getItem("studentData");
+          let studentData = null;
 
-            // Remplir les champs du formulaire
-            document.getElementById('email').value = studentData.email || '';
-            document.getElementById('personal_email').value = studentData.personal_email || '';
-            document.getElementById('phone').value = studentData.phone || '';
-            document.getElementById('secondary_phone').value = studentData.secondary_phone || '';
-            document.getElementById('address').value = studentData.address || '';
-            document.getElementById('postal_code').value = studentData.postal_code || '';
-            document.getElementById('city').value = studentData.city || '';
-            document.getElementById('emergency_contact').value = studentData.emergency_contact || '';
-        }
+          if (studentDataJson) {
+            try {
+              studentData = JSON.parse(studentDataJson);
+              console.log("Using student data from localStorage");
+            } catch (e) {
+              console.error("Error parsing stored student data:", e);
+            }
+          }
 
-        function setupForm() {
-            const form = document.getElementById('contact-form');
-            
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const submitBtn = document.getElementById('submit-btn');
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Enregistrement...';
-                
-                try {
-                    const formData = {
-                        email: document.getElementById('email').value,
-                        personal_email: document.getElementById('personal_email').value,
-                        phone: document.getElementById('phone').value,
-                        secondary_phone: document.getElementById('secondary_phone').value,
-                        address: document.getElementById('address').value,
-                        postal_code: document.getElementById('postal_code').value,
-                        city: document.getElementById('city').value,
-                        emergency_contact: document.getElementById('emergency_contact').value
-                    };
-
-                    const response = await fetch(STUDENT_CONTACT_API, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${TOKEN}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Erreur lors de la mise à jour');
-                    }
-
-                    const updatedData = await response.json();
-                    localStorage.setItem('studentData', JSON.stringify(updatedData));
-                    
-                    showMessage('Vos coordonnées ont été mises à jour avec succès !', 'success');
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    showMessage(error.message || 'Une erreur s\'est produite. Veuillez réessayer.', 'error');
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Enregistrer les modifications';
+          // Try to fetch fresh data from API
+          if (isBackendAvailable) {
+            try {
+              const response = await fetch(
+                `${API_BASE_URL}/api/etudiants/${currentUser.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${TOKEN}`,
+                  },
+                  signal: AbortSignal.timeout(5000),
                 }
-            });
-        }
+              );
 
-        function showMessage(message, type) {
-            const messageElement = document.getElementById('status-message');
-            messageElement.textContent = message;
-            messageElement.className = `status-message ${type}-message`;
-            messageElement.style.display = 'block';
-            
-            setTimeout(() => {
-                messageElement.style.display = 'none';
-            }, 5000);
-        }*/
+              if (response.ok) {
+                const freshData = await response.json();
+
+                // Merge with local data to preserve local-only changes
+                if (studentData) {
+                  const mergedData = {
+                    ...freshData,
+                    personal_email:
+                      studentData.personal_email || freshData.personal_email,
+                    phone: studentData.phone || freshData.phone,
+                    secondary_phone:
+                      studentData.secondary_phone || freshData.secondary_phone,
+                    address: studentData.address || freshData.address,
+                    postal_code:
+                      studentData.postal_code || freshData.postal_code,
+                    city: studentData.city || freshData.city,
+                    emergency_contact:
+                      studentData.emergency_contact ||
+                      freshData.emergency_contact,
+                  };
+                  // Store the merged data
+                  localStorage.setItem(
+                    "studentData",
+                    JSON.stringify(mergedData)
+                  );
+                  studentData = mergedData;
+                } else {
+                  // Store the updated data
+                  localStorage.setItem(
+                    "studentData",
+                    JSON.stringify(freshData)
+                  );
+                  studentData = freshData;
+                }
+              } else {
+                console.warn("Failed to fetch fresh data from API");
+              }
+            } catch (error) {
+              console.warn("API connection error:", error);
+              isBackendAvailable = false;
+            }
+          }
+
+          // Fill form with available data
+          if (studentData) {
+            fillFormWithStudentData(studentData);
+          } else {
+            showMessage("Données étudiant non disponibles", "error");
+          }
+        } catch (error) {
+          console.error("Erreur:", error);
+          showMessage("Erreur de chargement des données étudiant", "error");
+        }
+      }
+
+      function fillFormWithStudentData(studentData) {
+        if (!studentData) return;
+
+        // Remplir les champs du formulaire
+        document.getElementById("email").value = studentData.email || "";
+        document.getElementById("personal_email").value =
+          studentData.personal_email || "";
+        document.getElementById("phone").value = studentData.phone || "";
+        document.getElementById("secondary_phone").value =
+          studentData.secondary_phone || "";
+        document.getElementById("address").value = studentData.address || "";
+        document.getElementById("postal_code").value =
+          studentData.postal_code || "";
+        document.getElementById("city").value = studentData.city || "";
+        document.getElementById("emergency_contact").value =
+          studentData.emergency_contact || "";
+      }
+
+      function setupForm() {
+        const form = document.getElementById("contact-form");
+
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const submitBtn = document.getElementById("submit-btn");
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Enregistrement...";
+
+          try {
+            const formData = {
+              personal_email: document.getElementById("personal_email").value,
+              phone: document.getElementById("phone").value,
+              secondary_phone: document.getElementById("secondary_phone").value,
+              address: document.getElementById("address").value,
+              postal_code: document.getElementById("postal_code").value,
+              city: document.getElementById("city").value,
+              emergency_contact:
+                document.getElementById("emergency_contact").value,
+            };
+
+            // Since we know server updates are forbidden, just save locally
+            const currentData = JSON.parse(
+              localStorage.getItem("studentData") || "{}"
+            );
+            const updatedData = { ...currentData, ...formData };
+            localStorage.setItem("studentData", JSON.stringify(updatedData));
+
+            showMessage(
+              "Vos modifications ont été enregistrées localement dans votre navigateur.",
+              "success"
+            );
+          } catch (error) {
+            console.error("Erreur:", error);
+            showMessage(
+              error.message || "Une erreur s'est produite. Veuillez réessayer.",
+              "error"
+            );
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Enregistrer localement";
+          }
+        });
+      }
+
+      function showMessage(message, type) {
+        const messageElement = document.getElementById("status-message");
+        messageElement.textContent = message;
+        messageElement.className = `status-message ${type}-message`;
+        messageElement.style.display = "block";
+
+        setTimeout(() => {
+          messageElement.style.display = "none";
+        }, 5000);
+      }
     </script>
-</body>
+  </body>
 </html>

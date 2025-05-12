@@ -1,1132 +1,1482 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Demandes Étudiant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sora:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style/demandes.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sora:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style/demandes.css" />
     <style>
-        /* Additional styles for offline mode */
-        .status-offline {
-            background-color: #6c757d;
-            color: white;
-        }
-        
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 15px;
-        }
+      /* Additional styles for offline mode */
+      .status-offline {
+        background-color: #6c757d;
+        color: white;
+      }
+
+      .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        border-radius: 4px;
+        padding: 10px;
+        margin-bottom: 15px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div id="navbar-container"></div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">Mes Demandes</h1>
-                <div class="header-actions">
-                    <button id="new-request-btn">Nouvelle Demande</button>
-                </div>
-            </div>
-            
-            <!-- Contenu principal -->
-            <div class="tab-container">
-                <div class="tab-buttons">
-                    <button class="tab-button active" onclick="openTab(event, 'formulaires')">Formulaires de demande</button>
-                    <button class="tab-button" onclick="openTab(event, 'suivi')">Suivi des demandes</button>
-                </div>
-                
-                <!-- Onglet Formulaires -->
-                <div id="formulaires" class="tab-content active">
-                    <div class="alert alert-info">
-                        Veuillez remplir le formulaire correspondant à votre type de demande. Une fois soumise, vous pourrez suivre l'état de votre demande dans l'onglet "Suivi des demandes".
-                    </div>
-                    
-                    <!-- Sous-onglets pour les différents formulaires -->
-                    <div class="tab-buttons">
-                        <button class="tab-button active" onclick="openSubTab(event, 'section-form')">Changement de Section</button>
-                        <button class="tab-button" onclick="openSubTab(event, 'td-form')">Changement de Groupe TD</button>
-                        <button class="tab-button" onclick="openSubTab(event, 'tp-form')">Changement de Groupe TP</button>
-                    </div>
-                    
-                    <!-- Formulaire de changement de section -->
-                    <div id="section-form" class="tab-content active form-card">
-                        <h2 class="card-title">Formulaire de demande de changement de section</h2>
-                        <form id="section-change-form">
-                            <div class="form-group">
-                                <label for="current-section">Section actuelle</label>
-                                <input type="text" id="current-section" value="" readonly>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="requested-section">Section demandée</label>
-                                <select id="requested-section" required>
-                                    <option value="">Sélectionnez une section</option>
-                                    <!-- Options will be loaded dynamically -->
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="section-reason">Motif de la demande</label>
-                                <select id="section-reason" required>
-                                    <option value="">Sélectionnez un motif</option>
-                                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
-                                    <option value="MEDICAL">Raison médicale</option>
-                                    <option value="TRANSPORT">Problème de transport</option>
-                                    <option value="OTHER">Autre</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="section-justification">Justification détaillée</label>
-                                <textarea id="section-justification" placeholder="Veuillez expliquer en détail les raisons de votre demande..." required></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="section-document">Document justificatif (PDF, JPG, PNG)</label>
-                                <input type="file" id="section-document" accept=".pdf,.jpg,.jpeg,.png">
-                            </div>
-                            
-                            <div class="error-message" id="section-form-error" style="display: none; color: red; margin: 10px 0;"></div>
-                            <div class="success-message" id="section-form-success" style="display: none; color: green; margin: 10px 0;"></div>
-                            
-                            <button type="button" class="submit-btn" onclick="submitRequest('SECTION_CHANGE', 'section')">Soumettre la demande</button>
-                        </form>
-                    </div>
-                    
-                    <!-- Formulaire de changement de groupe TD -->
-                    <div id="td-form" class="tab-content form-card">
-                        <h2 class="card-title">Formulaire de demande de changement de groupe TD</h2>
-                        <form id="td-change-form">
-                            <div class="form-group">
-                                <label for="current-td">Groupe TD actuel</label>
-                                <input type="text" id="current-td" value="" readonly>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="requested-td">Groupe TD demandé</label>
-                                <select id="requested-td" required>
-                                    <option value="">Sélectionnez un groupe</option>
-                                    <!-- Options will be loaded dynamically -->
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="td-reason">Motif de la demande</label>
-                                <select id="td-reason" required>
-                                    <option value="">Sélectionnez un motif</option>
-                                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
-                                    <option value="GROUP_WORK">Travail en groupe</option>
-                                    <option value="TRANSPORT">Problème de transport</option>
-                                    <option value="OTHER">Autre</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="td-justification">Justification détaillée</label>
-                                <textarea id="td-justification" placeholder="Veuillez expliquer en détail les raisons de votre demande..." required></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="td-document">Document justificatif (PDF, JPG, PNG)</label>
-                                <input type="file" id="td-document" accept=".pdf,.jpg,.jpeg,.png">
-                            </div>
-                            
-                            <div class="error-message" id="td-form-error" style="display: none; color: red; margin: 10px 0;"></div>
-                            <div class="success-message" id="td-form-success" style="display: none; color: green; margin: 10px 0;"></div>
-                            
-                            <button type="button" class="submit-btn" onclick="submitRequest('TD_GROUP_CHANGE', 'td')">Soumettre la demande</button>
-                        </form>
-                    </div>
-                    
-                    <!-- Formulaire de changement de groupe TP -->
-                    <div id="tp-form" class="tab-content form-card">
-                        <h2 class="card-title">Formulaire de demande de changement de groupe TP</h2>
-                        <form id="tp-change-form">
-                            <div class="form-group">
-                                <label for="current-tp">Groupe TP actuel</label>
-                                <input type="text" id="current-tp" value="" readonly>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="requested-tp">Groupe TP demandé</label>
-                                <select id="requested-tp" required>
-                                    <option value="">Sélectionnez un groupe</option>
-                                    <!-- Options will be loaded dynamically -->
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="tp-reason">Motif de la demande</label>
-                                <select id="tp-reason" required>
-                                    <option value="">Sélectionnez un motif</option>
-                                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
-                                    <option value="GROUP_WORK">Binôme/groupe de projet</option>
-                                    <option value="EQUIPMENT">Accès au matériel</option>
-                                    <option value="OTHER">Autre</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="tp-justification">Justification détaillée</label>
-                                <textarea id="tp-justification" placeholder="Veuillez expliquer en détail les raisons de votre demande..." required></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="tp-document">Document justificatif (PDF, JPG, PNG)</label>
-                                <input type="file" id="tp-document" accept=".pdf,.jpg,.jpeg,.png">
-                            </div>
-                            
-                            <div class="error-message" id="tp-form-error" style="display: none; color: red; margin: 10px 0;"></div>
-                            <div class="success-message" id="tp-form-success" style="display: none; color: green; margin: 10px 0;"></div>
-                            
-                            <button type="button" class="submit-btn" onclick="submitRequest('TP_GROUP_CHANGE', 'tp')">Soumettre la demande</button>
-                        </form>
-                    </div>
-                </div>
-                
-                <!-- Onglet Suivi des demandes -->
-                <div id="suivi" class="tab-content">
-                    <div class="form-card">
-                        <h2 class="card-title">Suivi de mes demandes</h2>
-                        
-                        <div id="requests-loading" class="loading-indicator">Chargement des demandes...</div>
-                        <div id="requests-error" class="error-message" style="display: none;"></div>
-                        
-                        <table class="requests-table" id="requests-table">
-                            <thead>
-                                <tr>
-                                    <th>Type de demande</th>
-                                    <th>Date de soumission</th>
-                                    <th>Changement demandé</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="requests-table-body">
-                                <!-- Requests will be loaded dynamically -->
-                            </tbody>
-                        </table>
-                        
-                        <div id="no-requests-message" class="empty-state" style="display: none;">
-                            Vous n'avez pas encore soumis de demandes.
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Mes Demandes</h1>
+          <div class="header-actions">
+            <button id="new-request-btn">Nouvelle Demande</button>
+          </div>
         </div>
+
+        <!-- Contenu principal -->
+        <div class="tab-container">
+          <div class="tab-buttons">
+            <button
+              class="tab-button active"
+              onclick="openTab(event, 'formulaires')"
+            >
+              Formulaires de demande
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'suivi')">
+              Suivi des demandes
+            </button>
+          </div>
+
+          <!-- Onglet Formulaires -->
+          <div id="formulaires" class="tab-content active">
+            <div class="alert alert-info">
+              Veuillez remplir le formulaire correspondant à votre type de
+              demande. Une fois soumise, vous pourrez suivre l'état de votre
+              demande dans l'onglet "Suivi des demandes".
+            </div>
+
+            <!-- Sous-onglets pour les différents formulaires -->
+            <div class="tab-buttons">
+              <button
+                class="tab-button active"
+                onclick="openSubTab(event, 'section-form')"
+              >
+                Changement de Section
+              </button>
+              <button class="tab-button" onclick="openSubTab(event, 'td-form')">
+                Changement de Groupe TD
+              </button>
+              <button class="tab-button" onclick="openSubTab(event, 'tp-form')">
+                Changement de Groupe TP
+              </button>
+            </div>
+
+            <!-- Formulaire de changement de section -->
+            <div id="section-form" class="tab-content active form-card">
+              <h2 class="card-title">
+                Formulaire de demande de changement de section
+              </h2>
+              <form id="section-change-form">
+                <div class="form-group">
+                  <label for="current-section">Section actuelle</label>
+                  <input type="text" id="current-section" value="" readonly />
+                </div>
+
+                <div class="form-group">
+                  <label for="requested-section">Section demandée</label>
+                  <select id="requested-section" required>
+                    <option value="">Sélectionnez une section</option>
+                    <!-- Options will be loaded dynamically -->
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="section-reason">Motif de la demande</label>
+                  <select id="section-reason" required>
+                    <option value="">Sélectionnez un motif</option>
+                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
+                    <option value="MEDICAL">Raison médicale</option>
+                    <option value="TRANSPORT">Problème de transport</option>
+                    <option value="OTHER">Autre</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="section-justification"
+                    >Justification détaillée</label
+                  >
+                  <textarea
+                    id="section-justification"
+                    placeholder="Veuillez expliquer en détail les raisons de votre demande..."
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="section-document"
+                    >Document justificatif (PDF, JPG, PNG)</label
+                  >
+                  <input
+                    type="file"
+                    id="section-document"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                  />
+                </div>
+
+                <div
+                  class="error-message"
+                  id="section-form-error"
+                  style="display: none; color: red; margin: 10px 0"
+                ></div>
+                <div
+                  class="success-message"
+                  id="section-form-success"
+                  style="display: none; color: green; margin: 10px 0"
+                ></div>
+
+                <button
+                  type="button"
+                  class="submit-btn"
+                  onclick="submitRequest('SECTION_CHANGE', 'section')"
+                >
+                  Soumettre la demande
+                </button>
+              </form>
+            </div>
+
+            <!-- Formulaire de changement de groupe TD -->
+            <div id="td-form" class="tab-content form-card">
+              <h2 class="card-title">
+                Formulaire de demande de changement de groupe TD
+              </h2>
+              <form id="td-change-form">
+                <div class="form-group">
+                  <label for="current-td">Groupe TD actuel</label>
+                  <input type="text" id="current-td" value="" readonly />
+                </div>
+
+                <div class="form-group">
+                  <label for="requested-td">Groupe TD demandé</label>
+                  <select id="requested-td" required>
+                    <option value="">Sélectionnez un groupe</option>
+                    <!-- Options will be loaded dynamically -->
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="td-reason">Motif de la demande</label>
+                  <select id="td-reason" required>
+                    <option value="">Sélectionnez un motif</option>
+                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
+                    <option value="GROUP_WORK">Travail en groupe</option>
+                    <option value="TRANSPORT">Problème de transport</option>
+                    <option value="OTHER">Autre</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="td-justification">Justification détaillée</label>
+                  <textarea
+                    id="td-justification"
+                    placeholder="Veuillez expliquer en détail les raisons de votre demande..."
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="td-document"
+                    >Document justificatif (PDF, JPG, PNG)</label
+                  >
+                  <input
+                    type="file"
+                    id="td-document"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                  />
+                </div>
+
+                <div
+                  class="error-message"
+                  id="td-form-error"
+                  style="display: none; color: red; margin: 10px 0"
+                ></div>
+                <div
+                  class="success-message"
+                  id="td-form-success"
+                  style="display: none; color: green; margin: 10px 0"
+                ></div>
+
+                <button
+                  type="button"
+                  class="submit-btn"
+                  onclick="submitRequest('TD_GROUP_CHANGE', 'td')"
+                >
+                  Soumettre la demande
+                </button>
+              </form>
+            </div>
+
+            <!-- Formulaire de changement de groupe TP -->
+            <div id="tp-form" class="tab-content form-card">
+              <h2 class="card-title">
+                Formulaire de demande de changement de groupe TP
+              </h2>
+              <form id="tp-change-form">
+                <div class="form-group">
+                  <label for="current-tp">Groupe TP actuel</label>
+                  <input type="text" id="current-tp" value="" readonly />
+                </div>
+
+                <div class="form-group">
+                  <label for="requested-tp">Groupe TP demandé</label>
+                  <select id="requested-tp" required>
+                    <option value="">Sélectionnez un groupe</option>
+                    <!-- Options will be loaded dynamically -->
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="tp-reason">Motif de la demande</label>
+                  <select id="tp-reason" required>
+                    <option value="">Sélectionnez un motif</option>
+                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
+                    <option value="GROUP_WORK">Binôme/groupe de projet</option>
+                    <option value="EQUIPMENT">Accès au matériel</option>
+                    <option value="OTHER">Autre</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="tp-justification">Justification détaillée</label>
+                  <textarea
+                    id="tp-justification"
+                    placeholder="Veuillez expliquer en détail les raisons de votre demande..."
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="tp-document"
+                    >Document justificatif (PDF, JPG, PNG)</label
+                  >
+                  <input
+                    type="file"
+                    id="tp-document"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                  />
+                </div>
+
+                <div
+                  class="error-message"
+                  id="tp-form-error"
+                  style="display: none; color: red; margin: 10px 0"
+                ></div>
+                <div
+                  class="success-message"
+                  id="tp-form-success"
+                  style="display: none; color: green; margin: 10px 0"
+                ></div>
+
+                <button
+                  type="button"
+                  class="submit-btn"
+                  onclick="submitRequest('TP_GROUP_CHANGE', 'tp')"
+                >
+                  Soumettre la demande
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Onglet Suivi des demandes -->
+          <div id="suivi" class="tab-content">
+            <div class="form-card">
+              <h2 class="card-title">Suivi de mes demandes</h2>
+
+              <div id="requests-loading" class="loading-indicator">
+                Chargement des demandes...
+              </div>
+              <div
+                id="requests-error"
+                class="error-message"
+                style="display: none"
+              ></div>
+
+              <table class="requests-table" id="requests-table">
+                <thead>
+                  <tr>
+                    <th>Type de demande</th>
+                    <th>Date de soumission</th>
+                    <th>Changement demandé</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="requests-table-body">
+                  <!-- Requests will be loaded dynamically -->
+                </tbody>
+              </table>
+
+              <div
+                id="no-requests-message"
+                class="empty-state"
+                style="display: none"
+              >
+                Vous n'avez pas encore soumis de demandes.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Global variables
-        let currentUser = null;
-        let authToken = null;
-        let userSections = [];
-        let availableSections = [];
-        let availableTdGroups = [];
-        let availableTpGroups = [];
-        let isBackendAvailable = true; // Flag to track backend availability
+      // Global variables
+      let currentUser = null;
+      let authToken = null;
+      let userSections = [];
+      let availableSections = [];
+      let availableTdGroups = [];
+      let availableTpGroups = [];
+      let isBackendAvailable = true; // Flag to track backend availability
 
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Load navigation
-            fetch('etudiant-nav.html')
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('navbar-container').innerHTML = html;
-                });
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load navigation
+        fetch("etudiant-nav.html")
+          .then((response) => response.text())
+          .then((html) => {
+            document.getElementById("navbar-container").innerHTML = html;
 
-            try {
-                // 1. Retrieve token from storage
-                authToken = sessionStorage.getItem('etudiant_token') || 
-                          localStorage.getItem('etudiant_token');
-                
-                if (!authToken) {
-                    window.location.href = 'etudiant-login.html';
-                    return;
-                }
+            // After the nav is loaded, populate user data from localStorage
+            const studentDataJson =
+              localStorage.getItem("studentData") ||
+              sessionStorage.getItem("studentData");
+            if (studentDataJson) {
+              try {
+                const studentData = JSON.parse(studentDataJson);
 
-                // 2. Verify token and role - with fallback for backend issues
-                try {
-                    const verificationResponse = await fetch('http://localhost:3000/api/auth/verify', {
-                        method: 'GET',
-                        headers: { 
-                            'Authorization': `Bearer ${authToken}`,
-                            'Content-Type': 'application/json'
-                        },
-                        // Add timeout to prevent long waiting
-                        signal: AbortSignal.timeout(5000)
-                    });
+                // Update sidebar with student data
+                document.getElementById("userFullName").textContent =
+                  `${studentData.firstName || ""} ${
+                    studentData.lastName || ""
+                  }`.trim() || "Utilisateur";
+                document.getElementById("userId").textContent =
+                  studentData.matricule || "N/A";
 
-                    if (!verificationResponse.ok) {
-                        console.warn('Token verification failed but continuing with limited functionality');
-                        isBackendAvailable = false;
-                        // Continue with limited functionality instead of redirecting
-                        loadFallbackData();
-                    } else {
-                        const userData = await verificationResponse.json();
-                        
-                        // 3. Validate student role
-                        if (userData.adminRole !== 'etudiant') {
-                            throw new Error('Access restricted to students');
-                        }
-
-                        // 4. Set current user
-                        currentUser = {
-                            id: userData.userId,
-                            email: userData.email
-                        };
-
-                        // 5. Load user data and requests
-                        await loadUserData();
-                        loadUserRequests();
-                    }
-                } catch (error) {
-                    console.error('Auth verification error:', error);
-                    isBackendAvailable = false;
-                    loadFallbackData();
-                }
-
-            } catch (error) {
-                console.error('Access denied:', error);
-                // Clear storage and redirect
-                sessionStorage.removeItem('etudiant_token');
-                localStorage.removeItem('etudiant_token');
-                window.location.href = 'etudiant-login.html';
+                // Set avatar initials
+                const firstInitial =
+                  studentData.firstName && studentData.firstName.charAt
+                    ? studentData.firstName.charAt(0)
+                    : "";
+                const lastInitial =
+                  studentData.lastName && studentData.lastName.charAt
+                    ? studentData.lastName.charAt(0)
+                    : "";
+                document.getElementById("userAvatar").textContent =
+                  firstInitial && lastInitial
+                    ? `${firstInitial}${lastInitial}`.toUpperCase()
+                    : "U";
+              } catch (e) {
+                console.error("Error parsing stored student data:", e);
+              }
             }
+
+            // Execute setActiveLink function directly if it exists in the global scope
+            if (typeof window.setActiveLink === "function") {
+              // Give a small delay to ensure everything is loaded
+              setTimeout(() => {
+                window.setActiveLink();
+              }, 200);
+            } else {
+              // If function doesn't exist in global scope, try to find and run it from the loaded navigation
+              const navScript = document.querySelector(
+                "#navbar-container script"
+              );
+              if (
+                navScript &&
+                navScript.innerText.includes("function setActiveLink")
+              ) {
+                // Find all nav links and manually set active for the current page
+                document.querySelectorAll(".nav-link").forEach((link) => {
+                  link.classList.remove("active");
+                  if (link.getAttribute("href") === "demandes.html") {
+                    link.classList.add("active");
+                  }
+                });
+              }
+            }
+          });
+
+        try {
+          // 1. Retrieve token from storage
+          authToken =
+            sessionStorage.getItem("etudiant_token") ||
+            localStorage.getItem("etudiant_token");
+
+          if (!authToken) {
+            window.location.href = "etudiant-login.html";
+            return;
+          }
+
+          // 2. Verify token and role - with fallback for backend issues
+          try {
+            const verificationResponse = await fetch(
+              "http://localhost:3000/api/auth/verify",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  "Content-Type": "application/json",
+                },
+                // Add timeout to prevent long waiting
+                signal: AbortSignal.timeout(5000),
+              }
+            );
+
+            if (!verificationResponse.ok) {
+              console.warn(
+                "Token verification failed but continuing with limited functionality"
+              );
+              isBackendAvailable = false;
+              // Continue with limited functionality instead of redirecting
+              loadFallbackData();
+            } else {
+              const userData = await verificationResponse.json();
+
+              // 3. Validate student role
+              if (userData.adminRole !== "etudiant") {
+                throw new Error("Access restricted to students");
+              }
+
+              // 4. Set current user
+              currentUser = {
+                id: userData.userId,
+                email: userData.email,
+              };
+
+              // 5. Load user data and requests
+              await loadUserData();
+              loadUserRequests();
+            }
+          } catch (error) {
+            console.error("Auth verification error:", error);
+            isBackendAvailable = false;
+            loadFallbackData();
+          }
+        } catch (error) {
+          console.error("Access denied:", error);
+          // Clear storage and redirect
+          sessionStorage.removeItem("etudiant_token");
+          localStorage.removeItem("etudiant_token");
+          window.location.href = "etudiant-login.html";
+        }
+      });
+
+      // Load fallback data when backend is unavailable
+      function loadFallbackData() {
+        // Add offline mode notice
+        const existingNotice = document.querySelector(".alert.alert-warning");
+        if (!existingNotice) {
+          const offlineNotice = document.createElement("div");
+          offlineNotice.className = "alert alert-warning";
+          offlineNotice.style.marginTop = "20px";
+          offlineNotice.style.padding = "10px";
+          offlineNotice.style.backgroundColor = "#fff3cd";
+          offlineNotice.style.color = "#856404";
+          offlineNotice.style.borderRadius = "4px";
+          offlineNotice.innerHTML =
+            "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées. Les demandes ne seront pas envoyées tant que la connexion ne sera pas rétablie.";
+
+          // Add reconnection button
+          const reconnectBtn = document.createElement("button");
+          reconnectBtn.textContent = "Réessayer la connexion";
+          reconnectBtn.style.marginLeft = "10px";
+          reconnectBtn.style.padding = "5px 10px";
+          reconnectBtn.style.backgroundColor = "#007bff";
+          reconnectBtn.style.color = "#fff";
+          reconnectBtn.style.border = "none";
+          reconnectBtn.style.borderRadius = "4px";
+          reconnectBtn.style.cursor = "pointer";
+
+          reconnectBtn.onclick = function () {
+            window.location.reload();
+          };
+
+          offlineNotice.appendChild(reconnectBtn);
+          document.querySelector(".tab-container").prepend(offlineNotice);
+        }
+
+        // Set placeholder values
+        document.getElementById("current-section").value = "B";
+        document.getElementById("current-td").value = "3";
+        document.getElementById("current-tp").value = "2";
+
+        // Add some dummy options
+        const sectionSelect = document.getElementById("requested-section");
+        ["A", "C", "D"].forEach((section) => {
+          const option = document.createElement("option");
+          option.value = section;
+          option.textContent = `Section ${section}`;
+          sectionSelect.appendChild(option);
         });
 
-        // Load fallback data when backend is unavailable
-        function loadFallbackData() {
-            // Add offline mode notice
-            const existingNotice = document.querySelector('.alert.alert-warning');
-            if (!existingNotice) {
-                const offlineNotice = document.createElement('div');
-                offlineNotice.className = 'alert alert-warning';
-                offlineNotice.style.marginTop = '20px';
-                offlineNotice.style.padding = '10px';
-                offlineNotice.style.backgroundColor = '#fff3cd';
-                offlineNotice.style.color = '#856404';
-                offlineNotice.style.borderRadius = '4px';
-                offlineNotice.innerHTML = '<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées. Les demandes ne seront pas envoyées tant que la connexion ne sera pas rétablie.';
-                
-                // Add reconnection button
-                const reconnectBtn = document.createElement('button');
-                reconnectBtn.textContent = 'Réessayer la connexion';
-                reconnectBtn.style.marginLeft = '10px';
-                reconnectBtn.style.padding = '5px 10px';
-                reconnectBtn.style.backgroundColor = '#007bff';
-                reconnectBtn.style.color = '#fff';
-                reconnectBtn.style.border = 'none';
-                reconnectBtn.style.borderRadius = '4px';
-                reconnectBtn.style.cursor = 'pointer';
-                
-                reconnectBtn.onclick = function() {
-                    window.location.reload();
-                };
-                
-                offlineNotice.appendChild(reconnectBtn);
-                document.querySelector('.tab-container').prepend(offlineNotice);
+        const tdSelect = document.getElementById("requested-td");
+        [1, 2, 4, 5].forEach((group) => {
+          const option = document.createElement("option");
+          option.value = group;
+          option.textContent = `Groupe TD ${group}`;
+          tdSelect.appendChild(option);
+        });
+
+        const tpSelect = document.getElementById("requested-tp");
+        [1, 3, 4].forEach((group) => {
+          const option = document.createElement("option");
+          option.value = group;
+          option.textContent = `Groupe TP ${group}`;
+          tpSelect.appendChild(option);
+        });
+
+        // Show sample requests in the table
+        const sampleRequests = [
+          {
+            id: "sample1",
+            type: "SECTION_CHANGE",
+            createdAt: new Date(Date.now() - 86400000 * 5),
+            currentValue: "B",
+            requestedValue: "A",
+            status: "APPROVED",
+          },
+          {
+            id: "sample2",
+            type: "TD_GROUP_CHANGE",
+            createdAt: new Date(),
+            currentValue: "3",
+            requestedValue: "2",
+            status: "PENDING",
+          },
+        ];
+
+        const requestsTable = document.getElementById("requests-table");
+        const requestsTableBody = document.getElementById(
+          "requests-table-body"
+        );
+        const loadingIndicator = document.getElementById("requests-loading");
+
+        loadingIndicator.style.display = "none";
+        requestsTable.style.display = "table";
+
+        sampleRequests.forEach((request) => {
+          const row = document.createElement("tr");
+
+          // Type de demande
+          const typeCell = document.createElement("td");
+          typeCell.textContent = getRequestTypeLabel(request.type);
+          row.appendChild(typeCell);
+
+          // Date de soumission
+          const dateCell = document.createElement("td");
+          dateCell.textContent = formatDate(request.createdAt);
+          row.appendChild(dateCell);
+
+          // Changement demandé
+          const changeCell = document.createElement("td");
+          changeCell.textContent = `${request.currentValue} → ${request.requestedValue}`;
+          row.appendChild(changeCell);
+
+          // Statut
+          const statusCell = document.createElement("td");
+          statusCell.innerHTML = getStatusLabel(request.status);
+          row.appendChild(statusCell);
+
+          // Actions
+          const actionsCell = document.createElement("td");
+
+          // View details button
+          const viewButton = document.createElement("button");
+          viewButton.className = "action-btn";
+          viewButton.textContent = "Voir détails";
+          viewButton.onclick = () =>
+            alert("Mode hors ligne: détails non disponibles");
+          actionsCell.appendChild(viewButton);
+
+          // Cancel button (only for pending requests)
+          if (request.status === "PENDING") {
+            const cancelButton = document.createElement("button");
+            cancelButton.className = "action-btn";
+            cancelButton.textContent = "Annuler";
+            cancelButton.onclick = () =>
+              alert("Mode hors ligne: annulation non disponible");
+            actionsCell.appendChild(cancelButton);
+          }
+
+          row.appendChild(actionsCell);
+          requestsTableBody.appendChild(row);
+        });
+      }
+
+      // Load user data
+      async function loadUserData() {
+        try {
+          // First try to get the data from localStorage/sessionStorage
+          const studentDataJson =
+            localStorage.getItem("studentData") ||
+            sessionStorage.getItem("studentData");
+          let studentData = null;
+
+          if (studentDataJson) {
+            try {
+              studentData = JSON.parse(studentDataJson);
+              console.log("Using student data from localStorage");
+            } catch (e) {
+              console.error("Error parsing stored student data:", e);
             }
-            
-            // Set placeholder values
-            document.getElementById('current-section').value = 'B';
-            document.getElementById('current-td').value = '3';
-            document.getElementById('current-tp').value = '2';
-            
-            // Add some dummy options
-            const sectionSelect = document.getElementById('requested-section');
-            ['A', 'C', 'D'].forEach(section => {
-                const option = document.createElement('option');
-                option.value = section;
-                option.textContent = `Section ${section}`;
-                sectionSelect.appendChild(option);
-            });
-            
-            const tdSelect = document.getElementById('requested-td');
-            [1, 2, 4, 5].forEach(group => {
-                const option = document.createElement('option');
-                option.value = group;
-                option.textContent = `Groupe TD ${group}`;
-                tdSelect.appendChild(option);
-            });
-            
-            const tpSelect = document.getElementById('requested-tp');
-            [1, 3, 4].forEach(group => {
-                const option = document.createElement('option');
-                option.value = group;
-                option.textContent = `Groupe TP ${group}`;
-                tpSelect.appendChild(option);
-            });
-            
-            // Show sample requests in the table
-            const sampleRequests = [
-                {
-                    id: 'sample1',
-                    type: 'SECTION_CHANGE',
-                    createdAt: new Date(Date.now() - 86400000 * 5),
-                    currentValue: 'B',
-                    requestedValue: 'A',
-                    status: 'APPROVED'
+          }
+
+          try {
+            const response = await fetch(
+              `http://localhost:3000/api/etudiants/${currentUser.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
                 },
-                {
-                    id: 'sample2',
-                    type: 'TD_GROUP_CHANGE',
-                    createdAt: new Date(),
-                    currentValue: '3',
-                    requestedValue: '2',
-                    status: 'PENDING'
-                }
-            ];
-            
-            const requestsTable = document.getElementById('requests-table');
-            const requestsTableBody = document.getElementById('requests-table-body');
-            const loadingIndicator = document.getElementById('requests-loading');
-            
-            loadingIndicator.style.display = 'none';
-            requestsTable.style.display = 'table';
-            
-            sampleRequests.forEach(request => {
-                const row = document.createElement('tr');
-                
-                // Type de demande
-                const typeCell = document.createElement('td');
-                typeCell.textContent = getRequestTypeLabel(request.type);
-                row.appendChild(typeCell);
-                
-                // Date de soumission
-                const dateCell = document.createElement('td');
-                dateCell.textContent = formatDate(request.createdAt);
-                row.appendChild(dateCell);
-                
-                // Changement demandé
-                const changeCell = document.createElement('td');
-                changeCell.textContent = `${request.currentValue} → ${request.requestedValue}`;
-                row.appendChild(changeCell);
-                
-                // Statut
-                const statusCell = document.createElement('td');
-                statusCell.innerHTML = getStatusLabel(request.status);
-                row.appendChild(statusCell);
-                
-                // Actions
-                const actionsCell = document.createElement('td');
-                
-                // View details button
-                const viewButton = document.createElement('button');
-                viewButton.className = 'action-btn';
-                viewButton.textContent = 'Voir détails';
-                viewButton.onclick = () => alert('Mode hors ligne: détails non disponibles');
-                actionsCell.appendChild(viewButton);
-                
-                // Cancel button (only for pending requests)
-                if (request.status === 'PENDING') {
-                    const cancelButton = document.createElement('button');
-                    cancelButton.className = 'action-btn';
-                    cancelButton.textContent = 'Annuler';
-                    cancelButton.onclick = () => alert('Mode hors ligne: annulation non disponible');
-                    actionsCell.appendChild(cancelButton);
-                }
-                
-                row.appendChild(actionsCell);
-                requestsTableBody.appendChild(row);
+                signal: AbortSignal.timeout(5000),
+              }
+            );
+
+            if (response.ok) {
+              const user = await response.json();
+              userSections = user.sections || [];
+
+              // Store updated user data
+              localStorage.setItem("studentData", JSON.stringify(user));
+              studentData = user;
+            } else {
+              console.warn(
+                "Failed to load user data from API, using localStorage data"
+              );
+            }
+          } catch (error) {
+            console.warn("API error:", error);
+            // Continue with localStorage data
+          }
+
+          // Check if we have sections from API or localStorage
+          if (
+            studentData &&
+            studentData.sections &&
+            studentData.sections.length > 0
+          ) {
+            userSections = studentData.sections;
+          }
+
+          if (userSections.length > 0) {
+            // Set current values
+            document.getElementById("current-section").value =
+              userSections[0].nom || "Non assigné";
+            document.getElementById("current-td").value =
+              userSections[0].groupe_td || "Non assigné";
+            document.getElementById("current-tp").value =
+              userSections[0].groupe_tp || "Non assigné";
+
+            // Load available options if we have filiere information
+            if (userSections[0].filiere) {
+              await loadAvailableOptions(userSections[0].filiere);
+            } else {
+              console.warn(
+                "No filiere data available, skipping options loading"
+              );
+              loadFallbackData();
+            }
+          } else {
+            console.warn("No section data available, using fallback data");
+            loadFallbackData();
+          }
+        } catch (error) {
+          console.error("Error loading user data:", error);
+          isBackendAvailable = false;
+          loadFallbackData();
+        }
+      }
+
+      // Load available options for sections, TD and TP groups
+      async function loadAvailableOptions(filiere) {
+        try {
+          // Load available sections
+          const sectionsResponse = await fetch(
+            `http://localhost:3000/api/sections?filiere=${filiere}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
+
+          if (sectionsResponse.ok) {
+            availableSections = await sectionsResponse.json();
+            const sectionSelect = document.getElementById("requested-section");
+
+            // Clear existing options except the first one
+            while (sectionSelect.options.length > 1) {
+              sectionSelect.remove(1);
+            }
+
+            // Add new options, excluding the student's current section
+            availableSections.forEach((section) => {
+              if (
+                section.nom !== document.getElementById("current-section").value
+              ) {
+                const option = document.createElement("option");
+                option.value = section.id;
+                option.textContent = `Section ${section.nom}`;
+                sectionSelect.appendChild(option);
+              }
             });
+          }
+
+          // Load available TD groups for the current section
+          const currentSectionName =
+            document.getElementById("current-section").value;
+          const currentSection = availableSections.find(
+            (s) => s.nom === currentSectionName
+          );
+
+          if (currentSection) {
+            const tdResponse = await fetch(
+              `http://localhost:3000/api/sections/${currentSection.id}/td-groups`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+                signal: AbortSignal.timeout(5000),
+              }
+            );
+
+            if (tdResponse.ok) {
+              availableTdGroups = await tdResponse.json();
+              const tdSelect = document.getElementById("requested-td");
+
+              // Clear existing options except the first one
+              while (tdSelect.options.length > 1) {
+                tdSelect.remove(1);
+              }
+
+              // Add new options, excluding the student's current TD group
+              availableTdGroups.forEach((group) => {
+                if (
+                  group.number !== document.getElementById("current-td").value
+                ) {
+                  const option = document.createElement("option");
+                  option.value = group.id;
+                  option.textContent = `Groupe TD ${group.number}`;
+                  tdSelect.appendChild(option);
+                }
+              });
+            }
+
+            // Load available TP groups for the current section
+            const tpResponse = await fetch(
+              `http://localhost:3000/api/sections/${currentSection.id}/tp-groups`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+                signal: AbortSignal.timeout(5000),
+              }
+            );
+
+            if (tpResponse.ok) {
+              availableTpGroups = await tpResponse.json();
+              const tpSelect = document.getElementById("requested-tp");
+
+              // Clear existing options except the first one
+              while (tpSelect.options.length > 1) {
+                tpSelect.remove(1);
+              }
+
+              // Add new options, excluding the student's current TP group
+              availableTpGroups.forEach((group) => {
+                if (
+                  group.number !== document.getElementById("current-tp").value
+                ) {
+                  const option = document.createElement("option");
+                  option.value = group.id;
+                  option.textContent = `Groupe TP ${group.number}`;
+                  tpSelect.appendChild(option);
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error loading available options:", error);
+          isBackendAvailable = false;
+          loadFallbackData();
         }
+      }
 
-        // Load user data
-        async function loadUserData() {
-            try {
-                const response = await fetch(`http://localhost:3000/api/etudiants/${currentUser.id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    signal: AbortSignal.timeout(5000)
-                });
+      // Load user requests
+      async function loadUserRequests() {
+        const loadingIndicator = document.getElementById("requests-loading");
+        const errorMessage = document.getElementById("requests-error");
+        const requestsTable = document.getElementById("requests-table");
+        const requestsTableBody = document.getElementById(
+          "requests-table-body"
+        );
+        const noRequestsMessage = document.getElementById(
+          "no-requests-message"
+        );
 
-                if (response.ok) {
-                    const user = await response.json();
-                    userSections = user.sections || [];
-                    
-                    if (userSections.length > 0) {
-                        // Set current values
-                        document.getElementById('current-section').value = userSections[0].nom || 'Non assigné';
-                        document.getElementById('current-td').value = userSections[0].groupe_td || 'Non assigné';
-                        document.getElementById('current-tp').value = userSections[0].groupe_tp || 'Non assigné';
-                        
-                        // Load available options
-                        await loadAvailableOptions(userSections[0].filiere);
-                    } else {
-                        throw new Error('No section data available');
-                    }
+        loadingIndicator.style.display = "block";
+        errorMessage.style.display = "none";
+        requestsTable.style.display = "none";
+        noRequestsMessage.style.display = "none";
+
+        // Check if we're in offline mode
+        if (!isBackendAvailable) {
+          loadingIndicator.style.display = "none";
+
+          // Get offline requests from localStorage
+          try {
+            const offlineRequests = JSON.parse(
+              localStorage.getItem("offlineRequests") || "[]"
+            );
+
+            // Add sample requests for demonstration
+            const sampleRequests = [
+              {
+                id: "sample1",
+                type: "SECTION_CHANGE",
+                createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+                currentValue: "B",
+                requestedValue: "Section A",
+                status: "APPROVED",
+              },
+              {
+                id: "sample2",
+                type: "TD_GROUP_CHANGE",
+                createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+                currentValue: "3",
+                requestedValue: "Groupe TD 2",
+                status: "PENDING",
+              },
+            ];
+
+            // Combine offline and sample requests
+            const combinedRequests = [
+              ...offlineRequests.map((req) => ({
+                ...req,
+                id: "offline-" + Math.random().toString(36).substring(2, 9),
+                status: "PENDING",
+                isOffline: true,
+              })),
+              ...sampleRequests,
+            ];
+
+            if (combinedRequests.length === 0) {
+              noRequestsMessage.style.display = "block";
+              return;
+            }
+
+            requestsTable.style.display = "table";
+            requestsTableBody.innerHTML = "";
+
+            // Sort by date (newest first)
+            combinedRequests.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+
+            combinedRequests.forEach((request) => {
+              const row = document.createElement("tr");
+
+              // Type de demande
+              const typeCell = document.createElement("td");
+              typeCell.textContent = getRequestTypeLabel(request.type);
+              row.appendChild(typeCell);
+
+              // Date de soumission
+              const dateCell = document.createElement("td");
+              dateCell.textContent = formatDate(request.createdAt);
+              row.appendChild(dateCell);
+
+              // Changement demandé
+              const changeCell = document.createElement("td");
+              changeCell.textContent = `${request.currentValue || "-"} → ${
+                request.requestedValue || "-"
+              }`;
+              row.appendChild(changeCell);
+
+              // Statut
+              const statusCell = document.createElement("td");
+              if (request.isOffline) {
+                statusCell.innerHTML =
+                  '<span class="status-chip status-offline">En attente (hors ligne)</span>';
+              } else {
+                statusCell.innerHTML = getStatusLabel(request.status);
+              }
+              row.appendChild(statusCell);
+
+              // Actions
+              const actionsCell = document.createElement("td");
+
+              // View details button
+              const viewButton = document.createElement("button");
+              viewButton.className = "action-btn";
+              viewButton.textContent = "Voir détails";
+              viewButton.onclick = () => {
+                if (request.isOffline) {
+                  alert(
+                    "Détails de la demande hors ligne:\n" +
+                      "Type: " +
+                      getRequestTypeLabel(request.type) +
+                      "\n" +
+                      "Motif: " +
+                      request.reason +
+                      "\n" +
+                      "Justification: " +
+                      request.justification
+                  );
                 } else {
-                    throw new Error('Failed to load user data');
+                  alert("Mode hors ligne: détails non disponibles");
                 }
-            } catch (error) {
-                console.error('Error loading user data:', error);
-                isBackendAvailable = false;
-                loadFallbackData();
-            }
-        }
+              };
+              actionsCell.appendChild(viewButton);
 
-        // Load available options for sections, TD and TP groups
-        async function loadAvailableOptions(filiere) {
-            try {
-                // Load available sections
-                const sectionsResponse = await fetch(`http://localhost:3000/api/sections?filiere=${filiere}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    signal: AbortSignal.timeout(5000)
-                });
-                
-                if (sectionsResponse.ok) {
-                    availableSections = await sectionsResponse.json();
-                    const sectionSelect = document.getElementById('requested-section');
-                    
-                    // Clear existing options except the first one
-                    while (sectionSelect.options.length > 1) {
-                        sectionSelect.remove(1);
-                    }
-                    
-                    // Add new options, excluding the student's current section
-                    availableSections.forEach(section => {
-                        if (section.nom !== document.getElementById('current-section').value) {
-                            const option = document.createElement('option');
-                            option.value = section.id;
-                            option.textContent = `Section ${section.nom}`;
-                            sectionSelect.appendChild(option);
-                        }
-                    });
-                }
-                
-                // Load available TD groups for the current section
-                const currentSectionName = document.getElementById('current-section').value;
-                const currentSection = availableSections.find(s => s.nom === currentSectionName);
-                
-                if (currentSection) {
-                    const tdResponse = await fetch(`http://localhost:3000/api/sections/${currentSection.id}/td-groups`, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        },
-                        signal: AbortSignal.timeout(5000)
-                    });
-                    
-                    if (tdResponse.ok) {
-                        availableTdGroups = await tdResponse.json();
-                        const tdSelect = document.getElementById('requested-td');
-                        
-                        // Clear existing options except the first one
-                        while (tdSelect.options.length > 1) {
-                            tdSelect.remove(1);
-                        }
-                        
-                        // Add new options, excluding the student's current TD group
-                        availableTdGroups.forEach(group => {
-                            if (group.number !== document.getElementById('current-td').value) {
-                                const option = document.createElement('option');
-                                option.value = group.id;
-                                option.textContent = `Groupe TD ${group.number}`;
-                                tdSelect.appendChild(option);
-                            }
-                        });
-                    }
-                    
-                    // Load available TP groups for the current section
-                    const tpResponse = await fetch(`http://localhost:3000/api/sections/${currentSection.id}/tp-groups`, {
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        },
-                        signal: AbortSignal.timeout(5000)
-                    });
-                    
-                    if (tpResponse.ok) {
-                        availableTpGroups = await tpResponse.json();
-                        const tpSelect = document.getElementById('requested-tp');
-                        
-                        // Clear existing options except the first one
-                        while (tpSelect.options.length > 1) {
-                            tpSelect.remove(1);
-                        }
-                        
-                        // Add new options, excluding the student's current TP group
-                        availableTpGroups.forEach(group => {
-                            if (group.number !== document.getElementById('current-tp').value) {
-                                const option = document.createElement('option');
-                                option.value = group.id;
-                                option.textContent = `Groupe TP ${group.number}`;
-                                tpSelect.appendChild(option);
-                            }
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading available options:', error);
-                isBackendAvailable = false;
-                loadFallbackData();
-            }
-        }
+              // Cancel button (only for pending requests)
+              if (request.status === "PENDING" || request.isOffline) {
+                const cancelButton = document.createElement("button");
+                cancelButton.className = "action-btn";
+                cancelButton.textContent = "Annuler";
+                cancelButton.onclick = () => {
+                  if (
+                    request.isOffline &&
+                    confirm("Voulez-vous annuler cette demande hors ligne ?")
+                  ) {
+                    // Remove from localStorage
+                    const offlineReqs = JSON.parse(
+                      localStorage.getItem("offlineRequests") || "[]"
+                    );
+                    const updatedReqs = offlineReqs.filter(
+                      (r) =>
+                        r.createdAt !== request.createdAt ||
+                        r.type !== request.type
+                    );
+                    localStorage.setItem(
+                      "offlineRequests",
+                      JSON.stringify(updatedReqs)
+                    );
 
-        // Load user requests
-        async function loadUserRequests() {
-            const loadingIndicator = document.getElementById('requests-loading');
-            const errorMessage = document.getElementById('requests-error');
-            const requestsTable = document.getElementById('requests-table');
-            const requestsTableBody = document.getElementById('requests-table-body');
-            const noRequestsMessage = document.getElementById('no-requests-message');
-            
-            loadingIndicator.style.display = 'block';
-            errorMessage.style.display = 'none';
-            requestsTable.style.display = 'none';
-            noRequestsMessage.style.display = 'none';
-            
-            // Check if we're in offline mode
-            if (!isBackendAvailable) {
-                loadingIndicator.style.display = 'none';
-                
-                // Get offline requests from localStorage
-                try {
-                    const offlineRequests = JSON.parse(localStorage.getItem('offlineRequests') || '[]');
-                    
-                    // Add sample requests for demonstration
-                    const sampleRequests = [
-                        {
-                            id: 'sample1',
-                            type: 'SECTION_CHANGE',
-                            createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-                            currentValue: 'B',
-                            requestedValue: 'Section A',
-                            status: 'APPROVED'
-                        },
-                        {
-                            id: 'sample2',
-                            type: 'TD_GROUP_CHANGE',
-                            createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-                            currentValue: '3',
-                            requestedValue: 'Groupe TD 2',
-                            status: 'PENDING'
-                        }
-                    ];
-                    
-                    // Combine offline and sample requests
-                    const combinedRequests = [
-                        ...offlineRequests.map(req => ({
-                            ...req,
-                            id: 'offline-' + Math.random().toString(36).substring(2, 9),
-                            status: 'PENDING',
-                            isOffline: true
-                        })),
-                        ...sampleRequests
-                    ];
-                    
-                    if (combinedRequests.length === 0) {
-                        noRequestsMessage.style.display = 'block';
-                        return;
-                    }
-                    
-                    requestsTable.style.display = 'table';
-                    requestsTableBody.innerHTML = '';
-                    
-                    // Sort by date (newest first)
-                    combinedRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    
-                    combinedRequests.forEach(request => {
-                        const row = document.createElement('tr');
-                        
-                        // Type de demande
-                        const typeCell = document.createElement('td');
-                        typeCell.textContent = getRequestTypeLabel(request.type);
-                        row.appendChild(typeCell);
-                        
-                        // Date de soumission
-                        const dateCell = document.createElement('td');
-                        dateCell.textContent = formatDate(request.createdAt);
-                        row.appendChild(dateCell);
-                        
-                        // Changement demandé
-                        const changeCell = document.createElement('td');
-                        changeCell.textContent = `${request.currentValue || '-'} → ${request.requestedValue || '-'}`;
-                        row.appendChild(changeCell);
-                        
-                        // Statut
-                        const statusCell = document.createElement('td');
-                        if (request.isOffline) {
-                            statusCell.innerHTML = '<span class="status-chip status-offline">En attente (hors ligne)</span>';
-                        } else {
-                            statusCell.innerHTML = getStatusLabel(request.status);
-                        }
-                        row.appendChild(statusCell);
-                        
-                        // Actions
-                        const actionsCell = document.createElement('td');
-                        
-                        // View details button
-                        const viewButton = document.createElement('button');
-                        viewButton.className = 'action-btn';
-                        viewButton.textContent = 'Voir détails';
-                        viewButton.onclick = () => {
-                            if (request.isOffline) {
-                                alert('Détails de la demande hors ligne:\n' + 
-                                      'Type: ' + getRequestTypeLabel(request.type) + '\n' +
-                                      'Motif: ' + request.reason + '\n' +
-                                      'Justification: ' + request.justification);
-                            } else {
-                                alert('Mode hors ligne: détails non disponibles');
-                            }
-                        };
-                        actionsCell.appendChild(viewButton);
-                        
-                        // Cancel button (only for pending requests)
-                        if (request.status === 'PENDING' || request.isOffline) {
-                            const cancelButton = document.createElement('button');
-                            cancelButton.className = 'action-btn';
-                            cancelButton.textContent = 'Annuler';
-                            cancelButton.onclick = () => {
-                                if (request.isOffline && confirm('Voulez-vous annuler cette demande hors ligne ?')) {
-                                    // Remove from localStorage
-                                    const offlineReqs = JSON.parse(localStorage.getItem('offlineRequests') || '[]');
-                                    const updatedReqs = offlineReqs.filter(r => 
-                                        r.createdAt !== request.createdAt || 
-                                        r.type !== request.type
-                                    );
-                                    localStorage.setItem('offlineRequests', JSON.stringify(updatedReqs));
-                                    
-                                    // Reload requests
-                                    loadUserRequests();
-                                } else {
-                                    alert('Mode hors ligne: annulation non disponible');
-                                }
-                            };
-                            actionsCell.appendChild(cancelButton);
-                        }
-                        
-                        row.appendChild(actionsCell);
-                        requestsTableBody.appendChild(row);
-                    });
-                    
-                } catch (error) {
-                    console.error('Error loading offline requests:', error);
-                    errorMessage.textContent = 'Erreur lors du chargement des demandes hors ligne.';
-                    errorMessage.style.display = 'block';
-                }
-                
-                return;
-            }
-            
-            try {
-                const response = await fetch('http://localhost:3000/api/change-requests/my-requests', {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    signal: AbortSignal.timeout(5000)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to load requests');
-                }
-                
-                const requests = await response.json();
-                
-                loadingIndicator.style.display = 'none';
-                
-                if (requests.length === 0) {
-                    noRequestsMessage.style.display = 'block';
-                    return;
-                }
-                
-                requestsTable.style.display = 'table';
-                requestsTableBody.innerHTML = '';
-                
-                requests.forEach(request => {
-                    const row = document.createElement('tr');
-                    
-                    // Type de demande
-                    const typeCell = document.createElement('td');
-                    typeCell.textContent = getRequestTypeLabel(request.type);
-                    row.appendChild(typeCell);
-                    
-                    // Date de soumission
-                    const dateCell = document.createElement('td');
-                    dateCell.textContent = formatDate(request.createdAt);
-                    row.appendChild(dateCell);
-                    
-                    // Changement demandé
-                    const changeCell = document.createElement('td');
-                    changeCell.textContent = `${request.currentValue || '-'} → ${request.requestedValue || '-'}`;
-                    row.appendChild(changeCell);
-                    
-                    // Statut
-                    const statusCell = document.createElement('td');
-                    statusCell.innerHTML = getStatusLabel(request.status);
-                    row.appendChild(statusCell);
-                    
-                    // Actions
-                    const actionsCell = document.createElement('td');
-                    
-                    // View details button
-                    const viewButton = document.createElement('button');
-                    viewButton.className = 'action-btn';
-                    viewButton.textContent = 'Voir détails';
-                    viewButton.onclick = () => viewRequestDetails(request.id);
-                    actionsCell.appendChild(viewButton);
-                    
-                    // Cancel button (only for pending requests)
-                    if (request.status === 'PENDING') {
-                        const cancelButton = document.createElement('button');
-                        cancelButton.className = 'action-btn';
-                        cancelButton.textContent = 'Annuler';
-                        cancelButton.onclick = () => cancelRequest(request.id);
-                        actionsCell.appendChild(cancelButton);
-                    }
-                    
-                    row.appendChild(actionsCell);
-                    requestsTableBody.appendChild(row);
-                });
-                
-            } catch (error) {
-                console.error('Error loading requests:', error);
-                loadingIndicator.style.display = 'none';
-                
-                // Check if this is a backend availability issue
-                if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
-                    isBackendAvailable = false;
-                    // Load offline requests
+                    // Reload requests
                     loadUserRequests();
-                } else {
-                    errorMessage.textContent = 'Erreur lors du chargement des demandes. Veuillez réessayer.';
-                    errorMessage.style.display = 'block';
-                }
-            }
+                  } else {
+                    alert("Mode hors ligne: annulation non disponible");
+                  }
+                };
+                actionsCell.appendChild(cancelButton);
+              }
+
+              row.appendChild(actionsCell);
+              requestsTableBody.appendChild(row);
+            });
+          } catch (error) {
+            console.error("Error loading offline requests:", error);
+            errorMessage.textContent =
+              "Erreur lors du chargement des demandes hors ligne.";
+            errorMessage.style.display = "block";
+          }
+
+          return;
         }
 
-        // Submit a new request
-        async function submitRequest(requestType, formPrefix) {
-            const errorElement = document.getElementById(`${formPrefix}-form-error`);
-            const successElement = document.getElementById(`${formPrefix}-form-success`);
-            const submitButton = document.querySelector(`#${formPrefix}-change-form .submit-btn`);
-            
-            errorElement.style.display = 'none';
-            successElement.style.display = 'none';
-            
-            // Check if backend is available
-            if (!isBackendAvailable) {
-                // In offline mode, show a different message and store request locally
-                successElement.textContent = 'Mode hors ligne: Votre demande sera enregistrée lorsque la connexion au serveur sera rétablie.';
-                successElement.style.display = 'block';
-                
-                // Store request in localStorage for later submission
-                try {
-                    const offlineRequests = JSON.parse(localStorage.getItem('offlineRequests') || '[]');
-                    
-                    // Get form values
-                    const reason = document.getElementById(`${formPrefix}-reason`).value;
-                    const justification = document.getElementById(`${formPrefix}-justification`).value;
-                    
-                    // Get requested value based on request type
-                    let requestedValue;
-                    let currentValue;
-                    
-                    if (requestType === 'SECTION_CHANGE') {
-                        requestedValue = document.getElementById('requested-section').options[document.getElementById('requested-section').selectedIndex].text;
-                        currentValue = document.getElementById('current-section').value;
-                    } else if (requestType === 'TD_GROUP_CHANGE') {
-                        requestedValue = document.getElementById('requested-td').options[document.getElementById('requested-td').selectedIndex].text;
-                        currentValue = document.getElementById('current-td').value;
-                    } else if (requestType === 'TP_GROUP_CHANGE') {
-                        requestedValue = document.getElementById('requested-tp').options[document.getElementById('requested-tp').selectedIndex].text;
-                        currentValue = document.getElementById('current-tp').value;
-                    }
-                    
-                    offlineRequests.push({
-                        type: requestType,
-                        reason: reason,
-                        justification: justification,
-                        requestedValue: requestedValue,
-                        currentValue: currentValue,
-                        createdAt: new Date().toISOString()
-                    });
-                    
-                    localStorage.setItem('offlineRequests', JSON.stringify(offlineRequests));
-                    
-                    // Reset form
-                    document.getElementById(`${formPrefix}-reason`).value = '';
-                    document.getElementById(`${formPrefix}-justification`).value = '';
-                    document.getElementById(`${formPrefix}-document`).value = '';
-                    
-                    // Show the request in the table
-                    setTimeout(() => {
-                        loadUserRequests();
-                    }, 1000);
-                    
-                    // Hide success message after a delay
-                    setTimeout(() => {
-                        successElement.style.display = 'none';
-                    }, 3000);
-                } catch (error) {
-                    console.error('Error storing offline request:', error);
-                    errorElement.textContent = 'Erreur lors de l\'enregistrement de la demande hors ligne';
-                    errorElement.style.display = 'block';
-                }
-                
-                return;
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/change-requests/my-requests",
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              signal: AbortSignal.timeout(5000),
             }
-            
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to load requests");
+          }
+
+          const requests = await response.json();
+
+          loadingIndicator.style.display = "none";
+
+          if (requests.length === 0) {
+            noRequestsMessage.style.display = "block";
+            return;
+          }
+
+          requestsTable.style.display = "table";
+          requestsTableBody.innerHTML = "";
+
+          requests.forEach((request) => {
+            const row = document.createElement("tr");
+
+            // Type de demande
+            const typeCell = document.createElement("td");
+            typeCell.textContent = getRequestTypeLabel(request.type);
+            row.appendChild(typeCell);
+
+            // Date de soumission
+            const dateCell = document.createElement("td");
+            dateCell.textContent = formatDate(request.createdAt);
+            row.appendChild(dateCell);
+
+            // Changement demandé
+            const changeCell = document.createElement("td");
+            changeCell.textContent = `${request.currentValue || "-"} → ${
+              request.requestedValue || "-"
+            }`;
+            row.appendChild(changeCell);
+
+            // Statut
+            const statusCell = document.createElement("td");
+            statusCell.innerHTML = getStatusLabel(request.status);
+            row.appendChild(statusCell);
+
+            // Actions
+            const actionsCell = document.createElement("td");
+
+            // View details button
+            const viewButton = document.createElement("button");
+            viewButton.className = "action-btn";
+            viewButton.textContent = "Voir détails";
+            viewButton.onclick = () => viewRequestDetails(request.id);
+            actionsCell.appendChild(viewButton);
+
+            // Cancel button (only for pending requests)
+            if (request.status === "PENDING") {
+              const cancelButton = document.createElement("button");
+              cancelButton.className = "action-btn";
+              cancelButton.textContent = "Annuler";
+              cancelButton.onclick = () => cancelRequest(request.id);
+              actionsCell.appendChild(cancelButton);
+            }
+
+            row.appendChild(actionsCell);
+            requestsTableBody.appendChild(row);
+          });
+        } catch (error) {
+          console.error("Error loading requests:", error);
+          loadingIndicator.style.display = "none";
+
+          // Check if this is a backend availability issue
+          if (
+            error.name === "AbortError" ||
+            error.message.includes("Failed to fetch")
+          ) {
+            isBackendAvailable = false;
+            // Load offline requests
+            loadUserRequests();
+          } else {
+            errorMessage.textContent =
+              "Erreur lors du chargement des demandes. Veuillez réessayer.";
+            errorMessage.style.display = "block";
+          }
+        }
+      }
+
+      // Submit a new request
+      async function submitRequest(requestType, formPrefix) {
+        const errorElement = document.getElementById(
+          `${formPrefix}-form-error`
+        );
+        const successElement = document.getElementById(
+          `${formPrefix}-form-success`
+        );
+        const submitButton = document.querySelector(
+          `#${formPrefix}-change-form .submit-btn`
+        );
+
+        errorElement.style.display = "none";
+        successElement.style.display = "none";
+
+        // Check if backend is available
+        if (!isBackendAvailable) {
+          // In offline mode, show a different message and store request locally
+          successElement.textContent =
+            "Mode hors ligne: Votre demande sera enregistrée lorsque la connexion au serveur sera rétablie.";
+          successElement.style.display = "block";
+
+          // Store request in localStorage for later submission
+          try {
+            const offlineRequests = JSON.parse(
+              localStorage.getItem("offlineRequests") || "[]"
+            );
+
             // Get form values
-            const reason = document.getElementById(`${formPrefix}-reason`).value;
-            const justification = document.getElementById(`${formPrefix}-justification`).value;
-            const documentFile = document.getElementById(`${formPrefix}-document`).files[0];
-            
-            // Validate form
-            if (!reason || !justification) {
-                errorElement.textContent = 'Veuillez remplir tous les champs obligatoires';
-                errorElement.style.display = 'block';
-                return;
-            }
-            
+            const reason = document.getElementById(
+              `${formPrefix}-reason`
+            ).value;
+            const justification = document.getElementById(
+              `${formPrefix}-justification`
+            ).value;
+
             // Get requested value based on request type
-            let requestedValueId;
+            let requestedValue;
             let currentValue;
-            
-            if (requestType === 'SECTION_CHANGE') {
-                requestedValueId = document.getElementById('requested-section').value;
-                currentValue = document.getElementById('current-section').value;
-            } else if (requestType === 'TD_GROUP_CHANGE') {
-                requestedValueId = document.getElementById('requested-td').value;
-                currentValue = document.getElementById('current-td').value;
-            } else if (requestType === 'TP_GROUP_CHANGE') {
-                requestedValueId = document.getElementById('requested-tp').value;
-                currentValue = document.getElementById('current-tp').value;
+
+            if (requestType === "SECTION_CHANGE") {
+              requestedValue =
+                document.getElementById("requested-section").options[
+                  document.getElementById("requested-section").selectedIndex
+                ].text;
+              currentValue = document.getElementById("current-section").value;
+            } else if (requestType === "TD_GROUP_CHANGE") {
+              requestedValue =
+                document.getElementById("requested-td").options[
+                  document.getElementById("requested-td").selectedIndex
+                ].text;
+              currentValue = document.getElementById("current-td").value;
+            } else if (requestType === "TP_GROUP_CHANGE") {
+              requestedValue =
+                document.getElementById("requested-tp").options[
+                  document.getElementById("requested-tp").selectedIndex
+                ].text;
+              currentValue = document.getElementById("current-tp").value;
             }
-            
-            if (!requestedValueId) {
-                errorElement.textContent = 'Veuillez sélectionner une option';
-                errorElement.style.display = 'block';
-                return;
+
+            offlineRequests.push({
+              type: requestType,
+              reason: reason,
+              justification: justification,
+              requestedValue: requestedValue,
+              currentValue: currentValue,
+              createdAt: new Date().toISOString(),
+            });
+
+            localStorage.setItem(
+              "offlineRequests",
+              JSON.stringify(offlineRequests)
+            );
+
+            // Reset form
+            document.getElementById(`${formPrefix}-reason`).value = "";
+            document.getElementById(`${formPrefix}-justification`).value = "";
+            document.getElementById(`${formPrefix}-document`).value = "";
+
+            // Show the request in the table
+            setTimeout(() => {
+              loadUserRequests();
+            }, 1000);
+
+            // Hide success message after a delay
+            setTimeout(() => {
+              successElement.style.display = "none";
+            }, 3000);
+          } catch (error) {
+            console.error("Error storing offline request:", error);
+            errorElement.textContent =
+              "Erreur lors de l'enregistrement de la demande hors ligne";
+            errorElement.style.display = "block";
+          }
+
+          return;
+        }
+
+        // Get form values
+        const reason = document.getElementById(`${formPrefix}-reason`).value;
+        const justification = document.getElementById(
+          `${formPrefix}-justification`
+        ).value;
+        const documentFile = document.getElementById(`${formPrefix}-document`)
+          .files[0];
+
+        // Validate form
+        if (!reason || !justification) {
+          errorElement.textContent =
+            "Veuillez remplir tous les champs obligatoires";
+          errorElement.style.display = "block";
+          return;
+        }
+
+        // Get requested value based on request type
+        let requestedValueId;
+        let currentValue;
+
+        if (requestType === "SECTION_CHANGE") {
+          requestedValueId = document.getElementById("requested-section").value;
+          currentValue = document.getElementById("current-section").value;
+        } else if (requestType === "TD_GROUP_CHANGE") {
+          requestedValueId = document.getElementById("requested-td").value;
+          currentValue = document.getElementById("current-td").value;
+        } else if (requestType === "TP_GROUP_CHANGE") {
+          requestedValueId = document.getElementById("requested-tp").value;
+          currentValue = document.getElementById("current-tp").value;
+        }
+
+        if (!requestedValueId) {
+          errorElement.textContent = "Veuillez sélectionner une option";
+          errorElement.style.display = "block";
+          return;
+        }
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append("type", requestType);
+        formData.append("reason", reason);
+        formData.append("justification", justification);
+        formData.append("requestedValueId", requestedValueId);
+        formData.append("currentValue", currentValue);
+
+        if (documentFile) {
+          formData.append("document", documentFile);
+        }
+
+        // Show loading state
+        submitButton.disabled = true;
+        submitButton.textContent = "Envoi en cours...";
+
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/change-requests",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              body: formData,
+              signal: AbortSignal.timeout(10000),
             }
-            
-            // Prepare form data
-            const formData = new FormData();
-            formData.append('type', requestType);
-            formData.append('reason', reason);
-            formData.append('justification', justification);
-            formData.append('requestedValueId', requestedValueId);
-            formData.append('currentValue', currentValue);
-            
-            if (documentFile) {
-                formData.append('document', documentFile);
-            }
-            
-            // Show loading state
-            submitButton.disabled = true;
-            submitButton.textContent = 'Envoi en cours...';
-            
+          );
+
+          if (!response.ok) {
+            // Try to parse error message
             try {
-                const response = await fetch('http://localhost:3000/api/change-requests', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: formData,
-                    signal: AbortSignal.timeout(10000)
-                });
-                
-                if (!response.ok) {
-                    // Try to parse error message
-                    try {
-                        const error = await response.json();
-                        throw new Error(error.message || 'Erreur lors de la soumission de la demande');
-                    } catch (e) {
-                        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-                    }
-                }
-                
-                // Show success message
-                successElement.textContent = 'Demande soumise avec succès!';
-                successElement.style.display = 'block';
-                
-                // Reset form
-                document.getElementById(`${formPrefix}-reason`).value = '';
-                document.getElementById(`${formPrefix}-justification`).value = '';
-                document.getElementById(`${formPrefix}-document`).value = '';
-                
-                // Reload requests
-                loadUserRequests();
-                
-                // Hide success message after a delay
-                setTimeout(() => {
-                    successElement.style.display = 'none';
-                }, 3000);
-                
-            } catch (error) {
-                console.error('Error submitting request:', error);
-                
-                // Check if this is a backend availability issue
-                if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
-                    isBackendAvailable = false;
-                    loadFallbackData();
-                    
-                    // Show offline message
-                    errorElement.textContent = 'Le serveur est actuellement indisponible. Votre demande a été enregistrée en local et sera soumise lorsque la connexion sera rétablie.';
-                    errorElement.style.display = 'block';
-                    
-                    // Store request for later submission
-                    try {
-                        const offlineRequests = JSON.parse(localStorage.getItem('offlineRequests') || '[]');
-                        offlineRequests.push({
-                            type: requestType,
-                            reason: reason,
-                            justification: justification,
-                            requestedValueId: requestedValueId,
-                            currentValue: currentValue,
-                            createdAt: new Date().toISOString()
-                        });
-                        localStorage.setItem('offlineRequests', JSON.stringify(offlineRequests));
-                    } catch (storageError) {
-                        console.error('Error storing offline request:', storageError);
-                    }
-                } else {
-                    errorElement.textContent = error.message || 'Erreur de connexion au serveur';
-                    errorElement.style.display = 'block';
-                }
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Soumettre la demande';
+              const error = await response.json();
+              throw new Error(
+                error.message || "Erreur lors de la soumission de la demande"
+              );
+            } catch (e) {
+              throw new Error(
+                `Erreur ${response.status}: ${response.statusText}`
+              );
             }
-        }
+          }
 
-        // View request details
-        function viewRequestDetails(requestId) {
-            if (!isBackendAvailable) {
-                alert('Le serveur est actuellement indisponible. Les détails ne peuvent pas être affichés.');
-                return;
-            }
-            
-            // This would typically open a modal with request details
-            alert(`Détails de la demande ${requestId} - Fonctionnalité à implémenter`);
-        }
+          // Show success message
+          successElement.textContent = "Demande soumise avec succès!";
+          successElement.style.display = "block";
 
-        // Cancel a request
-        async function cancelRequest(requestId) {
-            if (!isBackendAvailable) {
-                alert('Le serveur est actuellement indisponible. La demande ne peut pas être annulée.');
-                return;
-            }
-            
-            if (!confirm('Êtes-vous sûr de vouloir annuler cette demande?')) {
-                return;
-            }
-            
+          // Reset form
+          document.getElementById(`${formPrefix}-reason`).value = "";
+          document.getElementById(`${formPrefix}-justification`).value = "";
+          document.getElementById(`${formPrefix}-document`).value = "";
+
+          // Reload requests
+          loadUserRequests();
+
+          // Hide success message after a delay
+          setTimeout(() => {
+            successElement.style.display = "none";
+          }, 3000);
+        } catch (error) {
+          console.error("Error submitting request:", error);
+
+          // Check if this is a backend availability issue
+          if (
+            error.name === "AbortError" ||
+            error.message.includes("Failed to fetch")
+          ) {
+            isBackendAvailable = false;
+            loadFallbackData();
+
+            // Show offline message
+            errorElement.textContent =
+              "Le serveur est actuellement indisponible. Votre demande a été enregistrée en local et sera soumise lorsque la connexion sera rétablie.";
+            errorElement.style.display = "block";
+
+            // Store request for later submission
             try {
-                const response = await fetch(`http://localhost:3000/api/change-requests/${requestId}/cancel`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    signal: AbortSignal.timeout(5000)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to cancel request');
-                }
-                
-                // Reload requests
-                loadUserRequests();
-                
-            } catch (error) {
-                console.error('Error cancelling request:', error);
-                alert('Erreur lors de l\'annulation de la demande. Veuillez réessayer.');
-                
-                // Check if this is a backend availability issue
-                if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
-                    isBackendAvailable = false;
-                    alert('Le serveur est actuellement indisponible. Veuillez réessayer plus tard.');
-                }
+              const offlineRequests = JSON.parse(
+                localStorage.getItem("offlineRequests") || "[]"
+              );
+              offlineRequests.push({
+                type: requestType,
+                reason: reason,
+                justification: justification,
+                requestedValueId: requestedValueId,
+                currentValue: currentValue,
+                createdAt: new Date().toISOString(),
+              });
+              localStorage.setItem(
+                "offlineRequests",
+                JSON.stringify(offlineRequests)
+              );
+            } catch (storageError) {
+              console.error("Error storing offline request:", storageError);
             }
+          } else {
+            errorElement.textContent =
+              error.message || "Erreur de connexion au serveur";
+            errorElement.style.display = "block";
+          }
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = "Soumettre la demande";
+        }
+      }
+
+      // View request details
+      function viewRequestDetails(requestId) {
+        if (!isBackendAvailable) {
+          alert(
+            "Le serveur est actuellement indisponible. Les détails ne peuvent pas être affichés."
+          );
+          return;
         }
 
-        // Helper functions
-        function getRequestTypeLabel(type) {
-            const types = {
-                'SECTION_CHANGE': 'Changement de Section',
-                'TD_GROUP_CHANGE': 'Changement de Groupe TD',
-                'TP_GROUP_CHANGE': 'Changement de Groupe TP',
-                'ATTESTATION': 'Attestation de scolarité',
-                'OTHER': 'Autre demande'
-            };
-            return types[type] || type;
+        // This would typically open a modal with request details
+        alert(
+          `Détails de la demande ${requestId} - Fonctionnalité à implémenter`
+        );
+      }
+
+      // Cancel a request
+      async function cancelRequest(requestId) {
+        if (!isBackendAvailable) {
+          alert(
+            "Le serveur est actuellement indisponible. La demande ne peut pas être annulée."
+          );
+          return;
         }
 
-        function getStatusLabel(status) {
-            const statuses = {
-                'PENDING': '<span class="status-chip status-pending">En attente</span>',
-                'APPROVED': '<span class="status-chip status-approved">Acceptée</span>',
-                'REJECTED': '<span class="status-chip status-rejected">Refusée</span>',
-                'IN_PROGRESS': '<span class="status-chip status-pending">En cours</span>',
-                'CANCELLED': '<span class="status-chip status-rejected">Annulée</span>',
-                'OFFLINE': '<span class="status-chip status-offline">En attente (hors ligne)</span>'
-            };
-            return statuses[status] || status;
+        if (!confirm("Êtes-vous sûr de vouloir annuler cette demande?")) {
+          return;
         }
 
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('fr-FR');
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/change-requests/${requestId}/cancel`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to cancel request");
+          }
+
+          // Reload requests
+          loadUserRequests();
+        } catch (error) {
+          console.error("Error cancelling request:", error);
+          alert(
+            "Erreur lors de l'annulation de la demande. Veuillez réessayer."
+          );
+
+          // Check if this is a backend availability issue
+          if (
+            error.name === "AbortError" ||
+            error.message.includes("Failed to fetch")
+          ) {
+            isBackendAvailable = false;
+            alert(
+              "Le serveur est actuellement indisponible. Veuillez réessayer plus tard."
+            );
+          }
+        }
+      }
+
+      // Helper functions
+      function getRequestTypeLabel(type) {
+        const types = {
+          SECTION_CHANGE: "Changement de Section",
+          TD_GROUP_CHANGE: "Changement de Groupe TD",
+          TP_GROUP_CHANGE: "Changement de Groupe TP",
+          ATTESTATION: "Attestation de scolarité",
+          OTHER: "Autre demande",
+        };
+        return types[type] || type;
+      }
+
+      function getStatusLabel(status) {
+        const statuses = {
+          PENDING: '<span class="status-chip status-pending">En attente</span>',
+          APPROVED: '<span class="status-chip status-approved">Acceptée</span>',
+          REJECTED: '<span class="status-chip status-rejected">Refusée</span>',
+          IN_PROGRESS:
+            '<span class="status-chip status-pending">En cours</span>',
+          CANCELLED: '<span class="status-chip status-rejected">Annulée</span>',
+          OFFLINE:
+            '<span class="status-chip status-offline">En attente (hors ligne)</span>',
+        };
+        return statuses[status] || status;
+      }
+
+      function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString("fr-FR");
+      }
+
+      // Tab functions
+      function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+
+        // Hide all tab content
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+          if (tabcontent[i].parentElement.className === "tab-container") {
+            tabcontent[i].style.display = "none";
+          }
         }
 
-        // Tab functions
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            
-            // Hide all tab content
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                if (tabcontent[i].parentElement.className === "tab-container") {
-                    tabcontent[i].style.display = "none";
-                }
-            }
-            
-            // Deactivate all tab buttons
-            tablinks = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tablinks.length; i++) {
-                if (tablinks[i].parentElement.className === "tab-buttons") {
-                    tablinks[i].className = tablinks[i].className.replace(" active", "");
-                }
-            }
-            
-            // Show active tab and activate button
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-            
-            // If switching to requests tab, reload requests
-            if (tabName === 'suivi') {
-                loadUserRequests();
-            }
+        // Deactivate all tab buttons
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) {
+          if (tablinks[i].parentElement.className === "tab-buttons") {
+            tablinks[i].className = tablinks[i].className.replace(
+              " active",
+              ""
+            );
+          }
         }
-        
-        function openSubTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            
-            // Hide all sub-tab content
-            tabcontent = document.querySelectorAll(".form-card.tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            
-            // Deactivate all sub-tab buttons
-            tablinks = document.querySelectorAll(".tab-buttons:nth-of-type(2) .tab-button");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            
-            // Show active sub-tab and activate button
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
+
+        // Show active tab and activate button
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+
+        // If switching to requests tab, reload requests
+        if (tabName === "suivi") {
+          loadUserRequests();
         }
+      }
+
+      function openSubTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+
+        // Hide all sub-tab content
+        tabcontent = document.querySelectorAll(".form-card.tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+        }
+
+        // Deactivate all sub-tab buttons
+        tablinks = document.querySelectorAll(
+          ".tab-buttons:nth-of-type(2) .tab-button"
+        );
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Show active sub-tab and activate button
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+      }
     </script>
-</body>
+  </body>
 </html>
