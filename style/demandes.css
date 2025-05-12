@@ -15,7 +15,7 @@ body {
 
 .dashboard-container {
     display: grid;
-    grid-template-columns: 250px 1fr;
+    grid-template-columns: auto 1fr;
     grid-gap: 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -128,21 +128,21 @@ body {
 }
 
 /* Formulaires et tableaux */
-.form-card {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-}
 
 .card-title {
     font-family: 'Sora', sans-serif;
     font-size: 1.2rem;
     margin-bottom: 20px;
     color: #3B82F6;
-    border-bottom: 1px solid #E2E8F0;
     padding-bottom: 10px;
+}
+
+.box{
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
 }
 
 .form-group {
@@ -183,6 +183,7 @@ body {
 .submit-btn {
     padding: 12px 25px;
     border: none;
+    font-size: 16px;
     border-radius: 50px;
     background: linear-gradient(to right, #3B82F6, #1E40AF);
     color: white;
@@ -207,7 +208,7 @@ body {
 
 .requests-table th {
     text-align: left;
-    padding: 15px;
+    padding:15px;
     background-color: rgba(59, 130, 246, 0.1);
     font-weight: 600;
     border-bottom: 2px solid #E2E8F0;
@@ -252,11 +253,12 @@ body {
 
 .tab-buttons {
     display: flex;
-    margin-bottom: 15px;
+    margin-bottom: 40px;
     border-bottom: 1px solid #E2E8F0;
 }
 
 .tab-button {
+    font-size: 16px;
     padding: 12px 20px;
     background: none;
     border: none;
@@ -288,6 +290,14 @@ body {
 
 .tab-content.active {
     display: block;
+}
+
+.boxx{
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
 }
 
 /* Styles pour les alertes et messages */
@@ -339,4 +349,97 @@ body {
     justify-content: center;
     font-size: 0.7rem;
     font-weight: bold;
+}
+
+@media (max-width: 767px) {
+    .page-title {
+        font-size: 2.5vw;
+    }
+    .header-actions button {
+        font-size: 1.5vw;
+    }
+    .card-title {
+        font-size: 2.5vw;
+    }
+    .header {
+        padding: 8px 16px;
+        border-radius: 18px;
+    }
+    .dashboard-container {
+        grid-gap: 10px;
+    }
+    .main-content {
+        grid-gap: 10px;
+    }
+    body {
+        padding: 14px;
+    }
+
+    .tab-buttons {
+        margin-bottom: 15px;
+    }
+    
+    .tab-button {
+        padding: 8px 10px;
+        font-size: 2.2vw;
+    }
+    
+    .alert-info {
+        font-size: 2vw;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        margin-bottom: 4px;
+        font-size: 2vw;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 8px 8px;
+        border-radius: 6px;
+        font-size: 2vw;
+    }
+    .form-group textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+    .submit-btn {
+        padding: 12px 25px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .requests-table th {
+        font-size: 2vw;
+        padding: 8px;
+    }
+    
+    .requests-table td {
+        font-size: 1.8vw;
+        padding: 8px;
+    }
+    .requests-table {
+        margin-top: 0px;
+    }
+    .status-chip {
+        font-size: 1.2vw;
+    }
+    .action-btn {
+        color: #3B82F6;
+        cursor: pointer;
+        font-size: 1vw;
+    }
+    .box{
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        padding: 12px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    
 }

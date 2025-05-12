@@ -9,35 +9,7 @@
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar">AR</div>
-                <div class="user-name">Ahmed Rahmani</div>
-                <div class="user-id">20230456</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashbord-etudiant.html" class="nav-link">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="profile.html" class="nav-link">Profil Personnel</a>
-                </li>
-                <li class="nav-item">
-                    <a href="group-section.html" class="nav-link">Groupe et Section</a>
-                </li>
-                <li class="nav-item">
-                    <a href="demandes.html" class="nav-link active">Demandes</a>
-                </li>
-                <li class="nav-item">
-                    <a href="notification.html" class="nav-link">Notifications</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
-        
+        <div id="navbar-container"></div> 
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
@@ -59,7 +31,7 @@
                     <div class="alert alert-info">
                         Veuillez remplir le formulaire correspondant à votre type de demande. Une fois soumise, vous pourrez suivre l'état de votre demande dans l'onglet "Suivi des demandes".
                     </div>
-                    
+                    <div class="box ">
                     <!-- Sous-onglets pour les différents formulaires -->
                     <div class="tab-buttons">
                         <button class="tab-button active" onclick="openSubTab(event, 'section-form')">Changement de Section</button>
@@ -110,6 +82,7 @@
                             <button type="submit" class="submit-btn">Soumettre la demande</button>
                         </form>
                     </div>
+                    
                     
                     <!-- Formulaire de changement de groupe TD -->
                     <div id="td-form" class="tab-content form-card">
@@ -200,10 +173,11 @@
                         </form>
                     </div>
                 </div>
+            </div>
                 
                 <!-- Onglet Suivi des demandes -->
                 <div id="suivi" class="tab-content">
-                    <div class="form-card">
+                    <div class="form-card box">
                         <h2 class="card-title">Suivi de mes demandes</h2>
                         
                         <table class="requests-table">
@@ -224,7 +198,6 @@
                                     <td><span class="status-chip status-pending">En cours</span></td>
                                     <td>
                                         <button class="action-btn">Voir détails</button>
-                                        <button class="action-btn">Annuler</button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -263,6 +236,50 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const studentData = JSON.parse(localStorage.getItem('studentData'));
+        if (!studentData) {
+            console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
+            return;
+        }
+
+        // Charger la navbar
+        fetch('etudiant-nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-container').innerHTML = html;
+
+                const avatar = document.getElementById('userAvatar');
+                const fullName = document.getElementById('userFullName');
+                const userId = document.getElementById('userId');
+
+                if (avatar) avatar.textContent = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+                if (fullName) fullName.textContent = `${studentData.nom} ${studentData.prenom}`;
+                if (userId) userId.textContent = `Matricule: ${studentData.matricule}`;
+
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === window.location.pathname.split('/').pop()) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+        Object.keys(studentData).forEach(key => {
+            const elements = document.querySelectorAll(`[data-field="${key}"]`);
+            elements.forEach(el => {
+                el.textContent = studentData[key];
+            });
+        });
+
+        // Initiales dans la photo de profil
+        const initials = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
+        const profilePhoto = document.getElementById('profile-photo');
+        if (profilePhoto) {
+            profilePhoto.textContent = initials;
+        }
+    });
+
         // Fonction pour gérer les onglets principaux
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
@@ -289,25 +306,29 @@
         }
         
         // Fonction pour gérer les sous-onglets (formulaires)
-        function openSubTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            
-            // Masquer tous les contenus des sous-onglets
-            tabcontent = document.querySelectorAll(".form-card.tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            
-            // Désactiver tous les boutons des sous-onglets
-            tablinks = document.querySelectorAll(".tab-buttons:nth-of-type(2) .tab-button");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            
-            // Afficher le sous-onglet actif et activer le bouton
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
+function openSubTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    
+    // Masquer tous les contenus des sous-onglets dans le conteneur parent
+    const parentContainer = evt.currentTarget.closest('.box');
+    tabcontent = parentContainer.querySelectorAll(".tab-content.form-card");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+        tabcontent[i].style.display = "none";
+    }
+    
+    // Désactiver tous les boutons des sous-onglets dans le même groupe
+    const buttonGroup = evt.currentTarget.parentElement;
+    tablinks = buttonGroup.querySelectorAll(".tab-button");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+    }
+    
+    // Afficher le sous-onglet actif et activer le bouton
+    document.getElementById(tabName).classList.add("active");
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.classList.add("active");
+}
     </script>
 </body>
 </html>
