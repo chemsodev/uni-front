@@ -15,7 +15,7 @@
 
         .dashboard-container {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: auto 1fr;
             grid-gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
@@ -40,7 +40,7 @@
 
         .page-title {
             font-family: 'Sora', sans-serif;
-            font-size: 1.8rem;
+            font-size: 30px;
             color: #3B82F6;
         }
 
@@ -154,4 +154,58 @@
             background-color: rgba(245, 101, 101, 0.1);
             border: 1px solid #F56565;
             color: #C53030;
+        }
+
+        @media (max-width: 767px) {
+            .page-title {
+                font-size: 2.5vw;
+            }
+            .header {
+                padding: 10px 20px;
+            }
+            .dashboard-container {
+                grid-gap: 10px;
+            }
+            .main-content {
+                grid-gap: 10px;
+            }
+            .section-title {
+                font-size: 2.6vw;
+                margin-top: 10px;
+            }
+            body {
+                padding: 14px;
+            }
+            .profile-container {
+                padding: 12px;
+            }
+
+            .form-label {
+                font-size: 2.2vw;
+            }
+    
+            .form-input {
+                width: 100%;
+                padding: 8px 4px;
+                border-radius: 6px;
+                font-size: 2vw;
+            }
+            .form-help {
+                font-size: 1.8vw;
+                margin-top: 2px;
+            }
+            .form-group {
+                margin-bottom: 10px;
+            }
+            .button-group {
+                display: flex;
+                gap: 15px;
+                margin-top: 40px;
+            }
+            .btn {
+                padding: 12px 20px;
+                border: none;
+                border-radius: 50px;
+                font-size: 2vw;
+            }
         }
