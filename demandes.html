@@ -329,6 +329,34 @@ function openSubTab(evt, tabName) {
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.classList.add("active");
 }
+
+// Fonction pour la soumission des formulaires
+function handleFormSubmit(event) {
+    event.preventDefault(); 
+    
+    const form = event.target;
+    const formData = {};
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        if (input.type !== 'submit') {
+            if (input.type === 'file') {
+                formData[input.id] = input.files.length > 0 ? input.files[0].name : 'Aucun fichier';
+            } else {
+                formData[input.id] = input.value;
+            }
+        }
+    });
+    
+    // Afficher les donnees dans la console
+    console.log('Données du formulaire soumis:', formData);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', handleFormSubmit);
+    });
+});
     </script>
 </body>
 </html>
