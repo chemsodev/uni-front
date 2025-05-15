@@ -10,7 +10,7 @@
             background-size: 100% 100%;
             min-height: 100vh;
             color: #1A365D;
-            padding: 20px;
+            padding:20px;
         }
 
         #personalInfo {
@@ -41,78 +41,10 @@
 
         .dashboard-container {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: auto 1fr;
             grid-gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 30px 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            height: calc(100vh - 40px);
-            position: sticky;
-            top: 20px;
-        }
-
-        .user-info {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #E2E8F0;
-            margin-bottom: 20px;
-        }
-
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: #3B82F6;
-            color: white;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-        }
-
-        .user-name {
-            font-family: 'Sora', sans-serif;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .user-id {
-            font-size: 0.9rem;
-            color: #64748B;
-        }
-
-        .nav-menu {
-            list-style: none;
-        }
-
-        .nav-item {
-            margin-bottom: 10px;
-        }
-
-        .nav-link {
-            display: block;
-            padding: 12px 15px;
-            text-decoration: none;
-            color: #1A365D;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-        }
-
-        .nav-link.active {
-            background-color: #3B82F6;
-            color: white;
         }
 
         /* Main Content */
@@ -134,7 +66,7 @@
 
         .page-title {
             font-family: 'Sora', sans-serif;
-            font-size: 1.8rem;
+            font-size: 30px;
             color: #3B82F6;
         }
 
@@ -142,6 +74,7 @@
             padding: 10px 15px;
             border: none;
             border-radius: 50px;
+            font-size: 14px;
             background: linear-gradient(to right, #3B82F6, #1E40AF);
             color: white;
             font-weight: 500;
@@ -169,7 +102,7 @@
 
         .card-title {
             font-family: 'Sora', sans-serif;
-            font-size: 1.2rem;
+            font-size: 16px;
             margin-bottom: 15px;
             color: #3B82F6;
         }
@@ -278,4 +211,45 @@
 
         .see-all:hover {
             text-decoration: underline;
+        }
+
+
+        @media (max-width: 767px) {
+            .page-title {
+                font-size: 2.5vw;
+            }
+            .header-actions button {
+                font-size: 1.5vw;
+            }
+            .card-title {
+                font-size: 2.5vw;
+            }
+            .info-label {
+                font-size: 2.2vw;
+            }
+            .info-value {
+                font-size: 2.2vw;
+            }
+            .info-row {
+                padding: 4px 0;
+            }
+            .card-content {
+                font-size: 2.2vw;
+            }
+            .header {
+                padding: 8px 16px;
+                border-radius: 18px;
+            }
+            .dashboard-container {
+                grid-gap: 10px;
+            }
+            .main-content {
+                grid-gap: 10px;
+            }
+            .dashboard-cards {
+                grid-gap: 10px;
+            }
+            body {
+                padding: 14px;
+            }
         }

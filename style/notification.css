@@ -15,7 +15,7 @@
 
         .dashboard-container {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: auto 1fr;
             grid-gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
@@ -301,7 +301,7 @@
 
         .notification-badge {
             position: absolute;
-            top: 15px;
+            top: 0px;
             right: 15px;
             width: 10px;
             height: 10px;
@@ -375,4 +375,99 @@
         .empty-state-text {
             font-size: 1.2rem;
             margin-bottom: 20px;
+        }
+
+        @media (max-width: 767px) {
+            .page-title {
+                font-size: 2.5vw;
+            }
+            .header-actions button {
+                font-size: 1.5vw;
+            }
+            .card-title {
+                font-size: 2.5vw;
+            }
+            .info-label {
+                font-size: 2.2vw;
+            }
+            .info-value {
+                font-size: 2.2vw;
+            }
+            .info-row {
+                padding: 4px 0;
+            }
+            .card-content {
+                font-size: 2.2vw;
+            }
+            .header {
+                padding: 8px 16px;
+                border-radius: 18px;
+            }
+            .dashboard-container {
+                grid-gap: 10px;
+            }
+            .main-content {
+                grid-gap: 10px;
+            }
+            .dashboard-cards {
+                grid-gap: 10px;
+            }
+            body {
+                padding: 14px;
+            }
+
+            .filter-btn {
+                padding: 6px 8px;
+                border-radius: 30px;
+                font-size: 1.5vw;
+            }
+            .card-title-actions button {
+                padding: 6px 8px;
+                border-radius: 30px;
+                font-size: 1.5vw;
+            }
+
+
+
+            .notification-list {
+                gap: 15px;
+            }
+    
+            .notification-item {
+                padding: 10px;
+                border-radius: 10px;
+                font-size: 2vw;
+                border-left: 3px solid #3B82F6;
+            }
+    
+            .notification-title {
+                font-weight: 600;
+                color: #1A365D;
+            }
+    
+            .notification-date {
+                font-size: 1vw;
+            }
+    
+            .notification-btn {
+                padding: 5px 8px;
+                font-size: 2vw;
+                border-radius: 40px;
+            }
+    
+            .notification-badge {
+                width: 3px;
+                height: 3px;
+            }
+    
+            .notification-icon {
+                width: 3vw;
+                height: 3vw;
+                font-size: 2vw;
+            }
+
+        .pagination-btn {
+            padding: 4px 6px;
+            margin: 0 5px;
+        }
         }

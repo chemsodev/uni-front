@@ -1,4 +1,97 @@
 <div class="sidebar">
+  <style>
+    .sidebar {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      height: calc(100vh - 40px);
+      position: sticky;
+      top: 20px;
+    }
+
+    .user-info {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+    }
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #3b82f6;
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    .user-name {
+      font-family: "Sora", sans-serif;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .user-id {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 10px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #1a365d;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .nav-link.active {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    @media (max-width: 767px) {
+      .nav-link {
+        padding: 10px 10px;
+        color: #1a365d;
+        font-size: 2vw;
+      }
+      .user-name {
+        font-size: 2vw;
+      }
+
+      .user-id {
+        font-size: 1.6vw;
+      }
+      .user-avatar {
+        width: 10vw;
+        height: 10vw;
+        font-size: 3vw;
+        margin: 0 auto 10px;
+      }
+      .sidebar {
+        padding: 20px 10px;
+      }
+    }
+  </style>
+
   <div class="user-info">
     <div class="user-avatar" id="userAvatar"></div>
     <div class="user-name" id="userFullName"></div>

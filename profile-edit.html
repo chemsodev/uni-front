@@ -25,13 +25,18 @@
 
           <!-- Request Notice -->
           <div class="info-message" style="margin-bottom: 20px">
-            <strong>Note:</strong> Les modifications que vous souhaitez apporter à votre profil seront soumises 
-            sous forme de demande. Un administrateur devra valider ces modifications avant qu'elles ne soient 
-            appliquées à votre profil.
+            <strong>Note:</strong> Les modifications que vous souhaitez apporter
+            à votre profil seront soumises sous forme de demande. Un
+            administrateur devra valider ces modifications avant qu'elles ne
+            soient appliquées à votre profil.
           </div>
 
           <!-- Pending Requests Section -->
-          <div id="pending-requests" class="pending-requests" style="display: none;">
+          <div
+            id="pending-requests"
+            class="pending-requests"
+            style="display: none"
+          >
             <h3>Demandes en attente</h3>
             <div id="pending-requests-list"></div>
           </div>
@@ -57,7 +62,9 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="adresseEmailPersonnelle">Email Personnel</label>
+              <label class="form-label" for="adresseEmailPersonnelle"
+                >Email Personnel</label
+              >
               <input
                 type="email"
                 id="adresseEmailPersonnelle"
@@ -67,7 +74,9 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="numeroTelephonePrincipal">Téléphone Principal</label>
+              <label class="form-label" for="numeroTelephonePrincipal"
+                >Téléphone Principal</label
+              >
               <input
                 type="tel"
                 id="numeroTelephonePrincipal"
@@ -78,7 +87,9 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="numeroTelephoneSecondaire">Téléphone Secondaire</label>
+              <label class="form-label" for="numeroTelephoneSecondaire"
+                >Téléphone Secondaire</label
+              >
               <input
                 type="tel"
                 id="numeroTelephoneSecondaire"
@@ -88,7 +99,9 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="adressePostale">Adresse Postale</label>
+              <label class="form-label" for="adressePostale"
+                >Adresse Postale</label
+              >
               <input
                 type="text"
                 id="adressePostale"
@@ -109,12 +122,7 @@
 
             <div class="form-group">
               <label class="form-label" for="ville">Ville</label>
-              <input
-                type="text"
-                id="ville"
-                name="ville"
-                class="form-input"
-              />
+              <input type="text" id="ville" name="ville" class="form-input" />
             </div>
 
             <div class="form-group">
@@ -161,7 +169,7 @@
 
       let currentUser = null;
       let isBackendAvailable = true;
-      
+
       // Check authentication on page load
       document.addEventListener("DOMContentLoaded", async function () {
         try {
@@ -184,7 +192,7 @@
           }
 
           const userData = await verificationResponse.json();
-          
+
           // Validate student role
           if (userData.adminRole !== "etudiant") {
             throw new Error("Access restricted to students");
@@ -229,9 +237,8 @@
 
               // Update sidebar with student data
               document.getElementById("userFullName").textContent =
-                `${studentData.prenom || ""} ${
-                  studentData.nom || ""
-                }`.trim() || "Utilisateur";
+                `${studentData.prenom || ""} ${studentData.nom || ""}`.trim() ||
+                "Utilisateur";
               document.getElementById("userId").textContent =
                 studentData.matricule || "N/A";
 
@@ -244,8 +251,9 @@
                 studentData.nom && studentData.nom.charAt
                   ? studentData.nom.charAt(0)
                   : "";
-              document.getElementById("userInitials").textContent =
-                (firstInitial + lastInitial).toUpperCase();
+              document.getElementById("userInitials").textContent = (
+                firstInitial + lastInitial
+              ).toUpperCase();
             } catch (e) {
               console.error("Error parsing stored student data:", e);
             }
@@ -258,7 +266,7 @@
       async function loadUserData() {
         try {
           let studentData = null;
-          
+
           // Try to get data from localStorage first
           const studentDataJson = localStorage.getItem("studentData");
           if (studentDataJson) {
@@ -284,12 +292,9 @@
 
               if (response.ok) {
                 const freshData = await response.json();
-                
+
                 // Store the updated data
-                localStorage.setItem(
-                  "studentData",
-                  JSON.stringify(freshData)
-                );
+                localStorage.setItem("studentData", JSON.stringify(freshData));
                 studentData = freshData;
               } else {
                 console.warn("Failed to fetch fresh data from API");
@@ -314,20 +319,20 @@
 
       async function checkPendingRequests() {
         if (!isBackendAvailable || !currentUser) return;
-        
+
         try {
           const response = await fetch(
             `${PROFILE_REQUESTS_API}/student/${currentUser.id}`,
             {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,
-              }
+              },
             }
           );
-          
+
           if (response.ok) {
             const requests = await response.json();
-            
+
             if (requests && requests.length > 0) {
               displayPendingRequests(requests);
             }
@@ -336,42 +341,56 @@
           console.warn("Failed to check pending requests:", error);
         }
       }
-      
+
       function displayPendingRequests(requests) {
         const container = document.getElementById("pending-requests");
         const list = document.getElementById("pending-requests-list");
         list.innerHTML = "";
-        
-        requests.forEach(request => {
+
+        requests.forEach((request) => {
           const requestItem = document.createElement("div");
           requestItem.className = "request-item";
-          
-          const status = request.status === 'pending' ? 'En attente' : 
-                         request.status === 'approved' ? 'Approuvée' : 'Rejetée';
-          
-          const statusClass = request.status === 'pending' ? 'status-pending' : 
-                             request.status === 'approved' ? 'status-approved' : 'status-rejected';
-          
+
+          const status =
+            request.status === "pending"
+              ? "En attente"
+              : request.status === "approved"
+              ? "Approuvée"
+              : "Rejetée";
+
+          const statusClass =
+            request.status === "pending"
+              ? "status-pending"
+              : request.status === "approved"
+              ? "status-approved"
+              : "status-rejected";
+
           requestItem.innerHTML = `
-            <div class="request-date">${new Date(request.createdAt).toLocaleDateString()}</div>
+            <div class="request-date">${new Date(
+              request.createdAt
+            ).toLocaleDateString()}</div>
             <div class="request-status ${statusClass}">${status}</div>
           `;
-          
+
           list.appendChild(requestItem);
         });
-        
+
         container.style.display = "block";
       }
 
       function fillFormWithStudentData(studentData) {
         if (!studentData) return;
-      
+
         // Mise à jour des champs editables seulement
-        document.getElementById("nationalite").value = studentData.nationalite || "DZ";
-        document.getElementById("dateNaissance").value = studentData.dateNaissance || "2001-07-16";
+        document.getElementById("nationalite").value =
+          studentData.nationalite || "DZ";
+        document.getElementById("dateNaissance").value =
+          studentData.dateNaissance || "2001-07-16";
         document.getElementById("genre").value = studentData.genre || "Féminin";
-        document.getElementById("telephone").value = studentData.telephone || "0532081153";
-        document.getElementById("adresse").value = studentData.adresse || "Non fournie";
+        document.getElementById("telephone").value =
+          studentData.telephone || "0532081153";
+        document.getElementById("adresse").value =
+          studentData.adresse || "Non fournie";
       }
 
       function setupForm() {
@@ -391,7 +410,7 @@
               genre: document.getElementById("genre").value,
               telephone: document.getElementById("telephone").value,
               adresse: document.getElementById("adresse").value,
-              studentId: currentUser.id
+              studentId: currentUser.id,
             };
 
             if (isBackendAvailable) {
@@ -410,12 +429,15 @@
                   "Votre demande de modification a été soumise avec succès. Un administrateur l'examinera prochainement.",
                   "success"
                 );
-                
+
                 // Refresh pending requests
                 await checkPendingRequests();
               } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Erreur lors de la soumission de la demande");
+                throw new Error(
+                  errorData.message ||
+                    "Erreur lors de la soumission de la demande"
+                );
               }
             } else {
               // If backend is not available, show appropriate message
@@ -450,86 +472,3 @@
     </script>
   </body>
 </html>
-
-<h2 class="section-title">Informations Personnelles</h2>
-
-<div class="info-group">
-  <div class="info-item">
-    <span class="info-label">Nom :</span>
-    <span class="info-value">BOURABIA</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Prénom :</span>
-    <span class="info-value">CHEMS EDDINE</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Numéro étudiant :</span>
-    <span class="info-value">222231622113</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Nationalité :</span>
-    <span class="info-value">DZ</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Date de naissance :</span>
-    <span class="info-value">16/07/2001</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Genre :</span>
-    <span class="info-value">Féminin</span>
-  </div>
-</div>
-
-<h3 class="sub-section-title">Coordonnées</h3>
-<div class="info-group">
-  <div class="info-item">
-    <span class="info-label">Email institutionnel :</span>
-    <span class="info-value">chems.eddine.bourabia@etu.usthb.dz</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Téléphone :</span>
-    <span class="info-value">0532081153</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Adresse :</span>
-    <span class="info-value">Non fournie</span>
-  </div>
-</div>
-
-// Supprimer toutes les sections dupliquées ci-dessous...
-</form>
-
-<div class="form-group">
-  <label class="form-label" for="email">Email Institutionnel</label>
-  <input
-    type="email"
-    id="email"
-    name="email"
-    class="form-input"
-    readonly
-  />
-</div>
-
-<div class="form-group">
-  <label class="form-label" for="telephone">Téléphone</label>
-  <input
-    type="tel"
-    id="telephone"
-    name="telephone"
-    class="form-input"
-    required
-  />
-</div>
-
-<div class="form-group">
-  <label class="form-label" for="adresse">Adresse</label>
-  <textarea
-    id="adresse"
-    name="adresse"
-    class="form-input"
-    placeholder="Non fournie"
-  ></textarea>
-</div>
-
-// Supprimer les sections dupliquées ci-dessous...
-</form>

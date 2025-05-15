@@ -15,7 +15,7 @@
 
     .dashboard-container {
         display: grid;
-        grid-template-columns: 250px 1fr;
+        grid-template-columns: auto 1fr;
         grid-gap: 20px;
         max-width: 1200px;
         margin: 0 auto;
@@ -304,4 +304,76 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    @media (max-width: 767px) {
+        .page-title {
+            font-size: 2.5vw;
+        }
+        .info-label {
+            font-size: 2.2vw;
+        }
+        .info-value {
+            font-size: 2.2vw;
+        }
+        .header {
+            padding: 10px 20px;
+        }
+        .dashboard-container {
+            grid-gap: 10px;
+        }
+        .main-content {
+            grid-gap: 10px;
+        }
+        body {
+            padding: 14px;
+        }
+        .card-title {
+            font-size: 2.2vw;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+        }
+    
+        .card-title-icon {
+            margin-right: 6px;
+            width: 2vw;
+            height: 2vw;
+        }
+        .info-item {
+            border-radius: 10px;
+            padding: 10px;
+            border-left: 3px solid #3B82F6;
+        }
+        .info-grid {
+            grid-gap: 10px;
+        }
+
+        .file-upload-container {
+            margin-top: 0px;
+        }
+    
+        .upload-area {
+            border-radius: 10px;
+            padding: 18px 0px;
+            margin-bottom: 0px;
+        }
+    
+        .upload-icon {
+            width: 6vw;
+            height: 6vw;
+            margin: 0 auto 10px;
+        }
+    
+        .upload-text {
+            font-size: 2.2vw;
+            margin-bottom: 6px;
+        }
+    
+        .upload-hint {
+            font-size: 2vw;
+        }
+    
+        .upload-btn {
+            padding: 6px 8px;
+        }
     }

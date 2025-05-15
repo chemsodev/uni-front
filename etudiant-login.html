@@ -74,14 +74,16 @@
           <div id="password-error" class="error-message"></div>
         </div>
 
-        <div class="remember-me">
-          <input type="checkbox" id="remember" name="remember" />
-          <label for="remember">Se souvenir de moi</label>
-        </div>
+        <div class="hehe">
+          <div class="remember-me">
+            <input type="checkbox" id="remember" name="remember" />
+            <label for="remember">Se souvenir de moi</label>
+          </div>
 
-        <a href="mdps-oublier-etudiant.html" class="forgot-password"
-          >Mot de passe oublié?</a
-        >
+          <a href="mdps-oublier-etudiant.html" class="forgot-password"
+            >Mot de passe oublié?</a
+          >
+        </div>
 
         <button type="button" class="login-button" onclick="handleLogin()">
           Se connecter
@@ -156,22 +158,6 @@
           localStorage.removeItem("etudiant_token");
         }
       });
-
-      // Tab switching
-      function switchTab(showTabId, hideTabId) {
-        document.getElementById(showTabId).classList.add("active");
-        document.getElementById(hideTabId).classList.remove("active");
-
-        const tabs = document.querySelectorAll(".login-tab");
-        tabs.forEach((tab) => tab.classList.remove("active"));
-
-        event.currentTarget.classList.add("active");
-
-        const hiddenInput = document
-          .getElementById(hideTabId)
-          .querySelector("input");
-        if (hiddenInput) hiddenInput.value = "";
-      }
 
       // Display error message
       function showError(elementId, message) {
