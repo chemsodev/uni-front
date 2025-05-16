@@ -48,7 +48,44 @@
       // Global variables
       let currentUser = null;
       let authToken = null;
-      let isBackendAvailable = true; // Flag to track backend availability
+      let isBackendAvailable = true; 
+
+      /*document.addEventListener("DOMContentLoaded", async function () {
+        // Load navigation
+        fetch("enseignant-nav.html")
+            .then((response) => response.text())
+            .then((html) => {
+            document.getElementById("navbar-container").innerHTML = html;
+            // Mark active link after loading
+            const navScript = document.createElement("script");
+            navScript.innerHTML = `
+                document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === '${window.location.pathname.split("/").pop()}') {
+                    link.classList.add('active');
+                }
+                });
+            `;
+            document.body.appendChild(navScript);
+            })
+            .catch((error) => {
+            console.error("Error loading navigation:", error);
+            });
+
+        // Données de démonstration
+        currentUser = {
+            id: "demo-teacher",
+            email: "demo@univ.edu"
+        };
+
+        try {
+            await loadUserData();
+            await loadDashboardData();
+        } catch (error) {
+            console.error("Error loading data:", error);
+            loadFallbackData();
+        }
+        });*/
 
       document.addEventListener("DOMContentLoaded", async function () {
         // Load navigation
@@ -306,6 +343,26 @@
           throw error;
         }
       }
+
+      /*async function loadUserData() {
+  // Utiliser des données fictives au lieu de faire une requête API
+  currentUser = {
+    id: "demo-teacher",
+    email: "demo@univ.edu",
+    nom: "Dupont",
+    prenom: "Jean",
+    matricule: "T20230001"
+  };
+
+  // Mettre à jour l'UI avec les données fictives
+  if (document.getElementById("userFullName")) {
+    document.getElementById("userFullName").textContent = "Jean Dupont";
+  }
+  
+  if (document.getElementById("userId")) {
+    document.getElementById("userId").textContent = "T20230001";
+  }
+}*/
 
       // Load dashboard data
       async function loadDashboardData() {

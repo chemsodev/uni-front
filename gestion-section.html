@@ -4,43 +4,14 @@
     <meta charset="UTF-8">
     <title>Gestion des Sections</title>
     <link href="style/gestion-section.css" rel="stylesheet">
-   
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar">MB</div>
-                <div class="user-name">Mohamed Belkacem</div>
-                <div class="user-id">Enseignant</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
-                </li>
-                <li class="nav-item">
-                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
-                </li>
-                <li class="nav-item">
-                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
-                </li>
-                <li class="nav-item">
-                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
-        
+        <div id="navbar-container"></div>
         <!-- Main Content -->
         <div class="main-content">
-            <div class="header">
+            <div class="header header-actions">
                 <h1 class="page-title">Gestion des Sections</h1>
             </div>
             
@@ -49,148 +20,248 @@
                 
                 <div class="search-section">
                     <div class="search-box">
-                        <input type="text" placeholder="Rechercher une section...">
-                        <button>🔍</button>
+                        <input type="text" id="searchInput" placeholder="Rechercher une section...">
+                        <button onclick="filterSections()">🔍</button>
                     </div>
                 </div>
                 
-                <div class="sections-list">
-                    <div class="section-item">
-                        <div class="section-info">
-                            <div class="section-name">Informatique - Section B</div>
-                            <div class="section-details">Module: Algorithmique | Semestre 2</div>
-                        </div>
-                        <div class="student-count">28 étudiants</div>
-                        <div class="section-actions">
-                            <button class="btn btn-secondary" onclick="toggleStudents('section1')">Voir étudiants</button>
-                            <button class="btn btn-primary">Gérer</button>
-                        </div>
-                    </div>
-                    
-                    <div class="student-panel" id="section1-students">
-                        <div class="panel-header">
-                            <div class="panel-title">Étudiants - Informatique Section B</div>
-                            <button class="btn btn-secondary" onclick="toggleStudents('section1')">Fermer</button>
-                        </div>
-                        <div class="student-list">
-                            <div class="student-item">
-                                <div class="student-name">Ahmed Saidi</div>
-                                <div class="student-group">TD3 / TP2</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Fatima Benali</div>
-                                <div class="student-group">TD1 / TP3</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Karim Hadj</div>
-                                <div class="student-group">TD2 / TP1</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Lina Mansouri</div>
-                                <div class="student-group">TD3 / TP2</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Yacine Boudiaf</div>
-                                <div class="student-group">TD1 / TP1</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section-item">
-                        <div class="section-info">
-                            <div class="section-name">Informatique - Section A</div>
-                            <div class="section-details">Module: Algorithmique | Semestre 2</div>
-                        </div>
-                        <div class="student-count">32 étudiants</div>
-                        <div class="section-actions">
-                            <button class="btn btn-secondary" onclick="toggleStudents('section2')">Voir étudiants</button>
-                            <button class="btn btn-primary">Gérer</button>
-                        </div>
-                    </div>
-                    
-                    <div class="student-panel" id="section2-students">
-                        <div class="panel-header">
-                            <div class="panel-title">Étudiants - Informatique Section A</div>
-                            <button class="btn btn-secondary" onclick="toggleStudents('section2')">Fermer</button>
-                        </div>
-                        <div class="student-list">
-                            <div class="student-item">
-                                <div class="student-name">Mohamed Amin</div>
-                                <div class="student-group">TD1 / TP2</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Sarah Haddad</div>
-                                <div class="student-group">TD2 / TP3</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Omar Bennani</div>
-                                <div class="student-group">TD1 / TP1</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Amina Kadi</div>
-                                <div class="student-group">TD3 / TP2</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Tarik Sahraoui</div>
-                                <div class="student-group">TD2 / TP1</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section-item">
-                        <div class="section-info">
-                            <div class="section-name">Mathématiques - Section C</div>
-                            <div class="section-details">Module: Algèbre | Semestre 2</div>
-                        </div>
-                        <div class="student-count">25 étudiants</div>
-                        <div class="section-actions">
-                            <button class="btn btn-secondary" onclick="toggleStudents('section3')">Voir étudiants</button>
-                            <button class="btn btn-primary">Gérer</button>
-                        </div>
-                    </div>
-                    
-                    <div class="student-panel" id="section3-students">
-                        <div class="panel-header">
-                            <div class="panel-title">Étudiants - Mathématiques Section C</div>
-                            <button class="btn btn-secondary" onclick="toggleStudents('section3')">Fermer</button>
-                        </div>
-                        <div class="student-list">
-                            <div class="student-item">
-                                <div class="student-name">Nadir Meziane</div>
-                                <div class="student-group">TD2 / TP3</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Yasmine Taleb</div>
-                                <div class="student-group">TD1 / TP2</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Riad Belhadj</div>
-                                <div class="student-group">TD3 / TP1</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Nour Bouzidi</div>
-                                <div class="student-group">TD1 / TP1</div>
-                            </div>
-                            <div class="student-item">
-                                <div class="student-name">Salim Khaldi</div>
-                                <div class="student-group">TD2 / TP2</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="sections-list" id="sectionsList">
+                    <!-- Les sections seront chargées dynamiquement ici -->
+                    <div class="loading-message">Chargement des sections...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // JavaScript simple pour afficher/cacher la liste des étudiants
-        function toggleStudents(sectionId) {
-            const studentPanel = document.getElementById(sectionId + '-students');
-            if (studentPanel.style.display === 'block') {
-                studentPanel.style.display = 'none';
-            } else {
-                studentPanel.style.display = 'block';
+        // Variables globales
+        const API_BASE_URL = 'http://localhost:3000/api';
+        let authToken = localStorage.getItem('enseignant_token') || sessionStorage.getItem('enseignant_token');
+        let currentUser = null;
+        let sectionsData = [];
+        let studentsData = {};
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            // Charger la navigation
+            await loadNavigation();
+            
+            // Vérifier l'authentification
+            if (!await verifyAuth()) {
+                window.location.href = 'enseignant-login.html';
+                return;
             }
+
+            // Charger les données
+            await loadData();
+        });
+
+        async function loadNavigation() {
+            try {
+                const response = await fetch("enseignant-nav.html");
+                const html = await response.text();
+                document.getElementById("navbar-container").innerHTML = html;
+                
+                // Marquer le lien actif
+                const navScript = document.createElement("script");
+                navScript.innerHTML = `
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if(link.getAttribute('href') === '${window.location.pathname.split("/").pop()}') {
+                            link.classList.add('active');
+                        }
+                    });
+                `;
+                document.body.appendChild(navScript);
+            } catch (error) {
+                console.error("Erreur de chargement de la navigation:", error);
+            }
+        }
+
+        async function verifyAuth() {
+            if (!authToken) return false;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+                    method: "GET",
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) return false;
+                
+                const userData = await response.json();
+                if (userData.adminRole !== "enseignant") return false;
+                
+                currentUser = {
+                    id: userData.userId,
+                    email: userData.email
+                };
+                return true;
+            } catch (error) {
+                console.error("Erreur de vérification d'authentification:", error);
+                return false;
+            }
+        }
+
+        async function loadData() {
+            try {
+                // Charger les sections de l'enseignant
+                const response = await fetch(`${API_BASE_URL}/enseignants/${currentUser.id}/sections`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (!response.ok) throw new Error("Erreur de chargement des sections");
+
+                sectionsData = await response.json();
+                renderSections(sectionsData);
+            } catch (error) {
+                console.error("Erreur de chargement des données:", error);
+                showError("Erreur de chargement des données. Veuillez réessayer.");
+            }
+        }
+
+        function renderSections(sections) {
+            const container = document.getElementById("sectionsList");
+            
+            if (!sections || sections.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucune section disponible</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            sections.forEach(section => {
+                const sectionItem = document.createElement("div");
+                sectionItem.className = "section-item";
+                sectionItem.innerHTML = `
+                    <div class="section-info">
+                        <div class="section-name">${section.filiere} - Section ${section.nom}</div>
+                        <div class="section-details">Module: ${section.module || 'Non spécifié'} | Semestre ${section.semestre || 'Non spécifié'}</div>
+                    </div>
+                    <div class="student-count">${section.nombreEtudiants || 0} étudiants</div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" onclick="loadStudents('${section.id}')">Voir étudiants</button>
+                        <button class="btn btn-primary" onclick="manageSection('${section.id}')">Gérer</button>
+                    </div>
+                `;
+                
+                container.appendChild(sectionItem);
+            });
+        }
+
+        async function loadStudents(sectionId) {
+            try {
+                // Vérifier si les étudiants sont déjà chargés
+                if (!studentsData[sectionId]) {
+                    const response = await fetch(`${API_BASE_URL}/sections/${sectionId}/etudiants`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+
+                    if (!response.ok) throw new Error("Erreur de chargement des étudiants");
+
+                    studentsData[sectionId] = await response.json();
+                }
+
+                // Afficher le panneau des étudiants
+                showStudentsPanel(sectionId);
+            } catch (error) {
+                console.error("Erreur de chargement des étudiants:", error);
+                showError("Erreur de chargement des étudiants. Veuillez réessayer.");
+            }
+        }
+
+        function showStudentsPanel(sectionId) {
+            // Trouver la section correspondante
+            const section = sectionsData.find(s => s.id === sectionId);
+            if (!section) return;
+
+            // Créer ou mettre à jour le panneau des étudiants
+            let panel = document.getElementById(`students-panel-${sectionId}`);
+            
+            if (!panel) {
+                panel = document.createElement("div");
+                panel.className = "student-panel";
+                panel.id = `students-panel-${sectionId}`;
+                document.getElementById("sectionsList").appendChild(panel);
+            }
+
+            panel.innerHTML = `
+                <div class="panel-header">
+                    <div class="panel-title">Étudiants - ${section.filiere} Section ${section.nom}</div>
+                    <button class="btn btn-secondary" onclick="closeStudentsPanel('${sectionId}')">Fermer</button>
+                </div>
+                <div class="student-list">
+                    ${renderStudentsList(studentsData[sectionId])}
+                </div>
+            `;
+
+            panel.style.display = 'block';
+        }
+
+        function renderStudentsList(students) {
+            if (!students || students.length === 0) {
+                return '<div class="empty-state">Aucun étudiant dans cette section</div>';
+            }
+
+            return students.map(student => `
+                <div class="student-item">
+                    <div class="student-name">${student.prenom} ${student.nom}</div>
+                    <div class="student-group">TD${student.groupe_td} / TP${student.groupe_tp}</div>
+                    <div class="student-actions">
+                        <button class="btn btn-small" onclick="viewStudentDetails('${student.id}')">Détails</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function closeStudentsPanel(sectionId) {
+            const panel = document.getElementById(`students-panel-${sectionId}`);
+            if (panel) {
+                panel.style.display = 'none';
+            }
+        }
+
+        function filterSections() {
+            const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderSections(sectionsData);
+                return;
+            }
+            
+            const filtered = sectionsData.filter(section => 
+                section.filiere.toLowerCase().includes(searchTerm) || 
+                section.nom.toLowerCase().includes(searchTerm) ||
+                (section.module && section.module.toLowerCase().includes(searchTerm))
+            );
+            
+            renderSections(filtered);
+        }
+
+        function manageSection(sectionId) {
+            // Redirection vers la page de gestion de section
+            window.location.href = `gestion-section-details.html?sectionId=${sectionId}`;
+        }
+
+        function viewStudentDetails(studentId) {
+            // Redirection vers la page de détails de l'étudiant
+            window.location.href = `etudiant-details.html?studentId=${studentId}`;
+        }
+
+        function showError(message) {
+            const container = document.getElementById("sectionsList");
+            container.innerHTML = `
+                <div class="error-message">
+                    ${message}
+                    <button onclick="location.reload()">Réessayer</button>
+                </div>
+            `;
         }
     </script>
 </body>
