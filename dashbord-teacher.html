@@ -50,7 +50,7 @@
       let authToken = null;
       let isBackendAvailable = true; 
 
-      /*document.addEventListener("DOMContentLoaded", async function () {
+      document.addEventListener("DOMContentLoaded", async function () {
         // Load navigation
         fetch("enseignant-nav.html")
             .then((response) => response.text())
@@ -85,9 +85,9 @@
             console.error("Error loading data:", error);
             loadFallbackData();
         }
-        });*/
+        });
 
-      document.addEventListener("DOMContentLoaded", async function () {
+      /*document.addEventListener("DOMContentLoaded", async function () {
         // Load navigation
         fetch("enseignant-nav.html")
           .then((response) => response.text())
@@ -178,7 +178,7 @@
           localStorage.removeItem("enseignant_token");
           window.location.href = "enseignant-login.html";
         }
-      });
+      });*/
 
       // Add reconnection button
       function addReconnectionButton() {
@@ -344,7 +344,7 @@
         }
       }
 
-      /*async function loadUserData() {
+      async function loadUserData() {
   // Utiliser des données fictives au lieu de faire une requête API
   currentUser = {
     id: "demo-teacher",
@@ -362,7 +362,7 @@
   if (document.getElementById("userId")) {
     document.getElementById("userId").textContent = "T20230001";
   }
-}*/
+}
 
       // Load dashboard data
       async function loadDashboardData() {
