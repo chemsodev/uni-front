@@ -313,29 +313,10 @@
               .then((html) => {
                 document.getElementById("navbar-container").innerHTML = html;
 
-                const avatar = document.getElementById("userAvatar");
-                const fullName = document.getElementById("userFullName");
-                const userId = document.getElementById("userId");
+                // Update user info in the navbar
+                updateNavbarUserInfo(studentData);
 
-                if (avatar) {
-                  const firstInitial = studentData.firstName
-                    ? studentData.firstName.charAt(0)
-                    : "";
-                  const lastInitial = studentData.lastName
-                    ? studentData.lastName.charAt(0)
-                    : "";
-                  avatar.textContent = (
-                    firstInitial + lastInitial
-                  ).toUpperCase();
-                }
-
-                if (fullName)
-                  fullName.textContent =
-                    `${studentData.firstName || ""} ${
-                      studentData.lastName || ""
-                    }`.trim() || "Utilisateur";
-                if (userId) userId.textContent = studentData.matricule || "N/A";
-
+                // Activate the correct nav link
                 document.querySelectorAll(".nav-link").forEach((link) => {
                   link.classList.remove("active");
                   if (link.getAttribute("href") === "notification.html") {
@@ -411,9 +392,9 @@
           const emptyState = document.createElement("div");
           emptyState.className = "empty-state";
           emptyState.innerHTML = `
-                <div class="empty-state-icon">📭</div>
-                <div class="empty-state-text">Aucune notification à afficher</div>
-            `;
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">Aucune notification à afficher</div>
+                    `;
           notificationList.appendChild(emptyState);
         }
       }
@@ -558,6 +539,52 @@
 
         // Redirect to login page
         window.location.href = "index.html";
+      }
+
+      // Fonction pour mettre à jour les informations utilisateur dans la barre de navigation
+      function updateNavbarUserInfo(studentData) {
+        if (!studentData) {
+          console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
+          return;
+        }
+
+        const avatar = document.getElementById("userAvatar");
+        const fullName = document.getElementById("userFullName");
+        const userId = document.getElementById("userId");
+
+        if (avatar) {
+          if (studentData.firstName && studentData.lastName) {
+            avatar.textContent = (
+              studentData.firstName.charAt(0) + studentData.lastName.charAt(0)
+            ).toUpperCase();
+          } else if (studentData.prenom && studentData.nom) {
+            avatar.textContent = (
+              studentData.prenom.charAt(0) + studentData.nom.charAt(0)
+            ).toUpperCase();
+          } else {
+            avatar.textContent = "ET";
+          }
+        }
+
+        if (fullName) {
+          if (studentData.firstName && studentData.lastName) {
+            fullName.textContent = `${studentData.firstName} ${studentData.lastName}`;
+          } else if (studentData.prenom && studentData.nom) {
+            fullName.textContent = `${studentData.prenom} ${studentData.nom}`;
+          } else {
+            fullName.textContent = "Étudiant";
+          }
+        }
+
+        if (userId) {
+          if (studentData.matricule) {
+            userId.textContent = `Matricule: ${studentData.matricule}`;
+          } else if (studentData.id) {
+            userId.textContent = `ID: ${studentData.id}`;
+          } else {
+            userId.textContent = "Utilisateur";
+          }
+        }
       }
     </script>
   </body>

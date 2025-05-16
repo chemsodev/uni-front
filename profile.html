@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Profil Personnel Étudiant</title>
     <link href="style/profile.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
     <div class="dashboard-container">
@@ -13,6 +14,21 @@
       <div class="main-content">
         <div class="header">
           <h1 class="page-title">Profil Personnel</h1>
+          <div class="header-actions">
+            <button id="refresh-btn" class="btn-icon" title="Actualiser">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M8 3a5 5 0 0 0-5 5h1a1 1 0 0 1 1 1 1 1 0 0 1-1 1H3a6 6 0 1 1 6 6v1a1 1 0 0 1-1 1 1 1 0 0 1-1-1v-1a5 5 0 0 0 5-5h1a1 1 0 0 1 1 1 1 1 0 0 1-1 1h-1a6 6 0 0 1-6 6v1a1 1 0 0 1-1 1 1 1 0 0 1-1-1v-1a5 5 0 0 0-5-5H1a1 1 0 0 1-1-1 1 1 0 0 1 1-1h1a6 6 0 0 1 6-6V1a1 1 0 0 1 1-1 1 1 0 0 1 1 1v1a5 5 0 0 0 5 5h1a1 1 0 0 1 1 1 1 1 0 0 1-1 1H8z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="profile-container">
@@ -31,7 +47,12 @@
               <div class="photo-container" id="profile-photo">ID</div>
               <label class="upload-btn">
                 Changer la photo
-                <input type="file" style="display: none" />
+                <input
+                  type="file"
+                  style="display: none"
+                  id="photoInput"
+                  accept="image/*"
+                />
               </label>
             </div>
 
@@ -119,6 +140,9 @@
               </div>
             </div>
 
+            <!-- Ongoing demandes section -->
+            <div id="ongoing-demandes-section"></div>
+
             <h2 class="section-title">Besoins spécifiques</h2>
             <div class="profile-info">
               <div class="info-item">
@@ -132,81 +156,280 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Attempt to retrieve student data
-        let studentData = null;
-        try {
-          studentData = JSON.parse(localStorage.getItem("studentData"));
-        } catch (e) {
-          console.error("Error parsing student data from localStorage:", e);
-        }
+      // Global variables
+      const API_BASE_URL = "http://localhost:3000/api";
+      let authToken = null;
+      let currentUser = null;
+      let isBackendAvailable = true;
 
-        if (!studentData) {
-          console.warn(
-            "Aucune donnée étudiant valide trouvée dans le localStorage. Tentative de récupération..."
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          // Attempt to retrieve token from storage
+          authToken =
+            sessionStorage.getItem("etudiant_token") ||
+            localStorage.getItem("etudiant_token");
+
+          if (!authToken) {
+            console.error("No authentication token found");
+            window.location.href = "etudiant-login.html";
+            return;
+          }
+
+          // Verify token first
+          await verifyToken();
+
+          // Load navbar
+          await loadNavbar();
+
+          // Load student data from API with fallback to localStorage
+          await loadStudentData();
+
+          // Set up event listeners
+          setupEventListeners();
+
+          // Set up photo upload
+          initPhotoUpload();
+
+          // Fetch and display ongoing demandes (pending requests)
+          await loadOngoingDemandes();
+        } catch (error) {
+          console.error("Error initializing profile page:", error);
+
+          if (error.message && error.message.includes("auth")) {
+            // Authentication error - redirect to login
+            showToast(
+              "Session expirée. Redirection vers la page de connexion...",
+              "error"
+            );
+            setTimeout(() => {
+              window.location.href = "etudiant-login.html";
+            }, 2000);
+          } else {
+            // Other errors - try to continue in offline mode
+            handleOfflineMode();
+          }
+        }
+      });
+
+      async function verifyToken() {
+        try {
+          const verificationResponse = await fetch(
+            `${API_BASE_URL}/auth/verify`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000), // Timeout after 5 seconds
+            }
           );
-          // Placeholder: Ideally, trigger a fetch here if data is missing/invalid
-          // For now, just show a message or leave fields blank
-          document.body.innerHTML =
-            "<p>Erreur: Données étudiant non disponibles. Veuillez vous reconnecter.</p>"; // Or redirect
-          // You might want to redirect to login: window.location.href = 'login.html';
+
+          if (!verificationResponse.ok) {
+            throw new Error(
+              `Token verification failed: ${verificationResponse.status}`
+            );
+          }
+
+          const userData = await verificationResponse.json();
+
+          // Ensure this is a student account
+          if (userData.adminRole !== "etudiant") {
+            throw new Error("auth: Access restricted to students");
+          }
+
+          // Store current user
+          currentUser = {
+            id: userData.userId,
+            email: userData.email,
+          };
+
+          return userData;
+        } catch (error) {
+          console.warn("Token verification failed:", error);
+
+          if (error.name === "AbortError" || error.message.includes("fetch")) {
+            isBackendAvailable = false;
+            // Continue with offline functionality
+            return null;
+          } else {
+            // Authentication error - propagate
+            throw error;
+          }
+        }
+      }
+
+      async function loadNavbar() {
+        try {
+          const response = await fetch("etudiant-nav.html");
+          const html = await response.text();
+
+          const navbarContainer = document.getElementById("navbar-container");
+          if (navbarContainer) {
+            navbarContainer.innerHTML = html;
+
+            // Activate the profile nav link (for both profile and profile-edit pages)
+            document
+              .querySelectorAll("#navbar-container .nav-link")
+              .forEach((link) => {
+                link.classList.remove("active");
+                const linkHref = link.getAttribute("href");
+                const currentPage = window.location.pathname.split("/").pop();
+
+                if (
+                  linkHref === "profile.html" &&
+                  (currentPage === "profile.html" ||
+                    currentPage === "profile-edit.html")
+                ) {
+                  link.classList.add("active");
+                } else if (linkHref === currentPage) {
+                  link.classList.add("active");
+                }
+              });
+
+            // Update user info in navbar if we have cached data
+            const studentData = getStudentData();
+            if (studentData) {
+              updateNavbarUserInfo(studentData);
+            }
+          }
+        } catch (error) {
+          console.error("Error loading navbar:", error);
+          // Continue without navbar
+        }
+      }
+
+      function updateNavbarUserInfo(studentData) {
+        if (!studentData) {
+          console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
           return;
         }
 
-        // Charger la navbar and populate it
-        fetch("etudiant-nav.html")
-          .then((response) => response.text())
-          .then((html) => {
-            const navbarContainer = document.getElementById("navbar-container");
-            if (navbarContainer) {
-              navbarContainer.innerHTML = html;
+        const avatar = document.getElementById("userAvatar");
+        const fullName = document.getElementById("userFullName");
+        const userId = document.getElementById("userId");
 
-              const avatar = document.getElementById("userAvatar");
-              const fullName = document.getElementById("userFullName");
-              const userId = document.getElementById("userId");
+        if (avatar) {
+          if (studentData.firstName && studentData.lastName) {
+            avatar.textContent = (
+              studentData.firstName.charAt(0) + studentData.lastName.charAt(0)
+            ).toUpperCase();
+          } else if (studentData.prenom && studentData.nom) {
+            avatar.textContent = (
+              studentData.prenom.charAt(0) + studentData.nom.charAt(0)
+            ).toUpperCase();
+          } else {
+            avatar.textContent = "ET";
+          }
+        }
 
-              // Use firstName and lastName for Navbar
-              if (studentData.firstName && studentData.lastName) {
-                if (avatar)
-                  avatar.textContent = (
-                    studentData.firstName.charAt(0) +
-                    studentData.lastName.charAt(0)
-                  ).toUpperCase();
-                if (fullName)
-                  fullName.textContent = `${studentData.firstName} ${studentData.lastName}`;
-              } else {
-                if (fullName) fullName.textContent = "Utilisateur"; // Fallback
-                if (avatar) avatar.textContent = "U";
+        if (fullName) {
+          if (studentData.firstName && studentData.lastName) {
+            fullName.textContent = `${studentData.firstName} ${studentData.lastName}`;
+          } else if (studentData.prenom && studentData.nom) {
+            fullName.textContent = `${studentData.prenom} ${studentData.nom}`;
+          } else {
+            fullName.textContent = "Étudiant";
+          }
+        }
+
+        if (userId) {
+          if (studentData.matricule) {
+            userId.textContent = `Matricule: ${studentData.matricule}`;
+          } else if (studentData.id) {
+            userId.textContent = `ID: ${studentData.id}`;
+          } else {
+            userId.textContent = "Utilisateur";
+          }
+        }
+      }
+
+      async function loadStudentData() {
+        // Check if backend is available
+        if (isBackendAvailable && currentUser?.id) {
+          try {
+            const response = await fetch(
+              `${API_BASE_URL}/etudiants/${currentUser.id}`,
+              {
+                headers: getAuthHeaders(),
+                signal: AbortSignal.timeout(5000),
               }
+            );
 
-              if (userId && studentData.matricule)
-                userId.textContent = `Matricule: ${studentData.matricule}`;
-
-              // Activate the correct nav link
-              document
-                .querySelectorAll("#navbar-container .nav-link")
-                .forEach((link) => {
-                  link.classList.remove("active");
-                  const linkHref = link.getAttribute("href");
-                  const currentPage = window.location.pathname.split("/").pop();
-                  // Make 'profile.html' active for both profile.html and profile-edit.html
-                  if (
-                    linkHref === "profile.html" &&
-                    (currentPage === "profile.html" ||
-                      currentPage === "profile-edit.html")
-                  ) {
-                    link.classList.add("active");
-                  } else if (linkHref === currentPage) {
-                    link.classList.add("active");
-                  }
-                });
-            } else {
-              console.error("Navbar container not found");
+            if (!response.ok) {
+              throw new Error(`API request failed: ${response.status}`);
             }
-          })
-          .catch((error) => console.error("Error loading navbar:", error));
 
-        // Populate profile fields using data-field attributes and specific IDs
+            const studentData = await response.json();
+
+            // Cache the data in localStorage
+            localStorage.setItem("studentData", JSON.stringify(studentData));
+
+            // Populate the profile with fresh data
+            populateProfile(studentData);
+
+            // Update the profile photo
+            updateProfilePhoto(studentData);
+
+            // Update navbar info
+            updateNavbarUserInfo(studentData);
+
+            return studentData;
+          } catch (error) {
+            console.error("Error fetching student data from API:", error);
+            isBackendAvailable = false;
+            showOfflineNotification();
+
+            // Fall back to cached data
+            const cachedData = getStudentData();
+            if (cachedData) {
+              populateProfile(cachedData);
+              updateProfilePhoto(cachedData);
+              updateNavbarUserInfo(cachedData);
+              return cachedData;
+            } else {
+              showToast(
+                "Données étudiant non disponibles en mode hors ligne",
+                "error"
+              );
+              return null;
+            }
+          }
+        } else {
+          // Offline mode: use cached data
+          showOfflineNotification();
+          const cachedData = getStudentData();
+          if (cachedData) {
+            populateProfile(cachedData);
+            updateProfilePhoto(cachedData);
+            updateNavbarUserInfo(cachedData);
+            return cachedData;
+          } else {
+            showToast(
+              "Données étudiant non disponibles en mode hors ligne",
+              "error"
+            );
+            return null;
+          }
+        }
+      }
+
+      function getStudentData() {
+        try {
+          return JSON.parse(localStorage.getItem("studentData"));
+        } catch (e) {
+          console.error("Error parsing student data:", e);
+          return null;
+        }
+      }
+
+      function populateProfile(studentData) {
+        if (!studentData) {
+          showToast("Aucune donnée étudiant disponible", "error");
+          return;
+        }
+
+        // Helper function to populate fields
         const populateField = (field, value) => {
           const elements = document.querySelectorAll(`[data-field="${field}"]`);
           if (elements.length > 0) {
@@ -225,16 +448,16 @@
         };
 
         // --- Populate Personal Info ---
-        populateField("nom", studentData.lastName); // Keep data-field="nom" but populate with lastName
-        populateField("firstName", studentData.firstName); // Changed data-field to firstName
+        populateField("nom", studentData.lastName || studentData.nom);
+        populateField("firstName", studentData.firstName || studentData.prenom);
         populateField("matricule", studentData.matricule);
-        populateField("nationality", studentData.nationality);
+        populateField("nationality", studentData.nationality || "N/A");
         populateField(
           "birthDate",
           studentData.birthDate
             ? new Date(studentData.birthDate).toLocaleDateString("fr-FR")
             : "N/A"
-        ); // Format date
+        );
         populateField(
           "gender",
           studentData.gender === "male"
@@ -242,55 +465,461 @@
             : studentData.gender === "female"
             ? "Féminin"
             : "N/A"
-        ); // Map gender
+        );
 
         // --- Populate Contact Info ---
         populateField("email", studentData.email);
-        populateField("phone", studentData.phone);
-        // Note: 'adresse' field doesn't exist in the provided student object. Add it or remove the HTML element.
-        populateField("adresse", studentData.address || "Non fournie"); // Example if address field existed
+        populateField("phone", studentData.phone || "N/A");
+        populateField(
+          "adresse",
+          studentData.address || studentData.adresse || "N/A"
+        );
 
         // --- Populate Academic Info ---
-        // Assuming the student is in one section for profile display
-        const currentSection =
-          studentData.sections && studentData.sections.length > 0
-            ? studentData.sections[0]
-            : {};
-        populateField("filiere", currentSection.filiere || "N/A"); // Needs 'filiere' in section object
-        populateField("section", currentSection.nom || "N/A"); // Needs 'nom' in section object
-        populateField("groupeTD", currentSection.groupe_td || "N/A"); // Needs 'groupe_td' in section object
-        populateField("groupeTP", currentSection.groupe_tp || "N/A"); // Needs 'groupe_tp' in section object
-        // Note: 'niveau' field doesn't exist in the provided student object/section. Add it or remove the HTML element.
-        populateField("niveau", currentSection.niveau || "N/A"); // Example if niveau field existed in section
+        // Handle sections - can be an array from the API
+        let sectionName = "N/A";
+        let filiereName = "N/A";
 
-        // --- Populate Specific Needs ---
+        if (studentData.sections && studentData.sections.length > 0) {
+          sectionName = studentData.sections[0].name || "N/A";
+          filiereName =
+            studentData.sections[0].specialty ||
+            studentData.sections[0].department?.name ||
+            "N/A";
+        }
+
+        populateField("filiere", filiereName);
+        populateField("section", sectionName);
+
+        // Handle group information - now using separate TD and TP groups
+        let groupeTD = "N/A";
+        let groupeTP = "N/A";
+
+        // Check new TD and TP group fields first
+        if (studentData.tdGroupe) {
+          groupeTD = studentData.tdGroupe.name || "N/A";
+        }
+
+        if (studentData.tpGroupe) {
+          groupeTP = studentData.tpGroupe.name || "N/A";
+        }
+
+        // Fallback to the old groupe field if necessary
+        if (
+          groupeTD === "N/A" &&
+          studentData.groupe &&
+          studentData.groupe.type === "td"
+        ) {
+          groupeTD = studentData.groupe.name || "N/A";
+        }
+
+        if (
+          groupeTP === "N/A" &&
+          studentData.groupe &&
+          studentData.groupe.type === "tp"
+        ) {
+          groupeTP = studentData.groupe.name || "N/A";
+        }
+
+        populateField("groupeTD", groupeTD);
+        populateField("groupeTP", groupeTP);
+        populateField(
+          "niveau",
+          studentData.niveau ||
+            (studentData.sections && studentData.sections[0]?.level) ||
+            "N/A"
+        );
+
+        // --- Populate Special Needs ---
         populateField(
           "hasDisability",
           studentData.hasDisability ? "Oui" : "Non"
         );
+      }
 
-        // --- Populate Profile Photo Initials ---
+      function updateProfilePhoto(studentData) {
         const profilePhoto = document.getElementById("profile-photo");
-        if (profilePhoto && studentData.firstName && studentData.lastName) {
-          profilePhoto.textContent = (
-            studentData.firstName.charAt(0) + studentData.lastName.charAt(0)
-          ).toUpperCase();
-        } else if (profilePhoto) {
-          profilePhoto.textContent = "U"; // Fallback
-        }
+        if (!profilePhoto) return;
 
-        // Add event listener for photo change if needed
-        const photoInput = document.querySelector(
-          '.upload-btn input[type="file"]'
-        );
+        if (studentData.photoUrl) {
+          // Check if the URL is relative or absolute
+          const photoUrl = studentData.photoUrl.startsWith("http")
+            ? studentData.photoUrl
+            : `${API_BASE_URL}/${studentData.photoUrl}`;
+
+          // Try to load the photo
+          const img = new Image();
+          img.onload = () => {
+            profilePhoto.innerHTML = `<img src="${photoUrl}" alt="Photo de profil">`;
+          };
+          img.onerror = () => {
+            // Fallback to initials if photo can't be loaded
+            profilePhoto.textContent =
+              (studentData.firstName?.charAt(0) ||
+                studentData.prenom?.charAt(0) ||
+                "") +
+              (studentData.lastName?.charAt(0) ||
+                studentData.nom?.charAt(0) ||
+                "");
+          };
+          img.src = photoUrl;
+        } else {
+          // Use initials if no photo available
+          profilePhoto.textContent =
+            (studentData.firstName?.charAt(0) ||
+              studentData.prenom?.charAt(0) ||
+              "") +
+            (studentData.lastName?.charAt(0) ||
+              studentData.nom?.charAt(0) ||
+              "");
+        }
+      }
+
+      function initPhotoUpload() {
+        const photoInput = document.getElementById("photoInput");
+
         if (photoInput) {
-          photoInput.addEventListener("change", (event) => {
-            // Handle file upload logic here - likely involves sending to backend
-            console.log("Photo change triggered:", event.target.files[0]);
-            // Example: uploadPhoto(event.target.files[0]);
+          photoInput.addEventListener("change", async (event) => {
+            if (event.target.files && event.target.files[0]) {
+              const file = event.target.files[0];
+
+              // Validate file type and size
+              if (!file.type.match("image.*")) {
+                showToast("Veuillez sélectionner une image", "error");
+                return;
+              }
+
+              if (file.size > 5 * 1024 * 1024) {
+                // 5MB max
+                showToast(
+                  "La taille de l'image ne doit pas dépasser 5MB",
+                  "error"
+                );
+                return;
+              }
+
+              try {
+                if (!isBackendAvailable) {
+                  throw new Error("Mode hors ligne actif");
+                }
+
+                // Show loading indicator
+                const profilePhoto = document.getElementById("profile-photo");
+                profilePhoto.innerHTML = '<div class="loading-spinner"></div>';
+
+                // Create FormData and add the file
+                const formData = new FormData();
+                formData.append("photo", file);
+
+                // Send to server
+                const response = await fetch(
+                  `${API_BASE_URL}/etudiants/photo`,
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${authToken}`,
+                    },
+                    body: formData,
+                  }
+                );
+
+                if (!response.ok) {
+                  throw new Error("Erreur lors du téléchargement de la photo");
+                }
+
+                const result = await response.json();
+
+                // Update student data with new photo URL
+                const studentData = getStudentData();
+                if (studentData) {
+                  studentData.photoUrl = result.photoUrl;
+                  localStorage.setItem(
+                    "studentData",
+                    JSON.stringify(studentData)
+                  );
+
+                  // Update the profile photo
+                  updateProfilePhoto(studentData);
+                  showToast(
+                    "Photo de profil mise à jour avec succès",
+                    "success"
+                  );
+                }
+              } catch (error) {
+                console.error("Error uploading photo:", error);
+
+                // Create a preview locally in offline mode
+                if (!isBackendAvailable) {
+                  const profilePhoto = document.getElementById("profile-photo");
+                  const photoUrl = URL.createObjectURL(file);
+                  profilePhoto.innerHTML = `<img src="${photoUrl}" alt="Photo de profil temporaire">`;
+
+                  showToast(
+                    "Mode hors ligne: La photo sera téléchargée lorsque vous serez connecté",
+                    "warning"
+                  );
+                } else {
+                  showToast(
+                    "Erreur lors du téléchargement de la photo",
+                    "error"
+                  );
+                }
+              }
+            }
           });
         }
-      });
+      }
+
+      function setupEventListeners() {
+        // Refresh button
+        const refreshBtn = document.getElementById("refresh-btn");
+        if (refreshBtn) {
+          refreshBtn.addEventListener("click", async () => {
+            try {
+              await loadStudentData();
+              showToast("Données actualisées", "success");
+            } catch (error) {
+              console.error("Error refreshing data:", error);
+              showToast("Erreur lors de l'actualisation", "error");
+            }
+          });
+        }
+      }
+
+      function showOfflineNotification() {
+        // Check if notification already exists
+        if (document.querySelector(".offline-notification")) return;
+
+        const notification = document.createElement("div");
+        notification.className = "offline-notification";
+        notification.innerHTML = `
+          <div class="notification-content">
+            <strong>Mode hors ligne</strong>: Affichage des données en cache. Certaines informations peuvent ne pas être à jour.
+            <button onclick="location.reload()" class="retry-button">Réessayer</button>
+          </div>
+        `;
+
+        // Add some styling
+        notification.style.background = "#fff3cd";
+        notification.style.color = "#856404";
+        notification.style.padding = "10px";
+        notification.style.borderRadius = "5px";
+        notification.style.margin = "10px 0";
+        notification.style.textAlign = "center";
+
+        // Add the retry button style
+        const style = document.createElement("style");
+        style.textContent = `
+          .retry-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-left: 10px;
+            cursor: pointer;
+          }
+
+          .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s;
+          }
+
+          .toast.success {
+            background-color: #28a745;
+          }
+
+          .toast.error {
+            background-color: #dc3545;
+          }
+
+          .toast.warning {
+            background-color: #ffc107;
+            color: #333;
+          }
+
+          .toast.info {
+            background-color: #17a2b8;
+          }
+
+          .toast.fade-out {
+            opacity: 0;
+          }
+
+          .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+
+        // Add to the page
+        const header = document.querySelector(".header");
+        if (header) {
+          header.parentNode.insertBefore(notification, header.nextSibling);
+        } else {
+          document.querySelector(".main-content").prepend(notification);
+        }
+      }
+
+      function showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add("fade-out");
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      function handleOfflineMode() {
+        showOfflineNotification();
+
+        // Try to load from cache
+        const cachedData = getStudentData();
+        if (cachedData) {
+          populateProfile(cachedData);
+          updateProfilePhoto(cachedData);
+          updateNavbarUserInfo(cachedData);
+        } else {
+          showToast(
+            "Aucune donnée étudiant disponible en mode hors ligne",
+            "error"
+          );
+        }
+      }
+
+      function getAuthHeaders(includeJson = true) {
+        const headers = {
+          Authorization: `Bearer ${authToken}`,
+        };
+
+        if (includeJson) {
+          headers["Content-Type"] = "application/json";
+        }
+
+        return headers;
+      }
+
+      // Fetch and display ongoing demandes (pending requests)
+      async function loadOngoingDemandes() {
+        const section = document.getElementById("ongoing-demandes-section");
+        section.innerHTML = "";
+        try {
+          const res = await fetch(`${API_BASE_URL}/demandes/mes`, {
+            headers: getAuthHeaders(),
+          });
+          if (!res.ok)
+            throw new Error("Erreur lors du chargement des demandes");
+          const demandes = await res.json();
+          const ongoing = demandes.filter(
+            (d) => (d.status || "").toUpperCase() === "PENDING"
+          );
+          if (!ongoing.length) return;
+          let html = `<h2 class='section-title'>Demandes en cours</h2><div class='demandes-cards'>`;
+          ongoing.forEach((d) => {
+            html += `<div class='demande-card'>
+              <div class='demande-type'><strong>${getRequestTypeLabel(
+                d.type
+              )}</strong></div>
+              <div class='demande-date'>Soumise le: ${formatDate(
+                d.createdAt
+              )}</div>
+              <div class='demande-change'>Changement: <span>${d.current} → ${
+              d.requested
+            }</span></div>
+              <div class='demande-status'>Statut: <span class='status-chip status-pending'>En cours</span></div>
+              <div class='demande-actions'><button class='action-btn' onclick='alert("Détails: " + JSON.stringify(${JSON.stringify(
+                d
+              )}))'>Voir détails</button></div>
+            </div>`;
+          });
+          html += `</div>`;
+          section.innerHTML = html;
+        } catch (e) {
+          // Hide section on error
+          section.innerHTML = "";
+        }
+      }
+      // Helper for type label
+      function getRequestTypeLabel(type) {
+        switch (type) {
+          case "SECTION_CHANGE":
+            return "Changement de Section";
+          case "TD_GROUP_CHANGE":
+            return "Changement de Groupe TD";
+          case "TP_GROUP_CHANGE":
+            return "Changement de Groupe TP";
+          default:
+            return type;
+        }
+      }
+      function formatDate(date) {
+        if (!date) return "-";
+        const d = new Date(date);
+        return d.toLocaleDateString("fr-FR");
+      }
     </script>
+    <style>
+      .demandes-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .demande-card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        padding: 16px 20px;
+        min-width: 220px;
+        max-width: 320px;
+        flex: 1 1 220px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .demande-type {
+        font-size: 1.1em;
+        color: #2a3b4d;
+      }
+      .demande-date,
+      .demande-change,
+      .demande-status {
+        font-size: 0.97em;
+        color: #555;
+      }
+      .demande-actions {
+        margin-top: 8px;
+      }
+      .demande-card .status-chip.status-pending {
+        background: #ffeeba;
+        color: #856404;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 0.95em;
+      }
+    </style>
   </body>
 </html>

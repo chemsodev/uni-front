@@ -14,7 +14,7 @@
         <div class="header">
           <h1 class="page-title">Tableau de bord</h1>
           <div class="header-actions">
-            <button onclick="window.location.href='emploi.html'">
+            <button onclick="window.location.href='schedule.html'">
               Emploi du temps
             </button>
           </div>
@@ -52,14 +52,6 @@
             </div>
           </div>
 
-          <!-- Emploi du temps aujourd'hui -->
-          <div class="card">
-            <h2 class="card-title">Emploi du temps aujourd'hui</h2>
-            <div class="card-content" id="todaySchedule">
-              <div class="loading">Chargement...</div>
-            </div>
-          </div>
-
           <!-- Demandes -->
           <div class="card">
             <h2 class="card-title">Mes Demandes</h2>
@@ -80,38 +72,15 @@
     </div>
 
     <script>
-      // Global variables
-      let currentUser = null;
+      // Global constants and variables
+      const API_BASE_URL = "http://localhost:3000/api";
       let authToken = null;
-      let isBackendAvailable = true; // Flag to track backend availability
+      let currentUser = null;
+      let isBackendAvailable = true;
 
       document.addEventListener("DOMContentLoaded", async function () {
-        // Load navigation
-        fetch("etudiant-nav.html")
-          .then((response) => response.text())
-          .then((html) => {
-            document.getElementById("navbar-container").innerHTML = html;
-            // Mark active link after loading
-            const navScript = document.createElement("script");
-            navScript.innerHTML = `
-                    document.querySelectorAll('.nav-link').forEach(link => {
-                        link.classList.remove('active');
-                        if(link.getAttribute('href') === '${window.location.pathname
-                          .split("/")
-                          .pop()}') {
-                            link.classList.add('active');
-                        }
-                    });
-                `;
-            document.body.appendChild(navScript);
-          })
-          .catch((error) => {
-            console.error("Error loading navigation:", error);
-            // Continue without navigation
-          });
-
         try {
-          // 1. Retrieve token from storage
+          // Attempt to retrieve token from storage
           authToken =
             sessionStorage.getItem("etudiant_token") ||
             localStorage.getItem("etudiant_token");
@@ -121,453 +90,393 @@
             return;
           }
 
-          // 2. Verify token and role - with fallback for backend issues
-          try {
-            const verificationResponse = await fetch(
-              "http://localhost:3000/api/auth/verify",
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${authToken}`,
-                  "Content-Type": "application/json",
-                },
-                // Add timeout to prevent long waiting
-                signal: AbortSignal.timeout(5000),
-              }
-            );
+          // Load navigation
+          await loadNavbar();
 
-            if (!verificationResponse.ok) {
-              console.warn(
-                "Token verification failed but continuing with limited functionality"
-              );
-              isBackendAvailable = false;
-              // Continue with limited functionality instead of redirecting
-              loadFallbackData();
+          // Verify token and user role
+          await verifyToken();
 
-              // Add a reconnection button
-              addReconnectionButton();
-            } else {
-              const userData = await verificationResponse.json();
-
-              // 3. Validate student role
-              if (userData.adminRole !== "etudiant") {
-                throw new Error("Access restricted to students");
-              }
-
-              // 4. Set current user
-              currentUser = {
-                id: userData.userId,
-                email: userData.email,
-              };
-
-              // 5. Load data
-              try {
-                await loadUserData();
-                await loadDashboardData();
-              } catch (dataError) {
-                console.error("Error loading data:", dataError);
-                isBackendAvailable = false;
-                loadFallbackData();
-                addReconnectionButton();
-              }
-            }
-          } catch (error) {
-            console.error("Auth verification error:", error);
-            isBackendAvailable = false;
-            loadFallbackData();
-            addReconnectionButton();
-          }
+          // Load all dashboard data
+          await loadDashboardData();
         } catch (error) {
-          console.error("Access denied:", error);
-          // Clear storage and redirect
-          sessionStorage.removeItem("etudiant_token");
-          localStorage.removeItem("etudiant_token");
-          window.location.href = "etudiant-login.html";
+          console.error("Error initializing dashboard:", error);
+
+          if (error.message && error.message.includes("auth")) {
+            // Authentication error - redirect to login
+            showErrorNotification(
+              "Session expirée. Redirection vers la page de connexion..."
+            );
+            setTimeout(() => {
+              sessionStorage.removeItem("etudiant_token");
+              localStorage.removeItem("etudiant_token");
+              window.location.href = "etudiant-login.html";
+            }, 2000);
+          } else {
+            // Other errors - try to continue in offline mode
+            isBackendAvailable = false;
+            handleOfflineMode();
+          }
         }
       });
 
-      // Add reconnection button
-      function addReconnectionButton() {
-        const offlineNotice = document.querySelector(".alert.alert-warning");
-
-        if (offlineNotice) {
-          const reconnectBtn = document.createElement("button");
-          reconnectBtn.textContent = "Réessayer la connexion";
-          reconnectBtn.style.marginLeft = "10px";
-          reconnectBtn.style.padding = "5px 10px";
-          reconnectBtn.style.backgroundColor = "#007bff";
-          reconnectBtn.style.color = "#fff";
-          reconnectBtn.style.border = "none";
-          reconnectBtn.style.borderRadius = "4px";
-          reconnectBtn.style.cursor = "pointer";
-
-          reconnectBtn.onclick = function () {
-            window.location.reload();
-          };
-
-          offlineNotice.appendChild(reconnectBtn);
-        }
-      }
-
-      // Load fallback data when backend is unavailable
-      function loadFallbackData() {
-        // Add offline mode notice
-        const existingNotice = document.querySelector(".alert.alert-warning");
-        if (!existingNotice) {
-          const offlineNotice = document.createElement("div");
-          offlineNotice.className = "alert alert-warning";
-          offlineNotice.style.padding = "10px";
-          offlineNotice.style.margin = "10px 0";
-          offlineNotice.style.backgroundColor = "#fff3cd";
-          offlineNotice.style.color = "#856404";
-          offlineNotice.style.borderRadius = "4px";
-          offlineNotice.innerHTML =
-            "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.";
-          document.querySelector(".main-content").prepend(offlineNotice);
-        }
-
-        // Set sample user data
-        const sampleUserData = {
-          firstName: "Ahmed",
-          lastName: "Rahmani",
-          matricule: "20230456",
-          sections: [
-            {
-              filiere: "Informatique",
-              nom: "B",
-              groupe_td: "3",
-              groupe_tp: "2",
-            },
-          ],
-        };
-
-        // Update UI with sample data
-        document.getElementById("lastName").textContent =
-          sampleUserData.lastName;
-        document.getElementById("firstName").textContent =
-          sampleUserData.firstName;
-        document.getElementById("major").textContent =
-          sampleUserData.sections[0].filiere;
-        document.getElementById("section").textContent =
-          sampleUserData.sections[0].nom;
-        document.getElementById("tdGroup").textContent =
-          sampleUserData.sections[0].groupe_td;
-        document.getElementById("tpGroup").textContent =
-          sampleUserData.sections[0].groupe_tp;
-
-        // Sample schedule data
-        const sampleSchedule = [
-          {
-            startTime: new Date().setHours(8, 30),
-            endTime: new Date().setHours(10, 0),
-            courseName: "Algorithmique",
-            roomName: "Amphi C",
-          },
-          {
-            startTime: new Date().setHours(10, 15),
-            endTime: new Date().setHours(12, 0),
-            courseName: "Base de données",
-            roomName: "Salle B12",
-          },
-          {
-            startTime: new Date().setHours(14, 0),
-            endTime: new Date().setHours(16, 0),
-            courseName: "Réseaux",
-            roomName: "Labo Info 3",
-          },
-        ];
-        renderTodaySchedule(sampleSchedule);
-
-        // Sample requests data
-        const sampleRequests = [
-          {
-            id: "sample1",
-            type: "SECTION_CHANGE",
-            createdAt: new Date(Date.now() - 86400000 * 5),
-            status: "APPROVED",
-          },
-          {
-            id: "sample2",
-            type: "TD_GROUP_CHANGE",
-            createdAt: new Date(),
-            status: "PENDING",
-          },
-        ];
-        renderRequests(sampleRequests);
-
-        // Sample notifications data
-        const sampleNotifications = [
-          {
-            id: "notif1",
-            title: "Note",
-            message: "Nouvelle note en Algorithmique",
-            createdAt: new Date(Date.now() - 7200000), // 2 hours ago
-          },
-          {
-            id: "notif2",
-            title: "Demande",
-            message: "Votre demande de changement de section a été approuvée",
-            createdAt: new Date(Date.now() - 86400000), // 1 day ago
-          },
-        ];
-        renderNotifications(sampleNotifications);
-      }
-
-      // Load user data
-      async function loadUserData() {
+      async function loadNavbar() {
         try {
-          // First try to get the data from localStorage/sessionStorage
-          const studentDataJson =
-            localStorage.getItem("studentData") ||
-            sessionStorage.getItem("studentData");
-          let user = null;
+          const response = await fetch("etudiant-nav.html");
+          const html = await response.text();
 
-          if (studentDataJson) {
-            try {
-              user = JSON.parse(studentDataJson);
-              console.log("Using student data from localStorage");
+          document.getElementById("navbar-container").innerHTML = html;
 
-              // Validate the parsed data has the minimum required fields
-              if (
-                !user ||
-                typeof user !== "object" ||
-                (!user.firstName && !user.lastName && !user.matricule)
-              ) {
-                console.warn(
-                  "Invalid student data in localStorage, will fetch from API"
-                );
-                user = null; // Reset to trigger API fetch
-              }
-            } catch (e) {
-              console.error("Error parsing stored student data:", e);
-              // Clear invalid data
-              localStorage.removeItem("studentData");
-              sessionStorage.removeItem("studentData");
+          // Activate current nav link
+          document.querySelectorAll(".nav-link").forEach((link) => {
+            link.classList.remove("active");
+            if (
+              link.getAttribute("href") ===
+              window.location.pathname.split("/").pop()
+            ) {
+              link.classList.add("active");
             }
-          }
-
-          // If no valid data in storage, fetch from API
-          if (!user) {
-            const response = await fetch(
-              `http://localhost:3000/api/etudiants/${currentUser.id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${authToken}`,
-                },
-                signal: AbortSignal.timeout(5000),
-              }
-            );
-
-            if (response.ok) {
-              user = await response.json();
-              // Store the fetched data for future use
-              const storage = localStorage.getItem("etudiant_token")
-                ? localStorage
-                : sessionStorage;
-              storage.setItem("studentData", JSON.stringify(user));
-            } else {
-              // Handle specific error codes
-              if (response.status === 401 || response.status === 403) {
-                throw new Error(
-                  "Accès non autorisé. Veuillez vous reconnecter."
-                );
-              } else if (response.status === 500) {
-                throw new Error(
-                  "Erreur serveur. Veuillez réessayer plus tard."
-                );
-              } else {
-                throw new Error("Failed to load user data");
-              }
-            }
-          }
-
-          // Update UI with user data
-          document.getElementById("userFullName").textContent =
-            `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-            "Utilisateur";
-          document.getElementById("userId").textContent =
-            user.matricule || "N/A";
-
-          // Add null checks for firstName and lastName
-          const firstInitial =
-            user.firstName && user.firstName.charAt
-              ? user.firstName.charAt(0)
-              : "";
-          const lastInitial =
-            user.lastName && user.lastName.charAt
-              ? user.lastName.charAt(0)
-              : "";
-          document.getElementById("userAvatar").textContent =
-            firstInitial && lastInitial
-              ? `${firstInitial}${lastInitial}`.toUpperCase()
-              : "U";
-
-          // Check if sections array exists and has at least one item
-          const hasValidSection =
-            user.sections &&
-            Array.isArray(user.sections) &&
-            user.sections.length > 0;
-          const currentSection = hasValidSection ? user.sections[0] : {};
-
-          document.getElementById("lastName").textContent =
-            user.lastName || "N/A";
-          document.getElementById("firstName").textContent =
-            user.firstName || "N/A";
-
-          document.getElementById("major").textContent =
-            (currentSection && currentSection.filiere) || "Non assigné";
-          document.getElementById("section").textContent =
-            (currentSection && currentSection.nom) || "Non assigné";
-          document.getElementById("tdGroup").textContent =
-            (currentSection && currentSection.groupe_td) || "Non assigné";
-          document.getElementById("tpGroup").textContent =
-            (currentSection && currentSection.groupe_tp) || "Non assigné";
+          });
         } catch (error) {
-          console.error("Error loading user data:", error);
-
-          // Check if this is a timeout or network error
-          if (
-            error.name === "AbortError" ||
-            error.message.includes("Failed to fetch")
-          ) {
-            isBackendAvailable = false;
-          }
-
-          // Only load fallback data if not already loaded
-          if (document.getElementById("lastName").textContent === "") {
-            loadFallbackData();
-          }
-
-          // Rethrow to let the caller handle it
-          throw error;
+          console.error("Error loading navigation:", error);
+          // Continue without navbar
         }
       }
 
-      // Load dashboard data
-      async function loadDashboardData() {
+      async function verifyToken() {
         try {
-          const promises = [];
-
-          // Load today's schedule
-          const today = new Date().toISOString().split("T")[0];
-          promises.push(
-            fetch(
-              `http://localhost:3000/api/etudiants/${currentUser.id}/schedule?date=${today}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${authToken}`,
-                },
-                signal: AbortSignal.timeout(5000),
-              }
-            )
-              .then((response) => {
-                if (response.ok) return response.json();
-                return [];
-              })
-              .then((schedule) => renderTodaySchedule(schedule))
-              .catch((error) => {
-                console.error("Error loading schedule:", error);
-                renderTodaySchedule([]);
-              })
-          );
-
-          // Load requests
-          promises.push(
-            fetch(`http://localhost:3000/api/change-requests/my-requests`, {
+          const verificationResponse = await fetch(
+            `${API_BASE_URL}/auth/verify`,
+            {
+              method: "GET",
               headers: {
                 Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
               },
               signal: AbortSignal.timeout(5000),
-            })
-              .then((response) => {
-                if (response.ok) return response.json();
-                return [];
-              })
-              .then((requests) => renderRequests(requests))
-              .catch((error) => {
-                console.error("Error loading requests:", error);
-                renderRequests([]);
-              })
-          );
-
-          // Load notifications
-          promises.push(
-            fetch(
-              `http://localhost:3000/api/etudiants/${currentUser.id}/notifications`,
-              {
-                headers: {
-                  Authorization: `Bearer ${authToken}`,
-                },
-                signal: AbortSignal.timeout(5000),
-              }
-            )
-              .then((response) => {
-                if (response.ok) return response.json();
-                return [];
-              })
-              .then((notifications) => renderNotifications(notifications))
-              .catch((error) => {
-                console.error("Error loading notifications:", error);
-                renderNotifications([]);
-              })
-          );
-
-          // Wait for all requests to complete
-          await Promise.allSettled(promises);
-        } catch (error) {
-          console.error("Error loading dashboard data:", error);
-
-          if (!isBackendAvailable) {
-            // If backend is unavailable and data hasn't been loaded yet, load fallback data
-            if (
-              document.getElementById("todaySchedule").querySelector(".loading")
-            ) {
-              loadFallbackData();
             }
-          } else {
-            document.getElementById("todaySchedule").innerHTML =
-              '<div class="error-message">Erreur de chargement des données</div>';
-            document.getElementById("requestsList").innerHTML =
-              '<div class="error-message">Erreur de chargement des données</div>';
-            document.getElementById("notificationsList").innerHTML =
-              '<div class="error-message">Erreur de chargement des données</div>';
+          );
+
+          if (!verificationResponse.ok) {
+            throw new Error(
+              `Token verification failed: ${verificationResponse.status}`
+            );
           }
 
-          // Rethrow to let the caller handle it
-          throw error;
+          const userData = await verificationResponse.json();
+
+          // Validate student role
+          if (userData.adminRole !== "etudiant") {
+            throw new Error("auth: Access restricted to students");
+          }
+
+          // Set current user
+          currentUser = {
+            id: userData.userId,
+            email: userData.email,
+          };
+
+          return userData;
+        } catch (error) {
+          console.warn("Token verification failed:", error);
+
+          if (error.name === "AbortError" || error.message.includes("fetch")) {
+            isBackendAvailable = false;
+            // Continue in offline mode
+            return null;
+          } else {
+            // Authentication error
+            throw new Error("auth: " + error.message);
+          }
         }
       }
 
-      // Render today's schedule
-      function renderTodaySchedule(schedule) {
-        const container = document.getElementById("todaySchedule");
-        container.innerHTML = "";
+      async function loadDashboardData() {
+        try {
+          // If backend is available, try to load fresh data
+          if (isBackendAvailable && currentUser?.id) {
+            // Load student data first
+            await loadStudentData();
 
-        if (schedule.length === 0) {
-          container.innerHTML =
-            '<div class="empty-state">Aucun cours prévu aujourd\'hui</div>';
+            // Load other dashboard components in parallel
+            await Promise.allSettled([loadRequests(), loadNotifications()]);
+          } else {
+            // Offline mode - load from cache or show fallback data
+            handleOfflineMode();
+          }
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+          handleOfflineMode();
+        }
+      }
+
+      async function loadStudentData() {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/etudiants/${currentUser.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+          }
+
+          const studentData = await response.json();
+
+          // Cache the data for offline use
+          localStorage.setItem("studentData", JSON.stringify(studentData));
+
+          // Populate UI with student data
+          updateStudentInfo(studentData);
+          updateNavbarUserInfo(studentData);
+
+          return studentData;
+        } catch (error) {
+          console.error("Error fetching student data:", error);
+
+          // Try to use cached data
+          const cachedData = getStudentData();
+          if (cachedData) {
+            updateStudentInfo(cachedData);
+            updateNavbarUserInfo(cachedData);
+            return cachedData;
+          } else {
+            throw error; // Propagate error if no cached data
+          }
+        }
+      }
+
+      function getStudentData() {
+        try {
+          return JSON.parse(localStorage.getItem("studentData"));
+        } catch (e) {
+          console.error("Error parsing student data:", e);
+          return null;
+        }
+      }
+
+      function updateStudentInfo(studentData) {
+        if (!studentData) return;
+
+        // Update personal info card
+        document.getElementById("lastName").textContent =
+          studentData.lastName || "N/A";
+        document.getElementById("firstName").textContent =
+          studentData.firstName || "N/A";
+
+        // Academic info - check for sections data
+        const sectionInfo =
+          studentData.sections && studentData.sections.length > 0
+            ? studentData.sections[0]
+            : null;
+
+        // Display specialty/filière
+        document.getElementById("major").textContent = sectionInfo
+          ? sectionInfo.specialty || "Non assigné"
+          : "Non assigné";
+
+        // Display section
+        document.getElementById("section").textContent = sectionInfo
+          ? sectionInfo.name || "Non assigné"
+          : "Non assigné";
+
+        // Display TD Group
+        document.getElementById("tdGroup").textContent = studentData.tdGroupe
+          ? studentData.tdGroupe.name || "Non assigné"
+          : "Non assigné";
+
+        // Display TP Group
+        document.getElementById("tpGroup").textContent = studentData.tpGroupe
+          ? studentData.tpGroupe.name || "Non assigné"
+          : "Non assigné";
+      }
+
+      function updateNavbarUserInfo(studentData) {
+        if (!studentData) {
+          console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
           return;
         }
 
-        schedule.forEach((item) => {
-          const div = document.createElement("div");
-          div.className = "schedule-item";
-          div.innerHTML = `
-                <strong>${formatTime(item.startTime)} - ${formatTime(
-            item.endTime
-          )}</strong> -
-                ${item.courseName} (${item.roomName})
-            `;
-          container.appendChild(div);
-        });
+        const avatar = document.getElementById("userAvatar");
+        const fullName = document.getElementById("userFullName");
+        const userId = document.getElementById("userId");
+
+        if (avatar) {
+          if (studentData.firstName && studentData.lastName) {
+            avatar.textContent = (
+              studentData.firstName.charAt(0) + studentData.lastName.charAt(0)
+            ).toUpperCase();
+          } else if (studentData.prenom && studentData.nom) {
+            avatar.textContent = (
+              studentData.prenom.charAt(0) + studentData.nom.charAt(0)
+            ).toUpperCase();
+          } else {
+            avatar.textContent = "ET";
+          }
+        }
+
+        if (fullName) {
+          if (studentData.firstName && studentData.lastName) {
+            fullName.textContent = `${studentData.firstName} ${studentData.lastName}`;
+          } else if (studentData.prenom && studentData.nom) {
+            fullName.textContent = `${studentData.prenom} ${studentData.nom}`;
+          } else {
+            fullName.textContent = "Étudiant";
+          }
+        }
+
+        if (userId) {
+          if (studentData.matricule) {
+            userId.textContent = `Matricule: ${studentData.matricule}`;
+          } else if (studentData.id) {
+            userId.textContent = `ID: ${studentData.id}`;
+          } else {
+            userId.textContent = "Utilisateur";
+          }
+        }
       }
 
-      // Render requests
+      async function loadRequests() {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/change-requests/my-requests`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+          }
+
+          const requestsData = await response.json();
+
+          // Cache the requests data
+          localStorage.setItem(
+            "studentRequests",
+            JSON.stringify({
+              timestamp: Date.now(),
+              requests: requestsData,
+            })
+          );
+
+          // Render requests
+          renderRequests(requestsData);
+        } catch (error) {
+          console.error("Error loading requests:", error);
+
+          // Try to use cached requests if they exist and aren't too old
+          const cachedRequestsData = getCachedRequests();
+          if (
+            cachedRequestsData &&
+            !isCachedDataExpired(cachedRequestsData.timestamp, 60)
+          ) {
+            renderRequests(cachedRequestsData.requests);
+          } else {
+            // If in offline mode, show empty or fallback
+            if (!isBackendAvailable) {
+              renderFallbackRequests();
+            } else {
+              document.getElementById("requestsList").innerHTML =
+                '<div class="error-message">Erreur de chargement des demandes</div>';
+            }
+          }
+        }
+      }
+
+      function getCachedRequests() {
+        try {
+          return JSON.parse(localStorage.getItem("studentRequests"));
+        } catch (e) {
+          console.error("Error parsing cached requests:", e);
+          return null;
+        }
+      }
+
+      async function loadNotifications() {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/etudiants/${currentUser.id}/notifications`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+          }
+
+          const notificationsData = await response.json();
+
+          // Cache the notifications data
+          localStorage.setItem(
+            "studentNotifications",
+            JSON.stringify({
+              timestamp: Date.now(),
+              notifications: notificationsData,
+            })
+          );
+
+          // Render notifications
+          renderNotifications(notificationsData);
+        } catch (error) {
+          console.error("Error loading notifications:", error);
+
+          // Try to use cached notifications if they exist and aren't too old
+          const cachedNotificationsData = getCachedNotifications();
+          if (
+            cachedNotificationsData &&
+            !isCachedDataExpired(cachedNotificationsData.timestamp, 60)
+          ) {
+            renderNotifications(cachedNotificationsData.notifications);
+          } else {
+            // If in offline mode, show empty or fallback
+            if (!isBackendAvailable) {
+              renderFallbackNotifications();
+            } else {
+              document.getElementById("notificationsList").innerHTML =
+                '<div class="error-message">Erreur de chargement des notifications</div>';
+            }
+          }
+        }
+      }
+
+      function getCachedNotifications() {
+        try {
+          return JSON.parse(localStorage.getItem("studentNotifications"));
+        } catch (e) {
+          console.error("Error parsing cached notifications:", e);
+          return null;
+        }
+      }
+
+      function isCachedDataExpired(timestamp, minutesValid = 30) {
+        if (!timestamp) return true;
+
+        const now = Date.now();
+        const ageInMinutes = (now - timestamp) / (1000 * 60);
+        return ageInMinutes > minutesValid;
+      }
+
+      // Render functions
       function renderRequests(requests) {
         const container = document.getElementById("requestsList");
         container.innerHTML = "";
 
-        if (requests.length === 0) {
+        if (!requests || requests.length === 0) {
           container.innerHTML =
             '<div class="empty-state">Aucune demande en cours</div>';
           return;
@@ -582,9 +491,7 @@
           div.innerHTML = `
                 <strong>${getRequestTypeLabel(request.type)}</strong> -
                 ${getStatusLabel(request.status)}
-                <span class="request-date">(${formatDate(
-                  request.createdAt
-                )})</span>
+            <span class="request-date">(${formatDate(request.createdAt)})</span>
             `;
           container.appendChild(div);
         });
@@ -598,12 +505,11 @@
         }
       }
 
-      // Render notifications
       function renderNotifications(notifications) {
         const container = document.getElementById("notificationsList");
         container.innerHTML = "";
 
-        if (notifications.length === 0) {
+        if (!notifications || notifications.length === 0) {
           container.innerHTML =
             '<div class="empty-state">Aucune notification récente</div>';
           return;
@@ -616,7 +522,7 @@
           const div = document.createElement("div");
           div.className = "notification-item";
           div.innerHTML = `
-                <strong>${notif.title}</strong> -
+            <strong>${notif.title || "Notification"}</strong> -
                 ${notif.message}
                 <span class="notification-time">(${formatTimeAgo(
                   notif.createdAt
@@ -634,20 +540,186 @@
         }
       }
 
+      // Fallback render functions for offline mode
+      function renderFallbackRequests() {
+        const sampleRequests = [
+          {
+            id: "sample1",
+            type: "SECTION_CHANGE",
+            createdAt: new Date(Date.now() - 86400000 * 5),
+            status: "APPROVED",
+          },
+          {
+            id: "sample2",
+            type: "TD_GROUP_CHANGE",
+            createdAt: new Date(),
+            status: "PENDING",
+          },
+        ];
+        renderRequests(sampleRequests);
+      }
+
+      function renderFallbackNotifications() {
+        const sampleNotifications = [
+          {
+            id: "notif1",
+            title: "Note",
+            message: "Nouvelle note en Algorithmique",
+            createdAt: new Date(Date.now() - 7200000), // 2 hours ago
+          },
+          {
+            id: "notif2",
+            title: "Demande",
+            message: "Votre demande de changement de section a été approuvée",
+            createdAt: new Date(Date.now() - 86400000), // 1 day ago
+          },
+        ];
+        renderNotifications(sampleNotifications);
+      }
+
+      // Handle offline mode
+      function handleOfflineMode() {
+        showOfflineNotification();
+
+        // Try to load everything from cache first
+        const studentData = getStudentData();
+        if (studentData) {
+          updateStudentInfo(studentData);
+          updateNavbarUserInfo(studentData);
+        } else {
+          // Use sample data as last resort
+          const sampleUserData = {
+            firstName: "Ahmed",
+            lastName: "Rahmani",
+            matricule: "20230456",
+            filiere: "Informatique",
+            section: "B",
+            groupeTD: "3",
+            groupeTP: "2",
+          };
+          updateStudentInfo(sampleUserData);
+          updateNavbarUserInfo(sampleUserData);
+        }
+
+        // Load requests from cache or use fallback
+        const cachedRequests = getCachedRequests();
+        if (
+          cachedRequests &&
+          !isCachedDataExpired(cachedRequests.timestamp, 60)
+        ) {
+          renderRequests(cachedRequests.requests);
+        } else {
+          renderFallbackRequests();
+        }
+
+        // Load notifications from cache or use fallback
+        const cachedNotifications = getCachedNotifications();
+        if (
+          cachedNotifications &&
+          !isCachedDataExpired(cachedNotifications.timestamp, 60)
+        ) {
+          renderNotifications(cachedNotifications.notifications);
+        } else {
+          renderFallbackNotifications();
+        }
+      }
+
+      function showOfflineNotification() {
+        // Check if notification already exists
+        if (document.querySelector(".offline-notification")) return;
+
+        const notification = document.createElement("div");
+        notification.className = "offline-notification";
+        notification.innerHTML = `
+          <div class="notification-content">
+            <strong>Mode hors ligne</strong>: Le serveur est actuellement indisponible. Certaines données peuvent ne pas être à jour.
+            <button onclick="location.reload()" class="retry-button">Réessayer</button>
+          </div>
+        `;
+
+        // Add styles
+        notification.style.background = "#fff3cd";
+        notification.style.color = "#856404";
+        notification.style.padding = "10px";
+        notification.style.borderRadius = "5px";
+        notification.style.margin = "0 0 15px 0";
+        notification.style.textAlign = "center";
+
+        // Add the retry button style
+        const retryButton = notification.querySelector(".retry-button");
+        if (retryButton) {
+          retryButton.style.background = "#007bff";
+          retryButton.style.color = "white";
+          retryButton.style.border = "none";
+          retryButton.style.padding = "5px 10px";
+          retryButton.style.borderRadius = "3px";
+          retryButton.style.marginLeft = "10px";
+          retryButton.style.cursor = "pointer";
+        }
+
+        // Insert at the top of the main content
+        const headerElement = document.querySelector(".header");
+        if (headerElement) {
+          headerElement.parentNode.insertBefore(
+            notification,
+            headerElement.nextSibling
+          );
+        } else {
+          const mainContent = document.querySelector(".main-content");
+          if (mainContent) {
+            mainContent.insertBefore(notification, mainContent.firstChild);
+          }
+        }
+      }
+
+      function showErrorNotification(message) {
+        const notification = document.createElement("div");
+        notification.className = "error-notification";
+        notification.textContent = message;
+
+        // Add styles
+        notification.style.background = "#f8d7da";
+        notification.style.color = "#721c24";
+        notification.style.padding = "10px";
+        notification.style.borderRadius = "5px";
+        notification.style.margin = "0 0 15px 0";
+        notification.style.textAlign = "center";
+
+        // Insert at the top of the main content
+        const headerElement = document.querySelector(".header");
+        if (headerElement) {
+          headerElement.parentNode.insertBefore(
+            notification,
+            headerElement.nextSibling
+          );
+        } else {
+          const mainContent = document.querySelector(".main-content");
+          if (mainContent) {
+            mainContent.insertBefore(notification, mainContent.firstChild);
+          }
+        }
+      }
+
       // Helper functions
       function formatTime(timeString) {
-        return new Date(timeString).toLocaleTimeString("fr-FR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+        const date = new Date(timeString);
+        return isNaN(date.getTime())
+          ? "N/A"
+          : date.toLocaleTimeString("fr-FR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
       }
 
       function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString("fr-FR");
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? "N/A" : date.toLocaleDateString("fr-FR");
       }
 
       function formatTimeAgo(dateString) {
         const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "N/A";
+
         const now = new Date();
         const diffMs = now - date;
         const diffMins = Math.floor(diffMs / 60000);
@@ -686,7 +758,7 @@
       async function logout() {
         try {
           if (isBackendAvailable) {
-            await fetch("http://localhost:3000/api/auth/logout", {
+            await fetch(`${API_BASE_URL}/auth/logout`, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${authToken}`,

@@ -1,65 +1,175 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Emploi du temps</title>
-    <link href="style/profile.css" rel="stylesheet">
-</head>
-<body>
+    <link href="style/profile.css" rel="stylesheet" />
+    <style>
+      .schedule-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .schedule-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin-top: 15px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
     <div class="dashboard-container">
-        <div id="navbar-container"></div>
+      <div id="navbar-container"></div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">Emploi du temps</h1>
-            </div>
-
-            <div class="profile-container">
-                <!-- Contenu ici -->
-            </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Emploi du temps</h1>
         </div>
+
+        <div class="schedule-container">
+          <h2>Emploi du temps de la semaine</h2>
+          <div id="scheduleContent">
+            <div class="loading">Chargement de l'emploi du temps...</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const studentData = JSON.parse(localStorage.getItem('studentData'));
+      document.addEventListener("DOMContentLoaded", function () {
+        // Retrieve auth token and student data
+        const authToken =
+          sessionStorage.getItem("etudiant_token") ||
+          localStorage.getItem("etudiant_token");
+        const studentData = JSON.parse(localStorage.getItem("studentData"));
+
+        if (!authToken) {
+          window.location.href = "etudiant-login.html";
+          return;
+        }
+
         if (!studentData) {
-            console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
-            return;
+          console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
         }
 
-        // Charger la navbar
-        fetch('etudiant-nav.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('navbar-container').innerHTML = html;
+        // Load navigation sidebar
+        loadNavbar();
 
-                const avatar = document.getElementById('userAvatar');
-                const fullName = document.getElementById('userFullName');
-                const userId = document.getElementById('userId');
+        // Load schedule image
+        loadScheduleImage();
+      });
 
-                if (avatar) avatar.textContent = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
-                if (fullName) fullName.textContent = `${studentData.nom} ${studentData.prenom}`;
-                if (userId) userId.textContent = `Matricule: ${studentData.matricule}`;
+      function loadNavbar() {
+        fetch("etudiant-nav.html")
+          .then((response) => response.text())
+          .then((html) => {
+            document.getElementById("navbar-container").innerHTML = html;
 
-                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-                document.querySelector('a[href="dashbord-etudiant.html"]')?.classList.add('active');
-            });
+            // Get the student data after the navbar is loaded
+            updateUserInfo();
 
-        Object.keys(studentData).forEach(key => {
-            const elements = document.querySelectorAll(`[data-field="${key}"]`);
-            elements.forEach(el => {
-                el.textContent = studentData[key];
-            });
-        });
+            // Activate the correct nav link
+            setTimeout(() => {
+              document.querySelectorAll(".nav-link").forEach((link) => {
+                if (link.getAttribute("href") === "schedule.html") {
+                  link.classList.add("active");
+                }
+              });
+            }, 100);
+          })
+          .catch((error) => {
+            console.error("Error loading navigation:", error);
+          });
+      }
 
-        const initials = studentData.prenom.charAt(0) + studentData.nom.charAt(0);
-        const profilePhoto = document.getElementById('profile-photo');
-        if (profilePhoto) {
-            profilePhoto.textContent = initials;
+      function updateUserInfo() {
+        const studentData = JSON.parse(localStorage.getItem("studentData"));
+        if (!studentData) {
+          console.warn("Aucune donnée étudiant trouvée dans le localStorage.");
+          return;
         }
-    });
+
+        const avatar = document.getElementById("userAvatar");
+        const fullName = document.getElementById("userFullName");
+        const userId = document.getElementById("userId");
+
+        if (avatar) {
+          if (studentData.firstName && studentData.lastName) {
+            avatar.textContent = (
+              studentData.firstName.charAt(0) + studentData.lastName.charAt(0)
+            ).toUpperCase();
+          } else if (studentData.prenom && studentData.nom) {
+            avatar.textContent = (
+              studentData.prenom.charAt(0) + studentData.nom.charAt(0)
+            ).toUpperCase();
+          } else {
+            avatar.textContent = "ET";
+          }
+        }
+
+        if (fullName) {
+          if (studentData.firstName && studentData.lastName) {
+            fullName.textContent = `${studentData.firstName} ${studentData.lastName}`;
+          } else if (studentData.prenom && studentData.nom) {
+            fullName.textContent = `${studentData.prenom} ${studentData.nom}`;
+          } else {
+            fullName.textContent = "Étudiant";
+          }
+        }
+
+        if (userId) {
+          if (studentData.matricule) {
+            userId.textContent = `Matricule: ${studentData.matricule}`;
+          } else if (studentData.id) {
+            userId.textContent = `ID: ${studentData.id}`;
+          } else {
+            userId.textContent = "Utilisateur";
+          }
+        }
+      }
+
+      function loadScheduleImage() {
+        const scheduleContent = document.getElementById("scheduleContent");
+        const studentData = JSON.parse(localStorage.getItem("studentData"));
+
+        // Simulate checking for schedule images
+        setTimeout(() => {
+          // Determine student section/group for fetching the correct schedule
+          const section = studentData?.section || "A";
+          const filiere = studentData?.filiere || "Informatique";
+
+          // For demo purposes, we're displaying a placeholder or message
+          // In a real implementation, you would fetch from your server
+          if (Math.random() > 0.3) {
+            // Simulate 70% chance of having a schedule
+            scheduleContent.innerHTML = `
+              <p>Emploi du temps pour: ${filiere} - Section ${section}</p>
+              <img src="https://via.placeholder.com/800x600.png?text=Emploi+du+temps+${filiere}+Section+${section}"
+                   alt="Emploi du temps" class="schedule-image">
+              <p><small>Dernière mise à jour: ${new Date().toLocaleDateString()}</small></p>
+            `;
+          } else {
+            scheduleContent.innerHTML = `
+              <div class="empty-state">
+                <p>Aucun emploi du temps n'est disponible pour le moment.</p>
+                <p>Veuillez vérifier ultérieurement ou contacter l'administration.</p>
+              </div>
+            `;
+          }
+        }, 1000);
+      }
     </script>
-</body>
+  </body>
 </html>
