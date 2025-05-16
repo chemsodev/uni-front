@@ -8,42 +8,12 @@
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">MB</div>
-                <div class="user-name" id="userFullName">Chargement...</div>
-                <div class="user-id" id="userId">Enseignant</div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
-                </li>
-                <li class="nav-item">
-                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
-                </li>
-                <li class="nav-item">
-                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
-                </li>
-                <li class="nav-item">
-                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
-                </li>
-            </ul>
-        </div>
-        
+       <div id="navbar-container"></div>
         <!-- Main Content -->
         <div class="main-content">
-            <div class="header">
+            <div class="header header-actions">
                 <h1 class="page-title">Tableau de bord Enseignant</h1>
-                <div class="header-actions">
-                    <button>Emploi du temps</button>
-                </div>
+                <button onclick="window.location.href='emploi.html'">Emploi du temps</button>
             </div>
             
             <div class="dashboard-cards">
@@ -52,14 +22,6 @@
                     <h2 class="card-title">Mes Sections</h2>
                     <div class="card-content" id="sectionsList">
                         <div class="loading-message">Chargement des sections...</div>
-                    </div>
-                </div>
-                
-                <!-- Emploi du temps aujourd'hui -->
-                <div class="card">
-                    <h2 class="card-title">Emploi du temps aujourd'hui</h2>
-                    <div class="card-content" id="todaySchedule">
-                        <div class="loading-message">Chargement de l'emploi du temps...</div>
                     </div>
                 </div>
                 
@@ -83,7 +45,505 @@
     </div>
 
     <script>
-        // Global variables
+      // Global variables
+      let currentUser = null;
+      let authToken = null;
+      let isBackendAvailable = true; // Flag to track backend availability
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load navigation
+        fetch("enseignant-nav.html")
+          .then((response) => response.text())
+          .then((html) => {
+            document.getElementById("navbar-container").innerHTML = html;
+            // Mark active link after loading
+            const navScript = document.createElement("script");
+            navScript.innerHTML = `
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if(link.getAttribute('href') === '${window.location.pathname
+                          .split("/")
+                          .pop()}') {
+                            link.classList.add('active');
+                        }
+                    });
+                `;
+            document.body.appendChild(navScript);
+          })
+          .catch((error) => {
+            console.error("Error loading navigation:", error);
+          });
+
+        try {
+          // 1. Retrieve token from storage
+          authToken =
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+          if (!authToken) {
+            window.location.href = "enseignant-login.html";
+            return;
+          }
+
+          // 2. Verify token and role - with fallback for backend issues
+          try {
+            const verificationResponse = await fetch(
+              "http://localhost:3000/api/auth/verify",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  "Content-Type": "application/json",
+                },
+                signal: AbortSignal.timeout(5000),
+              }
+            );
+
+            if (!verificationResponse.ok) {
+              console.warn("Token verification failed");
+              isBackendAvailable = false;
+              loadFallbackData();
+              addReconnectionButton();
+            } else {
+              const userData = await verificationResponse.json();
+
+              // 3. Validate teacher role
+              if (userData.adminRole !== "enseignant") {
+                throw new Error("Access restricted to teachers");
+              }
+
+              // 4. Set current user
+              currentUser = {
+                id: userData.userId,
+                email: userData.email,
+              };
+
+              // 5. Load data
+              try {
+                await loadUserData();
+                await loadDashboardData();
+              } catch (dataError) {
+                console.error("Error loading data:", dataError);
+                isBackendAvailable = false;
+                loadFallbackData();
+                addReconnectionButton();
+              }
+            }
+          } catch (error) {
+            console.error("Auth verification error:", error);
+            isBackendAvailable = false;
+            loadFallbackData();
+            addReconnectionButton();
+          }
+        } catch (error) {
+          console.error("Access denied:", error);
+          sessionStorage.removeItem("enseignant_token");
+          localStorage.removeItem("enseignant_token");
+          window.location.href = "enseignant-login.html";
+        }
+      });
+
+      // Add reconnection button
+      function addReconnectionButton() {
+        const offlineNotice = document.querySelector(".alert.alert-warning");
+
+        if (!offlineNotice) {
+          const offlineNotice = document.createElement("div");
+          offlineNotice.className = "alert alert-warning";
+          offlineNotice.style.padding = "10px";
+          offlineNotice.style.margin = "10px 0";
+          offlineNotice.style.backgroundColor = "#fff3cd";
+          offlineNotice.style.color = "#856404";
+          offlineNotice.style.borderRadius = "4px";
+          offlineNotice.innerHTML =
+            "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.";
+          
+          const reconnectBtn = document.createElement("button");
+          reconnectBtn.textContent = "Réessayer la connexion";
+          reconnectBtn.style.marginLeft = "10px";
+          reconnectBtn.style.padding = "5px 10px";
+          reconnectBtn.style.backgroundColor = "#007bff";
+          reconnectBtn.style.color = "#fff";
+          reconnectBtn.style.border = "none";
+          reconnectBtn.style.borderRadius = "4px";
+          reconnectBtn.style.cursor = "pointer";
+          reconnectBtn.onclick = function () {
+            window.location.reload();
+          };
+
+          offlineNotice.appendChild(reconnectBtn);
+          document.querySelector(".main-content").prepend(offlineNotice);
+        }
+      }
+
+      // Load fallback data when backend is unavailable
+      function loadFallbackData() {
+        addReconnectionButton();
+
+        // Sample sections data
+        const sampleSections = [
+          {
+            filiere: "Informatique",
+            nom: "B",
+            niveau: "3ème année",
+            nombreEtudiants: 32
+          },
+          {
+            filiere: "Mathématiques",
+            nom: "A",
+            niveau: "2ème année",
+            nombreEtudiants: 28
+          }
+        ];
+        renderSections(sampleSections);
+
+        // Sample students data
+        const sampleStudents = [
+          {
+            nom: "Dupont",
+            prenom: "Jean",
+            matricule: "20230001",
+            groupe_td: "1",
+            groupe_tp: "2"
+          },
+          {
+            nom: "Martin",
+            prenom: "Sophie",
+            matricule: "20230002",
+            groupe_td: "1",
+            groupe_tp: "1"
+          }
+        ];
+        renderStudents(sampleStudents);
+
+        // Sample notifications data
+        const sampleNotifications = [
+          {
+            id: "notif1",
+            title: "Rendu de TP",
+            message: "Les copies du TP d'algorithmique sont à corriger",
+            createdAt: new Date(Date.now() - 7200000), // 2 hours ago
+          },
+          {
+            id: "notif2",
+            title: "Réunion",
+            message: "Réunion pédagogique prévue demain à 10h",
+            createdAt: new Date(Date.now() - 86400000), // 1 day ago
+          },
+        ];
+        renderNotifications(sampleNotifications);
+      }
+
+      // Load user data
+      async function loadUserData() {
+        try {
+          const enseignantDataJson =
+            localStorage.getItem("enseignantData") ||
+            sessionStorage.getItem("enseignantData");
+          let user = null;
+
+          if (enseignantDataJson) {
+            try {
+              user = JSON.parse(enseignantDataJson);
+              console.log("Using teacher data from localStorage");
+
+              if (!user || typeof user !== "object" || (!user.nom && !user.prenom)) {
+                console.warn("Invalid teacher data in localStorage");
+                user = null;
+              }
+            } catch (e) {
+              console.error("Error parsing stored teacher data:", e);
+              localStorage.removeItem("enseignantData");
+              sessionStorage.removeItem("enseignantData");
+            }
+          }
+
+          if (!user) {
+            const response = await fetch(
+              `http://localhost:3000/api/enseignants/${currentUser.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+                signal: AbortSignal.timeout(5000),
+              }
+            );
+
+            if (response.ok) {
+              user = await response.json();
+              const storage = localStorage.getItem("enseignant_token")
+                ? localStorage
+                : sessionStorage;
+              storage.setItem("enseignantData", JSON.stringify(user));
+            } else {
+              if (response.status === 401 || response.status === 403) {
+                throw new Error("Accès non autorisé");
+              } else if (response.status === 500) {
+                throw new Error("Erreur serveur");
+              } else {
+                throw new Error("Failed to load user data");
+              }
+            }
+          }
+
+          // Update UI with user data if elements exist
+          if (document.getElementById("userFullName")) {
+            document.getElementById("userFullName").textContent =
+              `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
+          }
+          
+          if (document.getElementById("userId")) {
+            document.getElementById("userId").textContent =
+              user.matricule || "N/A";
+          }
+
+        } catch (error) {
+          console.error("Error loading user data:", error);
+          if (error.name === "AbortError" || error.message.includes("Failed to fetch")) {
+            isBackendAvailable = false;
+          }
+          loadFallbackData();
+          throw error;
+        }
+      }
+
+      // Load dashboard data
+      async function loadDashboardData() {
+        try {
+          const promises = [];
+
+          // Load sections
+          promises.push(
+            fetch(`http://localhost:3000/api/enseignants/${currentUser.id}/sections`, {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              signal: AbortSignal.timeout(5000),
+            })
+              .then((response) => {
+                if (response.ok) return response.json();
+                return [];
+              })
+              .then((sections) => renderSections(sections))
+              .catch((error) => {
+                console.error("Error loading sections:", error);
+                renderSections([]);
+              })
+          );
+
+          // Load students
+          promises.push(
+            fetch(`http://localhost:3000/api/enseignants/${currentUser.id}/etudiants`, {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              signal: AbortSignal.timeout(5000),
+            })
+              .then((response) => {
+                if (response.ok) return response.json();
+                return [];
+              })
+              .then((students) => renderStudents(students))
+              .catch((error) => {
+                console.error("Error loading students:", error);
+                renderStudents([]);
+              })
+          );
+
+          // Load notifications
+          promises.push(
+            fetch(`http://localhost:3000/api/enseignants/${currentUser.id}/notifications`, {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              signal: AbortSignal.timeout(5000),
+            })
+              .then((response) => {
+                if (response.ok) return response.json();
+                return [];
+              })
+              .then((notifications) => renderNotifications(notifications))
+              .catch((error) => {
+                console.error("Error loading notifications:", error);
+                renderNotifications([]);
+              })
+          );
+
+          await Promise.allSettled(promises);
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+          if (!isBackendAvailable) {
+            loadFallbackData();
+          } else {
+            document.getElementById("sectionsList").innerHTML =
+              '<div class="error-message">Erreur de chargement des sections</div>';
+            document.getElementById("studentsList").innerHTML =
+              '<div class="error-message">Erreur de chargement des étudiants</div>';
+            document.getElementById("notificationsList").innerHTML =
+              '<div class="error-message">Erreur de chargement des notifications</div>';
+          }
+          throw error;
+        }
+      }
+
+      // Render sections
+      function renderSections(sections) {
+        const container = document.getElementById("sectionsList");
+        container.innerHTML = "";
+
+        if (sections.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aucune section assignée</div>';
+          return;
+        }
+
+        const list = document.createElement("ul");
+        list.className = "section-list";
+        
+        sections.forEach((section) => {
+          const item = document.createElement("li");
+          item.className = "section-item";
+          item.innerHTML = `
+            <strong>${section.filiere} - ${section.nom}</strong>
+            <div>Niveau: ${section.niveau || 'Non spécifié'}</div>
+            <div>Nombre d'étudiants: ${section.nombreEtudiants || 0}</div>
+          `;
+          list.appendChild(item);
+        });
+        
+        container.appendChild(list);
+      }
+
+      // Render students
+      function renderStudents(students) {
+        const container = document.getElementById("studentsList");
+        container.innerHTML = "";
+
+        if (students.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aucun étudiant à gérer</div>';
+          return;
+        }
+
+        const table = document.createElement("table");
+        table.className = "students-table";
+        
+        const thead = document.createElement("thead");
+        thead.innerHTML = `
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Matricule</th>
+            <th>Groupe TD</th>
+            <th>Groupe TP</th>
+          </tr>
+        `;
+        table.appendChild(thead);
+        
+        const tbody = document.createElement("tbody");
+        students.forEach((student) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${student.nom || 'N/A'}</td>
+            <td>${student.prenom || 'N/A'}</td>
+            <td>${student.matricule || 'N/A'}</td>
+            <td>${student.groupe_td || 'N/A'}</td>
+            <td>${student.groupe_tp || 'N/A'}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        
+        table.appendChild(tbody);
+        container.appendChild(table);
+
+        if (students.length > 5) {
+          const moreLink = document.createElement("a");
+          moreLink.href = "etudiants.html";
+          moreLink.className = "more-link";
+          moreLink.textContent = "Voir tous les étudiants";
+          container.appendChild(moreLink);
+        }
+      }
+
+      // Render notifications
+      function renderNotifications(notifications) {
+        const container = document.getElementById("notificationsList");
+        container.innerHTML = "";
+
+        if (notifications.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aucune notification récente</div>';
+          return;
+        }
+
+        const recentNotifications = notifications.slice(0, 3);
+
+        recentNotifications.forEach((notif) => {
+          const div = document.createElement("div");
+          div.className = "notification-item";
+          div.innerHTML = `
+            <strong>${notif.title}</strong>
+            <p>${notif.message}</p>
+            <span class="notification-time">${formatTimeAgo(notif.createdAt)}</span>
+          `;
+          container.appendChild(div);
+        });
+
+        if (notifications.length > 3) {
+          const moreLink = document.createElement("a");
+          moreLink.href = "notifications.html";
+          moreLink.className = "more-link";
+          moreLink.textContent = "Voir toutes les notifications";
+          container.appendChild(moreLink);
+        }
+      }
+
+      // Helper functions
+      function formatTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffMins < 1) return "à l'instant";
+        if (diffMins < 60) return `il y a ${diffMins} min`;
+        if (diffHours < 24) return `il y a ${diffHours}h`;
+        if (diffDays < 7) return `il y a ${diffDays}j`;
+        return formatDate(dateString);
+      }
+
+      function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString("fr-FR", {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      }
+
+      // Logout function
+      async function logout() {
+        try {
+          if (isBackendAvailable) {
+            await fetch("http://localhost:3000/api/auth/logout", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              signal: AbortSignal.timeout(3000),
+            });
+          }
+        } catch (error) {
+          console.error("Logout error:", error);
+        } finally {
+          sessionStorage.removeItem("enseignant_token");
+          localStorage.removeItem("enseignant_token");
+          window.location.href = "enseignant-login.html";
+        }
+      }
+
+
+
+
+        /* l code l9dim
         let currentUser = null;
         let authToken = null;
     
@@ -372,7 +832,7 @@
                 sessionStorage.removeItem('enseignant_token');
                 window.location.href = 'enseignant-login.html';
             }
-        }
+        }*/
     </script>
 </body>
 </html>

@@ -15,7 +15,7 @@
 
         .dashboard-container {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: auto 1fr;
             grid-gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
@@ -299,4 +299,44 @@
             color: white;
             border-radius: 0 8px 8px 0;
             cursor: pointer;
+        }
+
+        @media (max-width: 767px) {
+            .page-title {
+                font-size: 2.5vw;
+            }
+            .header-actions button {
+                font-size: 1.5vw;
+            }
+            .card-title {
+                font-size: 2.5vw;
+            }
+            .info-label {
+                font-size: 2.2vw;
+            }
+            .info-value {
+                font-size: 2.2vw;
+            }
+            .info-row {
+                padding: 4px 0;
+            }
+            .card-content {
+                font-size: 2.2vw;
+            }
+            .header {
+                padding: 8px 16px;
+                border-radius: 18px;
+            }
+            .dashboard-container {
+                grid-gap: 10px;
+            }
+            .main-content {
+                grid-gap: 10px;
+            }
+            .dashboard-cards {
+                grid-gap: 10px;
+            }
+            body {
+                padding: 14px;
+            }
         }

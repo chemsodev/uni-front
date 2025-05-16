@@ -1,0 +1,166 @@
+<div class="sidebar">
+  <style>
+    .sidebar {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      height: calc(100vh - 40px);
+      position: sticky;
+      top: 20px;
+    }
+
+    .user-info {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+    }
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #10B981;
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    .user-name {
+      font-family: "Sora", sans-serif;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .user-id {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 10px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #1a365d;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #10B981, #047857);
+      color: white;
+    }
+
+    @media (max-width: 767px) {
+      .nav-link {
+        padding: 10px 10px;
+        color: #1a365d;
+        font-size: 2vw;
+      }
+      .user-name {
+        font-size: 2vw;
+      }
+
+      .user-id {
+        font-size: 1.6vw;
+      }
+      .user-avatar {
+        width: 10vw;
+        height: 10vw;
+        font-size: 3vw;
+        margin: 0 auto 10px;
+      }
+      .sidebar {
+        padding: 20px 10px;
+      }
+    }
+  </style>
+
+  <div class="user-info">
+    <div class="user-avatar" id="userAvatar"></div>
+    <div class="user-name" id="userFullName"></div>
+    <div class="user-id" id="userId"></div>
+  </div>
+
+<ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
+                </li>
+                <li class="nav-item">
+                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
+                </li>
+                <li class="nav-item">
+                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
+                </li>
+                <li class="nav-item">
+                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
+                </li>
+            </ul>
+</div>
+
+<script>
+  // Fonction pour marquer le lien actif
+  function setActiveLink() {
+    const currentPage = window.location.pathname.split("/").pop();
+    console.log("Current page:", currentPage);
+
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      link.classList.remove("active");
+
+      const href = link.getAttribute("href");
+
+      // Handle both exact match and potential default.html filenames
+      if (
+        href === currentPage ||
+        (currentPage === "" && href === "dashbord-teacher.html") 
+      ) {
+        link.classList.add("active");
+        console.log("Set active:", href);
+      }
+    });
+  }
+
+  // Call setActiveLink when the document is loaded to set the active link
+  document.addEventListener("DOMContentLoaded", function () {
+    // Give a small timeout to ensure links are loaded
+    setTimeout(setActiveLink, 100);
+  });
+
+  // Fonction globale de déconnexion
+  function logout() {
+    // Clear all specific student-related items
+    localStorage.removeItem("enseignantData");
+    localStorage.removeItem("enseignant_token");
+    localStorage.removeItem("offlineRequests");
+    localStorage.removeItem("lastLogin");
+    localStorage.removeItem("userPreferences");
+
+    // Clear all session storage items
+    sessionStorage.clear();
+
+    // Redirect to login page
+    window.location.href = "index.html";
+  }
+</script>
