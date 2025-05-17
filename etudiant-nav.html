@@ -151,7 +151,73 @@
   document.addEventListener("DOMContentLoaded", function () {
     // Give a small timeout to ensure links are loaded
     setTimeout(setActiveLink, 100);
+    
+    // Load user info
+    loadUserInfo();
   });
+  
+  // Function to load user info in the sidebar
+  async function loadUserInfo() {
+    try {
+      // Get user data from token
+      const authToken = sessionStorage.getItem("etudiant_token") || localStorage.getItem("etudiant_token");
+      
+      if (!authToken) {
+        console.warn("No auth token found, redirecting to login");
+        window.location.href = "etudiant-login.html";
+        return;
+      }
+      
+      // Try to get cached student data first
+      let userData = JSON.parse(localStorage.getItem("studentData"));
+      
+      // If no cached data, fetch from server
+      if (!userData) {
+        const res = await fetch("http://localhost:3000/api/auth/verify", {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        
+        if (!res.ok) {
+          throw new Error("Invalid token");
+        }
+        
+        const tokenData = await res.json();
+        
+        // Now fetch student details
+        const studentRes = await fetch(`http://localhost:3000/api/etudiants/${tokenData.userId}`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        
+        if (!studentRes.ok) {
+          throw new Error("Failed to fetch student data");
+        }
+        
+        userData = await studentRes.json();
+        localStorage.setItem("studentData", JSON.stringify(userData));
+      }
+      
+      // Update user info in sidebar
+      const userAvatar = document.getElementById("userAvatar");
+      const userFullName = document.getElementById("userFullName");
+      const userId = document.getElementById("userId");
+      
+      if (userAvatar && userData) {
+        // Set initials in avatar
+        const initials = ((userData.firstName || "")[0] || "") + ((userData.lastName || "")[0] || "");
+        userAvatar.textContent = initials.toUpperCase();
+      }
+      
+      if (userFullName && userData) {
+        userFullName.textContent = `${userData.firstName || ""} ${userData.lastName || ""}`;
+      }
+      
+      if (userId && userData) {
+        userId.textContent = userData.matricule || userData.email || "";
+      }
+    } catch (error) {
+      console.error("Error loading user info:", error);
+    }
+  }
 
   // Fonction globale de déconnexion
   function logout() {

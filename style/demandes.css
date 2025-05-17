@@ -443,3 +443,259 @@ body {
     }
     
 }
+
+/* Add these styles to the existing CSS file */
+
+.file-name {
+  margin-top: 5px;
+  padding: 5px 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: none;
+}
+
+.input-hint {
+  color: #6c757d;
+  font-size: 0.85em;
+  margin-top: 4px;
+}
+
+/* Form file input styling */
+input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border: 1px dashed #ced4da;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type="file"]:hover {
+  border-color: #adb5bd;
+  background-color: #e9ecef;
+}
+
+/* Tab styling improvements */
+.tab-button:hover {
+  color: #3B82F6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Form card styling */
+.form-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Form cards inside formulaires tab need to be hidden by default */
+#formulaires .form-card {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Active form cards should be visible with animation */
+.form-card.active {
+  display: block !important;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Form cards directly in the suivi tab should always be visible */
+#suivi .form-card {
+  display: block;
+  opacity: 1;
+  transform: none;
+}
+
+/* Error and success messages */
+.error-message {
+  padding: 12px;
+  background-color: #FEE2E2;
+  color: #B91C1C;
+  border-radius: 10px;
+  margin: 15px 0;
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.success-message {
+  padding: 12px;
+  background-color: #D1FAE5;
+  color: #047857;
+  border-radius: 10px;
+  margin: 15px 0;
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Button hover effects */
+.submit-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Loading indicator */
+.loading-indicator {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+}
+
+/* Improved form styles */
+.request-form .form-section {
+  margin-bottom: 20px;
+}
+
+.request-form .form-actions {
+  margin-top: 30px;
+}
+
+/* Fix for form card styles - Removed duplicate declaration */
+/* The duplicate .form-card declaration was removed from here */
+
+/* Form card active state */
+.form-card.active {
+  display: block !important;
+}
+
+/* Form section style */
+.form-section {
+  margin-bottom: 20px;
+}
+
+.form-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #1A365D;
+}
+
+.form-section input,
+.form-section select,
+.form-section textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #CBD5E0;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-section input:focus,
+.form-section select:focus,
+.form-section textarea:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-section textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.current-value {
+  padding: 12px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  color: #1A365D;
+  font-size: 0.95rem;
+}
+
+.form-actions {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.form-actions .submit-btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(to right, #3B82F6, #1E40AF);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.form-actions .submit-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Fix for the request form */
+.request-form {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Fixed form title styles */
+.form-card h3 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.3rem;
+  margin-bottom: 25px;
+  color: #3B82F6;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+/* Make sure the requests table is visible and properly styled */
+#suivi {
+  padding-top: 10px;
+}
+
+#suivi .box {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Make sure the "suivi" tab content is properly displayed */
+#suivi.active {
+  display: block !important;
+}
+
+.boxx{
+}

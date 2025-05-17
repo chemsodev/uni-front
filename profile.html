@@ -834,7 +834,7 @@
         const section = document.getElementById("ongoing-demandes-section");
         section.innerHTML = "";
         try {
-          const res = await fetch(`${API_BASE_URL}/demandes/mes`, {
+          const res = await fetch(`${API_BASE_URL}/change-requests/my-requests`, {
             headers: getAuthHeaders(),
           });
           if (!res.ok)
@@ -848,36 +848,41 @@
           ongoing.forEach((d) => {
             html += `<div class='demande-card'>
               <div class='demande-type'><strong>${getRequestTypeLabel(
-                d.type
+                d.requestType || d.type
               )}</strong></div>
               <div class='demande-date'>Soumise le: ${formatDate(
                 d.createdAt
               )}</div>
-              <div class='demande-change'>Changement: <span>${d.current} → ${
-              d.requested
-            }</span></div>
+              <div class='demande-change'>Changement: <span>${
+                d.currentSection?.name || d.currentGroupe?.name || '-'
+              } → ${
+                d.requestedSection?.name || d.requestedGroupe?.name || '-'
+              }</span></div>
               <div class='demande-status'>Statut: <span class='status-chip status-pending'>En cours</span></div>
-              <div class='demande-actions'><button class='action-btn' onclick='alert("Détails: " + JSON.stringify(${JSON.stringify(
-                d
-              )}))'>Voir détails</button></div>
+              <div class='demande-actions'><a href="demande-details.html?id=${d.id}" class='action-btn'>Voir détails</a></div>
             </div>`;
           });
           html += `</div>`;
           section.innerHTML = html;
         } catch (e) {
+          console.error("Error loading requests:", e);
           // Hide section on error
           section.innerHTML = "";
         }
       }
       // Helper for type label
       function getRequestTypeLabel(type) {
-        switch (type) {
-          case "SECTION_CHANGE":
+        const typeStr = String(type).toLowerCase();
+        
+        switch (typeStr) {
+          case "section":
             return "Changement de Section";
-          case "TD_GROUP_CHANGE":
+          case "groupe_td":
             return "Changement de Groupe TD";
-          case "TP_GROUP_CHANGE":
+          case "groupe_tp":
             return "Changement de Groupe TP";
+          case "profile_update":
+            return "Modification de profil";
           default:
             return type;
         }

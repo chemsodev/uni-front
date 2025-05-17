@@ -24,10 +24,29 @@
         margin-bottom: 15px;
       }
 
-      /* Make div forms look like real forms */
-      .form-container {
-        display: block;
-        width: 100%;
+      /* File display styles */
+      .file-name {
+        margin-top: 5px;
+        padding: 5px 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 0.9em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        display: none;
+      }
+
+      .status-rejected {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      .status-cancelled {
+        background-color: #6c757d;
+        color: white;
       }
     </style>
   </head>
@@ -86,209 +105,171 @@
             </div>
 
             <!-- Formulaire de changement de section -->
-            <div id="section-form" class="tab-content active form-card">
-              <h2 class="card-title">
-                Formulaire de demande de changement de section
-              </h2>
-              <div id="section-change-form" class="form-container">
-                <div class="form-group">
-                  <label for="current-section">Section actuelle</label>
-                  <input type="text" id="current-section" value="" readonly />
+            <div id="section-form" class="form-card active">
+              <h3>Demande de changement de section</h3>
+              <form id="section-change-form" class="request-form" enctype="multipart/form-data">
+                <div class="form-section">
+                  <label for="current-section">Section actuelle:</label>
+                  <div class="current-value" id="current-section" data-id=""></div>
                 </div>
 
-                <div class="form-group">
-                  <label for="requested-section">Section demandée</label>
-                  <select id="requested-section">
-                    <option value="">Sélectionnez une section</option>
-                    <!-- Options loaded dynamically -->
+                <div class="form-section">
+                  <label for="requested-section">Section souhaitée:</label>
+                  <select id="requested-section" required>
+                    <option value="">Choisir une section</option>
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="section-reason">Motif de la demande</label>
-                  <select id="section-reason">
-                    <option value="">Sélectionnez un motif</option>
-                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
-                    <option value="MEDICAL">Raison médicale</option>
-                    <option value="TRANSPORT">Problème de transport</option>
-                    <option value="OTHER">Autre</option>
+                <div class="form-section">
+                  <label for="section-reason">Motif de la demande:</label>
+                  <select id="section-reason" required>
+                    <option value="">Sélectionner un motif</option>
+                    <option value="Schedule">Conflit d'horaire</option>
+                    <option value="Medical">Raison médicale</option>
+                    <option value="Transport">Problème de transport</option>
+                    <option value="Other">Autre</option>
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="section-justification"
-                    >Justification détaillée</label
-                  >
+                <div class="form-section">
+                  <label for="section-justification">Justification détaillée:</label>
                   <textarea
                     id="section-justification"
                     placeholder="Veuillez expliquer en détail les raisons de votre demande..."
+                    required
                   ></textarea>
                 </div>
 
-                <div class="form-group">
-                  <label for="section-document"
-                    >Document justificatif (PDF, JPG, PNG)</label
-                  >
-                  <input
-                    type="file"
-                    id="section-document"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                  />
+                <div class="form-section">
+                  <label for="section-document">Document justificatif (si applicable):</label>
+                  <input type="file" id="section-document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <div id="section-file-name" class="file-name"></div>
+                  <div class="input-hint">Format: PDF, Word ou image (max 5MB)</div>
                 </div>
 
-                <div
-                  class="error-message"
-                  id="section-form-error"
-                  style="display: none; color: red; margin: 10px 0"
-                ></div>
-                <div
-                  class="success-message"
-                  id="section-form-success"
-                  style="display: none; color: green; margin: 10px 0"
-                ></div>
+                <div id="section-form-error" class="error-message"></div>
+                <div id="section-form-success" class="success-message"></div>
 
-                <button type="button" class="submit-btn">
-                  Soumettre la demande
-                </button>
-              </div>
+                <div class="form-actions">
+                  <button type="submit" class="submit-btn">
+                    Soumettre la demande
+                  </button>
+                </div>
+              </form>
             </div>
 
-            <!-- Formulaire de changement de groupe TD -->
-            <div id="td-form" class="tab-content form-card">
-              <h2 class="card-title">
-                Formulaire de demande de changement de groupe TD
-              </h2>
-              <div id="td-change-form" class="form-container">
-                <div class="form-group">
-                  <label for="current-td">Groupe TD actuel</label>
-                  <input type="text" id="current-td" value="" readonly />
+            <!-- Group TD Form -->
+            <div id="td-form" class="form-card">
+              <h3>Demande de changement de groupe TD</h3>
+              <form id="td-change-form" class="request-form" enctype="multipart/form-data">
+                <div class="form-section">
+                  <label for="current-td">Groupe TD actuel:</label>
+                  <div class="current-value" id="current-td" data-id=""></div>
                 </div>
 
-                <div class="form-group">
-                  <label for="requested-td">Groupe TD demandé</label>
-                  <select id="requested-td">
-                    <option value="">Sélectionnez un groupe</option>
-                    <!-- Options loaded dynamically -->
+                <div class="form-section">
+                  <label for="requested-td">Groupe TD souhaité:</label>
+                  <select id="requested-td" required>
+                    <option value="">Choisir un groupe</option>
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="td-reason">Motif de la demande</label>
-                  <select id="td-reason">
-                    <option value="">Sélectionnez un motif</option>
-                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
-                    <option value="GROUP_WORK">Travail en groupe</option>
-                    <option value="TRANSPORT">Problème de transport</option>
-                    <option value="OTHER">Autre</option>
+                <div class="form-section">
+                  <label for="td-reason">Motif de la demande:</label>
+                  <select id="td-reason" required>
+                    <option value="">Sélectionner un motif</option>
+                    <option value="Famille">Raisons familiales</option>
+                    <option value="Sante">Raisons médicales</option>
+                    <option value="Transport">Problèmes de transport</option>
+                    <option value="Autre">Autre</option>
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="td-justification">Justification détaillée</label>
+                <div class="form-section">
+                  <label for="td-justification">Justification détaillée:</label>
                   <textarea
                     id="td-justification"
                     placeholder="Veuillez expliquer en détail les raisons de votre demande..."
+                    required
                   ></textarea>
                 </div>
 
-                <div class="form-group">
-                  <label for="td-document"
-                    >Document justificatif (PDF, JPG, PNG)</label
-                  >
-                  <input
-                    type="file"
-                    id="td-document"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                  />
+                <div class="form-section">
+                  <label for="td-document">Document justificatif (si applicable):</label>
+                  <input type="file" id="td-document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <div id="td-file-name" class="file-name"></div>
+                  <div class="input-hint">Format: PDF, Word ou image (max 5MB)</div>
                 </div>
 
-                <div
-                  class="error-message"
-                  id="td-form-error"
-                  style="display: none; color: red; margin: 10px 0"
-                ></div>
-                <div
-                  class="success-message"
-                  id="td-form-success"
-                  style="display: none; color: green; margin: 10px 0"
-                ></div>
+                <div id="td-form-error" class="error-message" style="display: none;"></div>
+                <div id="td-form-success" class="success-message" style="display: none;"></div>
 
-                <button type="button" class="submit-btn">
-                  Soumettre la demande
-                </button>
-              </div>
+                <div class="form-actions">
+                  <button type="submit" class="submit-btn">
+                    Soumettre la demande
+                  </button>
+                </div>
+              </form>
             </div>
 
-            <!-- Formulaire de changement de groupe TP -->
-            <div id="tp-form" class="tab-content form-card">
-              <h2 class="card-title">
-                Formulaire de demande de changement de groupe TP
-              </h2>
-              <div id="tp-change-form" class="form-container">
-                <div class="form-group">
-                  <label for="current-tp">Groupe TP actuel</label>
-                  <input type="text" id="current-tp" value="" readonly />
+            <!-- Group TP Form -->
+            <div id="tp-form" class="form-card">
+              <h3>Demande de changement de groupe TP</h3>
+              <form id="tp-change-form" class="request-form" enctype="multipart/form-data">
+                <div class="form-section">
+                  <label for="current-tp">Groupe TP actuel:</label>
+                  <div class="current-value" id="current-tp" data-id=""></div>
                 </div>
 
-                <div class="form-group">
-                  <label for="requested-tp">Groupe TP demandé</label>
-                  <select id="requested-tp">
-                    <option value="">Sélectionnez un groupe</option>
-                    <!-- Options loaded dynamically -->
+                <div class="form-section">
+                  <label for="requested-tp">Groupe TP souhaité:</label>
+                  <select id="requested-tp" required>
+                    <option value="">Choisir un groupe</option>
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="tp-reason">Motif de la demande</label>
-                  <select id="tp-reason">
-                    <option value="">Sélectionnez un motif</option>
-                    <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
-                    <option value="GROUP_WORK">Binôme/groupe de projet</option>
-                    <option value="EQUIPMENT">Accès au matériel</option>
-                    <option value="OTHER">Autre</option>
+                <div class="form-section">
+                  <label for="tp-reason">Motif de la demande:</label>
+                  <select id="tp-reason" required>
+                    <option value="">Sélectionner un motif</option>
+                    <option value="Famille">Raisons familiales</option>
+                    <option value="Sante">Raisons médicales</option>
+                    <option value="Transport">Problèmes de transport</option>
+                    <option value="Autre">Autre</option>
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="tp-justification">Justification détaillée</label>
+                <div class="form-section">
+                  <label for="tp-justification">Justification détaillée:</label>
                   <textarea
                     id="tp-justification"
                     placeholder="Veuillez expliquer en détail les raisons de votre demande..."
+                    required
                   ></textarea>
                 </div>
 
-                <div class="form-group">
-                  <label for="tp-document"
-                    >Document justificatif (PDF, JPG, PNG)</label
-                  >
-                  <input
-                    type="file"
-                    id="tp-document"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                  />
+                <div class="form-section">
+                  <label for="tp-document">Document justificatif (si applicable):</label>
+                  <input type="file" id="tp-document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <div id="tp-file-name" class="file-name"></div>
+                  <div class="input-hint">Format: PDF, Word ou image (max 5MB)</div>
                 </div>
 
-                <div
-                  class="error-message"
-                  id="tp-form-error"
-                  style="display: none; color: red; margin: 10px 0"
-                ></div>
-                <div
-                  class="success-message"
-                  id="tp-form-success"
-                  style="display: none; color: green; margin: 10px 0"
-                ></div>
+                <div id="tp-form-error" class="error-message" style="display: none;"></div>
+                <div id="tp-form-success" class="success-message" style="display: none;"></div>
 
-                <button type="button" class="submit-btn">
-                  Soumettre la demande
-                </button>
-              </div>
+                <div class="form-actions">
+                  <button type="submit" class="submit-btn">
+                    Soumettre la demande
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
           <!-- Onglet Suivi des demandes -->
           <div id="suivi" class="tab-content">
-            <div class="form-card">
+            <div class="box">
               <h2 class="card-title">Suivi de mes demandes</h2>
 
               <div id="requests-loading" class="loading-indicator">
@@ -329,5 +310,88 @@
     </div>
 
     <script src="demandes.js"></script>
+    
+    <!-- Add a reference to ensure the logout function is bound correctly -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Make sure the logout button has the correct event handler
+        const logoutBtn = document.querySelector('a[onclick="logout()"]');
+        if (logoutBtn) {
+          logoutBtn.onclick = function(e) {
+            e.preventDefault();
+            logout();
+            return false;
+          };
+        }
+        
+        // Add direct click handlers for the main tabs
+        const tabButtons = document.querySelectorAll('.tab-container > .tab-buttons > .tab-button');
+        tabButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            console.log(`Direct click on tab button: ${targetId}`);
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-container > .tab-buttons > .tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Activate selected tab
+            document.getElementById(targetId).classList.add('active');
+            this.classList.add('active');
+            
+            // For the "suivi" tab, reload requests
+            if (targetId === 'suivi') {
+              console.log('Loading requests for Suivi tab...');
+              loadUserRequests();
+            }
+          });
+        });
+        
+        // Add direct click handlers for the form tabs
+        const formTabButtons = document.querySelectorAll('#formulaires .tab-buttons .tab-button');
+        formTabButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            console.log(`Direct click on form tab: ${targetId}`);
+            
+            // Deactivate all form tabs
+            document.querySelectorAll('.form-card').forEach(form => form.classList.remove('active'));
+            document.querySelectorAll('#formulaires .tab-buttons .tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Activate selected form tab
+            document.getElementById(targetId).classList.add('active');
+            this.classList.add('active');
+          });
+        });
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Set up file input behavior to show file names
+        setupFileInput('section-document', 'section-file-name');
+        setupFileInput('td-document', 'td-file-name');
+        setupFileInput('tp-document', 'tp-file-name');
+      });
+      
+      // Function to display selected file name
+      function setupFileInput(inputId, displayId) {
+        const fileInput = document.getElementById(inputId);
+        const fileNameDisplay = document.getElementById(displayId);
+        
+        if (fileInput && fileNameDisplay) {
+          fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+              fileNameDisplay.textContent = this.files[0].name;
+              fileNameDisplay.title = this.files[0].name;
+              fileNameDisplay.style.display = 'block';
+            } else {
+              fileNameDisplay.textContent = '';
+              fileNameDisplay.style.display = 'none';
+            }
+          });
+        }
+      }
+    </script>
   </body>
 </html>

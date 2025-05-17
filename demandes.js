@@ -56,6 +56,9 @@ function openSubTab(evt, tabName) {
 document.addEventListener("DOMContentLoaded", async () => {
   await loadNavbar();
 
+  // Initialize sidebar user information
+  initializeSidebar();
+
   // Auth setup
   authToken =
     sessionStorage.getItem("etudiant_token") ||
@@ -73,7 +76,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (userData) {
       currentUser = { id: userData.userId, email: userData.email };
       await loadUserData();
-      loadUserRequests();
+      
+      // Load requests but don't switch to that tab yet
+      await loadUserRequests();
     } else if (!isBackendAvailable) {
       // No user data but backend is down
       console.warn("Backend is not available, loading fallback data");
@@ -92,103 +97,166 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadFallbackData();
   }
 
-  // Tab event listeners
-  document.querySelectorAll(".tab-button").forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-      const target = this.dataset.target;
-      if (target) {
-        if (this.closest("#formulaires")) {
-          openSubTab(e, target);
-        } else {
-          openTab(e, target);
-        }
-      }
-    });
-  });
-
-  // Add click listeners for the main tab buttons with onclick attributes
-  document
-    .querySelectorAll(".tab-container > .tab-buttons > .tab-button")
-    .forEach((btn) => {
-      btn.addEventListener("click", function (e) {
-        const target =
-          e.target.textContent.trim() === "Formulaires de demande"
-            ? "formulaires"
-            : "suivi";
-        openTab(e, target);
-      });
-    });
-
-  // Add click listeners for sub-tab buttons with onclick attributes
-  document
-    .querySelectorAll("#formulaires > .tab-buttons > .tab-button")
-    .forEach((btn) => {
-      btn.addEventListener("click", function (e) {
-        const target = btn.textContent.trim().includes("Section")
-          ? "section-form"
-          : btn.textContent.trim().includes("TD")
-          ? "td-form"
-          : "tp-form";
-        openSubTab(e, target);
-      });
-    });
-
-  // Global guard to prevent form submissions
-  document.addEventListener(
-    "submit",
-    function (e) {
-      // Prevent ANY form from submitting normally
-      e.preventDefault();
-      console.log("Global form submission prevented");
-      return false;
-    },
-    true
-  ); // Use capture phase
-
-  // Complete removal of standard form behavior for all forms
-  document.querySelectorAll("form").forEach((form) => {
-    // Remove action attribute if present
-    if (form.hasAttribute("action")) {
-      form.removeAttribute("action");
-    }
-
-    // Remove method attribute if present
-    if (form.hasAttribute("method")) {
-      form.removeAttribute("method");
-    }
-
-    // Add explicit submit-prevention listener
-    form.addEventListener(
-      "submit",
-      function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log("Form submission prevented:", this.id);
-        return false;
-      },
-      true
-    ); // Use capture phase
-  });
+  // Set up tab functionality
+  setupTabNavigation();
+  
+  // Set up file input displays
+  setupFileInputDisplays();
 
   // Direct submit button handling for each form
-  setupSubmitForForm("section-change-form", "SECTION_CHANGE", "section");
-  setupSubmitForForm("td-change-form", "TD_GROUP_CHANGE", "td");
-  setupSubmitForForm("tp-change-form", "TP_GROUP_CHANGE", "tp");
+  setupSubmitForForm("section-change-form", "SECTION", "section");
+  setupSubmitForForm("td-change-form", "TD_GROUP", "td");
+  setupSubmitForForm("tp-change-form", "TP_GROUP", "tp");
 
   // Also handle the "new-request-btn" if it exists
   const newRequestBtn = document.getElementById("new-request-btn");
   if (newRequestBtn) {
     newRequestBtn.addEventListener("click", function (e) {
       e.preventDefault();
-      openTab(e, "formulaires");
+      // Click the first tab button to switch to formulaires
+      const formulairesTab = document.querySelector('[data-target="formulaires"]');
+      if (formulairesTab) formulairesTab.click();
+    });
+  }
+  
+  // Add specific listener for the suivi tab to make sure requests load
+  const suiviTabButton = document.querySelector('[data-target="suivi"]');
+  if (suiviTabButton) {
+    suiviTabButton.addEventListener('click', function() {
+      console.log("Suivi tab clicked, reloading requests");
+      loadUserRequests();
     });
   }
 });
 
+// Setup file input displays
+function setupFileInputDisplays() {
+  setupFileInput('section-document', 'section-file-name');
+  setupFileInput('td-document', 'td-file-name');
+  setupFileInput('tp-document', 'tp-file-name');
+}
+
+// Function to display selected file name
+function setupFileInput(inputId, displayId) {
+  const fileInput = document.getElementById(inputId);
+  const fileNameDisplay = document.getElementById(displayId);
+  
+  if (fileInput && fileNameDisplay) {
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) {
+        fileNameDisplay.textContent = this.files[0].name;
+        fileNameDisplay.title = this.files[0].name;
+        fileNameDisplay.style.display = 'block';
+      } else {
+        fileNameDisplay.textContent = '';
+        fileNameDisplay.style.display = 'none';
+      }
+    });
+  }
+}
+
+// Improved tab navigation setup
+function setupTabNavigation() {
+  console.log("Setting up tab navigation");
+  // Set up main tab buttons
+  document.querySelectorAll('.tab-container > .tab-buttons > .tab-button').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = this.getAttribute('data-target');
+      console.log(`Tab clicked: ${target}`);
+      
+      // Hide all main tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Deactivate all main tab buttons
+      document.querySelectorAll('.tab-container > .tab-buttons > .tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected tab and activate button
+      const selectedTab = document.getElementById(target);
+      if (selectedTab) {
+        selectedTab.classList.add('active');
+        console.log(`Activated tab: ${target}`);
+      } else {
+        console.error(`Tab element not found with id: ${target}`);
+      }
+      this.classList.add('active');
+      
+      // If switching to "suivi" tab, reload requests and ensure it's visible
+      if (target === 'suivi') {
+        console.log("Loading requests for Suivi tab");
+        loadUserRequests();
+        // Make sure the suivi tab is visible by forcing display
+        document.getElementById('suivi').style.display = 'block';
+      }
+      
+      // If switching to forms tab, activate first sub-tab
+      if (target === 'formulaires') {
+        const firstSubTab = document.querySelector('#formulaires .tab-buttons .tab-button');
+        if (firstSubTab) {
+          firstSubTab.click();
+        }
+      }
+    });
+  });
+  
+  // Set up form sub-tab buttons
+  document.querySelectorAll('#formulaires .tab-buttons .tab-button').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+      const target = this.getAttribute('data-target');
+      
+      // Hide all form cards
+      document.querySelectorAll('.form-card').forEach(form => {
+        form.classList.remove('active');
+      });
+      
+      // Deactivate all form tab buttons
+      document.querySelectorAll('#formulaires .tab-buttons .tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected form and activate button
+      const selectedForm = document.getElementById(target);
+      if (selectedForm) {
+        selectedForm.classList.add('active');
+        console.log(`Activated form: ${target}`);
+      } else {
+        console.error(`Form element not found with id: ${target}`);
+      }
+      this.classList.add('active');
+    });
+  });
+  
+  // Add a test click on the Suivi tab once DOM is fully loaded
+  setTimeout(() => {
+    console.log("Testing tab navigation");
+    const suiviTab = document.querySelector('[data-target="suivi"]');
+    const formulairesTab = document.querySelector('[data-target="formulaires"]');
+    if (suiviTab) {
+      console.log("Suivi tab found:", suiviTab);
+    } else {
+      console.error("Suivi tab not found");
+    }
+    if (formulairesTab) {
+      console.log("Formulaires tab found:", formulairesTab);
+    } else {
+      console.error("Formulaires tab not found");
+    }
+  }, 1000);
+}
+
 // Check backend connectivity
 async function checkBackendConnectivity() {
   try {
-    const response = await fetch("http://localhost:3000/api/health", {
+    // Try loading student data instead of using a non-existent health endpoint
+    const response = await fetch("http://localhost:3000/api/auth/verify", {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
       method: "GET",
       signal: AbortSignal.timeout(3000),
     });
@@ -202,27 +270,29 @@ async function checkBackendConnectivity() {
   }
 }
 
-// Helper function to set up submit handlers for a specific form
+// Fixed form submission setup
 function setupSubmitForForm(formId, requestType, prefix) {
   const form = document.getElementById(formId);
-  const submitBtn = form?.querySelector(".submit-btn");
-
-  if (!form || !submitBtn) return;
-
-  // Remove any existing click handlers
-  submitBtn.replaceWith(submitBtn.cloneNode(true));
-
-  // Get the fresh button reference
-  const newSubmitBtn = form.querySelector(".submit-btn");
-
-  // Add click handler directly to button
-  newSubmitBtn.addEventListener("click", function (e) {
+  if (!form) {
+    console.error(`Form not found: ${formId}`);
+    return;
+  }
+  
+  // Add proper form submission handler
+  form.addEventListener('submit', function(e) {
     e.preventDefault();
-    e.stopPropagation();
-    console.log(`Submit button clicked for ${formId}`);
-    submitRequest(requestType, prefix);
+    submitRequest(requestType, prefix, e);
     return false;
   });
+  
+  // Also handle direct button click
+  const submitBtn = form.querySelector('.submit-btn');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      submitRequest(requestType, prefix, e);
+    });
+  }
 }
 
 // DATA LOADING
@@ -236,7 +306,7 @@ async function loadUserData() {
     const setCurrent = (elementId, data) => {
       const el = document.getElementById(elementId);
       if (el) {
-        el.value = data?.name || "Non assigné";
+        el.textContent = data?.name || "Non assigné";
         el.dataset.id = data?.id || "";
       }
     };
@@ -266,7 +336,28 @@ async function fetchStudentData() {
 
   if (!res.ok) throw new Error("Failed to fetch student data");
   const data = await res.json();
+  
+  // Save to localStorage
   localStorage.setItem("studentData", JSON.stringify(data));
+  
+  // Update sidebar with fresh data
+  const userAvatar = document.getElementById("userAvatar");
+  const userFullName = document.getElementById("userFullName");
+  const userId = document.getElementById("userId");
+  
+  if (userAvatar) {
+    const initials = ((data.firstName || "")[0] || "") + ((data.lastName || "")[0] || "");
+    userAvatar.textContent = initials.toUpperCase();
+  }
+  
+  if (userFullName) {
+    userFullName.textContent = `${data.firstName || ""} ${data.lastName || ""}`;
+  }
+  
+  if (userId) {
+    userId.textContent = data.matricule || data.email || "";
+  }
+  
   return data;
 }
 
@@ -310,22 +401,40 @@ async function fetchGroups(type, currentId) {
 
     if (!studentRes.ok) throw new Error("Failed to fetch student data");
     const studentData = await studentRes.json();
+    console.log("Student data:", studentData);
 
     let url;
     if (type === "section") {
-      const filiereId = studentData.sections[0]?.id;
-      if (!filiereId) {
-        console.warn("No filiere assigned for student, using fallback data");
+      // For section changes, find sections in the same specialty and level
+      const specialty = studentData.sections?.[0]?.specialty;
+      const level = studentData.sections?.[0]?.level;
+      
+      if (!specialty || !level) {
+        console.warn("No specialty or level assigned for student, using fallback data");
         return getFallbackGroups(type);
       }
-      url = `http://localhost:3000/api/sections?filiereId=${filiereId}`;
+      
+      // For sections, we'll request all sections with the same specialty and level
+      url = `http://localhost:3000/api/sections?specialty=${specialty}&level=${level}`;
+      console.log(`Finding available sections for specialty: ${specialty}, level: ${level}`);
     } else {
+      // For group changes (TD/TP), we need to get all groups in the same section
       const sectionId = studentData.sections?.[0]?.id;
       if (!sectionId) {
         console.warn("No section assigned for student, using fallback data");
         return getFallbackGroups(type);
       }
-      url = `http://localhost:3000/api/groupes/available?type=${type}&sectionId=${sectionId}`;
+      
+      // For TD/TP groups, we can find all groups from the student's section data
+      const currentGroups = studentData.sections?.[0]?.groupes || [];
+      
+      // Filter groups by type (td or tp)
+      const availableGroups = currentGroups.filter(group => 
+        group.type === type && group.id !== currentId
+      );
+      
+      console.log(`Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`);
+      return availableGroups;
     }
 
     const res = await fetch(url, {
@@ -355,9 +464,12 @@ function getFallbackGroups(type) {
 }
 
 // FORM SUBMISSION
-async function submitRequest(type, prefix) {
+async function submitRequest(type, prefix, e) {
   const form = document.getElementById(`${prefix}-change-form`);
   if (!form) return;
+
+  // Prevent default form submission behavior
+  e.preventDefault();
 
   // Clear previous messages
   const errorDiv = document.getElementById(`${prefix}-form-error`);
@@ -367,52 +479,68 @@ async function submitRequest(type, prefix) {
 
   try {
     // Validate required fields
-    const requested = document.getElementById(`requested-${prefix}`).value;
+    const requestedSelect = document.getElementById(`requested-${prefix}`);
+    const requested = requestedSelect.value;
     const reason = document.getElementById(`${prefix}-reason`).value;
-    const justification = document.getElementById(
-      `${prefix}-justification`
-    ).value;
+    const justification = document.getElementById(`${prefix}-justification`).value;
 
-    if (!requested || !reason || !justification) {
-      throw new Error("Veuillez remplir tous les champs obligatoires");
+    // Log form values for debugging
+    console.log(`Form values for ${prefix}:`, {
+      requested,
+      reason,
+      justification,
+      hasJustification: Boolean(justification),
+      justificationLength: justification?.length
+    });
+
+    if (!requested) {
+      throw new Error(`Veuillez sélectionner ${prefix === 'section' ? 'une section' : 'un groupe'} souhaité`);
     }
+    
+    if (!reason) {
+      throw new Error("Veuillez sélectionner un motif");
+    }
+    
+    if (!justification || justification.trim() === '') {
+      throw new Error("La justification détaillée est obligatoire");
+    }
+
+    // Get current ID
+    const currentElement = document.getElementById(`current-${prefix}`);
+    const currentId = currentElement.dataset.id;
+    
+    if (!currentId) {
+      throw new Error("Information d'affectation actuelle manquante");
+    }
+
+    // Make sure IDs are valid
+    console.log("Current ID:", currentId);
+    console.log("Requested ID:", requested);
 
     // Map the request type to backend enum values
     let requestType;
+    let isSection = false;
+    
     switch (type) {
-      case "SECTION_CHANGE":
-        requestType = "SECTION";
+      case "SECTION":
+        requestType = "section";
+        isSection = true;
         break;
-      case "TD_GROUP_CHANGE":
-        requestType = "TD_GROUP";
+      case "TD_GROUP":
+        requestType = "groupe_td";
         break;
-      case "TP_GROUP_CHANGE":
-        requestType = "TP_GROUP";
+      case "TP_GROUP":
+        requestType = "groupe_tp";
         break;
       default:
-        requestType = type;
+        requestType = type.toLowerCase();
     }
 
-    // Prepare form data
-    const formData = new FormData();
-    // Add the request type using the proper backend field name
-    formData.append("requestType", requestType);
-
-    // Add current and requested IDs
-    formData.append(
-      "currentId",
-      document.getElementById(`current-${prefix}`).dataset.id
-    );
-    formData.append("requestedId", requested);
-
-    // Add justification text with the reason and detailed justification
-    const fullJustification = `Motif: ${reason}\n\n${justification}`;
-    formData.append("justification", fullJustification);
-
-    // Add file if present
-    const fileInput = document.getElementById(`${prefix}-document`);
-    if (fileInput?.files.length > 0) {
-      formData.append("document", fileInput.files[0]);
+    // Show loading indicator
+    const submitBtn = form.querySelector(".submit-btn");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Envoi en cours...";
     }
 
     if (!isBackendAvailable) {
@@ -426,54 +554,177 @@ async function submitRequest(type, prefix) {
       return;
     }
 
-    console.log("Submitting form with data:", {
+    let response;
+    
+    // Create FormData for all request types
+    const formData = new FormData();
+    
+    // Common fields - ensure justification is trimmed and not empty
+    formData.append("requestType", requestType);
+    formData.append("reason", reason);
+    formData.append("justification", justification.trim());
+    
+    // Add file if present for all forms
+    const fileInput = document.getElementById(`${prefix}-document`);
+    if (fileInput?.files.length > 0) {
+      formData.append("document", fileInput.files[0]);
+    }
+    
+    // Debug: Log FormData contents (can't directly console.log FormData)
+    console.log("FormData entries:");
+    for (let pair of formData.entries()) {
+      if (pair[0] === 'document') {
+        console.log(pair[0], pair[1].name, pair[1].size);
+      } else {
+        console.log(pair[0], pair[1]);
+      }
+    }
+    
+    if (isSection) {
+      // For section changes
+      formData.append("currentSectionId", currentId.trim());
+      formData.append("requestedSectionId", requested.trim());
+      
+      console.log("Submitting section change request with document");
+      
+      // For section changes, create a separate JSON payload for required fields and include
+      // document in FormData. We need to ensure justification is sent correctly.
+      const sectionData = {
       requestType,
-      currentId: document.getElementById(`current-${prefix}`).dataset.id,
-      requestedId: requested,
-      justification: fullJustification,
-      hasFile: fileInput?.files.length > 0,
-    });
+        currentSectionId: currentId.trim(),
+        requestedSectionId: requested.trim(),
+        reason,
+        justification: justification.trim()
+      };
+      
+      // If we have a document, use multipart FormData
+      if (fileInput?.files.length > 0) {
+        formData.append("data", JSON.stringify(sectionData));
+        
+        // Submit request with multipart form data for file upload
+        response = await fetch("http://localhost:3000/api/change-requests/section-with-document", {
+          method: "POST",
+          headers: { 
+            Authorization: `Bearer ${authToken}`
+            // Don't set Content-Type for FormData
+          },
+          body: formData
+        });
+      } else {
+        // No document, use regular JSON request
+        response = await fetch("http://localhost:3000/api/change-requests/section", {
+          method: "POST",
+          headers: { 
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(sectionData)
+        });
+      }
+    } else {
+      // For TD/TP group changes
+      formData.append("currentId", currentId.trim());
+      formData.append("requestedId", requested.trim());
+      
+      console.log("Submitting group change request with document");
 
-    // Submit request
-    const res = await fetch("http://localhost:3000/api/change-requests", {
+      // Submit request for group change with file
+      response = await fetch("http://localhost:3000/api/change-requests/group", {
       method: "POST",
-      headers: { Authorization: `Bearer ${authToken}` },
-      // DO NOT set content-type header when using FormData with files
-      body: formData,
-    });
+        headers: { 
+          Authorization: `Bearer ${authToken}`
+          // Don't set Content-Type for FormData
+        },
+        body: formData
+      });
+    }
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || "Erreur lors de l'envoi de la demande"
-      );
+    // Reset button state
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Soumettre la demande";
+    }
+
+    // Check response status
+    if (!response.ok) {
+      let errorMessage = `Erreur lors de l'envoi de la demande (${response.status})`;
+      
+      try {
+        const errorData = await response.json();
+        if (errorData && errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (e) {
+        console.error("Failed to parse error response", e);
+      }
+      
+      throw new Error(errorMessage);
     }
 
     // Show success and reload requests
     if (successDiv) {
       successDiv.textContent = "Demande soumise avec succès.";
       successDiv.style.display = "block";
+      
+      // Automatically scroll to show success message
+      successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     form.reset();
+    
+    // Reset file name displays
+    const fileNameDisplay = document.getElementById(`${prefix}-file-name`);
+    if (fileNameDisplay) {
+      fileNameDisplay.textContent = '';
+      fileNameDisplay.style.display = 'none';
+    }
+    
+    // Switch to the requests tab
+    const requestsTab = document.querySelector('[data-target="suivi"]');
+    if (requestsTab) {
+      requestsTab.click();
+    }
+    
+    // Load updated requests
     loadUserRequests();
   } catch (e) {
     console.error("Submission error:", e);
     if (errorDiv) {
       errorDiv.textContent = e.message || "Erreur lors de la soumission.";
       errorDiv.style.display = "block";
+      errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Reset button state in case of error
+    const submitBtn = form.querySelector(".submit-btn");
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Soumettre la demande";
     }
   }
 }
 
 // REQUESTS TABLE
 async function loadUserRequests() {
+  console.log("Loading user requests...");
   const tbody = document.getElementById("requests-table-body");
   const loading = document.getElementById("requests-loading");
   const empty = document.getElementById("no-requests-message");
   const table = document.getElementById("requests-table");
   const errorDiv = document.getElementById("requests-error");
+  const suiviTab = document.getElementById("suivi");
 
-  if (!tbody || !loading || !empty || !table || !errorDiv) return;
+  if (!tbody || !loading || !empty || !table || !errorDiv) {
+    console.error("One or more required elements not found for requests tab");
+    console.log({
+      tbody: !!tbody,
+      loading: !!loading,
+      empty: !!empty,
+      table: !!table,
+      errorDiv: !!errorDiv,
+      suiviTab: !!suiviTab
+    });
+    return;
+  }
 
   tbody.innerHTML = "";
   loading.style.display = "block";
@@ -489,18 +740,25 @@ async function loadUserRequests() {
       fetchRequests("profile-requests"),
     ]);
 
+    console.log("Loaded requests:", {
+      changeRequests: changeRequests.length,
+      profileRequests: profileRequests.length
+    });
+
     const allRequests = [...changeRequests, ...profileRequests].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
 
     if (allRequests.length === 0) {
       empty.style.display = "block";
+      table.style.display = "none";
     } else {
       allRequests.forEach((req) => {
         const row = createRequestRow(req);
         tbody.appendChild(row);
       });
       table.style.display = "table";
+      empty.style.display = "none";
     }
   } catch (e) {
     console.error("Error loading requests:", e);
@@ -588,7 +846,7 @@ function loadFallbackRequests() {
     const fallbackRequests = [
       {
         id: 1,
-        type: "SECTION_CHANGE",
+        type: "SECTION",
         createdAt: new Date(Date.now() - 86400000 * 5),
         current: "B",
         requested: "A",
@@ -597,7 +855,7 @@ function loadFallbackRequests() {
       },
       {
         id: 2,
-        type: "TD_GROUP_CHANGE",
+        type: "TD_GROUP",
         createdAt: new Date(),
         current: "3",
         requested: "2",
@@ -628,14 +886,18 @@ function loadFallbackRequests() {
 
 // HELPERS
 function getRequestTypeLabel(type) {
-  switch (type) {
-    case "SECTION_CHANGE":
+  const typeStr = String(type).toLowerCase();
+  
+  switch (typeStr) {
+    case "section":
       return "Changement de Section";
-    case "TD_GROUP_CHANGE":
+    case "groupe_td":
+    case "td_group":
       return "Changement de Groupe TD";
-    case "TP_GROUP_CHANGE":
+    case "groupe_tp":
+    case "tp_group":
       return "Changement de Groupe TP";
-    case "PROFILE_UPDATE":
+    case "profile_update":
       return "Modification de profil";
     default:
       return type;
@@ -651,6 +913,8 @@ function getStatusLabel(status, isProfile = false) {
         return '<span class="status-chip status-approved">Acceptée</span>';
       case "rejected":
         return '<span class="status-chip status-rejected">Refusée</span>';
+      case "cancelled":
+        return '<span class="status-chip status-cancelled">Annulée</span>';
       default:
         return '<span class="status-chip status-pending">En cours</span>';
     }
@@ -660,6 +924,8 @@ function getStatusLabel(status, isProfile = false) {
         return '<span class="status-chip status-approved">Acceptée</span>';
       case "rejected":
         return '<span class="status-chip status-rejected">Refusée</span>';
+      case "cancelled":
+        return '<span class="status-chip status-cancelled">Annulée</span>';
       default:
         return '<span class="status-chip status-pending">En cours</span>';
     }
@@ -756,4 +1022,64 @@ function loadFallbackData() {
   loadAvailableOptions("section", "2");
   loadAvailableOptions("td", "3");
   loadAvailableOptions("tp", "2");
+}
+
+// GLOBAL AUTH FUNCTIONS
+function logout() {
+  console.log("Logout called");
+  
+  // Clear all auth tokens
+  localStorage.removeItem("etudiant_token");
+  sessionStorage.removeItem("etudiant_token");
+  
+  // Clear data
+  localStorage.removeItem("studentData");
+  localStorage.removeItem("offlineRequests"); 
+  localStorage.removeItem("lastLogin");
+  localStorage.removeItem("userPreferences");
+  
+  // Clear other session data
+  sessionStorage.clear();
+  
+  // Redirect to login
+  window.location.href = "index.html";
+}
+
+// Initialize sidebar with user information
+function initializeSidebar() {
+  // Check if we need to load student data
+  const studentData = JSON.parse(localStorage.getItem("studentData") || "null");
+  const token = sessionStorage.getItem("etudiant_token") || localStorage.getItem("etudiant_token");
+  
+  if (!token) {
+    // No token, redirect to login
+    window.location.href = "etudiant-login.html";
+    return;
+  }
+
+  // Get the user avatar, name and ID elements
+  const userAvatar = document.getElementById("userAvatar");
+  const userFullName = document.getElementById("userFullName");
+  const userId = document.getElementById("userId");
+  
+  // If we have studentData cached, use it
+  if (studentData) {
+    if (userAvatar) {
+      const initials = ((studentData.firstName || "")[0] || "") + ((studentData.lastName || "")[0] || "");
+      userAvatar.textContent = initials.toUpperCase();
+    }
+    
+    if (userFullName) {
+      userFullName.textContent = `${studentData.firstName || ""} ${studentData.lastName || ""}`;
+    }
+    
+    if (userId) {
+      userId.textContent = studentData.matricule || studentData.email || "";
+    }
+  } else {
+    // No cached data, sidebar will be updated after fetchStudentData is called
+    if (userAvatar) userAvatar.textContent = "...";
+    if (userFullName) userFullName.textContent = "Chargement...";
+    if (userId) userId.textContent = "...";
+  }
 }

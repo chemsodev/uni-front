@@ -48,17 +48,30 @@
       }
 
       .document-link {
-        display: inline-block;
-        margin-top: 10px;
-        padding: 6px 12px;
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
         background-color: #e9ecef;
         border-radius: 4px;
         color: #495057;
         text-decoration: none;
+        transition: all 0.2s ease;
       }
 
       .document-link:hover {
         background-color: #dee2e6;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      .document-link::before {
+        content: "";
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: center;
       }
 
       .action-buttons {
@@ -112,6 +125,59 @@
         background-color: #6c757d;
         color: white;
       }
+     
+      .loading-indicator {
+        padding: 20px;
+        text-align: center;
+        font-style: italic;
+        color: #666;
+      }
+
+      .error-message {
+        padding: 20px;
+        background-color: #f8d7da;
+        color: #721c24;
+        border-radius: 4px;
+        margin: 20px 0;
+      }
+      
+      .success-message {
+        padding: 20px;
+        background-color: #d4edda;
+        color: #155724;
+        border-radius: 4px;
+        margin: 20px 0;
+      }
+
+      .document-preview {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        text-align: center;
+      }
+
+      .document-image {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: zoom-in;
+        transition: transform 0.2s ease;
+      }
+
+      .document-image:hover {
+        transform: scale(1.02);
+      }
+
+      @media (max-width: 768px) {
+        .document-preview {
+          padding: 5px;
+        }
+        .document-image {
+          max-height: 200px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -137,6 +203,7 @@
           </div>
 
           <div id="request-error" class="error-message" style="display: none;"></div>
+          <div id="request-success" class="success-message" style="display: none;"></div>
 
           <div id="request-details" class="request-details" style="display: none;">
             <div class="field-group">
@@ -180,6 +247,9 @@
                 <a href="#" class="document-link" id="document-link" target="_blank">
                   Voir le document
                 </a>
+                <div class="document-preview" id="document-preview" style="display: none;">
+                  <img id="document-image" class="document-image" alt="Preview du document" />
+                </div>
               </div>
             </div>
 
@@ -222,9 +292,12 @@
           // Verify token and get user info
           const userData = await verifyToken();
           if (!userData) throw new Error("Invalid token");
-          if (userData.adminRole !== "etudiant") throw new Error("Access denied");
+          if (userData.userType !== "etudiant") throw new Error("Access denied");
 
           currentUser = { id: userData.userId, email: userData.email };
+          
+          // Initialize sidebar
+          initializeSidebar();
 
           // Load request details
           const requestId = getRequestIdFromUrl();
@@ -257,6 +330,33 @@
           console.error("Error loading navbar:", e);
         }
       }
+      
+      // Initialize sidebar with user information
+      function initializeSidebar() {
+        // Check if we need to load student data
+        const studentData = JSON.parse(localStorage.getItem("studentData") || "null");
+        
+        // Get the user avatar, name and ID elements
+        const userAvatar = document.getElementById("userAvatar");
+        const userFullName = document.getElementById("userFullName");
+        const userId = document.getElementById("userId");
+        
+        // If we have studentData cached, use it
+        if (studentData) {
+          if (userAvatar) {
+            const initials = ((studentData.firstName || "")[0] || "") + ((studentData.lastName || "")[0] || "");
+            userAvatar.textContent = initials.toUpperCase();
+          }
+          
+          if (userFullName) {
+            userFullName.textContent = `${studentData.firstName || ""} ${studentData.lastName || ""}`;
+          }
+          
+          if (userId) {
+            userId.textContent = studentData.matricule || studentData.email || "";
+          }
+        }
+      }
 
       // --- AUTH FUNCTIONS ---
       async function verifyToken() {
@@ -274,16 +374,39 @@
           return null;
         }
       }
+      
+      // Global logout function
+      function logout() {
+        console.log("Logout called");
+        
+        // Clear all auth tokens
+        localStorage.removeItem("etudiant_token");
+        sessionStorage.removeItem("etudiant_token");
+        
+        // Clear data
+        localStorage.removeItem("studentData");
+        localStorage.removeItem("offlineRequests"); 
+        localStorage.removeItem("lastLogin");
+        localStorage.removeItem("userPreferences");
+        
+        // Clear other session data
+        sessionStorage.clear();
+        
+        // Redirect to login
+        window.location.href = "index.html";
+      }
 
       // --- DATA LOADING FUNCTIONS ---
       async function loadRequestDetails(requestId) {
         const loadingEl = document.getElementById("request-loading");
         const detailsEl = document.getElementById("request-details");
         const errorEl = document.getElementById("request-error");
+        const successEl = document.getElementById("request-success");
 
         loadingEl.style.display = "block";
         detailsEl.style.display = "none";
         errorEl.style.display = "none";
+        successEl.style.display = "none";
 
         try {
           const response = await fetch(`${API_BASE_URL}/change-requests/${requestId}`, {
@@ -304,6 +427,12 @@
           displayRequestDetails(request);
           loadingEl.style.display = "none";
           detailsEl.style.display = "block";
+          
+          // Check for status parameter to show success message
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('status') === 'cancelled') {
+            showSuccess("Votre demande a été annulée avec succès.");
+          }
         } catch (e) {
           console.error("Error loading request details:", e);
           loadingEl.style.display = "none";
@@ -335,27 +464,135 @@
         // Justification
         document.getElementById("request-justification").textContent = request.justification || "-";
 
-        // Document
-        if (request.documentPath) {
-          document.getElementById("document-group").style.display = "flex";
-          document.getElementById("document-link").href = API_BASE_URL + request.documentPath;
+        // Document - now using the new binary endpoint
+        const documentLink = document.getElementById("document-link");
+        const documentGroup = document.getElementById("document-group");
+        const documentPreview = document.getElementById("document-preview");
+        const documentImage = document.getElementById("document-image");
+        
+        const hasDocument = request.documentData !== undefined || 
+                           request.documentName || 
+                           request.documentMimeType || 
+                           request.documentPath;
+        
+        if (hasDocument) {
+          documentGroup.style.display = "flex";
+          
+          // Check document existence before setting up the link
+          fetch(`${API_BASE_URL}/change-requests/${request.id}/document`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`
+            }
+          }).then(response => {
+            if (response.status === 204) {
+              console.log(response);
+              console.log("No document content available");
+              documentPreview.style.display = "none";
+              documentLink.textContent = "Aucun document disponible";
+              documentLink.style.opacity = "0.7";
+              documentLink.style.cursor = "not-allowed";
+              documentLink.onclick = function(e) {
+                e.preventDefault();
+                alert("Aucun document n'a été joint à cette demande.");
+              };
+              return null;
+            } else if (!response.ok) {
+              throw new Error(`Erreur ${response.status}`);
+            }
+            
+            // Document exists and has content
+            const docUrl = `${API_BASE_URL}/change-requests/${request.id}/document`;
+            documentLink.href = docUrl;
+            
+            // If we know the document name, display it
+            if (request.documentName) {
+              documentLink.textContent = request.documentName;
+              documentLink.title = request.documentName;
+              
+              // Check if it's an image to show preview
+              const isImage = request.documentMimeType?.startsWith('image/') || 
+                             /\.(jpe?g|png|gif|bmp)$/i.test(request.documentName);
+              
+              if (isImage) {
+                // Add authorization token to the image source
+                documentImage.onload = function() {
+                  documentPreview.style.display = "block";
+                };
+                
+                documentImage.onerror = function() {
+                  console.error("Error loading image");
+                  documentPreview.style.display = "none";
+                };
+                
+                // Set image source using fetch with auth token
+                fetchDocumentWithAuth(request.id)
+                  .then(imageUrl => {
+                    if (!imageUrl) {
+                      documentPreview.style.display = "none";
+                      return;
+                    }
+                    
+                    documentImage.src = imageUrl;
+                  })
+                  .catch(err => {
+                    console.error("Error fetching image:", err);
+                    documentPreview.style.display = "none";
+                  });
+                
+                // Add click handler to toggle fullscreen view
+                documentImage.onclick = function() {
+                  if (this.requestFullscreen) {
+                    this.requestFullscreen();
+                  }
+                };
+              } else {
+                documentPreview.style.display = "none";
+              }
+            } else {
+              documentLink.textContent = "Voir le document";
+              documentPreview.style.display = "none";
+            }
+            
+            // Make document link use document viewer with auth token
+            documentLink.onclick = function(e) {
+              e.preventDefault();
+              window.open(createAuthenticatedDocumentUrl(request.id), '_blank');
+            };
+          }).catch(error => {
+            console.error("Error checking document:", error);
+            documentPreview.style.display = "none";
+            documentLink.textContent = "Erreur: Document non disponible";
+            documentLink.onclick = function(e) {
+              e.preventDefault();
+              alert("Erreur lors de l'accès au document: " + error.message);
+            };
+          });
+        } else {
+          documentGroup.style.display = "none";
+          documentPreview.style.display = "none";
         }
 
         // Show admin response if available
         if (request.responseMessage) {
           document.getElementById("response-group").style.display = "flex";
           document.getElementById("admin-response").textContent = request.responseMessage;
+        } else {
+          document.getElementById("response-group").style.display = "none";
         }
 
         // Show cancel button only for pending requests
         const cancelBtn = document.getElementById("cancel-btn");
-        if (request.status === "PENDING") {
+        if (request.status && request.status.toUpperCase() === "PENDING") {
           cancelBtn.style.display = "block";
+        } else {
+          cancelBtn.style.display = "none";
         }
       }
 
       function getStatusLabel(status) {
-        switch (status) {
+        const statusLower = (status || "").toUpperCase();
+        
+        switch (statusLower) {
           case "PENDING":
             return '<span class="request-status status-pending">En attente</span>';
           case "APPROVED":
@@ -370,12 +607,14 @@
       }
 
       function getRequestTypeLabel(type) {
-        switch (type) {
-          case "SECTION":
+        const typeStr = String(type).toLowerCase();
+        
+        switch (typeStr) {
+          case "section":
             return "Changement de section";
-          case "TD":
+          case "groupe_td":
             return "Changement de groupe TD";
-          case "TP":
+          case "groupe_tp":
             return "Changement de groupe TP";
           default:
             return type;
@@ -388,6 +627,13 @@
         const errorEl = document.getElementById("request-error");
         errorEl.textContent = message;
         errorEl.style.display = "block";
+      }
+      
+      function showSuccess(message) {
+        const successEl = document.getElementById("request-success");
+        successEl.textContent = message;
+        successEl.style.display = "block";
+        successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
 
       // --- ACTION FUNCTIONS ---
@@ -402,24 +648,75 @@
         }
 
         try {
+          // Show loading in the cancel button
+          const cancelBtn = document.getElementById("cancel-btn");
+          cancelBtn.disabled = true;
+          cancelBtn.textContent = "Annulation en cours...";
+          
+          console.log(`Cancelling request: ${currentRequest.id}`);
+          
+          // Make sure we have a valid token
+          if (!authToken) {
+            throw new Error("Vous n'êtes pas authentifié. Veuillez vous reconnecter.");
+          }
+          
           const response = await fetch(`${API_BASE_URL}/change-requests/${currentRequest.id}/cancel`, {
             method: "PATCH",
             headers: {
               Authorization: `Bearer ${authToken}`,
               "Content-Type": "application/json"
-            }
+            },
+            body: JSON.stringify({
+              status: "CANCELLED",
+              responseMessage: "Demande annulée par l'étudiant"
+            })
           });
 
+          // Get detailed error information if available
           if (!response.ok) {
-            throw new Error(`Failed to cancel request (${response.status})`);
+            let errorMessage = `Échec de l'annulation (${response.status})`;
+            try {
+              const errorData = await response.json();
+              if (errorData && errorData.message) {
+                errorMessage = errorData.message;
+              }
+            } catch (e) {
+              console.error("Error parsing error response:", e);
+            }
+            throw new Error(errorMessage);
           }
 
-          alert("Demande annulée avec succès");
-          // Reload the request details
-          loadRequestDetails(currentRequest.id);
+          // Get the updated data and update page status
+          const updatedRequest = await response.json();
+          console.log("Request cancelled successfully:", updatedRequest);
+          
+          // Update current request with new status
+          currentRequest.status = "CANCELLED";
+          if (updatedRequest.responseMessage) {
+            currentRequest.responseMessage = updatedRequest.responseMessage;
+          }
+          
+          // Update the UI to show cancelled status
+          const statusElement = document.getElementById("request-status");
+          statusElement.innerHTML = getStatusLabel("CANCELLED");
+          
+          // Show admin response if available
+          document.getElementById("response-group").style.display = "flex";
+          document.getElementById("admin-response").textContent = currentRequest.responseMessage || "Demande annulée par l'étudiant";
+          
+          // Hide cancel button
+          cancelBtn.style.display = "none";
+          
+          // Show success message
+          showSuccess("Demande annulée avec succès");
         } catch (e) {
           console.error("Error cancelling request:", e);
-          alert("Erreur lors de l'annulation: " + e.message);
+          showError("Erreur lors de l'annulation: " + e.message);
+          
+          // Reset button state
+          const cancelBtn = document.getElementById("cancel-btn");
+          cancelBtn.disabled = false;
+          cancelBtn.textContent = "Annuler la demande";
         }
       }
 
@@ -442,3 +739,43 @@
           minute: "2-digit"
         });
       }
+
+      // Function to fetch document with authentication
+      async function fetchDocumentWithAuth(requestId) {
+        try {
+          // Create a blob URL that includes authentication
+          const response = await fetch(`${API_BASE_URL}/change-requests/${requestId}/document`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`
+            }
+          });
+          
+          // Check for 204 No Content response (no document)
+          if (response.status === 204) {
+            console.log("No document available for this request");
+            return null;
+          }
+          
+          if (!response.ok) {
+            throw new Error(`Document fetch failed: ${response.status}`);
+          }
+          
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
+        } catch (error) {
+          console.error("Error fetching document:", error);
+          throw error;
+        }
+      }
+      
+      // Function to create an authenticated document URL for opening in a new tab
+      function createAuthenticatedDocumentUrl(requestId) {
+        // For direct URL access, we need to use a method that includes the auth token
+        // Since we can't add headers to a window.open request, we'll use a data URL or temporary blob URL
+        
+        // Return a URL that will fetch the document with auth
+        return `document-viewer.html?id=${requestId}&token=${encodeURIComponent(authToken)}`;
+      }
+    </script>
+  </body>
+</html>

@@ -116,6 +116,11 @@
         color: white;
       }
 
+      .status-cancelled {
+        background-color: #6c757d;
+        color: white;
+      }
+
       .loading-indicator {
         padding: 20px;
         text-align: center;
@@ -357,8 +362,10 @@
 
         // Show cancel button only for pending requests
         const cancelBtn = document.getElementById("cancel-btn");
-        if (request.status === "pending") {
+        if (request.status && request.status.toLowerCase() === "pending") {
           cancelBtn.style.display = "block";
+        } else {
+          cancelBtn.style.display = "none";
         }
 
         // Show admin response if available
@@ -432,7 +439,9 @@
       }
 
       function getStatusLabel(status) {
-        switch (status) {
+        const statusLower = (status || "").toLowerCase();
+        
+        switch (statusLower) {
           case "pending":
             return '<span class="request-status status-pending">En attente</span>';
           case "approved":
@@ -440,7 +449,7 @@
           case "rejected":
             return '<span class="request-status status-rejected">Rejetée</span>';
           case "cancelled":
-            return '<span class="request-status" style="background-color:#6c757d;color:white">Annulée</span>';
+            return '<span class="request-status status-cancelled">Annulée</span>';
           default:
             return '<span class="request-status">' + status + "</span>";
         }
@@ -466,20 +475,17 @@
         }
 
         try {
-          const response = await fetch(
-            `${API_BASE_URL}/profile-requests/${currentRequest.id}/cancel`,
-            {
-              method: "PATCH",
-              headers: {
-                Authorization: `Bearer ${authToken}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                status: "CANCELLED",
-                adminComment: "Demande annulée par l'étudiant",
-              }),
-            }
-          );
+          const response = await fetch(`${API_BASE_URL}/profile-requests/${currentRequest.id}/cancel`, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              status: "cancelled",
+              adminComment: "Demande annulée par l'étudiant"
+            }),
+          });
 
           if (!response.ok) {
             throw new Error(`Failed to cancel request (${response.status})`);
