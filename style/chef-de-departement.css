@@ -196,9 +196,6 @@
         /* Tab Content */
         .tab-content {
             display: none;
-            overflow: auto;
-            width:  100%;
-            height: auto;
         }
         
         .tab-content.active {
@@ -262,6 +259,9 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             padding: 1.5rem;
             margin-bottom: 2rem;
+            overflow: auto;
+            width:  100%;
+            height: auto;
         }
         
         .section-title {
