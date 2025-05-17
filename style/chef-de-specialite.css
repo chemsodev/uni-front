@@ -196,6 +196,9 @@
         /* Tab Content */
         .tab-content {
             display: none;
+            overflow: auto;
+            width:  100%;
+            height: auto;
         }
         
         .tab-content.active {
