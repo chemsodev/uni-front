@@ -294,3 +294,63 @@
         }
 
     }
+
+    /* Add styles for group selector and student group badges */
+
+    .group-selector {
+        margin-bottom: 15px;
+        padding: 0 15px;
+    }
+
+    .group-selector select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        background-color: #4285f4;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 12px;
+    }
+
+    .student-info {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .student-groups {
+        display: flex;
+        gap: 8px;
+        margin-top: 5px;
+    }
+
+    .group-badge {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 12px;
+        display: inline-block;
+    }
+
+    .group-badge.td {
+        background-color: #e8f0fe;
+        color: #1967d2;
+        border: 1px solid #c6dafc;
+    }
+
+    .group-badge.tp {
+        background-color: #e6f4ea;
+        color: #1e8e3e;
+        border: 1px solid #ceead6;
+    }

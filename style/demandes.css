@@ -699,3 +699,68 @@ input[type="file"]:hover {
 
 .boxx{
 }
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-container {
+  display: flex;
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-container input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px 0 0 4px;
+  flex: 1;
+  outline: none;
+}
+
+.search-container input:focus {
+  border-color: var(--primary-color);
+}
+
+.search-container button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 0 4px 4px 0;
+}
+
+.search-container button:hover {
+  background-color: var(--primary-dark);
+}
+
+.filter-dropdown select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  min-width: 150px;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.filter-dropdown select:focus {
+  border-color: var(--primary-color);
+}
+
+/* Responsive layout for filter controls */
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+  }
+  
+  .search-container, .filter-dropdown {
+    width: 100%;
+  }
+}

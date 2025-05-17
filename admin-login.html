@@ -66,7 +66,7 @@
         })
         .then(data => {
             // Silent role validation
-            if (data.adminRole === requestedRole) {
+            if (data.userType === requestedRole) {
                 const rolePages = {
                     'chef-de-departement': 'chef-de-departement.html',
                     'chef-de-specialite': 'chef-de-specialite.html',

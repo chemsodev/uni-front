@@ -629,7 +629,7 @@
                 return response.json();
             })
             .then(data => {
-                if (data.adminRole !== REQUIRED_ROLE) {
+                if (data.userType !== REQUIRED_ROLE) {
                     throw new Error('Role mismatch');
                 }
                 // Load protected content here

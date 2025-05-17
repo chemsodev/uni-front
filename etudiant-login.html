@@ -142,11 +142,11 @@
           // More permissive role validation
           // Accept if role is etudiant or contains "etud" string
           if (
-            userData.adminRole &&
-            userData.adminRole !== "etudiant" &&
-            !userData.adminRole.includes("etud")
+            userData.userType &&
+            userData.userType !== "etudiant" &&
+            !userData.userType.includes("etud")
           ) {
-            console.warn("Expected student role but got:", userData.adminRole);
+            console.warn("Expected student role but got:", userData.userType);
             // Continue anyway - we'll still redirect to dashboard
           }
 

@@ -289,9 +289,24 @@ function setupSubmitForForm(formId, requestType, prefix) {
     return;
   }
   
+  console.log(`Setting up form submission for ${formId}`, {
+    requestType,
+    prefix,
+    formFound: !!form
+  });
+  
   // Add proper form submission handler
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log(`Form ${formId} submitted`);
+    
+    // Validate request type and prefix match - especially for TP groups
+    if (requestType === "TP_GROUP" && prefix !== "tp") {
+      console.error("Mismatch between requestType and prefix:", { requestType, prefix });
+      alert("Erreur de configuration du formulaire. Veuillez rafraîchir la page.");
+      return;
+    }
+    
     submitRequest(requestType, prefix, e);
     return false;
   });
@@ -301,6 +316,7 @@ function setupSubmitForForm(formId, requestType, prefix) {
   if (submitBtn) {
     submitBtn.addEventListener('click', function(e) {
       e.preventDefault();
+      console.log(`Submit button clicked for ${formId}`);
       submitRequest(requestType, prefix, e);
     });
   }
@@ -313,12 +329,21 @@ async function loadUserData() {
       ? await fetchStudentData()
       : JSON.parse(localStorage.getItem("studentData")) || {};
 
+    console.log("Student data loaded:", {
+      section: studentData.sections?.[0]?.name,
+      tdGroup: studentData.tdGroupe?.name,
+      tpGroup: studentData.tpGroupe?.name,
+      tdId: studentData.tdGroupe?.id,
+      tpId: studentData.tpGroupe?.id
+    });
+
     // Set current values with IDs
     const setCurrent = (elementId, data) => {
       const el = document.getElementById(elementId);
       if (el) {
         el.textContent = data?.name || "Non assigné";
         el.dataset.id = data?.id || "";
+        console.log(`Set ${elementId} to:`, { name: data?.name, id: data?.id });
       }
     };
 
@@ -377,23 +402,93 @@ async function loadAvailableOptions(type, currentId) {
   if (!select) return;
 
   select.innerHTML = `<option value="">Sélectionnez...</option>`;
+  
+  // Show loading state
+  select.disabled = true;
+  select.innerHTML = `<option value="">Chargement...</option>`;
 
   try {
     const groups = isBackendAvailable
       ? await fetchGroups(type, currentId)
       : getFallbackGroups(type);
 
-    groups.forEach((group) => {
-      if (group.id.toString() !== currentId?.toString()) {
-        const option = new Option(group.name, group.id);
-        select.add(option);
+    // Reset select after loading
+    select.innerHTML = `<option value="">Sélectionnez...</option>`;
+    
+    // Filter out invalid options first
+    const validGroups = groups.filter(group => {
+      // Filter out the current group - can't switch to same group
+      if (group.id?.toString() === currentId?.toString()) {
+        return false;
       }
+      
+      // Filter out full groups that can't accept more students
+      if (group.capacity && group.currentOccupancy && group.capacity <= group.currentOccupancy) {
+        console.log(`Filtering out full group: ${group.name} (${group.currentOccupancy}/${group.capacity})`);
+        return false;
+      }
+      
+      return true;
     });
+    
+    console.log(`Showing ${validGroups.length} valid options for ${type} from ${groups.length} total`);
+    
+    // Update the select with valid options
+    validGroups.forEach((group) => {
+      // Add the type to the name if it's not already there
+      let displayName = group.name;
+      
+      // Add capacity information if available
+      if (group.capacity && group.currentOccupancy) {
+        // Add the type to the name if it's not already there
+        if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
+          displayName = `${displayName} (TP)`;
+        } else if (type === "td" && !displayName.toLowerCase().includes("td")) {
+          displayName = `${displayName} (TD)`;
+        }
+        
+        // Add occupancy info
+        displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
+      } else {
+        // Just add the type if needed
+        if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
+          displayName = `${displayName} (TP)`;
+        } else if (type === "td" && !displayName.toLowerCase().includes("td")) {
+          displayName = `${displayName} (TD)`;
+        }
+      }
+      
+      const option = new Option(displayName, group.id);
+      select.add(option);
+    });
+    
+    // Re-enable the select
+    select.disabled = false;
+    
+    // If there are no options, show a message
+    if (validGroups.length === 0) {
+      select.innerHTML = `<option value="">Aucune option disponible</option>`;
+      select.disabled = true;
+      
+      // Show an error message
+      const errorDivId = `${type}-form-error`;
+      const errorDiv = document.getElementById(errorDivId);
+      if (errorDiv) {
+        errorDiv.textContent = "Aucun groupe disponible pour changement. Les groupes peuvent être complets ou vous êtes déjà dans le seul groupe disponible.";
+        errorDiv.style.display = "block";
+      }
+    }
   } catch (e) {
     console.error(`Error loading ${type} groups:`, e);
+    
+    // Reset select and add fallback options
+    select.innerHTML = `<option value="">Sélectionnez...</option>`;
     getFallbackGroups(type).forEach((group) => {
       select.add(new Option(group.name, group.id));
     });
+    
+    // Re-enable the select
+    select.disabled = false;
   }
 }
 
@@ -412,8 +507,40 @@ async function fetchGroups(type, currentId) {
 
     if (!studentRes.ok) throw new Error("Failed to fetch student data");
     const studentData = await studentRes.json();
-    console.log("Student data:", studentData);
+    console.log("Student data for group fetch:", studentData);
+    console.log(`Fetching groups for type: ${type}, currentId: ${currentId}`);
 
+    // Log TP and TD groups directly
+    if (studentData.tpGroupe) {
+      console.log("TP Group found in student data:", studentData.tpGroupe);
+    }
+    if (studentData.tdGroupe) {
+      console.log("TD Group found in student data:", studentData.tdGroupe);
+    }
+
+    // First, let's try to get all available groups via a more direct endpoint
+    try {
+      // Special endpoint to get available groups for changing (if it exists)
+      const availableGroupsUrl = `http://localhost:3000/api/etudiants/${currentUser.id}/available-${type}-groups`;
+      console.log(`Trying to fetch available groups from: ${availableGroupsUrl}`);
+      
+      const availableRes = await fetch(availableGroupsUrl, {
+        headers: { Authorization: `Bearer ${authToken}` },
+        signal: AbortSignal.timeout(5000),
+      });
+      
+      if (availableRes.ok) {
+        const availableGroups = await availableRes.json();
+        console.log(`Got ${availableGroups.length} available ${type} groups from API:`, availableGroups);
+        return availableGroups;
+      } else {
+        console.log(`Available groups endpoint not found or failed, using fallback approach`);
+      }
+    } catch (availableError) {
+      console.log(`Error getting available groups, using fallback approach:`, availableError);
+    }
+
+    // Continue with the fallback approach
     let url;
     if (type === "section") {
       // For section changes, find sections in the same specialty and level
@@ -428,6 +555,19 @@ async function fetchGroups(type, currentId) {
       // For sections, we'll request all sections with the same specialty and level
       url = `http://localhost:3000/api/sections?specialty=${specialty}&level=${level}`;
       console.log(`Finding available sections for specialty: ${specialty}, level: ${level}`);
+      
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${authToken}` },
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
+      const allSections = await res.json();
+      
+      // Filter out the current section and any full sections
+      return allSections.filter(section => {
+        return section.id !== currentId && section.currentOccupancy < section.capacity;
+      });
     } else {
       // For group changes (TD/TP), we need to get all groups in the same section
       const sectionId = studentData.sections?.[0]?.id;
@@ -436,25 +576,92 @@ async function fetchGroups(type, currentId) {
         return getFallbackGroups(type);
       }
       
-      // For TD/TP groups, we can find all groups from the student's section data
+      // Try to fetch all groups for this section from a dedicated endpoint
+      const groupsUrl = `http://localhost:3000/api/sections/${sectionId}/groupes`;
+      
+      try {
+        const groupsRes = await fetch(groupsUrl, {
+          headers: { Authorization: `Bearer ${authToken}` },
+          signal: AbortSignal.timeout(5000),
+        });
+        
+        if (groupsRes.ok) {
+          const allGroups = await groupsRes.json();
+          console.log(`Fetched ${allGroups.length} groups for section ${sectionId}`);
+          
+          // Filter groups by type and availability
+          const filteredGroups = allGroups.filter(group => {
+            return group.type === type && 
+                  group.id !== currentId && 
+                  (!group.capacity || group.currentOccupancy < group.capacity);
+          });
+          
+          console.log(`Found ${filteredGroups.length} available ${type} groups`, filteredGroups);
+          return filteredGroups;
+        }
+      } catch (groupsError) {
+        console.log("Error fetching groups from dedicated endpoint:", groupsError);
+      }
+      
+      // Fall back to using groups from student data
       const currentGroups = studentData.sections?.[0]?.groupes || [];
       
-      // Filter groups by type (td or tp)
-      const availableGroups = currentGroups.filter(group => 
-        group.type === type && group.id !== currentId
-      );
+      console.log(`Found ${currentGroups.length} total groups in section`, {
+        sectionName: studentData.sections?.[0]?.name,
+        groups: currentGroups.map(g => `${g.type} ${g.name}`)
+      });
       
-      console.log(`Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`);
+      // Need a more reliable way to filter groups due to data inconsistency
+      // For TP form, filter groups that most likely are TP groups
+      let availableGroups;
+      if (type === 'tp') {
+        // For TP groups, filter based on group name containing TP or database type
+        availableGroups = currentGroups.filter(group => {
+          const isNamedTP = group.name.toLowerCase().includes('tp');
+          const isTypeTP = group.type === 'tp';
+          const isNotCurrentGroup = group.id !== currentId;
+          const hasCapacity = !group.capacity || group.currentOccupancy < group.capacity;
+          
+          // Log each group for debugging
+          console.log(`Filtering TP group: ${group.name}`, {
+            isNamedTP,
+            isTypeTP,
+            isValidTP: isNamedTP || isTypeTP,
+            isNotCurrentGroup,
+            hasCapacity
+          });
+          
+          // Include if either the name contains TP or type is tp, and meets other criteria
+          return (isNamedTP || isTypeTP) && isNotCurrentGroup && hasCapacity;
+        });
+      } else {
+        // For TD groups, similar approach but for TD groups
+        availableGroups = currentGroups.filter(group => {
+          const isNamedTD = group.name.toLowerCase().includes('td');
+          const isTypeTD = group.type === 'td';
+          const isNotCurrentGroup = group.id !== currentId;
+          const hasCapacity = !group.capacity || group.currentOccupancy < group.capacity;
+          
+          // Log each group for debugging
+          console.log(`Filtering TD group: ${group.name}`, {
+            isNamedTD,
+            isTypeTD,
+            isValidTD: isNamedTD || isTypeTD,
+            isNotCurrentGroup,
+            hasCapacity
+          });
+          
+          // Include if either the name contains TD or type is td, and meets other criteria
+          return (isNamedTD || isTypeTD) && isNotCurrentGroup && hasCapacity;
+        });
+      }
+      
+      console.log(`Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`, {
+        availableGroups: availableGroups.map(g => ({ id: g.id, name: g.name, type: g.type }))
+      });
+      
       return availableGroups;
     }
-
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${authToken}` },
-      signal: AbortSignal.timeout(5000),
-    });
-
-    if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
-    return await res.json();
   } catch (e) {
     console.error(`Error fetching ${type} groups:`, e);
     return getFallbackGroups(type);
@@ -527,6 +734,8 @@ async function submitRequest(type, prefix, e) {
     // Make sure IDs are valid
     console.log("Current ID:", currentId);
     console.log("Requested ID:", requested);
+    console.log("Form prefix:", prefix);
+    console.log("Request type:", type);
 
     // Map the request type to backend enum values
     let requestType;
@@ -545,6 +754,39 @@ async function submitRequest(type, prefix, e) {
         break;
       default:
         requestType = type.toLowerCase();
+    }
+
+    // Debug the current IDs
+    console.log(`Processing ${type} change request`);
+    console.log(`Current ${prefix} ID:`, currentId);
+    console.log(`Element ID used: current-${prefix}`);
+    
+    // Enforce that group changes must maintain the same group type
+    if (!isSection) {
+      // For TD or TP changes, we need to be flexible since there's a data inconsistency
+      // where TP groups might have type 'td' in the database
+      const formType = prefix; // Use the form prefix (tp or td) instead of relying on database type
+      
+      // Get selected option text to check if it looks like a TD or TP group
+      const selectedOption = requestedSelect.options[requestedSelect.selectedIndex];
+      const requestedText = selectedOption ? selectedOption.text : "";
+      
+      console.log("Validating group types:", {
+        formType,
+        requestedText,
+        currentElement: currentElement.textContent,
+        requestType
+      });
+      
+      // For TP form, we should be selecting groups that have TP in their name
+      if (formType === "tp" && !requestedText.toLowerCase().includes("tp")) {
+        throw new Error("Les demandes de changement doivent concerner des groupes du même type (TP vers TP)");
+      }
+      
+      // For TD form, we should be selecting groups that have TD in their name
+      if (formType === "td" && !requestedText.toLowerCase().includes("td")) {
+        throw new Error("Les demandes de changement doivent concerner des groupes du même type (TD vers TD)");
+      }
     }
 
     // Show loading indicator
@@ -638,6 +880,19 @@ async function submitRequest(type, prefix, e) {
       formData.append("requestedId", requested.trim());
       
       console.log("Submitting group change request with document");
+      console.log("Request type:", requestType);
+      console.log("Current ID used:", currentId);
+      console.log("Requested ID used:", requested);
+
+      // Create payload for debugging
+      const groupChangeData = {
+        requestType,
+        currentId: currentId.trim(),
+        requestedId: requested.trim(),
+        reason,
+        justification: justification.trim()
+      };
+      console.log("Group change request payload:", groupChangeData);
 
       // Submit request for group change with file
       response = await fetch("http://localhost:3000/api/change-requests/group", {
@@ -743,6 +998,7 @@ async function loadUserRequests() {
     return;
   }
 
+  // Clear existing data
   tbody.innerHTML = "";
   loading.style.display = "block";
   table.style.display = "none";
@@ -752,6 +1008,37 @@ async function loadUserRequests() {
   try {
     if (!isBackendAvailable) throw new Error("offline");
 
+    // Verify we have a valid auth token
+    if (!authToken) {
+      console.error("No auth token available, redirecting to login");
+      alert("Votre session a expiré. Veuillez vous reconnecter.");
+      logout();
+      return;
+    }
+
+    // Check if the token is still valid
+    try {
+      const tokenCheck = await fetch("http://localhost:3000/api/auth/verify", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        signal: AbortSignal.timeout(5000),
+      });
+      
+      if (!tokenCheck.ok) {
+        console.error("Token validation failed:", tokenCheck.status);
+        alert("Votre session a expiré. Veuillez vous reconnecter.");
+        logout();
+        return;
+      }
+    } catch (tokenError) {
+      console.warn("Token check failed:", tokenError);
+      // Continue anyway, maybe just network issue
+    }
+
+    // Load both request types
+    console.log("Fetching change requests and profile requests...");
     const [changeRequests, profileRequests] = await Promise.all([
       fetchRequests("change-requests"),
       fetchRequests("profile-requests"),
@@ -780,17 +1067,42 @@ async function loadUserRequests() {
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
 
-    if (allRequests.length === 0) {
-      empty.style.display = "block";
-      table.style.display = "none";
-    } else {
-      allRequests.forEach((req) => {
-        const row = createRequestRow(req);
-        tbody.appendChild(row);
+    // Store all requests globally for filtering
+    window.allUserRequests = allRequests;
+    
+    // Check if we need to add search functionality
+    if (!document.getElementById('requests-search')) {
+      // Add search/filter controls if they don't exist
+      const filterControls = document.createElement('div');
+      filterControls.className = 'filter-controls';
+      filterControls.innerHTML = `
+        <div class="search-container">
+          <input type="text" id="requests-search" placeholder="Rechercher une demande...">
+          <button id="requests-search-btn"><i class="fas fa-search"></i> Rechercher</button>
+        </div>
+        <div class="filter-dropdown">
+          <select id="requests-status-filter">
+            <option value="all">Tous les statuts</option>
+            <option value="pending">En attente</option>
+            <option value="approved">Approuvées</option>
+            <option value="rejected">Rejetées</option>
+          </select>
+        </div>
+      `;
+      
+      // Insert before the table
+      table.parentNode.insertBefore(filterControls, table);
+      
+      // Add event listeners for search and filter
+      document.getElementById('requests-search-btn').addEventListener('click', filterUserRequests);
+      document.getElementById('requests-search').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') filterUserRequests();
       });
-      table.style.display = "table";
-      empty.style.display = "none";
+      document.getElementById('requests-status-filter').addEventListener('change', filterUserRequests);
     }
+    
+    // Display all requests initially
+    displayUserRequests(allRequests);
     
     // Mark requests as loaded
     requestsLoaded = true;
@@ -807,8 +1119,75 @@ async function loadUserRequests() {
   }
 }
 
+// Filter user requests based on search and status
+function filterUserRequests() {
+  // Get filter values
+  const searchTerm = document.getElementById('requests-search')?.value.toLowerCase().trim() || '';
+  const statusFilter = document.getElementById('requests-status-filter')?.value || 'all';
+  
+  // Get stored requests
+  const allRequests = window.allUserRequests || [];
+  
+  if (allRequests.length === 0) {
+    console.log("No requests to filter");
+    return;
+  }
+  
+  console.log("Filtering requests with:", { searchTerm, statusFilter });
+  
+  // Apply filters
+  const filteredRequests = allRequests.filter(req => {
+    // Status filter
+    const statusMatch = statusFilter === 'all' || req.status?.toLowerCase() === statusFilter;
+    
+    // Search term filter
+    const searchMatch = !searchTerm || 
+      req.type?.toLowerCase().includes(searchTerm) ||
+      req.current?.toLowerCase().includes(searchTerm) ||
+      req.requested?.toLowerCase().includes(searchTerm) ||
+      getRequestTypeLabel(req.type).toLowerCase().includes(searchTerm) ||
+      getStatusLabel(req.status, req.requestType === 'profile').toLowerCase().includes(searchTerm);
+    
+    return statusMatch && searchMatch;
+  });
+  
+  // Display filtered requests
+  displayUserRequests(filteredRequests);
+}
+
+// Display user requests in the table
+function displayUserRequests(requests) {
+  const tbody = document.getElementById("requests-table-body");
+  const empty = document.getElementById("no-requests-message");
+  const table = document.getElementById("requests-table");
+  
+  if (!tbody || !empty || !table) return;
+  
+  tbody.innerHTML = "";
+  
+  if (requests.length === 0) {
+    empty.style.display = "block";
+    table.style.display = "none";
+  } else {
+    requests.forEach((req) => {
+      const row = createRequestRow(req);
+      tbody.appendChild(row);
+    });
+    table.style.display = "table";
+    empty.style.display = "none";
+  }
+}
+
 async function fetchRequests(endpoint) {
   try {
+    console.log(`Fetching ${endpoint} from ${`http://localhost:3000/api/${endpoint}/my-requests`}`);
+    
+    // Make sure we have a valid token
+    if (!authToken) {
+      console.error("No auth token available for request");
+      return [];
+    }
+    
     const res = await fetch(
       `http://localhost:3000/api/${endpoint}/my-requests`,
       {
@@ -816,12 +1195,31 @@ async function fetchRequests(endpoint) {
           Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(10000), // Increase timeout to 10 seconds
       }
     );
 
-    if (!res.ok) return [];
+    // Log the response status and headers for debugging
+    console.log(`Response for ${endpoint}:`, {
+      status: res.status,
+      statusText: res.statusText,
+      contentType: res.headers.get('content-type')
+    });
+
+    if (!res.ok) {
+      console.error(`Error fetching ${endpoint}: ${res.status} ${res.statusText}`);
+      // Try to get error details if available
+      try {
+        const errorData = await res.json();
+        console.error("Error details:", errorData);
+      } catch (e) {
+        // Ignore error parsing errors
+      }
+      return [];
+    }
+    
     const data = await res.json();
+    console.log(`Received ${data.length} ${endpoint}`, data.slice(0, 2)); // Log first 2 items
 
     return data.map((req) => ({
       ...req,
@@ -837,6 +1235,15 @@ async function fetchRequests(endpoint) {
         "Information personnelle",
     }));
   } catch (e) {
+    console.error(`Error in fetchRequests(${endpoint}):`, e);
+    
+    // Check for CORS or network errors
+    if (e.name === 'TypeError' && e.message.includes('Failed to fetch')) {
+      console.error("Network error - check CORS settings or server availability");
+    } else if (e.name === 'AbortError') {
+      console.error("Request timed out - server may be slow or unresponsive");
+    }
+    
     return [];
   }
 }

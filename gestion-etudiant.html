@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Gestion des Étudiants - Dashboard Enseignant</title>
     <link href="style/gestion-etudiant.css" rel="stylesheet">
+    <script src="js/enseignant-auth.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -29,14 +30,12 @@
                             
                             <select class="section-selector" id="section-filter" onchange="filterStudents()">
                                 <option value="">Toutes les sections</option>
-                                <option value="info-a">Informatique - Section A</option>
-                                <option value="info-b">Informatique - Section B</option>
-                                <option value="math-c">Mathématiques - Section C</option>
+                                <!-- Sections loaded dynamically -->
                             </select>
                         </div>
                         
                         <div class="student-list" id="student-list-container">
-                            <!-- Les étudiants seront chargés dynamiquement ici -->
+                            <div class="loading-message">Chargement des étudiants...</div>
                         </div>
                         
                         <div class="pagination" id="pagination-container">
@@ -61,88 +60,389 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", async function () {
-        // Load navigation
-        fetch("enseignant-nav.html")
-            .then((response) => response.text())
-            .then((html) => {
-            document.getElementById("navbar-container").innerHTML = html;
-            // Mark active link after loading
-            const navScript = document.createElement("script");
-            navScript.innerHTML = `
-                document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-                if(link.getAttribute('href') === '${window.location.pathname.split("/").pop()}') {
-                    link.classList.add('active');
-                }
-                });
-            `;
-            document.body.appendChild(navScript);
-            })
-            .catch((error) => {
-            console.error("Error loading navigation:", error);
-            });
-        currentUser = {
-            id: "demo-teacher",
-            email: "demo@univ.edu"
-        };
-
-        try {
-            await loadUserData();
-            await loadDashboardData();
-        } catch (error) {
-            console.error("Error loading data:", error);
-            loadFallbackData();
-        }
-        });
-
-        // Données simulées
-        const mockStudents = [];
-        const firstNames = ["Ahmed", "Fatima", "Karim", "Lina", "Yacine", "Sara", "Mohamed", "Amina", "Nassim", "Leila"];
-        const lastNames = ["Saidi", "Benali", "Hadj", "Mansouri", "Boudiaf", "Messaoudi", "Benzema", "Cherif", "Zitouni", "Kadri"];
-        const sections = ["info-a", "info-b", "math-c"];
-        const modules = ["Algo", "Algèbre", "Prog", "Analyse", "Archi"];
-        
-        // Générer 50 étudiants aléatoires
-        for (let i = 0; i < 50; i++) {
-            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-            const section = sections[Math.floor(Math.random() * sections.length)];
-            
-            // Générer des taux de présence aléatoires pour chaque module
-            const attendance = {};
-            modules.forEach(module => {
-                attendance[module] = Math.floor(Math.random() * 20 + 80); // Entre 80% et 100%
-            });
-            
-            // Calculer la présence globale moyenne
-            const globalAttendance = Math.round(Object.values(attendance).reduce((a, b) => a + b, 0) / modules.length);
-            
-            mockStudents.push({
-                id: `2023${Math.floor(10000 + Math.random() * 90000)}`,
-                firstName: firstName,
-                lastName: lastName,
-                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@etudiant.university.dz`,
-                phone: `+213 ${Math.floor(500 + Math.random() * 100)} ${Math.floor(100 + Math.random() * 900)} ${Math.floor(100 + Math.random() * 900)}`,
-                section: section,
-                enrollmentYear: 2023,
-                globalAttendance: globalAttendance,
-                attendance: attendance,
-                tdGroup: `TD${Math.floor(Math.random() * 3 + 1)}`,
-                tpGroup: `TP${Math.floor(Math.random() * 3 + 1)}`
-            });
-        }
-        
-        // Variables d'état
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let isBackendAvailable = true; 
+        let allStudents = [];
+        let allSections = [];
         let currentPage = 1;
         const studentsPerPage = 6;
-        let filteredStudents = [...mockStudents];
+        let filteredStudents = [];
         let selectedStudent = null;
-        
-        // Fonction pour afficher les étudiants
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            // Load navigation
+            fetch("enseignant-nav.html")
+                .then((response) => response.text())
+                .then((html) => {
+                document.getElementById("navbar-container").innerHTML = html;
+                // Mark active link after loading
+                const navScript = document.createElement("script");
+                navScript.innerHTML = `
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === '${window.location.pathname.split("/").pop()}') {
+                        link.classList.add('active');
+                    }
+                    });
+                `;
+                document.body.appendChild(navScript);
+                })
+                .catch((error) => {
+                console.error("Error loading navigation:", error);
+                });
+
+            try {
+                // Verify authentication using our helper
+                const authResult = await verifyEnseignantAuth();
+                
+                if (!authResult.isAuthenticated) {
+                    return; // The helper will redirect to login
+                }
+                
+                // Set global variables
+                currentUser = authResult.user;
+                authToken = sessionStorage.getItem("enseignant_token") || localStorage.getItem("enseignant_token");
+
+                // Load data
+                try {
+                    await loadUserData();
+                    await loadSections();
+                    await loadStudents();
+                } catch (dataError) {
+                    console.error("Error loading data:", dataError);
+                    isBackendAvailable = false;
+                    loadFallbackData();
+                    addReconnectionButton();
+                }
+            } catch (error) {
+                console.error("Access denied:", error);
+                logout(); // Use our shared logout function
+            }
+        });
+
+        // Add reconnection button
+        function addReconnectionButton() {
+            const offlineNotice = document.querySelector(".alert.alert-warning");
+
+            if (!offlineNotice) {
+                const offlineNotice = document.createElement("div");
+                offlineNotice.className = "alert alert-warning";
+                offlineNotice.style.padding = "10px";
+                offlineNotice.style.margin = "10px 0";
+                offlineNotice.style.backgroundColor = "#fff3cd";
+                offlineNotice.style.color = "#856404";
+                offlineNotice.style.borderRadius = "4px";
+                offlineNotice.innerHTML =
+                    "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.";
+                
+                const reconnectBtn = document.createElement("button");
+                reconnectBtn.textContent = "Réessayer la connexion";
+                reconnectBtn.style.marginLeft = "10px";
+                reconnectBtn.style.padding = "5px 10px";
+                reconnectBtn.style.backgroundColor = "#007bff";
+                reconnectBtn.style.color = "#fff";
+                reconnectBtn.style.border = "none";
+                reconnectBtn.style.borderRadius = "4px";
+                reconnectBtn.style.cursor = "pointer";
+                reconnectBtn.onclick = function () {
+                    window.location.reload();
+                };
+
+                offlineNotice.appendChild(reconnectBtn);
+                document.querySelector(".main-content").prepend(offlineNotice);
+            }
+        }
+
+        // Load fallback data
+        function loadFallbackData() {
+            // Generate mock sections
+            const mockSections = [
+                { id: "info-a", filiere: "Informatique", nom: "A", niveau: "3ème année" },
+                { id: "info-b", filiere: "Informatique", nom: "B", niveau: "3ème année" },
+                { id: "math-c", filiere: "Mathématiques", nom: "C", niveau: "2ème année" }
+            ];
+            
+            // Generate mock students
+            const firstNames = ["Ahmed", "Fatima", "Karim", "Lina", "Yacine", "Sara", "Mohamed", "Amina", "Nassim", "Leila"];
+            const lastNames = ["Saidi", "Benali", "Hadj", "Mansouri", "Boudiaf", "Messaoudi", "Benzema", "Cherif", "Zitouni", "Kadri"];
+            const mockStudents = [];
+            
+            for (let i = 0; i < 50; i++) {
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const sectionId = mockSections[Math.floor(Math.random() * mockSections.length)].id;
+                
+                mockStudents.push({
+                    id: `2023${Math.floor(10000 + Math.random() * 90000)}`,
+                    prenom: firstName,
+                    nom: lastName,
+                    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@etudiant.university.dz`,
+                    telephone: `+213 ${Math.floor(500 + Math.random() * 100)} ${Math.floor(100 + Math.random() * 900)} ${Math.floor(100 + Math.random() * 900)}`,
+                    section: sectionId,
+                    anneeInscription: 2023,
+                    groupe_td: Math.floor(Math.random() * 3) + 1,
+                    groupe_tp: Math.floor(Math.random() * 3) + 1
+                });
+            }
+            
+            // Update global variables
+            allSections = mockSections;
+            allStudents = mockStudents;
+            filteredStudents = [...mockStudents];
+            
+            // Render data
+            renderSectionOptions(mockSections);
+            displayStudents();
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const enseignantDataJson =
+                    localStorage.getItem("enseignantData") ||
+                    sessionStorage.getItem("enseignantData");
+                let user = null;
+
+                if (enseignantDataJson) {
+                    try {
+                        user = JSON.parse(enseignantDataJson);
+                        console.log("Using teacher data from localStorage");
+
+                        if (!user || typeof user !== "object" || (!user.nom && !user.prenom)) {
+                            console.warn("Invalid teacher data in localStorage");
+                            user = null;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing stored teacher data:", e);
+                        localStorage.removeItem("enseignantData");
+                        sessionStorage.removeItem("enseignantData");
+                    }
+                }
+
+                if (!user) {
+                    // Try to fetch the enseignant data - first try by email
+                    try {
+                        // Get all enseignants and find by email
+                        const response = await fetch(
+                            `http://localhost:3000/api/enseignants`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${authToken}`,
+                                },
+                                signal: AbortSignal.timeout(5000),
+                            }
+                        );
+                        
+                        if (response.ok) {
+                            const allEnseignants = await response.json();
+                            // Find by email
+                            user = allEnseignants.find(e => e.email === currentUser.email);
+                            
+                            if (!user) {
+                                throw new Error("No matching teacher found");
+                            }
+                            
+                            const storage = localStorage.getItem("enseignant_token")
+                                ? localStorage
+                                : sessionStorage;
+                            storage.setItem("enseignantData", JSON.stringify(user));
+                        } else {
+                            throw new Error("Failed to retrieve teachers list");
+                        }
+                    } catch (error) {
+                        console.error("Error finding teacher by email:", error);
+                        // Fallback to mock data in case of failure
+                        user = {
+                            id: currentUser.id,
+                            nom: "Enseignant",
+                            prenom: "Test",
+                            email: currentUser.email,
+                            matricule: "ENS" + currentUser.id,
+                            departement: "Informatique"
+                        };
+                        const storage = localStorage.getItem("enseignant_token")
+                            ? localStorage
+                            : sessionStorage;
+                        storage.setItem("enseignantData", JSON.stringify(user));
+                    }
+                }
+
+                // Update UI with user data if elements exist
+                if (document.getElementById("userFullName")) {
+                    document.getElementById("userFullName").textContent =
+                        `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
+                }
+                
+                if (document.getElementById("userId")) {
+                    document.getElementById("userId").textContent = user.matricule || "N/A";
+                }
+                
+                if (document.getElementById("userAvatar")) {
+                    document.getElementById("userAvatar").textContent = 
+                        `${(user.prenom || " ").charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
+                }
+            } catch (error) {
+                console.error("Error loading user data:", error);
+                throw error;
+            }
+        }
+
+        // Load sections
+        async function loadSections() {
+            try {
+                // Use our helper function
+                const sections = await loadTeacherSections();
+                if (sections.length > 0) {
+                    allSections = sections;
+                    renderSectionOptions(sections);
+                } else {
+                    throw new Error("No sections found");
+                }
+            } catch (error) {
+                console.error("Error loading sections:", error);
+                if (!isBackendAvailable) {
+                    loadFallbackData();
+                }
+            }
+        }
+
+        // Load students
+        async function loadStudents() {
+            try {
+                // Use our helper function
+                const studentsData = await loadTeacherStudents(1, 50);
+                
+                // Handle both array and pagination object formats
+                const students = studentsData.items || studentsData;
+                
+                if (students && students.length > 0) {
+                    allStudents = students;
+                    filteredStudents = [...students];
+                    displayStudents();
+                    
+                    // Attempt to add section information to students if missing
+                    if (students[0] && !students[0].sectionId && allSections.length > 0) {
+                        await mapStudentsToSections();
+                    }
+                } else {
+                    throw new Error("No students found");
+                }
+            } catch (error) {
+                console.error("Error loading students:", error);
+                if (!isBackendAvailable) {
+                    loadFallbackData();
+                } else {
+                    document.getElementById("student-list-container").innerHTML =
+                        '<div class="error-message">Erreur de chargement des étudiants</div>';
+                }
+            }
+        }
+
+        // Map students to sections by making additional API calls if needed
+        async function mapStudentsToSections() {
+            try {
+                if (!isBackendAvailable || allSections.length === 0) return;
+                
+                // For each section, get its students and update the main students array
+                for (const section of allSections) {
+                    try {
+                        const response = await fetch(
+                            `http://localhost:3000/api/sections/${section.id}/etudiants`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${authToken}`,
+                                },
+                                signal: AbortSignal.timeout(5000),
+                            }
+                        );
+                        
+                        if (response.ok) {
+                            const sectionStudents = await response.json();
+                            
+                            // Match these students with our main list and add section info
+                            sectionStudents.forEach(sectionStudent => {
+                                const matchedStudent = allStudents.find(s => 
+                                    s.id === sectionStudent.id || 
+                                    s.matricule === sectionStudent.matricule
+                                );
+                                
+                                if (matchedStudent) {
+                                    matchedStudent.sectionId = section.id;
+                                    matchedStudent.sectionName = `${section.specialty || section.filiere || ''} - Section ${section.name || section.nom || ''}`;
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching students for section ${section.id}:`, error);
+                    }
+                }
+                
+                // Update filtered students with new section information
+                filteredStudents = [...allStudents];
+                displayStudents();
+            } catch (error) {
+                console.error("Error mapping students to sections:", error);
+            }
+        }
+
+        // Render section options for the dropdown
+        function renderSectionOptions(sections) {
+            const select = document.getElementById('section-filter');
+            // Keep the first "All sections" option
+            select.innerHTML = '<option value="">Toutes les sections</option>';
+            
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.id;
+                option.textContent = `${section.specialty || 'Filière'} - Section ${section.name || ''}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Filter students based on search and section
+        function filterStudents() {
+            const searchValue = document.getElementById('student-search').value.toLowerCase();
+            const sectionValue = document.getElementById('section-filter').value;
+            
+            filteredStudents = allStudents.filter(student => {
+                // Handle both legacy and new data structure
+                const firstName = student.firstName || student.prenom || '';
+                const lastName = student.lastName || student.nom || '';
+                const studentId = student.matricule || student.id?.toString() || '';
+                
+                const nameMatch = (firstName + ' ' + lastName).toLowerCase().includes(searchValue) || 
+                                studentId.toLowerCase().includes(searchValue);
+                                
+                // Check if section matches - try multiple paths for section ID
+                let sectionMatch = true;
+                if (sectionValue) {
+                    // Check various ways section ID might be stored in student object
+                    const studentSectionId = student.sectionId || 
+                                           student.section?.id || 
+                                           student.section || 
+                                           (student.groupe_td ? student.groupe_td.sectionId : null);
+                                           
+                    sectionMatch = studentSectionId === sectionValue;
+                }
+                
+                return nameMatch && sectionMatch;
+            });
+            
+            currentPage = 1;
+            displayStudents();
+        }
+
+        // Display students with pagination
         function displayStudents() {
             const container = document.getElementById('student-list-container');
             container.innerHTML = '';
+            
+            if (!filteredStudents || filteredStudents.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun étudiant trouvé</div>';
+                return;
+            }
             
             const startIndex = (currentPage - 1) * studentsPerPage;
             const endIndex = startIndex + studentsPerPage;
@@ -153,13 +453,16 @@
                 studentElement.className = `student-item ${selectedStudent && selectedStudent.id === student.id ? 'selected' : ''}`;
                 studentElement.onclick = () => selectStudent(student);
                 
-                const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`;
+                // Get first initial of firstName and lastName, handling both data structures
+                const firstName = student.firstName || student.prenom || ' ';
+                const lastName = student.lastName || student.nom || ' ';
+                const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
                 
                 studentElement.innerHTML = `
-                    <div class="student-avatar">${initials}</div>
+                    <div class="student-avatar">${initials.toUpperCase()}</div>
                     <div class="student-info">
-                        <div class="student-name">${student.firstName} ${student.lastName}</div>
-                        <div class="student-id">ID: ${student.id}</div>
+                        <div class="student-name">${firstName} ${lastName}</div>
+                        <div class="student-id">${student.matricule || student.id || 'N/A'}</div>
                     </div>
                 `;
                 
@@ -168,13 +471,13 @@
             
             updatePagination();
             
-            // Si aucun étudiant n'est sélectionné mais qu'il y a des étudiants, sélectionner le premier
+            // If no student is selected but there are students, select the first one
             if (!selectedStudent && studentsToShow.length > 0) {
                 selectStudent(studentsToShow[0]);
             }
         }
-        
-        // Fonction pour mettre à jour la pagination
+
+        // Update pagination
         function updatePagination() {
             const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
             const container = document.getElementById('pagination-container');
@@ -182,7 +485,7 @@
             
             if (totalPages <= 1) return;
             
-            // Bouton précédent
+            // Previous button
             if (currentPage > 1) {
                 const prevBtn = document.createElement('button');
                 prevBtn.className = 'pagination-btn';
@@ -194,7 +497,7 @@
                 container.appendChild(prevBtn);
             }
             
-            // Boutons de page
+            // Page buttons
             for (let i = 1; i <= totalPages; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
@@ -206,7 +509,7 @@
                 container.appendChild(pageBtn);
             }
             
-            // Bouton suivant
+            // Next button
             if (currentPage < totalPages) {
                 const nextBtn = document.createElement('button');
                 nextBtn.className = 'pagination-btn';
@@ -218,166 +521,97 @@
                 container.appendChild(nextBtn);
             }
         }
-        
-        // Fonction pour filtrer les étudiants
-        function filterStudents() {
-            const searchTerm = document.getElementById('student-search').value.toLowerCase();
-            const sectionFilter = document.getElementById('section-filter').value;
-            
-            filteredStudents = mockStudents.filter(student => {
-                const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
-                const matchesSearch = fullName.includes(searchTerm) || student.id.includes(searchTerm);
-                const matchesSection = sectionFilter ? student.section === sectionFilter : true;
-                
-                return matchesSearch && matchesSection;
-            });
-            
-            currentPage = 1;
-            displayStudents();
-        }
-        
-        // Fonction pour sélectionner un étudiant
+
+        // Select a student to display profile
         function selectStudent(student) {
             selectedStudent = student;
-            displayStudents();
+            
+            // Update selection in the list
+            document.querySelectorAll('.student-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            const selectedItems = document.querySelectorAll(`.student-item:nth-child(${filteredStudents.indexOf(student) % studentsPerPage + 1})`);
+            if (selectedItems.length > 0) {
+                selectedItems[0].classList.add('selected');
+            }
+            
+            // Show student profile
             displayStudentProfile(student);
         }
-        
-        // Fonction pour afficher le profil de l'étudiant
+
+        // Display student profile
         function displayStudentProfile(student) {
             const container = document.getElementById('student-profile-card');
-            const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`;
             
-            // Section name mapping
-            const sectionNames = {
-                "info-a": "Informatique - Section A",
-                "info-b": "Informatique - Section B",
-                "math-c": "Mathématiques - Section C"
-            };
+            // Find student's section
+            const section = allSections.find(s => s.id === student.sectionId);
+            const sectionName = section 
+                ? `${section.specialty || 'Filière'} - Section ${section.name || ''}` 
+                : 'Section non assignée';
             
-            // Créer les barres du graphique de présence
-            const attendanceBars = modules.map(module => {
-                const height = student.attendance[module];
-                return `<div class="chart-bar" style="height: ${height}%;" data-label="${height}%"></div>`;
-            }).join('');
-            
-            // Créer les labels du graphique
-            const attendanceLabels = modules.map(module => {
-                return `<div class="chart-label">${module}</div>`;
-            }).join('');
+            // Extract fields with fallbacks for both data structures
+            const firstName = student.firstName || student.prenom || '';
+            const lastName = student.lastName || student.nom || '';
+            const matricule = student.matricule || '';
+            const email = student.email || '';
+            const phone = student.phone || student.telephone || 'N/A';
+            const birthDate = student.birthDate ? new Date(student.birthDate).toLocaleDateString('fr-FR') : 'N/A';
             
             container.innerHTML = `
                 <div class="profile-header">
-                    <div class="profile-avatar">${initials}</div>
+                    <div class="student-avatar large">${firstName.charAt(0)}${lastName.charAt(0)}</div>
                     <div>
-                        <div class="profile-name">${student.firstName} ${student.lastName}</div>
-                        <div class="student-id">ID: ${student.id} | ${sectionNames[student.section]}</div>
+                        <div class="student-name large">${firstName} ${lastName}</div>
+                        <div class="student-section">${sectionName}</div>
                     </div>
                 </div>
                 
                 <div class="profile-details">
-                    <div>
-                        <div class="detail-group">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">${student.email}</div>
-                        </div>
-                        
-                        <div class="detail-group">
-                            <div class="detail-label">Téléphone</div>
-                            <div class="detail-value">${student.phone}</div>
-                        </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Matricule:</div>
+                        <div class="detail-value">${matricule || 'N/A'}</div>
                     </div>
-                    
-                    <div>
-                        <div class="detail-group">
-                            <div class="detail-label">Année d'Inscription</div>
-                            <div class="detail-value">${student.enrollmentYear}</div>
-                        </div>
-                        
-                        <div class="detail-group">
-                            <div class="detail-label">Présence Globale</div>
-                            <div class="detail-value">${student.globalAttendance}%</div>
-                        </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Email:</div>
+                        <div class="detail-value">${email || 'N/A'}</div>
                     </div>
-                </div>
-                
-                <div class="group-management">
-                    <h3 class="detail-label">Modification des Groupes</h3>
-                    
-                    <div class="group-selector">
-                        <select id="td-group-select">
-                            <option value="TD1" ${student.tdGroup === 'TD1' ? 'selected' : ''}>TD1</option>
-                            <option value="TD2" ${student.tdGroup === 'TD2' ? 'selected' : ''}>TD2</option>
-                            <option value="TD3" ${student.tdGroup === 'TD3' ? 'selected' : ''}>TD3</option>
-                        </select>
-                        
-                        <select id="tp-group-select">
-                            <option value="TP1" ${student.tpGroup === 'TP1' ? 'selected' : ''}>TP1</option>
-                            <option value="TP2" ${student.tpGroup === 'TP2' ? 'selected' : ''}>TP2</option>
-                            <option value="TP3" ${student.tpGroup === 'TP3' ? 'selected' : ''}>TP3</option>
-                        </select>
-                        
-                        <button onclick="updateStudentGroups()">Modifier</button>
+                    <div class="detail-item">
+                        <div class="detail-label">Téléphone:</div>
+                        <div class="detail-value">${phone}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Date de naissance:</div>
+                        <div class="detail-value">${birthDate}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Genre:</div>
+                        <div class="detail-value">${student.gender === 'male' ? 'Masculin' : student.gender === 'female' ? 'Féminin' : 'N/A'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Nationalité:</div>
+                        <div class="detail-value">${student.nationality || 'N/A'}</div>
                     </div>
                 </div>
                 
-                <div class="attendance-summary">
-                    <h3 class="detail-label">Assiduité par Module</h3>
-                    
-                    <div class="attendance-chart">
-                        ${attendanceBars}
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-between;">
-                        ${attendanceLabels}
-                    </div>
+                <div class="profile-actions">
+                    <button class="btn btn-primary" onclick="contactStudent('${student.id}')">Contacter</button>
+                    <button class="btn btn-secondary" onclick="viewAttendance('${student.id}')">Présences</button>
                 </div>
             `;
         }
-        
-        // Fonction pour mettre à jour les groupes d'un étudiant
-        function updateStudentGroups() {
-            if (!selectedStudent) return;
-            
-            const tdGroupSelect = document.getElementById('td-group-select');
-            const tpGroupSelect = document.getElementById('tp-group-select');
-            
-            selectedStudent.tdGroup = tdGroupSelect.value;
-            selectedStudent.tpGroup = tpGroupSelect.value;
-            
-            // Mettre à jour l'affichage
-            displayStudentProfile(selectedStudent);
-            displayStudents();
-            
-            alert("Groupes mis à jour avec succès!");
+
+        // Contact student function (placeholder)
+        function contactStudent(studentId) {
+            // Will be implemented later
+            alert(`Contacter l'étudiant ${studentId} - Fonctionnalité en cours de développement`);
         }
         
-        // Initialisation
-        document.addEventListener("DOMContentLoaded", function() {
-            // Simuler le chargement de la navbar
-            document.getElementById('navbar-container').innerHTML = `
-                <div style="padding: 20px;">
-                    <h2>Menu Enseignant</h2>
-                    <ul style="list-style: none; padding: 0;">
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: white; text-decoration: none;">Dashboard</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: white; text-decoration: none;">Cours</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: #3498db; text-decoration: none;">Étudiants</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: white; text-decoration: none;">Notes</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: white; text-decoration: none;">Paramètres</a></li>
-                    </ul>
-                </div>
-            `;
-            
-            // Afficher les étudiants au chargement
-            displayStudents();
-            
-            // Gestion de la recherche lors de la frappe
-            document.getElementById('student-search').addEventListener('keyup', function(e) {
-                if (e.key === 'Enter') {
-                    filterStudents();
-                }
-            });
-        });
+        // View attendance function (placeholder)
+        function viewAttendance(studentId) {
+            // Will be implemented later
+            alert(`Voir les présences de l'étudiant ${studentId} - Fonctionnalité en cours de développement`);
+        }
     </script>
 </body>
 </html>

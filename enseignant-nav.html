@@ -1,125 +1,182 @@
 <div class="sidebar">
-  <style>
-    .sidebar {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 20px;
-      padding: 30px 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      height: calc(100vh - 40px);
-      position: sticky;
-      top: 20px;
-    }
-
-    .user-info {
-      text-align: center;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #e2e8f0;
-      margin-bottom: 20px;
-    }
-
-    .user-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #10B981;
-      color: white;
-      font-size: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 10px;
-    }
-
-    .user-name {
-      font-family: "Sora", sans-serif;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .user-id {
-      font-size: 0.9rem;
-      color: #64748b;
-    }
-
-    .nav-menu {
-      list-style: none;
-    }
-
-    .nav-item {
-      margin-bottom: 10px;
-    }
-
-    .nav-link {
-      display: block;
-      padding: 12px 20px;
-      text-decoration: none;
-      color: #1a365d;
-      border-radius: 10px;
-      transition: all 0.3s ease;
-    }
-
-    .nav-link:hover {
-      background-color: rgba(59, 130, 246, 0.1);
-    }
-
-    .nav-link.active {
-      background: linear-gradient(to right, #10B981, #047857);
-      color: white;
-    }
-
-    @media (max-width: 767px) {
-      .nav-link {
-        padding: 10px 10px;
-        color: #1a365d;
-        font-size: 2vw;
-      }
-      .user-name {
-        font-size: 2vw;
-      }
-
-      .user-id {
-        font-size: 1.6vw;
-      }
-      .user-avatar {
-        width: 10vw;
-        height: 10vw;
-        font-size: 3vw;
-        margin: 0 auto 10px;
-      }
-      .sidebar {
-        padding: 20px 10px;
-      }
-    }
-  </style>
-
-  <div class="user-info">
-    <div class="user-avatar" id="userAvatar"></div>
-    <div class="user-name" id="userFullName"></div>
-    <div class="user-id" id="userId"></div>
+  <div class="sidebar-header">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">EN</div>
+      <div class="user-details">
+        <h3 id="userFullName">Enseignant</h3>
+        <p id="userId">ENS000</p>
+        <p id="userDepartment" class="user-department">Informatique</p>
+      </div>
+    </div>
   </div>
-
-<ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashbord-teacher.html" class="nav-link active">Tableau de bord</a>
-                </li>
-                <li class="nav-item">
-                    <a href="gestion-section.html" class="nav-link">Gestion des Sections</a>
-                </li>
-                <li class="nav-item">
-                    <a href="gestion-etudiant.html" class="nav-link">Gestion des Étudiants</a>
-                </li>
-                <li class="nav-item">
-                    <a href="emploi.html" class="nav-link">Emploi du temps</a>
-                </li>
-                <li class="nav-item">
-                    <a href="note-evaluation.html" class="nav-link">Notes et Évaluations</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
-                </li>
-            </ul>
+  
+  <div class="sidebar-menu">
+    <a href="dashbord-teacher.html" class="nav-link">
+      <i class="fas fa-tachometer-alt"></i>
+      <span>Tableau de bord</span>
+    </a>
+    <a href="enseignant-demandes.html" class="nav-link">
+      <i class="fas fa-clipboard-list"></i>
+      <span>Demandes d'étudiants</span>
+    </a>
+    <a href="emploi.html" class="nav-link">
+      <i class="fas fa-calendar-alt"></i>
+      <span>Emploi du temps</span>
+    </a>
+  </div>
+  
+  <div class="sidebar-footer">
+    <a href="#" class="nav-link" onclick="logout(); return false;">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Déconnexion</span>
+    </a>
+  </div>
 </div>
 
+<style>
+  .sidebar {
+    width: 250px;
+    height: 100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3182ce, #2c5282);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    margin-right: 12px;
+  }
+  
+  .user-details h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+  }
+  
+  .user-details p {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #718096;
+  }
+  
+  .user-department {
+    font-size: 11px;
+    font-style: italic;
+    color: #4a5568;
+    margin-top: 2px !important;
+  }
+  
+  .sidebar-menu {
+    padding: 20px 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .sidebar-footer {
+    padding: 15px 0;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #4a5568;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-bottom: 5px;
+  }
+  
+  .nav-link i {
+    width: 20px;
+    margin-right: 12px;
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .nav-link:hover {
+    background: #f7fafc;
+    color: #3182ce;
+  }
+  
+  .nav-link.active {
+    background: #ebf8ff;
+    color: #3182ce;
+    font-weight: 500;
+    border-right: 3px solid #3182ce;
+  }
+  
+  .sidebar-footer .nav-link {
+    color: #e53e3e;
+  }
+  
+  .sidebar-footer .nav-link:hover {
+    background: #fed7d7;
+  }
+  
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    
+    .user-info {
+      justify-content: center;
+    }
+    
+    .sidebar-menu, .sidebar-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px;
+    }
+    
+    .nav-link {
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 8px;
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .nav-link i {
+      margin-right: 0;
+      margin-bottom: 5px;
+      font-size: 20px;
+    }
+    
+    .nav-link.active {
+      border-right: none;
+      border-bottom: 3px solid #3182ce;
+    }
+  }
+</style>
+
+<script src="js/enseignant-auth.js"></script>
 <script>
   // Fonction pour marquer le lien actif
   function setActiveLink() {
@@ -144,6 +201,22 @@
 
   // Call setActiveLink when the document is loaded to set the active link
   document.addEventListener("DOMContentLoaded", function () {
+    // Load user data for the sidebar
+    try {
+      const user = getCurrentTeacherData();
+      if (user) {
+        // Update the user info in the sidebar
+        document.getElementById("userFullName").textContent = 
+          `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
+        document.getElementById("userId").textContent = user.matricule || "N/A";
+        document.getElementById("userAvatar").textContent = 
+          `${(user.prenom || " ").charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
+        document.getElementById("userDepartment").textContent = user.departement || "N/A";
+      }
+    } catch (error) {
+      console.error("Error updating sidebar user info:", error);
+    }
+    
     // Give a small timeout to ensure links are loaded
     setTimeout(setActiveLink, 100);
   });

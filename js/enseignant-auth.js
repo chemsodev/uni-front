@@ -1,0 +1,388 @@
+/**
+ * Shared authentication utilities for enseignant pages
+ */
+async function verifyEnseignantAuth(redirectOnFailure = true) {
+    try {
+        // 1. Retrieve token from storage
+        const authToken = 
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+        if (!authToken) {
+            throw new Error("No authentication token found");
+        }
+
+        // 2. Verify token and role
+        const verificationResponse = await fetch(
+            "http://localhost:3000/api/auth/verify",
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
+                },
+                signal: AbortSignal.timeout(5000),
+            }
+        );
+
+        if (!verificationResponse.ok) {
+            throw new Error("Token verification failed");
+        }
+
+        const userData = await verificationResponse.json();
+
+        // 3. Validate teacher role
+        if (userData.adminRole !== "enseignant" && userData.userType !== "enseignant") {
+            throw new Error("Access restricted to teachers");
+        }
+
+        // 4. Store user data for easy access
+        sessionStorage.setItem("enseignantUserData", JSON.stringify(userData));
+
+        return {
+            isAuthenticated: true,
+            user: userData
+        };
+    } catch (error) {
+        console.error("Authentication error:", error);
+        
+        // Clear invalid tokens
+        sessionStorage.removeItem("enseignant_token");
+        localStorage.removeItem("enseignant_token");
+        sessionStorage.removeItem("enseignantUserData");
+        localStorage.removeItem("enseignantData");
+        
+        if (redirectOnFailure) {
+            window.location.href = "enseignant-login.html";
+        }
+        
+        return {
+            isAuthenticated: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Load teacher's sections using the my-sections endpoint
+ */
+async function loadTeacherSections() {
+    try {
+        const authToken = 
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+        if (!authToken) {
+            throw new Error("No authentication token found");
+        }
+
+        // First check if we already have sections cached
+        const cachedSections = sessionStorage.getItem("teacherSections");
+        if (cachedSections) {
+            try {
+                return JSON.parse(cachedSections);
+            } catch (e) {
+                console.error("Error parsing cached sections:", e);
+                // Continue to fetch from API if parsing fails
+            }
+        }
+
+        const response = await fetch(
+            "http://localhost:3000/api/enseignants/my-sections",
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
+                },
+                signal: AbortSignal.timeout(5000),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load sections");
+        }
+
+        const sections = await response.json();
+        
+        // Cache sections for reuse
+        sessionStorage.setItem("teacherSections", JSON.stringify(sections));
+        
+        return sections;
+    } catch (error) {
+        console.error("Error loading teacher sections:", error);
+        return [];
+    }
+}
+
+/**
+ * Load students for this teacher (from their assigned sections)
+ */
+async function loadTeacherStudents(page = 1, limit = 10, search = '') {
+    try {
+        const authToken = 
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+        if (!authToken) {
+            throw new Error("No authentication token found");
+        }
+
+        let url = `http://localhost:3000/api/etudiants?page=${page}&limit=${limit}`;
+        if (search) {
+            url += `&search=${encodeURIComponent(search)}`;
+        }
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+            },
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to load students");
+        }
+
+        const students = await response.json();
+        
+        return students;
+    } catch (error) {
+        console.error("Error loading teacher students:", error);
+        return [];
+    }
+}
+
+/**
+ * Get section students directly from a section
+ * This can be more reliable than filtering from all students
+ */
+async function loadSectionStudents(sectionId) {
+    try {
+        const authToken = 
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+        if (!authToken) {
+            throw new Error("No authentication token found");
+        }
+
+        let url = `http://localhost:3000/api/sections/${sectionId}/etudiants`;
+        
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+            },
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load students for section ${sectionId}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`Error loading students for section ${sectionId}:`, error);
+        return [];
+    }
+}
+
+/**
+ * Load schedule documents for a section
+ * Note: This function provides fallback data since the real API endpoint 
+ * currently returns 404 errors
+ */
+async function fetchSectionSchedule(sectionId) {
+    try {
+        const authToken = 
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+        if (!authToken || !sectionId) {
+            throw new Error("Missing required data");
+        }
+        
+        // Normally we'd fetch from the API, but since that endpoint has issues,
+        // we're returning fallback data directly
+        
+        // If you want to try the real API once it's fixed, uncomment this:
+        /*
+        const response = await fetch(
+            `http://localhost:3000/api/sections/${sectionId}/schedules`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+                signal: AbortSignal.timeout(5000),
+            }
+        );
+        
+        if (response.ok) {
+            return await response.json();
+        }
+        */
+        
+        // Return fallback schedule data
+        const today = new Date();
+        const lastWeek = new Date(today);
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        
+        // Get section info if available
+        const sections = await loadTeacherSections();
+        const section = sections.find(s => s.id === sectionId) || { 
+            name: "Section", 
+            specialty: "Informatique" 
+        };
+        
+        return [
+            {
+                id: "schedule1",
+                title: `Emploi du temps - ${section.specialty} Section ${section.name}`,
+                description: "Emploi du temps du semestre en cours",
+                documentUrl: "#",
+                createdAt: today.toISOString(),
+                updatedAt: today.toISOString()
+            },
+            {
+                id: "schedule2",
+                title: `Planning des examens - ${section.specialty} Section ${section.name}`,
+                description: "Planning des examens pour la session courante",
+                documentUrl: "#",
+                createdAt: lastWeek.toISOString(),
+                updatedAt: lastWeek.toISOString()
+            }
+        ];
+    } catch (error) {
+        console.error(`Error loading schedule for section ${sectionId}:`, error);
+        return [];
+    }
+}
+
+// For backward compatibility
+const loadSectionSchedule = fetchSectionSchedule;
+
+/**
+ * Get the current teacher's data from localStorage/sessionStorage
+ * Avoids making API calls that might fail
+ */
+function getCurrentTeacherData() {
+    try {
+        // First try user data from auth token
+        const userDataJson = sessionStorage.getItem("enseignantUserData");
+        if (userDataJson) {
+            const userData = JSON.parse(userDataJson);
+            
+            if (userData && (userData.email || userData.userId)) {
+                return {
+                    id: userData.userId || userData.id,
+                    nom: userData.lastName || userData.nom || userData.family_name || "",
+                    prenom: userData.firstName || userData.prenom || userData.given_name || "",
+                    email: userData.email || "",
+                    matricule: userData.teacherId || userData.id_enseignant || userData.enseignantId || `ENS${userData.userId || '0000'}`,
+                    departement: userData.departement || userData.department || "Informatique"
+                };
+            }
+        }
+        
+        // Then try stored teacher data
+        const teacherDataJson = localStorage.getItem("enseignantData") || 
+                               sessionStorage.getItem("enseignantData");
+                               
+        if (teacherDataJson) {
+            const teacherData = JSON.parse(teacherDataJson);
+            if (teacherData) {
+                // Ensure we have all the required fields
+                return {
+                    id: teacherData.id || teacherData.userId || "",
+                    nom: teacherData.nom || teacherData.lastName || teacherData.family_name || "",
+                    prenom: teacherData.prenom || teacherData.firstName || teacherData.given_name || "",
+                    email: teacherData.email || "",
+                    matricule: teacherData.matricule || teacherData.teacherId || teacherData.id_enseignant || `ENS${teacherData.id || '0000'}`,
+                    departement: teacherData.departement || teacherData.department || "Informatique"
+                };
+            }
+        }
+        
+        // Return fallback data if no valid data found
+        // We create a minimal teacher data object so UI doesn't break
+        return {
+            id: "unknown",
+            nom: "Enseignant",
+            prenom: "Utilisateur",
+            email: "",
+            matricule: "ENS0000",
+            departement: "Informatique"
+        };
+    } catch (error) {
+        console.error("Error getting teacher data:", error);
+        return {
+            id: "error",
+            nom: "Enseignant",
+            prenom: "Utilisateur",
+            email: "",
+            matricule: "ENS0000",
+            departement: "Informatique"
+        };
+    }
+}
+
+/**
+ * Get the current teacher's ID
+ */
+function getCurrentTeacherId() {
+    const teacherData = getCurrentTeacherData();
+    return teacherData ? teacherData.id : null;
+}
+
+/**
+ * Add a reconnection button when backend is unavailable
+ */
+function addReconnectionButton(containerSelector = ".main-content") {
+    const offlineNotice = document.querySelector(".alert.alert-warning");
+
+    if (!offlineNotice) {
+        const offlineNotice = document.createElement("div");
+        offlineNotice.className = "alert alert-warning";
+        offlineNotice.style.padding = "10px";
+        offlineNotice.style.margin = "10px 0";
+        offlineNotice.style.backgroundColor = "#fff3cd";
+        offlineNotice.style.color = "#856404";
+        offlineNotice.style.borderRadius = "4px";
+        offlineNotice.innerHTML =
+            "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.";
+        
+        const reconnectBtn = document.createElement("button");
+        reconnectBtn.textContent = "Réessayer la connexion";
+        reconnectBtn.style.marginLeft = "10px";
+        reconnectBtn.style.padding = "5px 10px";
+        reconnectBtn.style.backgroundColor = "#007bff";
+        reconnectBtn.style.color = "#fff";
+        reconnectBtn.style.border = "none";
+        reconnectBtn.style.borderRadius = "4px";
+        reconnectBtn.style.cursor = "pointer";
+        reconnectBtn.onclick = function () {
+            window.location.reload();
+        };
+
+        offlineNotice.appendChild(reconnectBtn);
+        document.querySelector(containerSelector).prepend(offlineNotice);
+    }
+}
+
+/**
+ * Logout function for enseignant pages
+ */
+function logout() {
+    sessionStorage.removeItem("enseignantData");
+    sessionStorage.removeItem("enseignant_token");
+    sessionStorage.removeItem("enseignantUserData");
+    sessionStorage.removeItem("teacherSections");
+    localStorage.removeItem("enseignantData");
+    localStorage.removeItem("enseignant_token");
+    window.location.href = "enseignant-login.html";
+} 

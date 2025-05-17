@@ -79,9 +79,12 @@
                 const userData = await verificationResponse.json();
                 
                 // Validate teacher role
-                if (userData.adminRole !== 'enseignant') {
+                if (userData.userType !== 'enseignant' && userData.adminRole !== 'enseignant') {
                     throw new Error('Invalid user type');
                 }
+
+                // Store user data for quick access
+                sessionStorage.setItem('enseignantUserData', JSON.stringify(userData));
 
                 // Redirect to dashboard if valid
                 window.location.href = 'dashbord-teacher.html';
@@ -159,9 +162,15 @@
         
                 // Prepare request
                 const requestData = {
-                    password,
-                    [activeTab === 'email-tab' ? 'email' : 'teacherId']: activeTab === 'email-tab' ? email : id
+                    password
                 };
+                
+                // Add the correct identifier based on active tab
+                if (activeTab === 'email-tab') {
+                    requestData.email = email;
+                } else {
+                    requestData.id_enseignant = id; // Using id_enseignant instead of teacherId
+                }
 
                 // Add timeout handling
                 const controller = new AbortController();
