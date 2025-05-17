@@ -94,12 +94,6 @@
                 </div>
             </div>
             
-            <div class="tabs">
-                <div class="tab" onclick="activateTab(this, 'tableau-bord-content')">Vue d'ensemble</div>
-                <div class="tab active" onclick="activateTab(this, 'affectation-content')">Affectation des Étudiants</div>
-                <div class="tab" onclick="activateTab(this, 'decisions-content')">Décisions Exceptionnelles</div>
-            </div>
-            
             <!-- Tab 1: Vue d'ensemble -->
             <div class="tab-content" id="tableau-bord-content">
                 <div class="cards-container">
@@ -111,7 +105,7 @@
                             </svg>
                             Étudiants
                         </div>
-                        <div class="card-value">1,426</div>
+                        <div class="card-value" id="total-etudiants">1,426</div>
                         <div class="card-label">Total d'étudiants inscrits</div>
                     </div>
                     
@@ -124,7 +118,7 @@
                             </svg>
                             Spécialités
                         </div>
-                        <div class="card-value">7</div>
+                        <div class="card-value" id="total-specialites">7</div>
                         <div class="card-label">Nombre de spécialités</div>
                     </div>
                     
@@ -136,7 +130,7 @@
                             </svg>
                             Demandes
                         </div>
-                        <div class="card-value">18</div>
+                        <div class="card-value" id="total-demandes">18</div>
                         <div class="card-label">Demandes en attente</div>
                     </div>
                     
@@ -151,7 +145,7 @@
                             </svg>
                             Décisions
                         </div>
-                        <div class="card-value">5</div>
+                        <div class="card-value" id="total-decisions">5</div>
                         <div class="card-label">Décisions exceptionnelles</div>
                     </div>
                 </div>
@@ -163,23 +157,13 @@
                     <h2 class="section-title">Affectation des Étudiants</h2>
                     <div class="search-filter-bar">
                         <input type="text" class="search-input" placeholder="Rechercher un étudiant...">
-                        <select class="filter-select">
+                        <select class="filter-select" id="filter-specialite">
                             <option value="">Toutes les spécialités</option>
-                            <option value="info">Informatique</option>
-                            <option value="math">Mathématiques</option>
-                            <option value="phys">Physique</option>
-                            <option value="chim">Chimie</option>
-                            <option value="bio">Biologie</option>
-                            <option value="geo">Géologie</option>
-                            <option value="elec">Électronique</option>
+                            <!-- Options générées dynamiquement -->
                         </select>
-                        <select class="filter-select">
+                        <select class="filter-select" id="filter-niveau">
                             <option value="">Tous les niveaux</option>
-                            <option value="L1">L1</option>
-                            <option value="L2">L2</option>
-                            <option value="L3">L3</option>
-                            <option value="M1">M1</option>
-                            <option value="M2">M2</option>
+                            <!-- Options générées dynamiquement -->
                         </select>
                         <button class="search-btn">Rechercher</button>
                     </div>
@@ -195,60 +179,11 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>202310045</td>
-                                <td>Amina Khelifi</td>
-                                <td>Informatique</td>
-                                <td>Section A</td>
-                                <td>L2</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modification')">Modifier Affectation</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>202310078</td>
-                                <td>Karim Ferhat</td>
-                                <td>Informatique</td>
-                                <td>Section B</td>
-                                <td>L2</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modification')">Modifier Affectation</button>
-                                </td>
-                            </tr>
-                            <tr> 
-                                <td>202310091</td>
-                <td>Mohamed Belhadi</td>
-                <td>Mathématiques</td>
-                <td>Section A</td>
-                <td>L2</td>
-                <td>
-                    <button class="action-btn" onclick="openModal('modal-modification')">Modifier Affectation</button>
-                </td>
-            </tr>
-            <tr>
-                <td>202310103</td>
-                <td>Leila Boukhalfa</td>
-                <td>Physique</td>
-                <td>Section A</td>
-                <td>L3</td>
-                <td>
-                    <button class="action-btn" onclick="openModal('modal-modification')">Modifier Affectation</button>
-                </td>
-            </tr>
-            <tr>
-                <td>202310115</td>
-                <td>Omar Ziani</td>
-                <td>Chimie</td>
-                <td>Section A</td>
-                <td>L3</td>
-                <td>
-                    <button class="action-btn" onclick="openModal('modal-modification')">Modifier Affectation</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+                        <tbody id="etudiants-table">
+                            <!-- Le contenu sera généré dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <!-- Tab 3: Décisions Exceptionnelles -->
@@ -257,17 +192,13 @@
                     <h2 class="section-title">Décisions Exceptionnelles</h2>
                     <div class="search-filter-bar">
                         <input type="text" class="search-input" placeholder="Rechercher une demande...">
-                        <select class="filter-select">
+                        <select class="filter-select" id="filter-type-demande">
                             <option value="">Tous les types</option>
-                            <option value="rachat">Rachat</option>
-                            <option value="recours">Recours</option>
-                            <option value="derogation">Dérogation</option>
+                            <!-- Options générées dynamiquement -->
                         </select>
-                        <select class="filter-select">
+                        <select class="filter-select" id="filter-statut-demande">
                             <option value="">Tous les statuts</option>
-                            <option value="pending">En attente</option>
-                            <option value="approved">Approuvée</option>
-                            <option value="rejected">Refusée</option>
+                            <!-- Options générées dynamiquement -->
                         </select>
                         <button class="search-btn">Rechercher</button>
                     </div>
@@ -283,51 +214,8 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>DEM-2025-045</td>
-                                <td>Amina Khelifi</td>
-                                <td>Rachat</td>
-                                <td>07/04/2025</td>
-                                <td><span class="status status-pending">En attente</span></td>
-                                <td>
-                                    <button class="action-btn success" onclick="openModal('modal-details')">Voir Détails</button>
-                                    <button class="action-btn">Approuver</button>
-                                    <button class="action-btn danger">Refuser</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-046</td>
-                                <td>Karim Ferhat</td>
-                                <td>Recours</td>
-                                <td>08/04/2025</td>
-                                <td><span class="status status-pending">En attente</span></td>
-                                <td>
-                                    <button class="action-btn success" onclick="openModal('modal-details')">Voir Détails</button>
-                                    <button class="action-btn">Approuver</button>
-                                    <button class="action-btn danger">Refuser</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-042</td>
-                                <td>Nadia Benlakhdar</td>
-                                <td>Dérogation</td>
-                                <td>04/04/2025</td>
-                                <td><span class="status status-approved">Approuvée</span></td>
-                                <td>
-                                    <button class="action-btn success" onclick="openModal('modal-details')">Voir Détails</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-041</td>
-                                <td>Youcef Meziane</td>
-                                <td>Rachat</td>
-                                <td>03/04/2025</td>
-                                <td><span class="status status-denied">Refusée</span></td>
-                                <td>
-                                    <button class="action-btn success" onclick="openModal('modal-details')">Voir Détails</button>
-                                </td>
-                            </tr>
+                        <tbody id="demandes-table">
+                            <!-- Le contenu sera généré dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -347,32 +235,24 @@
                     <div class="grid-2col">
                         <div class="form-group">
                             <label class="form-label">Matricule</label>
-                            <input type="text" class="form-input" value="202310045" disabled>
+                            <input type="text" class="form-input" id="modal-matricule" disabled>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nom & Prénom</label>
-                            <input type="text" class="form-input" value="Amina Khelifi" disabled>
+                            <input type="text" class="form-input" id="modal-nom" disabled>
                         </div>
                     </div>
                     <div class="grid-2col">
                         <div class="form-group">
                             <label class="form-label">Spécialité</label>
-                            <select class="form-select">
-                                <option value="info" selected>Informatique</option>
-                                <option value="math">Mathématiques</option>
-                                <option value="phys">Physique</option>
-                                <option value="chim">Chimie</option>
-                                <option value="bio">Biologie</option>
-                                <option value="geo">Géologie</option>
-                                <option value="elec">Électronique</option>
+                            <select class="form-select" id="modal-specialite">
+                                <!-- Options générées dynamiquement -->
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Section</label>
-                            <select class="form-select">
-                                <option value="A" selected>Section A</option>
-                                <option value="B">Section B</option>
-                                <option value="C">Section C</option>
+                            <select class="form-select" id="modal-section">
+                                <!-- Options générées dynamiquement -->
                             </select>
                         </div>
                     </div>
@@ -400,36 +280,36 @@
                 <div class="grid-2col">
                     <div class="form-group">
                         <label class="form-label">ID de la Demande</label>
-                        <input type="text" class="form-input" value="DEM-2025-045" disabled>
+                        <input type="text" class="form-input" id="detail-id" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Date de Soumission</label>
-                        <input type="text" class="form-input" value="07/04/2025" disabled>
+                        <input type="text" class="form-input" id="detail-date" disabled>
                     </div>
                 </div>
                 <div class="grid-2col">
                     <div class="form-group">
                         <label class="form-label">Étudiant</label>
-                        <input type="text" class="form-input" value="Amina Khelifi" disabled>
+                        <input type="text" class="form-input" id="detail-etudiant" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Matricule</label>
-                        <input type="text" class="form-input" value="202310045" disabled>
+                        <input type="text" class="form-input" id="detail-matricule" disabled>
                     </div>
                 </div>
                 <div class="grid-2col">
                     <div class="form-group">
                         <label class="form-label">Type de Demande</label>
-                        <input type="text" class="form-input" value="Rachat" disabled>
+                        <input type="text" class="form-input" id="detail-type" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Statut</label>
-                        <input type="text" class="form-input" value="En attente" disabled>
+                        <input type="text" class="form-input" id="detail-statut" disabled>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Détails de la Demande</label>
-                    <textarea class="form-textarea" disabled>Je sollicite un rachat pour le module d'Analyse Numérique où j'ai obtenu la note de 9.75/20. J'ai obtenu une moyenne générale de 9.92 et il me manque seulement 0.08 point pour valider mon semestre. J'ai assisté à tous les cours et TD durant tout le semestre.</textarea>
+                    <textarea class="form-textarea" id="detail-contenu" disabled></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Décision du Comité</label>
@@ -453,6 +333,261 @@
     </div>
     
     <script>
+        // Données d'exemple pour les statistiques
+        const statistiques = {
+            totalEtudiants: 1426,
+            totalSpecialites: 7,
+            totalDemandes: 18,
+            totalDecisions: 5
+        };
+
+        // Données d'exemple pour les spécialités
+        const specialites = [
+            { id: "info", nom: "Informatique" },
+            { id: "math", nom: "Mathématiques" },
+            { id: "phys", nom: "Physique" },
+            { id: "chim", nom: "Chimie" },
+            { id: "bio", nom: "Biologie" },
+            { id: "geo", nom: "Géologie" },
+            { id: "elec", nom: "Électronique" }
+        ];
+
+        // Données d'exemple pour les niveaux
+        const niveaux = [
+            { id: "L1", nom: "L1" },
+            { id: "L2", nom: "L2" },
+            { id: "L3", nom: "L3" },
+            { id: "M1", nom: "M1" },
+            { id: "M2", nom: "M2" }
+        ];
+
+        // Données d'exemple pour les sections
+        const sections = [
+            { id: "A", nom: "Section A" },
+            { id: "B", nom: "Section B" },
+            { id: "C", nom: "Section C" }
+        ];
+
+        // Données d'exemple pour les types de demandes
+        const typesDemandes = [
+            { id: "rachat", nom: "Rachat" },
+            { id: "recours", nom: "Recours" },
+            { id: "derogation", nom: "Dérogation" }
+        ];
+
+        // Données d'exemple pour les statuts de demandes
+        const statutsDemandes = [
+            { id: "pending", nom: "En attente", classe: "status-pending" },
+            { id: "approved", nom: "Approuvée", classe: "status-approved" },
+            { id: "denied", nom: "Refusée", classe: "status-denied" }
+        ];
+
+        // Données d'exemple pour les étudiants
+        const etudiants = [
+            { matricule: "202310045", nom: "Amina Khelifi", specialite: "Informatique", section: "Section A", niveau: "L2" },
+            { matricule: "202310078", nom: "Karim Ferhat", specialite: "Informatique", section: "Section B", niveau: "L2" },
+            { matricule: "202310091", nom: "Mohamed Belhadi", specialite: "Mathématiques", section: "Section A", niveau: "L2" },
+            { matricule: "202310103", nom: "Leila Boukhalfa", specialite: "Physique", section: "Section A", niveau: "L3" },
+            { matricule: "202310115", nom: "Omar Ziani", specialite: "Chimie", section: "Section A", niveau: "L3" }
+        ];
+
+        // Données d'exemple pour les demandes
+        const demandes = [
+            { 
+                id: "DEM-2025-045", 
+                etudiant: "Amina Khelifi", 
+                matricule: "202310045",
+                type: "Rachat", 
+                date: "07/04/2025", 
+                statut: "pending", 
+                statutText: "En attente",
+                contenu: "Je sollicite un rachat pour le module d'Analyse Numérique où j'ai obtenu la note de 9.75/20. J'ai obtenu une moyenne générale de 9.92 et il me manque seulement 0.08 point pour valider mon semestre. J'ai assisté à tous les cours et TD durant tout le semestre."
+            },
+            { 
+                id: "DEM-2025-046", 
+                etudiant: "Karim Ferhat", 
+                matricule: "202310078",
+                type: "Recours", 
+                date: "08/04/2025", 
+                statut: "pending", 
+                statutText: "En attente",
+                contenu: "Je souhaite faire un recours concernant ma note d'examen du module Algorithmique. Je pense qu'il y a eu une erreur dans la correction de ma copie."
+            },
+            { 
+                id: "DEM-2025-042", 
+                etudiant: "Nadia Benlakhdar", 
+                matricule: "202310055",
+                type: "Dérogation", 
+                date: "04/04/2025", 
+                statut: "approved", 
+                statutText: "Approuvée",
+                contenu: "Je demande une dérogation pour pouvoir m'inscrire en Master malgré mon retard dans la validation de certains modules de Licence."
+            },
+            { 
+                id: "DEM-2025-041", 
+                etudiant: "Youcef Meziane", 
+                matricule: "202310033",
+                type: "Rachat", 
+                date: "03/04/2025", 
+                statut: "denied", 
+                statutText: "Refusée",
+                contenu: "Je sollicite un rachat pour le module de Programmation où j'ai obtenu la note de 8.5/20."
+            }
+        ];
+
+        // Fonction pour charger les données
+        function loadData() {
+            // Mettre à jour les statistiques
+            document.getElementById('total-etudiants').textContent = statistiques.totalEtudiants;
+            document.getElementById('total-specialites').textContent = statistiques.totalSpecialites;
+            document.getElementById('total-demandes').textContent = statistiques.totalDemandes;
+            document.getElementById('total-decisions').textContent = statistiques.totalDecisions;
+
+            // Charger les options pour les filtres de spécialités
+            const filterSpecialite = document.getElementById('filter-specialite');
+            filterSpecialite.innerHTML = '<option value="">Toutes les spécialités</option>';
+            specialites.forEach(specialite => {
+                const option = document.createElement('option');
+                option.value = specialite.id;
+                option.textContent = specialite.nom;
+                filterSpecialite.appendChild(option);
+            });
+
+            // Charger les options pour les filtres de niveaux
+            const filterNiveau = document.getElementById('filter-niveau');
+            filterNiveau.innerHTML = '<option value="">Tous les niveaux</option>';
+            niveaux.forEach(niveau => {
+                const option = document.createElement('option');
+                option.value = niveau.id;
+                option.textContent = niveau.nom;
+                filterNiveau.appendChild(option);
+            });
+
+            // Charger les options pour les filtres de types de demandes
+            const filterTypeDemande = document.getElementById('filter-type-demande');
+            filterTypeDemande.innerHTML = '<option value="">Tous les types</option>';
+            typesDemandes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.id;
+                option.textContent = type.nom;
+                filterTypeDemande.appendChild(option);
+            });
+
+            // Charger les options pour les filtres de statuts de demandes
+            const filterStatutDemande = document.getElementById('filter-statut-demande');
+            filterStatutDemande.innerHTML = '<option value="">Tous les statuts</option>';
+            statutsDemandes.forEach(statut => {
+                const option = document.createElement('option');
+                option.value = statut.id;
+                option.textContent = statut.nom;
+                filterStatutDemande.appendChild(option);
+            });
+
+            // Charger la table des étudiants
+            const etudiantsTable = document.getElementById('etudiants-table');
+            etudiantsTable.innerHTML = '';
+            etudiants.forEach(etudiant => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${etudiant.matricule}</td>
+                    <td>${etudiant.nom}</td>
+                    <td>${etudiant.specialite}</td>
+                    <td>${etudiant.section}</td>
+                    <td>${etudiant.niveau}</td>
+                    <td>
+                        <button class="action-btn" onclick="modifierEtudiant('${etudiant.matricule}')">Modifier Affectation</button>
+                    </td>
+                `;
+                etudiantsTable.appendChild(row);
+            });
+
+            // Charger la table des demandes
+            const demandesTable = document.getElementById('demandes-table');
+            demandesTable.innerHTML = '';
+            demandes.forEach(demande => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${demande.id}</td>
+                    <td>${demande.etudiant}</td>
+                    <td>${demande.type}</td>
+                    <td>${demande.date}</td>
+                    <td><span class="status status-${demande.statut}">${demande.statutText}</span></td>
+                    <td>
+                        <button class="action-btn success" onclick="voirDetailsDemande('${demande.id}')">Voir Détails</button>
+                        ${demande.statut === 'pending' ? `
+                            <button class="action-btn">Approuver</button>
+                            <button class="action-btn danger">Refuser</button>
+                        ` : ''}
+                    </td>
+                `;
+                demandesTable.appendChild(row);
+            });
+
+            // Charger les options pour le modal de modification
+            const modalSpecialite = document.getElementById('modal-specialite');
+            modalSpecialite.innerHTML = '';
+            specialites.forEach(specialite => {
+                const option = document.createElement('option');
+                option.value = specialite.id;
+                option.textContent = specialite.nom;
+                modalSpecialite.appendChild(option);
+            });
+
+            const modalSection = document.getElementById('modal-section');
+            modalSection.innerHTML = '';
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.id;
+                option.textContent = section.nom;
+                modalSection.appendChild(option);
+            });
+        }
+
+        // Fonction pour modifier un étudiant
+        function modifierEtudiant(matricule) {
+            const etudiant = etudiants.find(e => e.matricule === matricule);
+            if (etudiant) {
+                document.getElementById('modal-matricule').value = etudiant.matricule;
+                document.getElementById('modal-nom').value = etudiant.nom;
+                
+                // Sélectionner la spécialité
+                const specialiteSelect = document.getElementById('modal-specialite');
+                for (let i = 0; i < specialiteSelect.options.length; i++) {
+                    if (specialiteSelect.options[i].text === etudiant.specialite) {
+                        specialiteSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+                
+                // Sélectionner la section
+                const sectionSelect = document.getElementById('modal-section');
+                for (let i = 0; i < sectionSelect.options.length; i++) {
+                    if (sectionSelect.options[i].text === etudiant.section) {
+                        sectionSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+                
+                openModal('modal-modification');
+            }
+        }
+
+        // Fonction pour voir les détails d'une demande
+        function voirDetailsDemande(id) {
+            const demande = demandes.find(d => d.id === id);
+            if (demande) {
+                document.getElementById('detail-id').value = demande.id;
+                document.getElementById('detail-date').value = demande.date;
+                document.getElementById('detail-etudiant').value = demande.etudiant;
+                document.getElementById('detail-matricule').value = demande.matricule;
+                document.getElementById('detail-type').value = demande.type;
+                document.getElementById('detail-statut').value = demande.statutText;
+                document.getElementById('detail-contenu').value = demande.contenu;
+                
+                openModal('modal-details');
+            }
+        }
+
         // Tab Navigation
         function activateTab(tabElement, contentId) {
             // Remove active class from all tabs
@@ -533,6 +668,12 @@
                 }
             });
         });
+
+        // Initialiser les données au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const REQUIRED_ROLE = 'vice-doyen'; // Hardcoded role
             const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
@@ -568,6 +709,7 @@
                 window.location.href = `admin-login.html?requestedRole=${REQUIRED_ROLE}`;
             });
         });
+
     </script>
 </body>
 </html>

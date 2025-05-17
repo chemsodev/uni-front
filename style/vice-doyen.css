@@ -196,6 +196,9 @@
         /* Tab Content */
         .tab-content {
             display: none;
+            overflow: auto;
+            width:  100%;
+            height: auto;
         }
         
         .tab-content.active {
@@ -511,3 +514,31 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        @media (max-width: 767px) {
+            body {
+                padding: 0px;
+            }
+            thead th { 
+            padding: 0.4rem;
+            font-size: 2vw;
+        }
+        
+        tbody td {
+            padding: 0.4rem;
+            font-size: 1.8vw;
+        }
+        .search-btn {
+            padding: 8px 10px;
+            font-size: 2vw;
+        }
+        .action-btn {
+            padding: 8px 10px;
+            font-size: 2vw;
+        }
+        .filter-select {
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 2vw;
+        }
+    }
