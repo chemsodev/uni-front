@@ -2,6 +2,7 @@
 let currentUser = null;
 let authToken = null;
 let isBackendAvailable = true;
+let requestsLoaded = false; // Flag to track if requests have been loaded
 
 // TAB MANAGEMENT
 function openTab(evt, tabName) {
@@ -28,6 +29,11 @@ function openTab(evt, tabName) {
   if (tabName === "formulaires") {
     const firstSubTab = document.querySelector("[data-target='section-form']");
     firstSubTab?.click();
+  }
+  
+  // If switching to suivi tab, ensure requests are loaded (only once)
+  if (tabName === "suivi" && !requestsLoaded) {
+    loadUserRequests();
   }
 }
 
@@ -185,10 +191,15 @@ function setupTabNavigation() {
       }
       this.classList.add('active');
       
-      // If switching to "suivi" tab, reload requests and ensure it's visible
+      // If switching to "suivi" tab, only load requests if not already loaded
       if (target === 'suivi') {
-        console.log("Loading requests for Suivi tab");
-        loadUserRequests();
+        console.log("Handling Suivi tab activation");
+        if (!requestsLoaded) {
+          console.log("Loading requests for first time");
+          loadUserRequests();
+        } else {
+          console.log("Requests already loaded, skipping reload");
+        }
         // Make sure the suivi tab is visible by forcing display
         document.getElementById('suivi').style.display = 'block';
       }
@@ -726,6 +737,12 @@ async function loadUserRequests() {
     return;
   }
 
+  // Check if we're already loading requests
+  if (loading.style.display === "block") {
+    console.log("Request loading already in progress, skipping duplicate call");
+    return;
+  }
+
   tbody.innerHTML = "";
   loading.style.display = "block";
   table.style.display = "none";
@@ -745,7 +762,21 @@ async function loadUserRequests() {
       profileRequests: profileRequests.length
     });
 
-    const allRequests = [...changeRequests, ...profileRequests].sort(
+    // Use a Map to track unique requests by ID
+    const uniqueRequestsMap = new Map();
+    
+    // Add change requests to the map
+    changeRequests.forEach(req => {
+      uniqueRequestsMap.set(req.id, req);
+    });
+    
+    // Add profile requests to the map
+    profileRequests.forEach(req => {
+      uniqueRequestsMap.set(req.id, req);
+    });
+    
+    // Convert map values to array and sort
+    const allRequests = Array.from(uniqueRequestsMap.values()).sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
 
@@ -760,6 +791,9 @@ async function loadUserRequests() {
       table.style.display = "table";
       empty.style.display = "none";
     }
+    
+    // Mark requests as loaded
+    requestsLoaded = true;
   } catch (e) {
     console.error("Error loading requests:", e);
     if (isBackendAvailable) {
