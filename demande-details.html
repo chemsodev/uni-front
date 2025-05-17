@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Détails de la demande - Profil Étudiant</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sora:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style/demandes.css" />
+    <style>
+      .request-details {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .field-group {
+        margin-bottom: 15px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .field-label {
+        font-weight: 600;
+        min-width: 180px;
+        flex: 0 0 180px;
+      }
+
+      .field-value {
+        flex: 1;
+        color: #333;
+      }
+
+      .changes-list {
+        background-color: #f0f8ff;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 10px 0;
+      }
+
+      .change-item {
+        display: flex;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .document-link {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 12px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        color: #495057;
+        text-decoration: none;
+      }
+
+      .document-link:hover {
+        background-color: #dee2e6;
+      }
+
+      .action-buttons {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-back {
+        background-color: #6c757d;
+      }
+
+      .btn-cancel {
+        background-color: #dc3545;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      .request-status {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: 500;
+        display: inline-block;
+        text-align: center;
+        min-width: 100px;
+      }
+
+      .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+      }
+
+      .status-approved {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .status-rejected {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      .status-cancelled {
+        background-color: #6c757d;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Détails de la demande</h1>
+          <div class="header-actions">
+            <button onclick="window.location.href='demandes.html'" class="btn btn-back">
+              Retour aux demandes
+            </button>
+          </div>
+        </div>
+
+        <!-- Request details content -->
+        <div class="form-card">
+          <div id="request-loading" class="loading-indicator">
+            Chargement des détails...
+          </div>
+
+          <div id="request-error" class="error-message" style="display: none;"></div>
+
+          <div id="request-details" class="request-details" style="display: none;">
+            <div class="field-group">
+              <div class="field-label">Numéro de demande:</div>
+              <div class="field-value" id="request-number"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Date de soumission:</div>
+              <div class="field-value" id="request-date"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Statut:</div>
+              <div class="field-value" id="request-status"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Type de demande:</div>
+              <div class="field-value" id="request-type"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Affectation actuelle:</div>
+              <div class="field-value" id="current-assignment"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Affectation demandée:</div>
+              <div class="field-value" id="requested-assignment"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Justification:</div>
+              <div class="field-value" id="request-justification"></div>
+            </div>
+
+            <div class="field-group" id="document-group" style="display: none;">
+              <div class="field-label">Document:</div>
+              <div class="field-value">
+                <a href="#" class="document-link" id="document-link" target="_blank">
+                  Voir le document
+                </a>
+              </div>
+            </div>
+
+            <div class="field-group" id="response-group" style="display: none;">
+              <div class="field-label">Réponse de l'administration:</div>
+              <div class="field-value" id="admin-response"></div>
+            </div>
+
+            <div class="action-buttons" id="action-buttons">
+              <button class="btn btn-cancel" id="cancel-btn" onclick="cancelRequest()" style="display: none;">
+                Annuler la demande
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- GLOBALS ---
+      let currentUser = null;
+      let authToken = null;
+      let isBackendAvailable = true;
+      let currentRequest = null;
+      const API_BASE_URL = "http://localhost:3000/api";
+
+      // --- INITIALIZATION ---
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load navbar
+        await loadNavbar();
+
+        // Auth checks
+        try {
+          authToken = sessionStorage.getItem("etudiant_token") || localStorage.getItem("etudiant_token");
+          if (!authToken) {
+            window.location.href = "etudiant-login.html";
+            return;
+          }
+
+          // Verify token and get user info
+          const userData = await verifyToken();
+          if (!userData) throw new Error("Invalid token");
+          if (userData.adminRole !== "etudiant") throw new Error("Access denied");
+
+          currentUser = { id: userData.userId, email: userData.email };
+
+          // Load request details
+          const requestId = getRequestIdFromUrl();
+          if (requestId) {
+            await loadRequestDetails(requestId);
+          } else {
+            showError("ID de demande non spécifié");
+          }
+        } catch (e) {
+          console.error("Initialization error:", e);
+          isBackendAvailable = false;
+          showError("Erreur d'initialisation: " + e.message);
+        }
+      });
+
+      // --- NAVIGATION FUNCTIONS ---
+      async function loadNavbar() {
+        try {
+          const response = await fetch("etudiant-nav.html");
+          const html = await response.text();
+          document.getElementById("navbar-container").innerHTML = html;
+
+          // Set active link
+          document.querySelectorAll(".nav-link").forEach(link => {
+            if (link.getAttribute("href") === "demandes.html") {
+              link.classList.add("active");
+            }
+          });
+        } catch (e) {
+          console.error("Error loading navbar:", e);
+        }
+      }
+
+      // --- AUTH FUNCTIONS ---
+      async function verifyToken() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json"
+            }
+          });
+          if (!response.ok) throw new Error("Token verification failed");
+          return await response.json();
+        } catch (e) {
+          console.error("Token verification error:", e);
+          return null;
+        }
+      }
+
+      // --- DATA LOADING FUNCTIONS ---
+      async function loadRequestDetails(requestId) {
+        const loadingEl = document.getElementById("request-loading");
+        const detailsEl = document.getElementById("request-details");
+        const errorEl = document.getElementById("request-error");
+
+        loadingEl.style.display = "block";
+        detailsEl.style.display = "none";
+        errorEl.style.display = "none";
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/change-requests/${requestId}`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json"
+            },
+            signal: AbortSignal.timeout(5000)
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch request details (${response.status})`);
+          }
+
+          const request = await response.json();
+          currentRequest = request;
+
+          displayRequestDetails(request);
+          loadingEl.style.display = "none";
+          detailsEl.style.display = "block";
+        } catch (e) {
+          console.error("Error loading request details:", e);
+          loadingEl.style.display = "none";
+          errorEl.textContent = "Erreur lors du chargement des détails de la demande: " + e.message;
+          errorEl.style.display = "block";
+        }
+      }
+
+      // --- UI FUNCTIONS ---
+      function displayRequestDetails(request) {
+        document.getElementById("request-number").textContent = request.requestNumber || request.id || "-";
+        document.getElementById("request-date").textContent = formatDate(request.createdAt) || "-";
+
+        // Status
+        const statusElement = document.getElementById("request-status");
+        statusElement.innerHTML = getStatusLabel(request.status);
+
+        // Request type
+        const requestTypeEl = document.getElementById("request-type");
+        requestTypeEl.textContent = getRequestTypeLabel(request.requestType);
+
+        // Current & Requested assignments
+        document.getElementById("current-assignment").textContent =
+          request.currentSection?.name || request.currentGroupe?.name || "Non spécifié";
+
+        document.getElementById("requested-assignment").textContent =
+          request.requestedSection?.name || request.requestedGroupe?.name || "Non spécifié";
+
+        // Justification
+        document.getElementById("request-justification").textContent = request.justification || "-";
+
+        // Document
+        if (request.documentPath) {
+          document.getElementById("document-group").style.display = "flex";
+          document.getElementById("document-link").href = API_BASE_URL + request.documentPath;
+        }
+
+        // Show admin response if available
+        if (request.responseMessage) {
+          document.getElementById("response-group").style.display = "flex";
+          document.getElementById("admin-response").textContent = request.responseMessage;
+        }
+
+        // Show cancel button only for pending requests
+        const cancelBtn = document.getElementById("cancel-btn");
+        if (request.status === "PENDING") {
+          cancelBtn.style.display = "block";
+        }
+      }
+
+      function getStatusLabel(status) {
+        switch (status) {
+          case "PENDING":
+            return '<span class="request-status status-pending">En attente</span>';
+          case "APPROVED":
+            return '<span class="request-status status-approved">Approuvée</span>';
+          case "REJECTED":
+            return '<span class="request-status status-rejected">Rejetée</span>';
+          case "CANCELLED":
+            return '<span class="request-status status-cancelled">Annulée</span>';
+          default:
+            return '<span class="request-status">' + status + '</span>';
+        }
+      }
+
+      function getRequestTypeLabel(type) {
+        switch (type) {
+          case "SECTION":
+            return "Changement de section";
+          case "TD":
+            return "Changement de groupe TD";
+          case "TP":
+            return "Changement de groupe TP";
+          default:
+            return type;
+        }
+      }
+
+      function showError(message) {
+        document.getElementById("request-loading").style.display = "none";
+        document.getElementById("request-details").style.display = "none";
+        const errorEl = document.getElementById("request-error");
+        errorEl.textContent = message;
+        errorEl.style.display = "block";
+      }
+
+      // --- ACTION FUNCTIONS ---
+      async function cancelRequest() {
+        if (!currentRequest || !currentRequest.id) {
+          alert("Aucune demande à annuler");
+          return;
+        }
+
+        if (!confirm("Êtes-vous sûr de vouloir annuler cette demande ?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/change-requests/${currentRequest.id}/cancel`, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json"
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to cancel request (${response.status})`);
+          }
+
+          alert("Demande annulée avec succès");
+          // Reload the request details
+          loadRequestDetails(currentRequest.id);
+        } catch (e) {
+          console.error("Error cancelling request:", e);
+          alert("Erreur lors de l'annulation: " + e.message);
+        }
+      }
+
+      // --- HELPER FUNCTIONS ---
+      function getRequestIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id');
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+
+        return date.toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }

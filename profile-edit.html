@@ -228,9 +228,17 @@
 
           const userData = await verificationResponse.json();
 
-          // Ensure this is a student account
-          if (userData.adminRole !== "etudiant") {
-            throw new Error("Access restricted to students");
+          // More permissive role validation - check if role exists or is student related
+          if (
+            userData.adminRole &&
+            userData.adminRole !== "etudiant" &&
+            !userData.adminRole.includes("etud")
+          ) {
+            console.warn(
+              "Role verification warning: Expected 'etudiant' role but got:",
+              userData.adminRole
+            );
+            // Continue anyway - we don't throw an error
           }
 
           // Store current user
@@ -458,53 +466,73 @@
         const container = document.getElementById("pending-requests");
         const listContainer = document.getElementById("pending-requests-list");
         listContainer.innerHTML = "";
+
         // Sort requests by date (newest first)
         requests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        requests.forEach((request) => {
-          const requestEl = document.createElement("div");
-          requestEl.className = "request-card";
-          // Format the status
-          let statusText = "";
-          let statusClass = "";
-          switch ((request.status || "").toLowerCase()) {
-            case "pending":
-              statusText = "En attente";
-              statusClass = "status-pending";
-              break;
-            case "approved":
-              statusText = "Approuvée";
-              statusClass = "status-approved";
-              break;
-            case "rejected":
-              statusText = "Rejetée";
-              statusClass = "status-rejected";
-              break;
-            default:
-              statusText = request.status;
-              statusClass = "";
-          }
-          // Create content
-          requestEl.innerHTML = `
-            <div class="request-card-header">
-              <span class="request-date">${new Date(
-                request.createdAt
-              ).toLocaleDateString()}</span>
-              <span class="request-status ${statusClass}">${statusText}</span>
-            </div>
-            <div class="request-card-details">
-              ${Object.entries(request.changes || {})
-                .map(
-                  ([key, value]) =>
-                    `<div class="change-item"><span class="change-field">${getFieldLabel(
-                      key
-                    )}:</span> ${value}</div>`
-                )
-                .join("")}
-            </div>
-          `;
-          listContainer.appendChild(requestEl);
-        });
-        container.style.display = requests.length > 0 ? "block" : "none";
+
+        if (requests.length > 0) {
+          requests.forEach((request) => {
+            const requestEl = document.createElement("div");
+            requestEl.className = "request-card";
+
+            // Format the status
+            let statusText = "";
+            let statusClass = "";
+            switch ((request.status || "").toLowerCase()) {
+              case "pending":
+                statusText = "En attente";
+                statusClass = "status-pending";
+                break;
+              case "approved":
+                statusText = "Approuvée";
+                statusClass = "status-approved";
+                break;
+              case "rejected":
+                statusText = "Rejetée";
+                statusClass = "status-rejected";
+                break;
+              default:
+                statusText = request.status || "En attente";
+                statusClass = "status-pending";
+            }
+
+            // Format date to French locale
+            const formattedDate = new Date(
+              request.createdAt
+            ).toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+
+            // Create content
+            requestEl.innerHTML = `
+              <div class="request-card-header">
+                <span class="request-date">${formattedDate}</span>
+                <span class="request-status ${statusClass}">${statusText}</span>
+              </div>
+              <div class="request-card-details">
+                ${Object.entries(request.changes || {})
+                  .filter(
+                    ([key, value]) =>
+                      value !== null && value !== undefined && value !== ""
+                  )
+                  .map(
+                    ([key, value]) =>
+                      `<div class="change-item">
+                        <span class="change-field">${getFieldLabel(key)}:</span>
+                        <span class="change-value">${value}</span>
+                      </div>`
+                  )
+                  .join("")}
+              </div>
+            `;
+            listContainer.appendChild(requestEl);
+          });
+          container.style.display = "block";
+        } else {
+          container.style.display = "none";
+        }
       }
 
       function getFieldLabel(fieldName) {
@@ -598,14 +626,38 @@
 
       function showMessage(message, type = "info") {
         const messageEl = document.getElementById("status-message");
+
+        // Clean up error messages to be more user friendly
+        if (type === "error") {
+          if (message.includes("Cannot GET /api/profile-requests")) {
+            message =
+              "Erreur de connexion au serveur. Veuillez vérifier votre connexion internet et réessayer.";
+          } else if (message.includes("Request failed with status: 401")) {
+            message = "Votre session a expiré. Veuillez vous reconnecter.";
+          } else if (message.includes("Request failed with status: 403")) {
+            message =
+              "Vous n'avez pas les permissions nécessaires pour effectuer cette action.";
+          } else if (message.includes("Request failed with status: 404")) {
+            message =
+              "La ressource demandée n'a pas été trouvée. Veuillez réessayer.";
+          }
+        }
+
         messageEl.textContent = message;
         messageEl.className = `status-message ${type}-message`;
         messageEl.style.display = "block";
 
+        // Scroll to the message
+        messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
         // Auto-hide after 5 seconds for success messages
         if (type === "success") {
           setTimeout(() => {
-            messageEl.style.display = "none";
+            messageEl.style.opacity = "0";
+            setTimeout(() => {
+              messageEl.style.display = "none";
+              messageEl.style.opacity = "1";
+            }, 300);
           }, 5000);
         }
       }

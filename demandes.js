@@ -1,74 +1,696 @@
-// demandes.js
-
-// --- GLOBALS ---
+// GLOBALS
 let currentUser = null;
 let authToken = null;
 let isBackendAvailable = true;
 
-// --- DOMContentLoaded ---
-document.addEventListener("DOMContentLoaded", async function () {
-  // 1. Load navbar
+// TAB MANAGEMENT
+function openTab(evt, tabName) {
+  evt.preventDefault();
+
+  // Hide all tab contents
+  document.querySelectorAll(".tab-content").forEach((tab) => {
+    tab.classList.remove("active");
+  });
+
+  // Deactivate all buttons
+  document.querySelectorAll(".tab-button").forEach((btn) => {
+    btn.classList.remove("active");
+  });
+
+  // Show selected tab and activate button
+  const selectedTab = document.getElementById(tabName);
+  if (selectedTab) {
+    selectedTab.classList.add("active");
+    evt.currentTarget.classList.add("active");
+  }
+
+  // If switching to forms tab, activate first sub-tab
+  if (tabName === "formulaires") {
+    const firstSubTab = document.querySelector("[data-target='section-form']");
+    firstSubTab?.click();
+  }
+}
+
+function openSubTab(evt, tabName) {
+  evt.preventDefault();
+
+  // Hide all form cards
+  document.querySelectorAll(".form-card").forEach((tab) => {
+    tab.classList.remove("active");
+  });
+
+  // Deactivate all buttons
+  document.querySelectorAll("#formulaires .tab-button").forEach((btn) => {
+    btn.classList.remove("active");
+  });
+
+  // Show selected form and activate button
+  const selectedTab = document.getElementById(tabName);
+  if (selectedTab) {
+    selectedTab.classList.add("active");
+    evt.currentTarget.classList.add("active");
+  }
+}
+
+// INITIAL SETUP
+document.addEventListener("DOMContentLoaded", async () => {
   await loadNavbar();
 
-  // 2. Auth & user data
+  // Auth setup
+  authToken =
+    sessionStorage.getItem("etudiant_token") ||
+    localStorage.getItem("etudiant_token");
+  if (!authToken) {
+    window.location.href = "etudiant-login.html";
+    return;
+  }
+
   try {
-    authToken =
-      sessionStorage.getItem("etudiant_token") ||
-      localStorage.getItem("etudiant_token");
-    if (!authToken) {
+    // Check backend connectivity first
+    await checkBackendConnectivity();
+
+    const userData = await verifyToken();
+    if (userData) {
+      currentUser = { id: userData.userId, email: userData.email };
+      await loadUserData();
+      loadUserRequests();
+    } else if (!isBackendAvailable) {
+      // No user data but backend is down
+      console.warn("Backend is not available, loading fallback data");
+      loadFallbackData();
+    } else {
+      // Auth issue - redirect to login
+      console.error("Authentication failed, redirecting to login");
+      sessionStorage.removeItem("etudiant_token");
+      localStorage.removeItem("etudiant_token");
       window.location.href = "etudiant-login.html";
       return;
     }
-    // Verify token
-    const userData = await verifyToken();
-    if (!userData) return;
-    if (userData.adminRole !== "etudiant")
-      throw new Error("Access restricted to students");
-    currentUser = { id: userData.userId, email: userData.email };
-    // Load user data and requests
-    await loadUserData();
-    loadUserRequests();
   } catch (e) {
+    console.error("Error during initialization:", e);
     isBackendAvailable = false;
     loadFallbackData();
   }
 
-  // Tab logic
-  setupTabs();
-
-  // Form submit buttons
-  document
-    .getElementById("section-change-form")
-    .addEventListener("submit", (e) => {
-      e.preventDefault();
-      submitRequest("SECTION_CHANGE", "section");
+  // Tab event listeners
+  document.querySelectorAll(".tab-button").forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      const target = this.dataset.target;
+      if (target) {
+        if (this.closest("#formulaires")) {
+          openSubTab(e, target);
+        } else {
+          openTab(e, target);
+        }
+      }
     });
-  document.getElementById("td-change-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    submitRequest("TD_GROUP_CHANGE", "td");
   });
-  document.getElementById("tp-change-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    submitRequest("TP_GROUP_CHANGE", "tp");
+
+  // Add click listeners for the main tab buttons with onclick attributes
+  document
+    .querySelectorAll(".tab-container > .tab-buttons > .tab-button")
+    .forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        const target =
+          e.target.textContent.trim() === "Formulaires de demande"
+            ? "formulaires"
+            : "suivi";
+        openTab(e, target);
+      });
+    });
+
+  // Add click listeners for sub-tab buttons with onclick attributes
+  document
+    .querySelectorAll("#formulaires > .tab-buttons > .tab-button")
+    .forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        const target = btn.textContent.trim().includes("Section")
+          ? "section-form"
+          : btn.textContent.trim().includes("TD")
+          ? "td-form"
+          : "tp-form";
+        openSubTab(e, target);
+      });
+    });
+
+  // Global guard to prevent form submissions
+  document.addEventListener(
+    "submit",
+    function (e) {
+      // Prevent ANY form from submitting normally
+      e.preventDefault();
+      console.log("Global form submission prevented");
+      return false;
+    },
+    true
+  ); // Use capture phase
+
+  // Complete removal of standard form behavior for all forms
+  document.querySelectorAll("form").forEach((form) => {
+    // Remove action attribute if present
+    if (form.hasAttribute("action")) {
+      form.removeAttribute("action");
+    }
+
+    // Remove method attribute if present
+    if (form.hasAttribute("method")) {
+      form.removeAttribute("method");
+    }
+
+    // Add explicit submit-prevention listener
+    form.addEventListener(
+      "submit",
+      function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Form submission prevented:", this.id);
+        return false;
+      },
+      true
+    ); // Use capture phase
   });
+
+  // Direct submit button handling for each form
+  setupSubmitForForm("section-change-form", "SECTION_CHANGE", "section");
+  setupSubmitForForm("td-change-form", "TD_GROUP_CHANGE", "td");
+  setupSubmitForForm("tp-change-form", "TP_GROUP_CHANGE", "tp");
+
+  // Also handle the "new-request-btn" if it exists
+  const newRequestBtn = document.getElementById("new-request-btn");
+  if (newRequestBtn) {
+    newRequestBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      openTab(e, "formulaires");
+    });
+  }
 });
 
-// --- NAVBAR ---
-async function loadNavbar() {
-  const nav = await fetch("etudiant-nav.html").then((r) => r.text());
-  document.getElementById("navbar-container").innerHTML = nav;
-  // Set active link
-  document.querySelectorAll(".nav-link").forEach((link) => {
-    link.classList.remove("active");
-    if (
-      link.getAttribute("href") === window.location.pathname.split("/").pop()
-    ) {
-      link.classList.add("active");
-    }
+// Check backend connectivity
+async function checkBackendConnectivity() {
+  try {
+    const response = await fetch("http://localhost:3000/api/health", {
+      method: "GET",
+      signal: AbortSignal.timeout(3000),
+    });
+
+    isBackendAvailable = response.ok;
+    return response.ok;
+  } catch (error) {
+    console.warn("Backend connectivity check failed:", error);
+    isBackendAvailable = false;
+    return false;
+  }
+}
+
+// Helper function to set up submit handlers for a specific form
+function setupSubmitForForm(formId, requestType, prefix) {
+  const form = document.getElementById(formId);
+  const submitBtn = form?.querySelector(".submit-btn");
+
+  if (!form || !submitBtn) return;
+
+  // Remove any existing click handlers
+  submitBtn.replaceWith(submitBtn.cloneNode(true));
+
+  // Get the fresh button reference
+  const newSubmitBtn = form.querySelector(".submit-btn");
+
+  // Add click handler directly to button
+  newSubmitBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log(`Submit button clicked for ${formId}`);
+    submitRequest(requestType, prefix);
+    return false;
   });
 }
 
-// --- AUTH ---
+// DATA LOADING
+async function loadUserData() {
+  try {
+    const studentData = isBackendAvailable
+      ? await fetchStudentData()
+      : JSON.parse(localStorage.getItem("studentData")) || {};
+
+    // Set current values with IDs
+    const setCurrent = (elementId, data) => {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.value = data?.name || "Non assigné";
+        el.dataset.id = data?.id || "";
+      }
+    };
+
+    setCurrent("current-section", studentData.sections?.[0]);
+    setCurrent("current-td", studentData.tdGroupe);
+    setCurrent("current-tp", studentData.tpGroupe);
+
+    // Load options
+    await loadAvailableOptions("section", studentData.sections?.[0]?.id);
+    await loadAvailableOptions("td", studentData.tdGroupe?.id);
+    await loadAvailableOptions("tp", studentData.tpGroupe?.id);
+  } catch (e) {
+    console.error("Error loading user data:", e);
+    loadFallbackData();
+  }
+}
+
+async function fetchStudentData() {
+  const res = await fetch(
+    `http://localhost:3000/api/etudiants/${currentUser.id}`,
+    {
+      headers: { Authorization: `Bearer ${authToken}` },
+      signal: AbortSignal.timeout(5000),
+    }
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch student data");
+  const data = await res.json();
+  localStorage.setItem("studentData", JSON.stringify(data));
+  return data;
+}
+
+async function loadAvailableOptions(type, currentId) {
+  const select = document.getElementById(`requested-${type}`);
+  if (!select) return;
+
+  select.innerHTML = `<option value="">Sélectionnez...</option>`;
+
+  try {
+    const groups = isBackendAvailable
+      ? await fetchGroups(type, currentId)
+      : getFallbackGroups(type);
+
+    groups.forEach((group) => {
+      if (group.id.toString() !== currentId?.toString()) {
+        const option = new Option(group.name, group.id);
+        select.add(option);
+      }
+    });
+  } catch (e) {
+    console.error(`Error loading ${type} groups:`, e);
+    getFallbackGroups(type).forEach((group) => {
+      select.add(new Option(group.name, group.id));
+    });
+  }
+}
+
+async function fetchGroups(type, currentId) {
+  if (!currentUser?.id) return [];
+
+  try {
+    // First get student data to get section/filiere info
+    const studentRes = await fetch(
+      `http://localhost:3000/api/etudiants/${currentUser.id}`,
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+
+    if (!studentRes.ok) throw new Error("Failed to fetch student data");
+    const studentData = await studentRes.json();
+
+    let url;
+    if (type === "section") {
+      const filiereId = studentData.sections[0]?.id;
+      if (!filiereId) {
+        console.warn("No filiere assigned for student, using fallback data");
+        return getFallbackGroups(type);
+      }
+      url = `http://localhost:3000/api/sections?filiereId=${filiereId}`;
+    } else {
+      const sectionId = studentData.sections?.[0]?.id;
+      if (!sectionId) {
+        console.warn("No section assigned for student, using fallback data");
+        return getFallbackGroups(type);
+      }
+      url = `http://localhost:3000/api/groupes/available?type=${type}&sectionId=${sectionId}`;
+    }
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${authToken}` },
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
+    return await res.json();
+  } catch (e) {
+    console.error(`Error fetching ${type} groups:`, e);
+    return getFallbackGroups(type);
+  }
+}
+
+function getFallbackGroups(type) {
+  if (type === "section") {
+    return ["A", "C", "D"].map((name, i) => ({
+      id: i + 1,
+      name: `Section ${name}`,
+    }));
+  } else if (type === "td") {
+    return [1, 2, 4, 5].map((id) => ({ id, name: `Groupe TD ${id}` }));
+  } else {
+    return [1, 3, 4].map((id) => ({ id, name: `Groupe TP ${id}` }));
+  }
+}
+
+// FORM SUBMISSION
+async function submitRequest(type, prefix) {
+  const form = document.getElementById(`${prefix}-change-form`);
+  if (!form) return;
+
+  // Clear previous messages
+  const errorDiv = document.getElementById(`${prefix}-form-error`);
+  const successDiv = document.getElementById(`${prefix}-form-success`);
+  if (errorDiv) errorDiv.style.display = "none";
+  if (successDiv) successDiv.style.display = "none";
+
+  try {
+    // Validate required fields
+    const requested = document.getElementById(`requested-${prefix}`).value;
+    const reason = document.getElementById(`${prefix}-reason`).value;
+    const justification = document.getElementById(
+      `${prefix}-justification`
+    ).value;
+
+    if (!requested || !reason || !justification) {
+      throw new Error("Veuillez remplir tous les champs obligatoires");
+    }
+
+    // Map the request type to backend enum values
+    let requestType;
+    switch (type) {
+      case "SECTION_CHANGE":
+        requestType = "SECTION";
+        break;
+      case "TD_GROUP_CHANGE":
+        requestType = "TD_GROUP";
+        break;
+      case "TP_GROUP_CHANGE":
+        requestType = "TP_GROUP";
+        break;
+      default:
+        requestType = type;
+    }
+
+    // Prepare form data
+    const formData = new FormData();
+    // Add the request type using the proper backend field name
+    formData.append("requestType", requestType);
+
+    // Add current and requested IDs
+    formData.append(
+      "currentId",
+      document.getElementById(`current-${prefix}`).dataset.id
+    );
+    formData.append("requestedId", requested);
+
+    // Add justification text with the reason and detailed justification
+    const fullJustification = `Motif: ${reason}\n\n${justification}`;
+    formData.append("justification", fullJustification);
+
+    // Add file if present
+    const fileInput = document.getElementById(`${prefix}-document`);
+    if (fileInput?.files.length > 0) {
+      formData.append("document", fileInput.files[0]);
+    }
+
+    if (!isBackendAvailable) {
+      // For offline mode, simulate success
+      if (successDiv) {
+        successDiv.textContent = "Demande enregistrée en mode hors ligne.";
+        successDiv.style.display = "block";
+      }
+      form.reset();
+      loadUserRequests();
+      return;
+    }
+
+    console.log("Submitting form with data:", {
+      requestType,
+      currentId: document.getElementById(`current-${prefix}`).dataset.id,
+      requestedId: requested,
+      justification: fullJustification,
+      hasFile: fileInput?.files.length > 0,
+    });
+
+    // Submit request
+    const res = await fetch("http://localhost:3000/api/change-requests", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${authToken}` },
+      // DO NOT set content-type header when using FormData with files
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || "Erreur lors de l'envoi de la demande"
+      );
+    }
+
+    // Show success and reload requests
+    if (successDiv) {
+      successDiv.textContent = "Demande soumise avec succès.";
+      successDiv.style.display = "block";
+    }
+    form.reset();
+    loadUserRequests();
+  } catch (e) {
+    console.error("Submission error:", e);
+    if (errorDiv) {
+      errorDiv.textContent = e.message || "Erreur lors de la soumission.";
+      errorDiv.style.display = "block";
+    }
+  }
+}
+
+// REQUESTS TABLE
+async function loadUserRequests() {
+  const tbody = document.getElementById("requests-table-body");
+  const loading = document.getElementById("requests-loading");
+  const empty = document.getElementById("no-requests-message");
+  const table = document.getElementById("requests-table");
+  const errorDiv = document.getElementById("requests-error");
+
+  if (!tbody || !loading || !empty || !table || !errorDiv) return;
+
+  tbody.innerHTML = "";
+  loading.style.display = "block";
+  table.style.display = "none";
+  empty.style.display = "none";
+  errorDiv.style.display = "none";
+
+  try {
+    if (!isBackendAvailable) throw new Error("offline");
+
+    const [changeRequests, profileRequests] = await Promise.all([
+      fetchRequests("change-requests"),
+      fetchRequests("profile-requests"),
+    ]);
+
+    const allRequests = [...changeRequests, ...profileRequests].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    if (allRequests.length === 0) {
+      empty.style.display = "block";
+    } else {
+      allRequests.forEach((req) => {
+        const row = createRequestRow(req);
+        tbody.appendChild(row);
+      });
+      table.style.display = "table";
+    }
+  } catch (e) {
+    console.error("Error loading requests:", e);
+    if (isBackendAvailable) {
+      errorDiv.textContent =
+        "Erreur lors du chargement des demandes. Veuillez réessayer plus tard.";
+      errorDiv.style.display = "block";
+    }
+    loadFallbackRequests();
+  } finally {
+    loading.style.display = "none";
+  }
+}
+
+async function fetchRequests(endpoint) {
+  try {
+    const res = await fetch(
+      `http://localhost:3000/api/${endpoint}/my-requests`,
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+
+    if (!res.ok) return [];
+    const data = await res.json();
+
+    return data.map((req) => ({
+      ...req,
+      requestType: endpoint === "change-requests" ? "change" : "profile",
+      type:
+        req.requestType ||
+        (endpoint === "change-requests" ? "CHANGE_REQUEST" : "PROFILE_UPDATE"),
+      current: req.currentSection?.name || req.currentGroupe?.name || "Profile",
+      requested:
+        req.requestedSection?.name ||
+        req.requestedGroupe?.name ||
+        req.fields?.join(", ") ||
+        "Information personnelle",
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+function createRequestRow(request) {
+  const row = document.createElement("tr");
+  const isProfileRequest = request.requestType === "profile";
+
+  row.innerHTML = `
+    <td>${getRequestTypeLabel(request.type)}</td>
+    <td>${formatDate(request.createdAt)}</td>
+    <td>${request.current} ${isProfileRequest ? "" : "→"} ${
+    request.requested
+  }</td>
+    <td>${getStatusLabel(request.status, isProfileRequest)}</td>
+    <td>
+      <a href="${
+        isProfileRequest ? "profile-request.html" : "demande-details.html"
+      }?id=${request.id}"
+         class="action-btn">
+        Voir détails
+      </a>
+    </td>
+  `;
+
+  return row;
+}
+
+function loadFallbackRequests() {
+  const tbody = document.getElementById("requests-table-body");
+  const empty = document.getElementById("no-requests-message");
+  const table = document.getElementById("requests-table");
+
+  if (!tbody || !empty || !table) return;
+
+  tbody.innerHTML = "";
+  empty.style.display = "none";
+  table.style.display = "none";
+
+  if (!isBackendAvailable) {
+    const fallbackRequests = [
+      {
+        id: 1,
+        type: "SECTION_CHANGE",
+        createdAt: new Date(Date.now() - 86400000 * 5),
+        current: "B",
+        requested: "A",
+        status: "APPROVED",
+        requestType: "change",
+      },
+      {
+        id: 2,
+        type: "TD_GROUP_CHANGE",
+        createdAt: new Date(),
+        current: "3",
+        requested: "2",
+        status: "PENDING",
+        requestType: "change",
+      },
+      {
+        id: 3,
+        type: "PROFILE_UPDATE",
+        createdAt: new Date(Date.now() - 86400000 * 2),
+        current: "Profile",
+        requested: "Email, Phone",
+        status: "pending",
+        requestType: "profile",
+      },
+    ];
+
+    fallbackRequests.forEach((req) => {
+      const row = createRequestRow(req);
+      tbody.appendChild(row);
+    });
+
+    table.style.display = "table";
+  } else {
+    empty.style.display = "block";
+  }
+}
+
+// HELPERS
+function getRequestTypeLabel(type) {
+  switch (type) {
+    case "SECTION_CHANGE":
+      return "Changement de Section";
+    case "TD_GROUP_CHANGE":
+      return "Changement de Groupe TD";
+    case "TP_GROUP_CHANGE":
+      return "Changement de Groupe TP";
+    case "PROFILE_UPDATE":
+      return "Modification de profil";
+    default:
+      return type;
+  }
+}
+
+function getStatusLabel(status, isProfile = false) {
+  const statusText = (status || "").toLowerCase();
+
+  if (isProfile) {
+    switch (statusText) {
+      case "approved":
+        return '<span class="status-chip status-approved">Acceptée</span>';
+      case "rejected":
+        return '<span class="status-chip status-rejected">Refusée</span>';
+      default:
+        return '<span class="status-chip status-pending">En cours</span>';
+    }
+  } else {
+    switch (statusText) {
+      case "approved":
+        return '<span class="status-chip status-approved">Acceptée</span>';
+      case "rejected":
+        return '<span class="status-chip status-rejected">Refusée</span>';
+      default:
+        return '<span class="status-chip status-pending">En cours</span>';
+    }
+  }
+}
+
+function formatDate(date) {
+  return date ? new Date(date).toLocaleDateString("fr-FR") : "-";
+}
+
+// NAVBAR
+async function loadNavbar() {
+  try {
+    const nav = await fetch("etudiant-nav.html").then((r) => r.text());
+    document.getElementById("navbar-container").innerHTML = nav;
+
+    // Set active link
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      link.classList.remove("active");
+      if (
+        link.getAttribute("href") === window.location.pathname.split("/").pop()
+      ) {
+        link.classList.add("active");
+      }
+    });
+  } catch (e) {
+    console.error("Error loading navbar:", e);
+  }
+}
+
+// AUTH
 async function verifyToken() {
   try {
     const res = await fetch("http://localhost:3000/api/auth/verify", {
@@ -79,399 +701,59 @@ async function verifyToken() {
       },
       signal: AbortSignal.timeout(5000),
     });
-    if (!res.ok) throw new Error("Token verification failed");
+
+    if (!res.ok) {
+      console.warn(`Token verification failed with status: ${res.status}`);
+      // Don't mark as offline for 401/403 errors - those are auth issues
+      if (res.status !== 401 && res.status !== 403) {
+        isBackendAvailable = false;
+      }
+      return null;
+    }
+
+    // If we get here, backend is definitely available
+    isBackendAvailable = true;
     return await res.json();
   } catch (e) {
-    isBackendAvailable = false;
+    console.error("Token verification error:", e);
+    // Only mark as offline for network-related errors
+    if (
+      e.name === "AbortError" ||
+      e.name === "TypeError" ||
+      e.message.includes("fetch")
+    ) {
+      isBackendAvailable = false;
+    }
     return null;
   }
 }
 
-// --- TABS ---
-function setupTabs() {
-  // Main tabs
-  document.querySelectorAll(".tab-buttons > .tab-button").forEach((btn) => {
-    btn.addEventListener("click", function (evt) {
-      // Remove active from all main tab buttons
-      document
-        .querySelectorAll(".tab-buttons > .tab-button")
-        .forEach((b) => b.classList.remove("active"));
-      // Hide all main tab contents
-      document
-        .querySelectorAll(".tab-content")
-        .forEach((tc) => tc.classList.remove("active"));
-      // Activate the clicked tab
-      btn.classList.add("active");
-      const tabName = btn.getAttribute("onclick").match(/'([^']+)'/)[1];
-      const tabContent = document.getElementById(tabName);
-      if (tabContent) {
-        tabContent.classList.add("active");
-        tabContent.style.display = "block";
-      }
-      // Hide all other tab contents
-      document.querySelectorAll(".tab-content").forEach((tc) => {
-        if (tc !== tabContent) tc.style.display = "none";
-      });
-      // If switching to formulaires, reset sub-tabs to first
-      if (tabName === "formulaires") {
-        const firstSubBtn = document.querySelector(
-          "#formulaires .tab-buttons .tab-button"
-        );
-        if (firstSubBtn) firstSubBtn.click();
-      }
-    });
-  });
-  // Sub-tabs (forms)
-  document
-    .querySelectorAll("#formulaires .tab-buttons .tab-button")
-    .forEach((btn) => {
-      btn.addEventListener("click", function (evt) {
-        // Remove active from all sub-tab buttons
-        document
-          .querySelectorAll("#formulaires .tab-buttons .tab-button")
-          .forEach((b) => b.classList.remove("active"));
-        // Hide all sub-tab contents
-        document
-          .querySelectorAll("#formulaires .tab-content.form-card")
-          .forEach((tc) => {
-            tc.classList.remove("active");
-            tc.style.display = "none";
-          });
-        // Activate the clicked sub-tab
-        btn.classList.add("active");
-        const tabName = btn.getAttribute("onclick").match(/'([^']+)'/)[1];
-        const tabContent = document.getElementById(tabName);
-        if (tabContent) {
-          tabContent.classList.add("active");
-          tabContent.style.display = "block";
-        }
-      });
-    });
-}
-
-// --- USER DATA & FORM OPTIONS ---
-async function loadUserData() {
-  let studentData = null;
-  try {
-    const studentDataJson =
-      localStorage.getItem("studentData") ||
-      sessionStorage.getItem("studentData");
-    if (studentDataJson) studentData = JSON.parse(studentDataJson);
-    if (isBackendAvailable && currentUser?.id) {
-      const res = await fetch(
-        `http://localhost:3000/api/etudiants/${currentUser.id}`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-          signal: AbortSignal.timeout(5000),
-        }
-      );
-      if (res.ok) {
-        studentData = await res.json();
-        localStorage.setItem("studentData", JSON.stringify(studentData));
-      }
-    }
-    // Set current values
-    document.getElementById("current-section").value =
-      studentData.sections?.[0]?.name || "Non assigné";
-    document.getElementById("current-td").value =
-      studentData.tdGroupe?.name || "Non assigné";
-    document.getElementById("current-tp").value =
-      studentData.tpGroupe?.name || "Non assigné";
-    // Load options
-    await loadAvailableSections(studentData.sections?.[0]?.id);
-    await loadAvailableTdGroups(studentData.tdGroupe?.id);
-    await loadAvailableTpGroups(studentData.tpGroupe?.id);
-  } catch (e) {
-    isBackendAvailable = false;
-    loadFallbackData();
-  }
-}
-
-async function loadAvailableSections(currentSectionId) {
-  const sectionSelect = document.getElementById("requested-section");
-  sectionSelect.innerHTML =
-    '<option value="">Sélectionnez une section</option>';
-  try {
-    if (!isBackendAvailable) throw new Error("Backend unavailable");
-    const res = await fetch("http://localhost:3000/api/sections", {
-      headers: { Authorization: `Bearer ${authToken}` },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!res.ok) throw new Error("Failed to fetch sections");
-    const sections = await res.json();
-    sections.forEach((section) => {
-      if (section.id !== currentSectionId) {
-        const option = document.createElement("option");
-        option.value = section.id;
-        option.textContent = section.name || `Section ${section.id}`;
-        sectionSelect.appendChild(option);
-      }
-    });
-  } catch (e) {
-    ["A", "C", "D"].forEach((section) => {
-      const option = document.createElement("option");
-      option.value = section;
-      option.textContent = `Section ${section}`;
-      sectionSelect.appendChild(option);
-    });
-  }
-}
-async function loadAvailableTdGroups(currentTdId) {
-  const tdSelect = document.getElementById("requested-td");
-  tdSelect.innerHTML = '<option value="">Sélectionnez un groupe</option>';
-  try {
-    if (!isBackendAvailable) throw new Error("Backend unavailable");
-    const res = await fetch("http://localhost:3000/api/td-groupes", {
-      headers: { Authorization: `Bearer ${authToken}` },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!res.ok) throw new Error("Failed to fetch TD groups");
-    const groups = await res.json();
-    groups.forEach((group) => {
-      if (group.id !== currentTdId) {
-        const option = document.createElement("option");
-        option.value = group.id;
-        option.textContent = group.name || `Groupe TD ${group.id}`;
-        tdSelect.appendChild(option);
-      }
-    });
-  } catch (e) {
-    [1, 2, 4, 5].forEach((group) => {
-      const option = document.createElement("option");
-      option.value = group;
-      option.textContent = `Groupe TD ${group}`;
-      tdSelect.appendChild(option);
-    });
-  }
-}
-async function loadAvailableTpGroups(currentTpId) {
-  const tpSelect = document.getElementById("requested-tp");
-  tpSelect.innerHTML = '<option value="">Sélectionnez un groupe</option>';
-  try {
-    if (!isBackendAvailable) throw new Error("Backend unavailable");
-    const res = await fetch("http://localhost:3000/api/tp-groupes", {
-      headers: { Authorization: `Bearer ${authToken}` },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!res.ok) throw new Error("Failed to fetch TP groups");
-    const groups = await res.json();
-    groups.forEach((group) => {
-      if (group.id !== currentTpId) {
-        const option = document.createElement("option");
-        option.value = group.id;
-        option.textContent = group.name || `Groupe TP ${group.id}`;
-        tpSelect.appendChild(option);
-      }
-    });
-  } catch (e) {
-    [1, 3, 4].forEach((group) => {
-      const option = document.createElement("option");
-      option.value = group;
-      option.textContent = `Groupe TP ${group}`;
-      tpSelect.appendChild(option);
-    });
-  }
-}
-
-// --- FORM SUBMISSION ---
-async function submitRequest(type, formPrefix) {
-  const form = document.getElementById(`${formPrefix}-change-form`);
-  const errorDiv = document.getElementById(`${formPrefix}-form-error`);
-  const successDiv = document.getElementById(`${formPrefix}-form-success`);
-  errorDiv.style.display = "none";
-  successDiv.style.display = "none";
-  // Gather data
-  let data = {};
-  try {
-    if (formPrefix === "section") {
-      data = {
-        type,
-        current: document.getElementById("current-section").value,
-        requested: document.getElementById("requested-section").value,
-        reason: document.getElementById("section-reason").value,
-        justification: document.getElementById("section-justification").value,
-      };
-    } else if (formPrefix === "td") {
-      data = {
-        type,
-        current: document.getElementById("current-td").value,
-        requested: document.getElementById("requested-td").value,
-        reason: document.getElementById("td-reason").value,
-        justification: document.getElementById("td-justification").value,
-      };
-    } else if (formPrefix === "tp") {
-      data = {
-        type,
-        current: document.getElementById("current-tp").value,
-        requested: document.getElementById("requested-tp").value,
-        reason: document.getElementById("tp-reason").value,
-        justification: document.getElementById("tp-justification").value,
-      };
-    }
-    // File
-    const fileInput = document.getElementById(`${formPrefix}-document`);
-    const file =
-      fileInput && fileInput.files.length > 0 ? fileInput.files[0] : null;
-    // Backend
-    if (!isBackendAvailable)
-      throw new Error("Mode hors ligne: demande non envoyée");
-    const formData = new FormData();
-    Object.entries(data).forEach(([k, v]) => formData.append(k, v));
-    if (file) formData.append("document", file);
-    const res = await fetch("http://localhost:3000/api/demandes", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${authToken}` },
-      body: formData,
-    });
-    if (!res.ok) throw new Error("Erreur lors de l'envoi de la demande");
-    successDiv.textContent = "Demande soumise avec succès.";
-    successDiv.style.display = "block";
-    form.reset();
-    loadUserRequests();
-  } catch (e) {
-    errorDiv.textContent = e.message || "Erreur lors de la soumission.";
-    errorDiv.style.display = "block";
-  }
-}
-window.submitRequest = submitRequest;
-
-// --- REQUESTS TABLE ---
-async function loadUserRequests() {
-  const table = document.getElementById("requests-table");
-  const tbody = document.getElementById("requests-table-body");
-  const loading = document.getElementById("requests-loading");
-  const empty = document.getElementById("no-requests-message");
-  tbody.innerHTML = "";
-  loading.style.display = "block";
-  table.style.display = "none";
-  empty.style.display = "none";
-  try {
-    if (!isBackendAvailable) throw new Error("offline");
-    const res = await fetch("http://localhost:3000/api/demandes/mes", {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-    if (!res.ok) throw new Error("Erreur lors du chargement des demandes");
-    const demandes = await res.json();
-    if (!demandes.length) {
-      empty.style.display = "block";
-      loading.style.display = "none";
-      return;
-    }
-    demandes.forEach((req) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${getRequestTypeLabel(req.type)}</td>
-        <td>${formatDate(req.createdAt)}</td>
-        <td>${req.current} → ${req.requested}</td>
-        <td>${getStatusLabel(req.status)}</td>
-        <td><button class="action-btn" onclick="alert('Détails: ' + JSON.stringify(${JSON.stringify(
-          req
-        )}))">Voir détails</button></td>
-      `;
-      tbody.appendChild(row);
-    });
-    table.style.display = "table";
-    loading.style.display = "none";
-  } catch (e) {
-    // Fallback: show nothing or offline sample
-    loading.style.display = "none";
-    table.style.display = "none";
-    empty.style.display = "block";
-  }
-}
-
-// --- HELPERS ---
-function getRequestTypeLabel(type) {
-  switch (type) {
-    case "SECTION_CHANGE":
-      return "Changement de Section";
-    case "TD_GROUP_CHANGE":
-      return "Changement de Groupe TD";
-    case "TP_GROUP_CHANGE":
-      return "Changement de Groupe TP";
-    default:
-      return type;
-  }
-}
-function getStatusLabel(status) {
-  switch ((status || "").toUpperCase()) {
-    case "PENDING":
-      return '<span class="status-chip status-pending">En cours</span>';
-    case "APPROVED":
-      return '<span class="status-chip status-approved">Acceptée</span>';
-    case "REJECTED":
-      return '<span class="status-chip status-rejected">Refusée</span>';
-    default:
-      return status;
-  }
-}
-function formatDate(date) {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("fr-FR");
-}
-
-// --- OFFLINE FALLBACK ---
+// OFFLINE FALLBACK
 function loadFallbackData() {
-  // Add offline mode notice
+  // Add offline notice
   if (!document.querySelector(".alert.alert-warning")) {
-    const offlineNotice = document.createElement("div");
-    offlineNotice.className = "alert alert-warning";
-    offlineNotice.innerHTML = `<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées. Les demandes ne seront pas envoyées tant que la connexion ne sera pas rétablie. <button style='margin-left:10px;padding:5px 10px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer' onclick='location.reload()'>Réessayer la connexion</button>`;
-    document.querySelector(".tab-container").prepend(offlineNotice);
-  }
-  // Set placeholder values
-  document.getElementById("current-section").value = "B";
-  document.getElementById("current-td").value = "3";
-  document.getElementById("current-tp").value = "2";
-  // Dummy options
-  ["A", "C", "D"].forEach((section) => {
-    const option = document.createElement("option");
-    option.value = section;
-    option.textContent = `Section ${section}`;
-    document.getElementById("requested-section").appendChild(option);
-  });
-  [1, 2, 4, 5].forEach((group) => {
-    const option = document.createElement("option");
-    option.value = group;
-    option.textContent = `Groupe TD ${group}`;
-    document.getElementById("requested-td").appendChild(option);
-  });
-  [1, 3, 4].forEach((group) => {
-    const option = document.createElement("option");
-    option.value = group;
-    option.textContent = `Groupe TP ${group}`;
-    document.getElementById("requested-tp").appendChild(option);
-  });
-  // Sample requests
-  const tbody = document.getElementById("requests-table-body");
-  tbody.innerHTML = "";
-  [
-    {
-      type: "SECTION_CHANGE",
-      createdAt: new Date(Date.now() - 86400000 * 5),
-      current: "B",
-      requested: "A",
-      status: "APPROVED",
-    },
-    {
-      type: "TD_GROUP_CHANGE",
-      createdAt: new Date(),
-      current: "3",
-      requested: "2",
-      status: "PENDING",
-    },
-  ].forEach((req) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${getRequestTypeLabel(req.type)}</td>
-      <td>${formatDate(req.createdAt)}</td>
-      <td>${req.current} → ${req.requested}</td>
-      <td>${getStatusLabel(req.status)}</td>
-      <td><button class="action-btn" onclick="alert('Mode hors ligne: détails non disponibles')">Voir détails</button></td>
+    const notice = document.createElement("div");
+    notice.className = "alert alert-warning";
+    notice.innerHTML = `
+      <strong>Mode hors ligne:</strong>
+      Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.
+      <button onclick="location.reload()" style="margin-left:10px;padding:5px 10px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer">
+        Réessayer la connexion
+      </button>
     `;
-    tbody.appendChild(row);
-  });
-  document.getElementById("requests-table").style.display = "table";
-  document.getElementById("requests-loading").style.display = "none";
+    document.querySelector(".tab-container").prepend(notice);
+  }
+
+  // Set fallback values
+  document.getElementById("current-section").value = "B";
+  document.getElementById("current-section").dataset.id = "2";
+  document.getElementById("current-td").value = "TD3";
+  document.getElementById("current-td").dataset.id = "3";
+  document.getElementById("current-tp").value = "TP2";
+  document.getElementById("current-tp").dataset.id = "2";
+
+  // Load fallback options
+  loadAvailableOptions("section", "2");
+  loadAvailableOptions("td", "3");
+  loadAvailableOptions("tp", "2");
 }

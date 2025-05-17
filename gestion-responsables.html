@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gestion des Responsables de Sections</title>
+    <link href="style/gestion-responsables.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="user-info">
+          <div class="user-avatar">MB</div>
+          <div class="user-name">Mohamed Belkacem</div>
+          <div class="user-id">Enseignant</div>
+        </div>
+
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="dashbord-teacher.html" class="nav-link">Tableau de bord</a>
+          </li>
+          <li class="nav-item">
+            <a href="gestion-section.html" class="nav-link"
+              >Gestion des Sections</a
+            >
+          </li>
+          <li class="nav-item">
+            <a href="gestion-etudiant.html" class="nav-link"
+              >Gestion des Étudiants</a
+            >
+          </li>
+          <li class="nav-item">
+            <a href="gestion-responsables.html" class="nav-link active"
+              >Gestion des Responsables</a
+            >
+          </li>
+          <li class="nav-item">
+            <a href="emploi.html" class="nav-link">Emploi du temps</a>
+          </li>
+          <li class="nav-item">
+            <a href="note-evaluation.html" class="nav-link"
+              >Notes et Évaluations</a
+            >
+          </li>
+          <li class="nav-item">
+            <a href="#" id="logout-btn" class="nav-link">Déconnexion</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Gestion des Responsables Pédagogiques</h1>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="card-title">Sélectionner une section</h2>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="department-selector" class="form-label"
+                    >Département</label
+                  >
+                  <select class="form-select" id="department-selector">
+                    <option value="">Tous les départements</option>
+                    <!-- Departments will be loaded dynamically -->
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="section-selector" class="form-label"
+                    >Section</label
+                  >
+                  <select class="form-select" id="section-selector">
+                    <option value="">-- Choisir une section --</option>
+                    <!-- Sections will be loaded dynamically -->
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="responsables-panel" style="display: none">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h2 class="card-title">Responsables actuels</h2>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Rôle</th>
+                      <th>Enseignant</th>
+                      <th>Date d'assignation</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="responsables-table">
+                    <!-- Responsables will be loaded dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Assigner un responsable</h2>
+            </div>
+            <div class="card-body">
+              <form id="assign-form">
+                <div class="row">
+                  <div class="col-md-5">
+                    <div class="form-group mb-3">
+                      <label for="role-selector" class="form-label">Rôle</label>
+                      <select class="form-select" id="role-selector" required>
+                        <option value="">-- Sélectionner un rôle --</option>
+                        <option value="filiere">Responsable de filière</option>
+                        <option value="section">Responsable de section</option>
+                        <option value="td">Responsable TD</option>
+                        <option value="tp">Responsable TP</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-5">
+                    <div class="form-group mb-3">
+                      <label for="teacher-selector" class="form-label"
+                        >Enseignant</label
+                      >
+                      <select
+                        class="form-select"
+                        id="teacher-selector"
+                        required
+                      >
+                        <option value="">
+                          -- Sélectionner un enseignant --
+                        </option>
+                        <!-- Teachers will be loaded dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                      Assigner
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert for notifications -->
+        <div
+          id="toast-container"
+          class="position-fixed bottom-0 end-0 p-3"
+          style="z-index: 11"
+        ></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      // Configuration
+      const API_URL = "http://localhost:3000/api";
+
+      $(document).ready(function () {
+        // Load departments
+        loadDepartments();
+
+        // Load teachers
+        loadTeachers();
+
+        // Handle department selection
+        $("#department-selector").change(function () {
+          const departmentId = $(this).val();
+          loadSections(departmentId);
+        });
+
+        // Handle section selection
+        $("#section-selector").change(function () {
+          const sectionId = $(this).val();
+          if (sectionId) {
+            $("#responsables-panel").show();
+            loadSectionResponsables(sectionId);
+          } else {
+            $("#responsables-panel").hide();
+          }
+        });
+
+        // Handle form submission
+        $("#assign-form").submit(function (e) {
+          e.preventDefault();
+
+          const sectionId = $("#section-selector").val();
+          const role = $("#role-selector").val();
+          const teacherId = $("#teacher-selector").val();
+
+          if (!sectionId || !role || !teacherId) {
+            showToast("Veuillez remplir tous les champs", "danger");
+            return;
+          }
+
+          assignResponsable(sectionId, teacherId, role);
+        });
+
+        // Handle logout
+        $("#logout-btn").click(function (e) {
+          e.preventDefault();
+          localStorage.removeItem("admin_token");
+          sessionStorage.removeItem("admin_token");
+          window.location.href = "admin-login.html";
+        });
+      });
+
+      function getAuthToken() {
+        return (
+          localStorage.getItem("admin_token") ||
+          sessionStorage.getItem("admin_token") ||
+          localStorage.getItem("enseignant_token") ||
+          sessionStorage.getItem("enseignant_token")
+        );
+      }
+
+      function getAuthHeaders() {
+        return {
+          Authorization: `Bearer ${getAuthToken()}`,
+          "Content-Type": "application/json",
+        };
+      }
+
+      function loadDepartments() {
+        $.ajax({
+          url: `${API_URL}/departments`,
+          method: "GET",
+          headers: getAuthHeaders(),
+          success: function (data) {
+            const select = $("#department-selector");
+            select.find("option:not(:first)").remove();
+
+            data.forEach(function (dept) {
+              select.append(`<option value="${dept.id}">${dept.name}</option>`);
+            });
+          },
+          error: function (xhr) {
+            console.error("Error loading departments:", xhr);
+            showToast("Erreur lors du chargement des départements", "danger");
+          },
+        });
+      }
+
+      function loadSections(departmentId = "") {
+        let url = `${API_URL}/sections`;
+        if (departmentId) {
+          url += `?departmentId=${departmentId}`;
+        }
+
+        $.ajax({
+          url: url,
+          method: "GET",
+          headers: getAuthHeaders(),
+          success: function (data) {
+            const select = $("#section-selector");
+            select.find("option:not(:first)").remove();
+
+            data.forEach(function (section) {
+              const deptName = section.department
+                ? section.department.name
+                : "";
+              const displayName = deptName
+                ? `${section.name} (${deptName} - ${section.level})`
+                : `${section.name} (${section.level})`;
+
+              select.append(
+                `<option value="${section.id}">${displayName}</option>`
+              );
+            });
+          },
+          error: function (xhr) {
+            console.error("Error loading sections:", xhr);
+            showToast("Erreur lors du chargement des sections", "danger");
+          },
+        });
+      }
+
+      function loadTeachers() {
+        $.ajax({
+          url: `${API_URL}/enseignants`,
+          method: "GET",
+          headers: getAuthHeaders(),
+          success: function (data) {
+            const select = $("#teacher-selector");
+            select.find("option:not(:first)").remove();
+
+            data.forEach(function (teacher) {
+              select.append(
+                `<option value="${teacher.id}">${teacher.firstName} ${teacher.lastName}</option>`
+              );
+            });
+          },
+          error: function (xhr) {
+            console.error("Error loading teachers:", xhr);
+            showToast("Erreur lors du chargement des enseignants", "danger");
+          },
+        });
+      }
+
+      function loadSectionResponsables(sectionId) {
+        $.ajax({
+          url: `${API_URL}/section-responsables/${sectionId}`,
+          method: "GET",
+          headers: getAuthHeaders(),
+          success: function (data) {
+            const tbody = $("#responsables-table");
+            tbody.empty();
+
+            if (data.length === 0) {
+              tbody.append(
+                '<tr><td colspan="4" class="text-center">Aucun responsable assigné à cette section</td></tr>'
+              );
+              return;
+            }
+
+            data.forEach(function (resp) {
+              const roleName = getRoleName(resp.role);
+              const teacherName = `${resp.enseignant.firstName} ${resp.enseignant.lastName}`;
+              const assignedDate = new Date(resp.assignedAt).toLocaleDateString(
+                "fr-FR"
+              );
+
+              tbody.append(`
+                <tr>
+                  <td>${roleName}</td>
+                  <td>${teacherName}</td>
+                  <td>${assignedDate}</td>
+                  <td>
+                    <button class="btn btn-sm btn-danger remove-btn"
+                            data-section="${sectionId}"
+                            data-role="${resp.role}">
+                      Retirer
+                    </button>
+                  </td>
+                </tr>
+              `);
+            });
+
+            // Attach event handlers to remove buttons
+            $(".remove-btn").click(function () {
+              const sectionId = $(this).data("section");
+              const role = $(this).data("role");
+
+              if (
+                confirm("Êtes-vous sûr de vouloir retirer ce responsable ?")
+              ) {
+                removeResponsable(sectionId, role);
+              }
+            });
+          },
+          error: function (xhr) {
+            console.error("Error loading responsables:", xhr);
+            showToast("Erreur lors du chargement des responsables", "danger");
+          },
+        });
+      }
+
+      function assignResponsable(sectionId, teacherId, role) {
+        $.ajax({
+          url: `${API_URL}/section-responsables/${sectionId}/assign`,
+          method: "POST",
+          headers: getAuthHeaders(),
+          data: JSON.stringify({
+            enseignantId: teacherId,
+            role: role,
+          }),
+          success: function () {
+            showToast("Responsable assigné avec succès", "success");
+            loadSectionResponsables(sectionId);
+
+            // Reset form fields
+            $("#role-selector").val("");
+            $("#teacher-selector").val("");
+          },
+          error: function (xhr) {
+            console.error("Error assigning responsable:", xhr);
+            showToast("Erreur lors de l'assignation du responsable", "danger");
+          },
+        });
+      }
+
+      function removeResponsable(sectionId, role) {
+        $.ajax({
+          url: `${API_URL}/section-responsables/${sectionId}/role/${role}`,
+          method: "DELETE",
+          headers: getAuthHeaders(),
+          success: function () {
+            showToast("Responsable retiré avec succès", "success");
+            loadSectionResponsables(sectionId);
+          },
+          error: function (xhr) {
+            console.error("Error removing responsable:", xhr);
+            showToast("Erreur lors de la suppression du responsable", "danger");
+          },
+        });
+      }
+
+      function getRoleName(role) {
+        switch (role) {
+          case "filiere":
+            return "Responsable de filière";
+          case "section":
+            return "Responsable de section";
+          case "td":
+            return "Responsable TD";
+          case "tp":
+            return "Responsable TP";
+          default:
+            return role;
+        }
+      }
+
+      function showToast(message, type = "info") {
+        const toastId = "toast-" + Date.now();
+        const html = `
+          <div id="${toastId}" class="toast align-items-center text-white bg-${type}" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+              <div class="toast-body">${message}</div>
+              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        `;
+
+        $("#toast-container").append(html);
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+
+        // Remove toast from DOM after it's hidden
+        toastEl.addEventListener("hidden.bs.toast", function () {
+          $(this).remove();
+        });
+      }
+    </script>
+  </body>
+</html>

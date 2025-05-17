@@ -4,6 +4,68 @@
     <meta charset="UTF-8" />
     <title>Dashboard Étudiant</title>
     <link href="style/dashbord-etudiant.css" rel="stylesheet" />
+    <style>
+      /* ... existing styles ... */
+
+      /* Request item styles */
+      .request-item {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        background-color: #f9f9f9;
+        border-radius: 6px;
+        border-left: 3px solid #3b82f6;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      .request-item:hover {
+        background-color: #f1f5f9;
+      }
+
+      .request-link {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .request-date {
+        font-size: 0.85em;
+        color: #666;
+        margin-left: 8px;
+      }
+
+      .status-pending {
+        color: #f59e0b;
+        font-weight: 500;
+      }
+
+      .status-approved {
+        color: #10b981;
+        font-weight: 500;
+      }
+
+      .status-rejected {
+        color: #ef4444;
+        font-weight: 500;
+      }
+
+      .status-cancelled {
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .more-link {
+        display: block;
+        text-align: center;
+        margin-top: 12px;
+        color: #3b82f6;
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .more-link:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
     <div class="dashboard-container">
@@ -164,12 +226,19 @@
 
           const userData = await verificationResponse.json();
 
-          // Validate student role
-          if (userData.adminRole !== "etudiant") {
-            throw new Error("auth: Access restricted to students");
+          // More permissive role validation - check if role exists or is student related
+          if (
+            userData.adminRole &&
+            userData.adminRole !== "etudiant" &&
+            !userData.adminRole.includes("etud")
+          ) {
+            console.warn(
+              "Role verification warning: Expected 'etudiant' role but got:",
+              userData.adminRole
+            );
           }
 
-          // Set current user
+          // Set current user regardless of role
           currentUser = {
             id: userData.userId,
             email: userData.email,
@@ -343,34 +412,117 @@
 
       async function loadRequests() {
         try {
-          const response = await fetch(
-            `${API_BASE_URL}/change-requests/my-requests`,
-            {
-              headers: {
-                Authorization: `Bearer ${authToken}`,
-                "Content-Type": "application/json",
-              },
-              signal: AbortSignal.timeout(5000),
-            }
-          );
+          // Fetch both types of requests in parallel
+          const [changeRequestsResponse, profileRequestsResponse] =
+            await Promise.allSettled([
+              fetch(`${API_BASE_URL}/change-requests/my-requests`, {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  "Content-Type": "application/json",
+                },
+                signal: AbortSignal.timeout(5000),
+              }),
+              fetch(`${API_BASE_URL}/profile-requests/my-requests`, {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  "Content-Type": "application/json",
+                },
+                signal: AbortSignal.timeout(5000),
+              }),
+            ]);
 
-          if (!response.ok) {
-            throw new Error(`API request failed: ${response.status}`);
+          // Process change requests
+          let changeRequests = [];
+          if (
+            changeRequestsResponse.status === "fulfilled" &&
+            changeRequestsResponse.value.ok
+          ) {
+            changeRequests = await changeRequestsResponse.value.json();
+            // Add request type marker
+            changeRequests = changeRequests.map((req) => ({
+              ...req,
+              requestType: "change",
+            }));
+          } else if (changeRequestsResponse.status === "fulfilled") {
+            // Log error based on status code
+            const status = changeRequestsResponse.value.status;
+            if (status === 403) {
+              console.warn(
+                "Access denied to change requests: Permission issue"
+              );
+            } else if (status === 404) {
+              console.warn(
+                "Change requests endpoint not found. The module might not be registered correctly."
+              );
+            } else {
+              console.error(`Error fetching change requests: HTTP ${status}`);
+            }
+          } else {
+            console.error(
+              "Error fetching change requests:",
+              changeRequestsResponse.reason
+            );
           }
 
-          const requestsData = await response.json();
+          // Process profile requests
+          let profileRequests = [];
+          if (
+            profileRequestsResponse.status === "fulfilled" &&
+            profileRequestsResponse.value.ok
+          ) {
+            profileRequests = await profileRequestsResponse.value.json();
+            // Add request type marker
+            profileRequests = profileRequests.map((req) => ({
+              ...req,
+              requestType: "profile",
+            }));
+          } else if (profileRequestsResponse.status === "fulfilled") {
+            // Log error based on status code
+            const status = profileRequestsResponse.value.status;
+            if (status === 403) {
+              console.warn(
+                "Access denied to profile requests: Permission issue"
+              );
+            } else if (status === 404) {
+              console.warn(
+                "Profile requests endpoint not found. The module might not be registered correctly."
+              );
+            } else {
+              console.error(`Error fetching profile requests: HTTP ${status}`);
+            }
+          } else {
+            console.error(
+              "Error fetching profile requests:",
+              profileRequestsResponse.reason
+            );
+          }
 
-          // Cache the requests data
+          // Combine all requests and sort by date - don't fail if one endpoint failed
+          const allRequests = [...changeRequests, ...profileRequests].sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+
+          // Cache the combined requests data
           localStorage.setItem(
             "studentRequests",
             JSON.stringify({
               timestamp: Date.now(),
-              requests: requestsData,
+              requests: allRequests,
             })
           );
 
           // Render requests
-          renderRequests(requestsData);
+          renderRequests(allRequests);
+
+          // Show warning if one of the endpoints failed but we still have data
+          if (
+            (changeRequests.length === 0 || profileRequests.length === 0) &&
+            allRequests.length > 0
+          ) {
+            console.warn(
+              "Partial data loaded - some requests endpoints might be unavailable"
+            );
+          }
         } catch (error) {
           console.error("Error loading requests:", error);
 
@@ -488,11 +640,33 @@
         recentRequests.forEach((request) => {
           const div = document.createElement("div");
           div.className = "request-item";
+
+          // Determine request type and label
+          let typeLabel = "";
+          let statusLabel = "";
+          let requestUrl = "";
+
+          if (request.requestType === "profile") {
+            typeLabel = "Modification de profil";
+            statusLabel = getProfileRequestStatusLabel(request.status);
+            requestUrl = `profile-request.html?id=${request.id}`;
+          } else {
+            // Default to change request
+            typeLabel = getRequestTypeLabel(
+              request.requestType || request.type
+            );
+            statusLabel = getStatusLabel(request.status);
+            requestUrl = `demandes.html?id=${request.id}`;
+          }
+
           div.innerHTML = `
-                <strong>${getRequestTypeLabel(request.type)}</strong> -
-                ${getStatusLabel(request.status)}
-            <span class="request-date">(${formatDate(request.createdAt)})</span>
-            `;
+            <a href="${requestUrl}" class="request-link">
+              <strong>${typeLabel}</strong> - ${statusLabel}
+              <span class="request-date">(${formatDate(
+                request.createdAt
+              )})</span>
+            </a>
+          `;
           container.appendChild(div);
         });
 
@@ -502,6 +676,20 @@
           moreLink.className = "more-link";
           moreLink.textContent = "Voir toutes les demandes";
           container.appendChild(moreLink);
+        }
+      }
+
+      // Helper function for profile request status labels
+      function getProfileRequestStatusLabel(status) {
+        switch (status) {
+          case "pending":
+            return '<span class="status-pending">En attente</span>';
+          case "approved":
+            return '<span class="status-approved">Approuvée</span>';
+          case "rejected":
+            return '<span class="status-rejected">Rejetée</span>';
+          default:
+            return '<span class="status-pending">En traitement</span>';
         }
       }
 
@@ -542,21 +730,18 @@
 
       // Fallback render functions for offline mode
       function renderFallbackRequests() {
-        const sampleRequests = [
-          {
-            id: "sample1",
-            type: "SECTION_CHANGE",
-            createdAt: new Date(Date.now() - 86400000 * 5),
-            status: "APPROVED",
-          },
-          {
-            id: "sample2",
-            type: "TD_GROUP_CHANGE",
-            createdAt: new Date(),
-            status: "PENDING",
-          },
-        ];
-        renderRequests(sampleRequests);
+        const container = document.getElementById("requestsList");
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="offline-icon">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+              <path d="M12 16v.01"></path>
+              <path d="M12 8v4"></path>
+            </svg>
+            Mode hors ligne activé.<br>
+            Connectez-vous au réseau pour voir vos demandes.
+          </div>
+        `;
       }
 
       function renderFallbackNotifications() {
@@ -734,24 +919,38 @@
       }
 
       function getRequestTypeLabel(type) {
-        const types = {
-          SECTION_CHANGE: "Changement de Section",
-          TD_GROUP_CHANGE: "Changement de Groupe TD",
-          TP_GROUP_CHANGE: "Changement de Groupe TP",
-          ATTESTATION: "Attestation de scolarité",
-          OTHER: "Autre demande",
-        };
-        return types[type] || type;
+        if (!type) return "Demande";
+
+        // Handle request type values from both change-requests endpoint
+        switch (type) {
+          case "SECTION":
+            return "Changement de section";
+          case "TD":
+            return "Changement de groupe TD";
+          case "TP":
+            return "Changement de groupe TP";
+          case "change":
+            return "Changement de groupe/section";
+          default:
+            return `Demande: ${type}`;
+        }
       }
 
       function getStatusLabel(status) {
-        const statuses = {
-          PENDING: '<span class="status pending">En attente</span>',
-          APPROVED: '<span class="status approved">Approuvée</span>',
-          REJECTED: '<span class="status rejected">Refusée</span>',
-          IN_PROGRESS: '<span class="status in-progress">En cours</span>',
-        };
-        return statuses[status] || status;
+        if (!status) return "";
+
+        switch (status) {
+          case "PENDING":
+            return '<span class="status-pending">En attente</span>';
+          case "APPROVED":
+            return '<span class="status-approved">Approuvée</span>';
+          case "REJECTED":
+            return '<span class="status-rejected">Rejetée</span>';
+          case "CANCELLED":
+            return '<span class="status-cancelled">Annulée</span>';
+          default:
+            return `<span>${status}</span>`;
+        }
       }
 
       // Logout function

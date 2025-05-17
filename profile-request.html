@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Détails de la demande - Profil Étudiant</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sora:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style/demandes.css" />
+    <style>
+      .request-details {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .field-group {
+        margin-bottom: 15px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .field-label {
+        font-weight: 600;
+        min-width: 180px;
+        flex: 0 0 180px;
+      }
+
+      .field-value {
+        flex: 1;
+        color: #333;
+      }
+
+      .changes-list {
+        background-color: #f0f8ff;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 10px 0;
+      }
+
+      .change-item {
+        display: flex;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .change-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .change-field {
+        font-weight: 600;
+        width: 180px;
+        min-width: 180px;
+      }
+
+      .change-values {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .change-values div {
+        margin: 3px 0;
+      }
+
+      .action-buttons {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-back {
+        background-color: #6c757d;
+      }
+
+      .btn-cancel {
+        background-color: #dc3545;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      .request-status {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: 500;
+        display: inline-block;
+        text-align: center;
+        min-width: 100px;
+      }
+
+      .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+      }
+
+      .status-approved {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .status-rejected {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      .loading-indicator {
+        padding: 20px;
+        text-align: center;
+        font-style: italic;
+        color: #666;
+      }
+
+      .error-message {
+        padding: 20px;
+        background-color: #f8d7da;
+        color: #721c24;
+        border-radius: 4px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Détails de la demande</h1>
+          <div class="header-actions">
+            <button
+              onclick="window.location.href='demandes.html'"
+              class="btn btn-back"
+            >
+              Retour aux demandes
+            </button>
+          </div>
+        </div>
+
+        <!-- Request details content -->
+        <div class="form-card">
+          <div id="request-loading" class="loading-indicator">
+            Chargement des détails...
+          </div>
+
+          <div
+            id="request-error"
+            class="error-message"
+            style="display: none"
+          ></div>
+
+          <div
+            id="request-details"
+            class="request-details"
+            style="display: none"
+          >
+            <div class="field-group">
+              <div class="field-label">ID de la demande:</div>
+              <div class="field-value" id="request-id"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Date de soumission:</div>
+              <div class="field-value" id="request-date"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Statut:</div>
+              <div class="field-value" id="request-status"></div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Type de demande:</div>
+              <div class="field-value">Modification de profil</div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Modifications demandées:</div>
+              <div class="field-value">
+                <div class="changes-list" id="changes-list">
+                  <!-- Changes will be populated here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Commentaire:</div>
+              <div class="field-value" id="request-comment">-</div>
+            </div>
+
+            <div class="field-group" id="response-group" style="display: none">
+              <div class="field-label">Réponse de l'administration:</div>
+              <div class="field-value" id="admin-response"></div>
+            </div>
+
+            <div class="action-buttons" id="action-buttons">
+              <button
+                class="btn btn-cancel"
+                id="cancel-btn"
+                onclick="cancelRequest()"
+                style="display: none"
+              >
+                Annuler la demande
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- GLOBALS ---
+      let currentUser = null;
+      let authToken = null;
+      let isBackendAvailable = true;
+      let currentRequest = null;
+      const API_BASE_URL = "http://localhost:3000/api";
+
+      // --- INITIALIZATION ---
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load navbar
+        await loadNavbar();
+
+        // Auth checks
+        try {
+          authToken =
+            sessionStorage.getItem("etudiant_token") ||
+            localStorage.getItem("etudiant_token");
+          if (!authToken) {
+            window.location.href = "etudiant-login.html";
+            return;
+          }
+
+          // Verify token and get user info
+          const userData = await verifyToken();
+          if (!userData) throw new Error("Invalid token");
+          if (userData.userType !== "etudiant")
+            throw new Error("Access denied");
+
+          currentUser = { id: userData.userId, email: userData.email };
+
+          // Load request details
+          const requestId = getRequestIdFromUrl();
+          if (requestId) {
+            await loadRequestDetails(requestId);
+          } else {
+            showError("ID de demande non spécifié");
+          }
+        } catch (e) {
+          console.error("Initialization error:", e);
+          isBackendAvailable = false;
+          showError("Erreur d'initialisation: " + e.message);
+        }
+      });
+
+      // --- NAVIGATION FUNCTIONS ---
+      async function loadNavbar() {
+        try {
+          const response = await fetch("etudiant-nav.html");
+          const html = await response.text();
+          document.getElementById("navbar-container").innerHTML = html;
+
+          // Set active link
+          document.querySelectorAll(".nav-link").forEach((link) => {
+            if (link.getAttribute("href") === "demandes.html") {
+              link.classList.add("active");
+            }
+          });
+        } catch (e) {
+          console.error("Error loading navbar:", e);
+        }
+      }
+
+      // --- AUTH FUNCTIONS ---
+      async function verifyToken() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+          if (!response.ok) throw new Error("Token verification failed");
+          return await response.json();
+        } catch (e) {
+          console.error("Token verification error:", e);
+          return null;
+        }
+      }
+
+      // --- DATA LOADING FUNCTIONS ---
+      async function loadRequestDetails(requestId) {
+        const loadingEl = document.getElementById("request-loading");
+        const detailsEl = document.getElementById("request-details");
+        const errorEl = document.getElementById("request-error");
+
+        loadingEl.style.display = "block";
+        detailsEl.style.display = "none";
+        errorEl.style.display = "none";
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/profile-requests/${requestId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch request details (${response.status})`
+            );
+          }
+
+          const request = await response.json();
+          currentRequest = request;
+
+          displayRequestDetails(request);
+          loadingEl.style.display = "none";
+          detailsEl.style.display = "block";
+        } catch (e) {
+          console.error("Error loading request details:", e);
+          loadingEl.style.display = "none";
+          errorEl.textContent =
+            "Erreur lors du chargement des détails de la demande: " + e.message;
+          errorEl.style.display = "block";
+        }
+      }
+
+      // --- UI FUNCTIONS ---
+      function displayRequestDetails(request) {
+        document.getElementById("request-id").textContent = request.id || "-";
+        document.getElementById("request-date").textContent =
+          formatDate(request.createdAt) || "-";
+
+        // Status
+        const statusElement = document.getElementById("request-status");
+        statusElement.innerHTML = getStatusLabel(request.status);
+
+        // Show cancel button only for pending requests
+        const cancelBtn = document.getElementById("cancel-btn");
+        if (request.status === "pending") {
+          cancelBtn.style.display = "block";
+        }
+
+        // Show admin response if available
+        if (request.adminComment) {
+          document.getElementById("response-group").style.display = "flex";
+          document.getElementById("admin-response").textContent =
+            request.adminComment;
+        }
+
+        // Show student comment
+        document.getElementById("request-comment").textContent =
+          request.comment || "-";
+
+        // Display changes
+        const changesList = document.getElementById("changes-list");
+        changesList.innerHTML = "";
+
+        if (request.changes && Object.keys(request.changes).length > 0) {
+          // Create an array of fields in a specific order for better display
+          const orderedFields = [
+            "personalEmail",
+            "phone",
+            "secondaryPhone",
+            "address",
+            "postalCode",
+            "city",
+            "emergencyContact",
+          ];
+
+          orderedFields.forEach((field) => {
+            if (request.changes[field] !== undefined) {
+              const changeItem = document.createElement("div");
+              changeItem.className = "change-item";
+
+              const fieldName = formatFieldName(field);
+              const formattedValue = formatValue(field, request.changes[field]);
+
+              changeItem.innerHTML = `
+                <div class="change-field">${fieldName}</div>
+                <div class="change-values">
+                  <div><strong>Nouvelle valeur:</strong> ${formattedValue}</div>
+                </div>
+              `;
+
+              changesList.appendChild(changeItem);
+            }
+          });
+        } else {
+          changesList.innerHTML = "<div>Aucune modification spécifiée</div>";
+        }
+      }
+
+      function formatFieldName(field) {
+        const fieldMap = {
+          personalEmail: "Email personnel",
+          phone: "Téléphone principal",
+          secondaryPhone: "Téléphone secondaire",
+          address: "Adresse postale",
+          postalCode: "Code postal",
+          city: "Ville",
+          emergencyContact: "Contact d'urgence",
+        };
+        return fieldMap[field] || field;
+      }
+
+      function formatValue(field, value) {
+        if (value === null || value === undefined || value === "") {
+          return "-";
+        }
+        return value;
+      }
+
+      function getStatusLabel(status) {
+        switch (status) {
+          case "pending":
+            return '<span class="request-status status-pending">En attente</span>';
+          case "approved":
+            return '<span class="request-status status-approved">Approuvée</span>';
+          case "rejected":
+            return '<span class="request-status status-rejected">Rejetée</span>';
+          case "cancelled":
+            return '<span class="request-status" style="background-color:#6c757d;color:white">Annulée</span>';
+          default:
+            return '<span class="request-status">' + status + "</span>";
+        }
+      }
+
+      function showError(message) {
+        document.getElementById("request-loading").style.display = "none";
+        document.getElementById("request-details").style.display = "none";
+        const errorEl = document.getElementById("request-error");
+        errorEl.textContent = message;
+        errorEl.style.display = "block";
+      }
+
+      // --- ACTION FUNCTIONS ---
+      async function cancelRequest() {
+        if (!currentRequest || !currentRequest.id) {
+          alert("Aucune demande à annuler");
+          return;
+        }
+
+        if (!confirm("Êtes-vous sûr de vouloir annuler cette demande ?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/profile-requests/${currentRequest.id}/cancel`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                status: "CANCELLED",
+                adminComment: "Demande annulée par l'étudiant",
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to cancel request (${response.status})`);
+          }
+
+          alert("Demande annulée avec succès");
+          // Reload the request details
+          loadRequestDetails(currentRequest.id);
+        } catch (e) {
+          console.error("Error cancelling request:", e);
+          alert("Erreur lors de l'annulation: " + e.message);
+        }
+      }
+
+      // --- HELPER FUNCTIONS ---
+      function getRequestIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get("id");
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+
+        return date.toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    </script>
+  </body>
+</html>

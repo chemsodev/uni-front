@@ -23,6 +23,12 @@
         padding: 10px;
         margin-bottom: 15px;
       }
+
+      /* Make div forms look like real forms */
+      .form-container {
+        display: block;
+        width: 100%;
+      }
     </style>
   </head>
   <body>
@@ -35,7 +41,7 @@
         <div class="header">
           <h1 class="page-title">Mes Demandes</h1>
           <div class="header-actions">
-            <button id="new-request-btn">Nouvelle Demande</button>
+            <button type="button" id="new-request-btn">Nouvelle Demande</button>
           </div>
         </div>
 
@@ -43,12 +49,13 @@
         <div class="tab-container">
           <div class="tab-buttons">
             <button
+              type="button"
               class="tab-button active"
-              onclick="openTab(event, 'formulaires')"
+              data-target="formulaires"
             >
               Formulaires de demande
             </button>
-            <button class="tab-button" onclick="openTab(event, 'suivi')">
+            <button type="button" class="tab-button" data-target="suivi">
               Suivi des demandes
             </button>
           </div>
@@ -64,15 +71,16 @@
             <!-- Sous-onglets pour les différents formulaires -->
             <div class="tab-buttons">
               <button
+                type="button"
                 class="tab-button active"
-                onclick="openSubTab(event, 'section-form')"
+                data-target="section-form"
               >
                 Changement de Section
               </button>
-              <button class="tab-button" onclick="openSubTab(event, 'td-form')">
+              <button type="button" class="tab-button" data-target="td-form">
                 Changement de Groupe TD
               </button>
-              <button class="tab-button" onclick="openSubTab(event, 'tp-form')">
+              <button type="button" class="tab-button" data-target="tp-form">
                 Changement de Groupe TP
               </button>
             </div>
@@ -82,7 +90,7 @@
               <h2 class="card-title">
                 Formulaire de demande de changement de section
               </h2>
-              <form id="section-change-form">
+              <div id="section-change-form" class="form-container">
                 <div class="form-group">
                   <label for="current-section">Section actuelle</label>
                   <input type="text" id="current-section" value="" readonly />
@@ -90,7 +98,7 @@
 
                 <div class="form-group">
                   <label for="requested-section">Section demandée</label>
-                  <select id="requested-section" required>
+                  <select id="requested-section">
                     <option value="">Sélectionnez une section</option>
                     <!-- Options loaded dynamically -->
                   </select>
@@ -98,7 +106,7 @@
 
                 <div class="form-group">
                   <label for="section-reason">Motif de la demande</label>
-                  <select id="section-reason" required>
+                  <select id="section-reason">
                     <option value="">Sélectionnez un motif</option>
                     <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
                     <option value="MEDICAL">Raison médicale</option>
@@ -114,7 +122,6 @@
                   <textarea
                     id="section-justification"
                     placeholder="Veuillez expliquer en détail les raisons de votre demande..."
-                    required
                   ></textarea>
                 </div>
 
@@ -140,14 +147,10 @@
                   style="display: none; color: green; margin: 10px 0"
                 ></div>
 
-                <button
-                  type="button"
-                  class="submit-btn"
-                  onclick="submitRequest('SECTION_CHANGE', 'section')"
-                >
+                <button type="button" class="submit-btn">
                   Soumettre la demande
                 </button>
-              </form>
+              </div>
             </div>
 
             <!-- Formulaire de changement de groupe TD -->
@@ -155,7 +158,7 @@
               <h2 class="card-title">
                 Formulaire de demande de changement de groupe TD
               </h2>
-              <form id="td-change-form">
+              <div id="td-change-form" class="form-container">
                 <div class="form-group">
                   <label for="current-td">Groupe TD actuel</label>
                   <input type="text" id="current-td" value="" readonly />
@@ -163,7 +166,7 @@
 
                 <div class="form-group">
                   <label for="requested-td">Groupe TD demandé</label>
-                  <select id="requested-td" required>
+                  <select id="requested-td">
                     <option value="">Sélectionnez un groupe</option>
                     <!-- Options loaded dynamically -->
                   </select>
@@ -171,7 +174,7 @@
 
                 <div class="form-group">
                   <label for="td-reason">Motif de la demande</label>
-                  <select id="td-reason" required>
+                  <select id="td-reason">
                     <option value="">Sélectionnez un motif</option>
                     <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
                     <option value="GROUP_WORK">Travail en groupe</option>
@@ -185,7 +188,6 @@
                   <textarea
                     id="td-justification"
                     placeholder="Veuillez expliquer en détail les raisons de votre demande..."
-                    required
                   ></textarea>
                 </div>
 
@@ -211,14 +213,10 @@
                   style="display: none; color: green; margin: 10px 0"
                 ></div>
 
-                <button
-                  type="button"
-                  class="submit-btn"
-                  onclick="submitRequest('TD_GROUP_CHANGE', 'td')"
-                >
+                <button type="button" class="submit-btn">
                   Soumettre la demande
                 </button>
-              </form>
+              </div>
             </div>
 
             <!-- Formulaire de changement de groupe TP -->
@@ -226,7 +224,7 @@
               <h2 class="card-title">
                 Formulaire de demande de changement de groupe TP
               </h2>
-              <form id="tp-change-form">
+              <div id="tp-change-form" class="form-container">
                 <div class="form-group">
                   <label for="current-tp">Groupe TP actuel</label>
                   <input type="text" id="current-tp" value="" readonly />
@@ -234,7 +232,7 @@
 
                 <div class="form-group">
                   <label for="requested-tp">Groupe TP demandé</label>
-                  <select id="requested-tp" required>
+                  <select id="requested-tp">
                     <option value="">Sélectionnez un groupe</option>
                     <!-- Options loaded dynamically -->
                   </select>
@@ -242,7 +240,7 @@
 
                 <div class="form-group">
                   <label for="tp-reason">Motif de la demande</label>
-                  <select id="tp-reason" required>
+                  <select id="tp-reason">
                     <option value="">Sélectionnez un motif</option>
                     <option value="SCHEDULE_CONFLICT">Conflit d'horaire</option>
                     <option value="GROUP_WORK">Binôme/groupe de projet</option>
@@ -256,7 +254,6 @@
                   <textarea
                     id="tp-justification"
                     placeholder="Veuillez expliquer en détail les raisons de votre demande..."
-                    required
                   ></textarea>
                 </div>
 
@@ -282,14 +279,10 @@
                   style="display: none; color: green; margin: 10px 0"
                 ></div>
 
-                <button
-                  type="button"
-                  class="submit-btn"
-                  onclick="submitRequest('TP_GROUP_CHANGE', 'tp')"
-                >
+                <button type="button" class="submit-btn">
                   Soumettre la demande
                 </button>
-              </form>
+              </div>
             </div>
           </div>
 
