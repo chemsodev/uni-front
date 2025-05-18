@@ -27,148 +27,21 @@
         body {
             background-color: var(--bg-light);
             color: var(--dark-color);
-            min-height: 100vh;
             background: linear-gradient(240deg, #B0E0E6, #E6F2FF, #87CEFA, #F0F8FF);
             background-size: 100% 100%;
         }
-        
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            width: 280px;
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            z-index: 10;
-        }
-        
-        .logo-container {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-        }
-        
-        .logo {
-            font-family: 'Sora', sans-serif;
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            position: relative;
-            display: inline-block;
-        }
-        
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), transparent);
-            border-radius: 3px;
-        }
-        
-        .user-info {
-            padding: 1.25rem;
-            background-color: rgba(226, 232, 240, 0.3);
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-            color: var(--dark-color);
-        }
-        
-        .user-role {
-            font-size: 0.85rem;
-            color: var(--gray-color);
-        }
-        
-        .menu-title {
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--gray-color);
-            margin-bottom: 1rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .menu {
-            list-style: none;
-            margin-bottom: 2rem;
-            flex-grow: 1;
-        }
-        
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-bottom: 0.5rem;
-            transition: all 0.3s ease;
-            color: var(--gray-color);
-        }
-        
-        .menu-item:hover {
-            background-color: rgba(139, 92, 246, 0.1);
-            color: var(--primary-color);
-        }
-        
-        .menu-item.active {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            color: white;
-            box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);
-        }
-        
-        .menu-icon {
-            width: 18px;
-            height: 18px;
-            margin-right: 0.75rem;
-            stroke-width: 2;
-        }
-        
-        .logout {
-            margin-top: auto;
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            cursor: pointer;
-            color: var(--danger-color);
-            transition: all 0.3s ease;
-            background-color: rgba(239, 68, 68, 0.1);
-        }
-        
-        .logout:hover {
-            background-color: rgba(239, 68, 68, 0.2);
-        }
+               
         
         /* Main Content Styles */
         .main-content {
             flex-grow: 1;
             padding: 3rem;
-            margin-left: 280px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding-left: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
         
-        .dashboard-header {
-            margin-bottom: 2.5rem;
-        }
         
         .welcome-text {
             font-family: 'Sora', sans-serif;
@@ -192,9 +65,11 @@
         /* Role Selection Grid */
         .role-selection {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, minmax(280px, 320px));
             gap: 1.5rem;
             margin-top: 2rem;
+            justify-content: center;
+            width: 100%;
         }
         
         .role-card {
@@ -288,19 +163,14 @@
         
         /* Responsive Design */
         @media (max-width: 1024px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
             .main-content {
                 padding: 2rem;
                 margin-left: 0;
                 padding-left: 2rem;
+            }
+            
+            .role-selection {
+                grid-template-columns: repeat(2, minmax(280px, 320px));
             }
             
             .mobile-menu-toggle {
@@ -312,9 +182,10 @@
             }
         }
         
+        /* Small devices (phones, less than 768px) */
         @media (max-width: 768px) {
             .role-selection {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(280px, 400px);
             }
             
             .welcome-text {
@@ -325,41 +196,6 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <div class="sidebar">
-            <div class="logo-container">
-                <div class="logo">Portail Admin</div>
-            </div>
-            
-            <div class="user-info">
-                <div class="user-name">Bienvenue</div>
-                <div class="user-role">Sélectionnez votre rôle</div>
-            </div>
-            
-            <ul class="menu">
-                <li class="menu-item active" onclick="location.href='admin-login.html'">
-                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                    Connexion
-                </li>
-                <li class="menu-item" onclick="location.href='index.html'">
-                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                    </svg>
-                    Retour à l'accueil
-                </li>
-            </ul>
-            
-            <div class="logout" onclick="location.href='index.html'">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                Quitter
-            </div>
-        </div>
         
         <div class="main-content">
             <div class="dashboard-header">

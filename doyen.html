@@ -82,13 +82,6 @@
                 </div>
             </div>
             
-            <div class="tabs">
-                <div class="tab active" onclick="activateTab(this, 'tableau-bord-content')">Vue d'ensemble</div>
-                <div class="tab" onclick="activateTab(this, 'supervision-content')">Supervision des Départements</div>
-                <div class="tab" onclick="activateTab(this, 'demandes-content')">Demandes Importantes</div>
-                <div class="tab" onclick="activateTab(this, 'statistiques-content')">Statistiques Globales</div>
-            </div>
-            
             <!-- Tab 1: Vue d'ensemble -->
             <div class="tab-content active" id="tableau-bord-content">
                 <div class="cards-container">
@@ -100,7 +93,7 @@
                             </svg>
                             Étudiants
                         </div>
-                        <div class="card-value">5,823</div>
+                        <div class="card-value" id="total-etudiants">5,823</div>
                         <div class="card-label">Total d'étudiants inscrits</div>
                     </div>
                     
@@ -114,7 +107,7 @@
                             </svg>
                             Enseignants
                         </div>
-                        <div class="card-value">243</div>
+                        <div class="card-value" id="total-enseignants">243</div>
                         <div class="card-label">Nombre d'enseignants</div>
                     </div>
                     
@@ -127,7 +120,7 @@
                             </svg>
                             Départements
                         </div>
-                        <div class="card-value">7</div>
+                        <div class="card-value" id="total-departements">7</div>
                         <div class="card-label">Nombre de départements</div>
                     </div>
                     
@@ -139,7 +132,7 @@
                             </svg>
                             Demandes
                         </div>
-                        <div class="card-value">32</div>
+                        <div class="card-value" id="total-demandes">32</div>
                         <div class="card-label">Demandes en attente</div>
                     </div>
                 </div>
@@ -155,37 +148,8 @@
                                 <th>Statut</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>13/04/2025</td>
-                                <td>Informatique</td>
-                                <td>Validation des notes du semestre</td>
-                                <td><span class="status status-approved">Approuvée</span></td>
-                            </tr>
-                            <tr>
-                                <td>12/04/2025</td>
-                                <td>Mathématiques</td>
-                                <td>Demande d'équipement supplémentaire</td>
-                                <td><span class="status status-pending">En attente</span></td>
-                            </tr>
-                            <tr>
-                                <td>11/04/2025</td>
-                                <td>Physique</td>
-                                <td>Recrutement d'enseignant associé</td>
-                                <td><span class="status status-pending">En attente</span></td>
-                            </tr>
-                            <tr>
-                                <td>10/04/2025</td>
-                                <td>Chimie</td>
-                                <td>Modification de programme de master</td>
-                                <td><span class="status status-approved">Approuvée</span></td>
-                            </tr>
-                            <tr>
-                                <td>09/04/2025</td>
-                                <td>Biologie</td>
-                                <td>Demande de financement laboratoire</td>
-                                <td><span class="status status-denied">Refusée</span></td>
-                            </tr>
+                        <tbody id="activites-recentes-table">
+                            <!-- Le contenu sera généré dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -198,10 +162,9 @@
                     
                     <div class="search-filter-bar">
                         <input type="text" class="search-input" placeholder="Rechercher un département...">
-                        <select class="filter-select">
+                        <select class="filter-select" id="filter-statut-departement">
                             <option value="">Tous les statuts</option>
-                            <option value="active">Actif</option>
-                            <option value="issue">Problèmes signalés</option>
+                            <!-- Options générées dynamiquement -->
                         </select>
                         <button class="search-btn">Rechercher</button>
                     </div>
@@ -217,97 +180,8 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Informatique</td>
-                                <td>Dr. Ahmed Touati</td>
-                                <td>1,245</td>
-                                <td>56</td>
-                                <td>
-                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
-                                        <div style="width:85%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="action-btn success" onclick="openModal('modal-department-details')">Détails</button>
-                                    <button class="action-btn secondary">Rapports</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Mathématiques</td>
-                                <td>Prof. Nadia Belkadi</td>
-                                <td>965</td>
-                                <td>42</td>
-                                <td>
-                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
-                                        <div style="width:78%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="action-btn success">Détails</button>
-                                    <button class="action-btn secondary">Rapports</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Physique</td>
-                                <td>Prof. Karim Hamdi</td>
-                                <td>875</td>
-                                <td>38</td>
-                                <td>
-                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
-                                        <div style="width:92%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="action-btn success">Détails</button>
-                                    <button class="action-btn secondary">Rapports</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Chimie</td>
-                                <td>Dr. Leila Benziane</td>
-                                <td>798</td>
-                                <td>35</td>
-                                <td>
-                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
-                                        <div style="width:65%; background:linear-gradient(to right, var(--warning-color), #d97706); height:10px; border-radius:10px;"></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="action-btn success">Détails</button>
-                                    <button class="action-btn secondary">Rapports</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Biologie</td>
-                                <td>Prof. Mohammed Kamli</td>
-                                <td>1,025</td>
-                                <td>45</td>
-                                <td>
-                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
-                                        <div style="width:72%; background:linear-gradient(to right, var(--success-color), #10b981); height:10px; border-radius:10px;"></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="action-btn success">Détails</button>
-                                    <button class="action-btn secondary">Rapports</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Géologie</td>
-                                <td>Dr. Samira Tazi</td>
-                                <td>542</td>
-                                <td>27</td>
-                                <td>
-                                    <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
-                                        <div style="width:59%; background:linear-gradient(to right, var(--warning-color), #d97706); height:10px; border-radius:10px;"></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="action-btn success">Détails</button>
-                                    <button class="action-btn secondary">Rapports</button>
-                                </td>
-                            </tr>
+                        <tbody id="departements-table">
+                            <!-- Le contenu sera généré dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -342,20 +216,13 @@
                     
                     <div class="search-filter-bar">
                         <input type="text" class="search-input" placeholder="Rechercher des demandes...">
-                        <select class="filter-select">
+                        <select class="filter-select" id="filter-type-demande">
                             <option value="">Tous les types</option>
-                            <option value="financial">Financier</option>
-                            <option value="academic">Académique</option>
-                            <option value="hr">Ressources Humaines</option>
+                            <!-- Options générées dynamiquement -->
                         </select>
-                        <select class="filter-select">
+                        <select class="filter-select" id="filter-departement">
                             <option value="">Tous les départements</option>
-                            <option value="info">Informatique</option>
-                            <option value="math">Mathématiques</option>
-                            <option value="phys">Physique</option>
-                            <option value="chimie">Chimie</option>
-                            <option value="bio">Biologie</option>
-                            <option value="geo">Géologie</option>
+                            <!-- Options générées dynamiquement -->
                         </select>
                         <button class="search-btn">Rechercher</button>
                     </div>
@@ -372,71 +239,8 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>DEM-2025-0142</td>
-                                <td>12/04/2025</td>
-                                <td>Mathématiques</td>
-                                <td>Financier</td>
-                                <td>Demande d'équipement supplémentaire</td>
-                                <td><span class="status status-pending">Moyenne</span></td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-request-details')">Examiner</button>
-                                    <button class="action-btn success">Approuver</button>
-                                    <button class="action-btn danger">Refuser</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-0141</td>
-                                <td>11/04/2025</td>
-                                <td>Physique</td>
-                                <td>RH</td>
-                                <td>Recrutement d'enseignant associé</td>
-                                <td><span class="status status-approved">Haute</span></td>
-                                <td>
-                                    <button class="action-btn">Examiner</button>
-                                    <button class="action-btn success">Approuver</button>
-                                    <button class="action-btn danger">Refuser</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-0140</td>
-                                <td>09/04/2025</td>
-                                <td>Biologie</td>
-                                <td>Financier</td>
-                                <td>Demande de financement laboratoire</td>
-                                <td><span class="status status-denied">Haute</span></td>
-                                <td>
-                                    <button class="action-btn">Examiner</button>
-                                    <button class="action-btn secondary">Reconsidérer</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-0139</td>
-                                <td>08/04/2025</td>
-                                <td>Informatique</td>
-                                <td>Académique</td>
-                                <td>Modification de programme de licence</td>
-                                <td><span class="status status-pending">Moyenne</span></td>
-                                <td>
-                                    <button class="action-btn">Examiner</button>
-                                    <button class="action-btn success">Approuver</button>
-                                    <button class="action-btn danger">Refuser</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-0138</td>
-                                <td>07/04/2025</td>
-                                <td>Géologie</td>
-                                <td>Académique</td>
-                                <td>Organisation de conférence internationale</td>
-                                <td><span class="status status-pending">Basse</span></td>
-                                <td>
-                                    <button class="action-btn">Examiner</button>
-                                    <button class="action-btn success">Approuver</button>
-                                    <button class="action-btn danger">Refuser</button>
-                                </td>
-                            </tr>
+                        <tbody id="demandes-en-attente-table">
+                            <!-- Le contenu sera généré dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -455,40 +259,8 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>DEM-2025-0137</td>
-                                <td>05/04/2025</td>
-                                <td>Chimie</td>
-                                <td>Financier</td>
-                                <td>Acquisition de matériel laboratoire</td>
-                                <td><span class="status status-approved">Approuvée</span></td>
-                                <td>
-                                    <button class="action-btn">Détails</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-0136</td>
-                                <td>04/04/2025</td>
-                                <td>Informatique</td>
-                                <td>RH</td>
-                                <td>Recrutement de vacataires</td>
-                                <td><span class="status status-approved">Approuvée</span></td>
-                                <td>
-                                    <button class="action-btn">Détails</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>DEM-2025-0135</td>
-                                <td>03/04/2025</td>
-                                <td>Mathématiques</td>
-                                <td>Académique</td>
-                                <td>Création d'une nouvelle spécialité</td>
-                                <td><span class="status status-denied">Refusée</span></td>
-                                <td>
-                                    <button class="action-btn">Détails</button>
-                                </td>
-                            </tr>
+                        <tbody id="demandes-traitees-table">
+                            <!-- Le contenu sera généré dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -504,7 +276,7 @@
                             </svg>
                             Taux de Satisfaction
                         </div>
-                        <div class="card-value">87%</div>
+                        <div class="card-value" id="taux-satisfaction">87%</div>
                         <div class="card-label">Satisfaction étudiante</div>
                     </div>
                     
@@ -516,7 +288,7 @@
                             </svg>
                             Taux de Réussite
                         </div>
-                        <div class="card-value">76%</div>
+                        <div class="card-value" id="taux-reussite">76%</div>
                         <div class="card-label">Moyenne annuelle</div>
                     </div>
                     
@@ -527,7 +299,7 @@
                             </svg>
                             Complétion des Cours
                         </div>
-                        <div class="card-value">93%</div>
+                        <div class="card-value" id="completion-cours">93%</div>
                         <div class="card-label">Cours terminés</div>
                     </div>
                     
@@ -540,7 +312,7 @@
                             </svg>
                             Budget Utilisé
                         </div>
-                        <div class="card-value">62%</div>
+                        <div class="card-value" id="budget-utilise">62%</div>
                         <div class="card-label">du budget annuel</div>
                     </div>
                 </div>
@@ -589,49 +361,8 @@
                                 <th>Étudiants Excellents (%)</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Informatique</td>
-                                <td>78</td>
-                                <td>13.2/20</td>
-                                <td>5</td>
-                                <td>22</td>
-                            </tr>
-                            <tr>
-                                <td>Mathématiques</td>
-                                <td>74</td>
-                                <td>12.8/20</td>
-                                <td>9</td>
-                                <td>18</td>
-                            </tr>
-                            <tr>
-                                <td>Physique</td>
-                                <td>82</td>
-                                <td>13.6/20</td>
-                                <td>4</td>
-                                <td>25</td>
-                            </tr>
-                            <tr>
-                                <td>Chimie</td>
-                                <td>71</td>
-                                <td>12.4/20</td>
-                                <td>11</td>
-                                <td>16</td>
-                            </tr>
-                            <tr>
-                                <td>Biologie</td>
-                                <td>79</td>
-                                <td>13.5/20</td>
-                                <td>7</td>
-                                <td>23</td>
-                            </tr>
-                            <tr>
-                                <td>Géologie</td>
-                                <td>68</td>
-                                <td>11.9/20</td>
-                                <td>14</td>
-                                <td>12</td>
-                            </tr>
+                        <tbody id="resultats-academiques-table">
+                            <!-- Le contenu sera généré dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -643,7 +374,7 @@
     <div class="modal-backdrop" id="modal-department-details">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">Détails du Département d'Informatique</h3>
+                <h3 class="modal-title" id="modal-department-title">Détails du Département</h3>
                 <button class="modal-close" onclick="closeModal('modal-department-details')">&times;</button>
             </div>
             <div class="modal-content">
@@ -651,11 +382,11 @@
                     <div class="grid-2col">
                         <div>
                             <label class="form-label">Nom du Département</label>
-                            <input type="text" class="form-input" value="Informatique" readonly>
+                            <input type="text" class="form-input" id="modal-department-name" readonly>
                         </div>
                         <div>
                             <label class="form-label">Chef de Département</label>
-                            <input type="text" class="form-input" value="Dr. Ahmed Touati" readonly>
+                            <input type="text" class="form-input" id="modal-department-chef" readonly>
                         </div>
                     </div>
                 </div>
@@ -664,23 +395,19 @@
                     <div class="grid-2col">
                         <div>
                             <label class="form-label">Nombre d'Étudiants</label>
-                            <input type="text" class="form-input" value="1,245" readonly>
+                            <input type="text" class="form-input" id="modal-department-etudiants" readonly>
                         </div>
                         <div>
                             <label class="form-label">Nombre d'Enseignants</label>
-                            <input type="text" class="form-input" value="56" readonly>
+                            <input type="text" class="form-input" id="modal-department-enseignants" readonly>
                         </div>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Formations Proposées</label>
-                    <ul style="padding-left: 20px; margin-top: 10px;">
-                        <li>Licence en Informatique</li>
-                        <li>Master en Intelligence Artificielle</li>
-                        <li>Master en Sécurité Informatique</li>
-                        <li>Master en Systèmes d'Information</li>
-                        <li>Doctorat en Informatique</li>
+                    <ul id="modal-department-formations" style="padding-left: 20px; margin-top: 10px;">
+                        <!-- Le contenu sera généré dynamiquement -->
                     </ul>
                 </div>
                 
@@ -705,7 +432,7 @@
     <div class="modal-backdrop" id="modal-request-details">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">Détails de la Demande DEM-2025-0142</h3>
+                <h3 class="modal-title" id="modal-request-title">Détails de la Demande</h3>
                 <button class="modal-close" onclick="closeModal('modal-request-details')">&times;</button>
             </div>
             <div class="modal-content">
@@ -713,11 +440,11 @@
                     <div class="grid-2col">
                         <div>
                             <label class="form-label">ID de Demande</label>
-                            <input type="text" class="form-input" value="DEM-2025-0142" readonly>
+                            <input type="text" class="form-input" id="modal-request-id" readonly>
                         </div>
                         <div>
                             <label class="form-label">Date de Soumission</label>
-                            <input type="text" class="form-input" value="12/04/2025" readonly>
+                            <input type="text" class="form-input" id="modal-request-date" readonly>
                         </div>
                     </div>
                 </div>
@@ -726,31 +453,29 @@
                     <div class="grid-2col">
                         <div>
                             <label class="form-label">Département</label>
-                            <input type="text" class="form-input" value="Mathématiques" readonly>
+                            <input type="text" class="form-input" id="modal-request-department" readonly>
                         </div>
                         <div>
                             <label class="form-label">Type de Demande</label>
-                            <input type="text" class="form-input" value="Financier" readonly>
+                            <input type="text" class="form-input" id="modal-request-type" readonly>
                         </div>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Objet</label>
-                    <input type="text" class="form-input" value="Demande d'équipement supplémentaire" readonly>
+                    <input type="text" class="form-input" id="modal-request-objet" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Description</label>
-                    <textarea class="form-textarea" readonly>Le département de Mathématiques demande l'acquisition de 25 ordinateurs portables pour équiper la nouvelle salle de travaux pratiques. Ces équipements sont nécessaires pour les cours d'analyse numérique et de modélisation mathématique. Le budget estimé est de 35,000 DZD par unité, soit un total de 875,000 DZD.</textarea>
+                    <textarea class="form-textarea" id="modal-request-description" readonly></textarea>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Pièces Jointes</label>
-                    <ul style="padding-left: 20px; margin-top: 10px;">
-                        <li><a href="#" style="color: var(--primary-color);">Devis_Fournisseur.pdf</a></li>
-                        <li><a href="#" style="color: var(--primary-color);">Justification_Pedagogique.pdf</a></li>
-                        <li><a href="#" style="color: var(--primary-color);">Planning_Utilisation.xlsx</a></li>
+                    <ul id="modal-request-attachments" style="padding-left: 20px; margin-top: 10px;">
+                        <!-- Le contenu sera généré dynamiquement -->
                     </ul>
                 </div>
                 
@@ -778,6 +503,477 @@
     </div>
     
     <script>
+        // Données d'exemple pour les statistiques
+        const statistiques = {
+            totalEtudiants: 5823,
+            totalEnseignants: 243,
+            totalDepartements: 7,
+            totalDemandes: 32,
+            tauxSatisfaction: "87%",
+            tauxReussite: "76%",
+            completionCours: "93%",
+            budgetUtilise: "62%"
+        };
+
+        // Données d'exemple pour les activités récentes
+        const activitesRecentes = [
+            { date: "13/04/2025", departement: "Informatique", activite: "Validation des notes du semestre", statut: "approved", statutText: "Approuvée" },
+            { date: "12/04/2025", departement: "Mathématiques", activite: "Demande d'équipement supplémentaire", statut: "pending", statutText: "En attente" },
+            { date: "11/04/2025", departement: "Physique", activite: "Recrutement d'enseignant associé", statut: "pending", statutText: "En attente" },
+            { date: "10/04/2025", departement: "Chimie", activite: "Modification de programme de master", statut: "approved", statutText: "Approuvée" },
+            { date: "09/04/2025", departement: "Biologie", activite: "Demande de financement laboratoire", statut: "denied", statutText: "Refusée" }
+        ];
+
+        // Données d'exemple pour les départements
+        const departements = [
+            { 
+                id: "info", 
+                nom: "Informatique", 
+                chef: "Dr. Ahmed Touati", 
+                etudiants: 1245, 
+                enseignants: 56, 
+                performance: 85,
+                formations: [
+                    "Licence en Informatique",
+                    "Master en Intelligence Artificielle",
+                    "Master en Sécurité Informatique",
+                    "Master en Systèmes d'Information",
+                    "Doctorat en Informatique"
+                ]
+            },
+            { 
+                id: "math", 
+                nom: "Mathématiques", 
+                chef: "Prof. Nadia Belkadi", 
+                etudiants: 965, 
+                enseignants: 42, 
+                performance: 78,
+                formations: [
+                    "Licence en Mathématiques",
+                    "Master en Mathématiques Appliquées",
+                    "Master en Statistiques",
+                    "Doctorat en Mathématiques"
+                ]
+            },
+            { 
+                id: "phys", 
+                nom: "Physique", 
+                chef: "Prof. Karim Hamdi", 
+                etudiants: 875, 
+                enseignants: 38, 
+                performance: 92,
+                formations: [
+                    "Licence en Physique",
+                    "Master en Physique Théorique",
+                    "Master en Physique Appliquée",
+                    "Doctorat en Physique"
+                ]
+            },
+            { 
+                id: "chim", 
+                nom: "Chimie", 
+                chef: "Dr. Leila Benziane", 
+                etudiants: 798, 
+                enseignants: 35, 
+                performance: 65,
+                formations: [
+                    "Licence en Chimie",
+                    "Master en Chimie Organique",
+                    "Master en Chimie Analytique",
+                    "Doctorat en Chimie"
+                ]
+            },
+            { 
+                id: "bio", 
+                nom: "Biologie", 
+                chef: "Prof. Mohammed Kamli", 
+                etudiants: 1025, 
+                enseignants: 45, 
+                performance: 72,
+                formations: [
+                    "Licence en Biologie",
+                    "Master en Biologie Moléculaire",
+                    "Master en Écologie",
+                    "Doctorat en Biologie"
+                ]
+            },
+            { 
+                id: "geo", 
+                nom: "Géologie", 
+                chef: "Dr. Samira Tazi", 
+                etudiants: 542, 
+                enseignants: 27, 
+                performance: 59,
+                formations: [
+                    "Licence en Géologie",
+                    "Master en Géologie Appliquée",
+                    "Master en Hydrogéologie",
+                    "Doctorat en Géologie"
+                ]
+            }
+        ];
+
+        // Données d'exemple pour les statuts des départements
+        const statutsDepartements = [
+            { id: "active", nom: "Actif" },
+            { id: "issue", nom: "Problèmes signalés" }
+        ];
+
+        // Données d'exemple pour les types de demandes
+        const typesDemandes = [
+            { id: "financial", nom: "Financier" },
+            { id: "academic", nom: "Académique" },
+            { id: "hr", nom: "Ressources Humaines" }
+        ];
+
+        // Données d'exemple pour les priorités
+        const priorites = [
+            { id: "high", nom: "Haute", classe: "status-approved" },
+            { id: "medium", nom: "Moyenne", classe: "status-pending" },
+            { id: "low", nom: "Basse", classe: "status-pending" }
+        ];
+
+        // Données d'exemple pour les statuts des demandes
+        const statutsDemandes = [
+            { id: "pending", nom: "En attente", classe: "status-pending" },
+            { id: "approved", nom: "Approuvée", classe: "status-approved" },
+            { id: "denied", nom: "Refusée", classe: "status-denied" }
+        ];
+
+        // Données d'exemple pour les demandes en attente
+        const demandesEnAttente = [
+            { 
+                id: "DEM-2025-0142", 
+                date: "12/04/2025", 
+                departement: "Mathématiques", 
+                type: "Financier", 
+                objet: "Demande d'équipement supplémentaire", 
+                priorite: "medium", 
+                prioriteText: "Moyenne",
+                description: "Le département de Mathématiques demande l'acquisition de 25 ordinateurs portables pour équiper la nouvelle salle de travaux pratiques. Ces équipements sont nécessaires pour les cours d'analyse numérique et de modélisation mathématique. Le budget estimé est de 35,000 DZD par unité, soit un total de 875,000 DZD.",
+                attachments: [
+                    { nom: "Devis_Fournisseur.pdf", url: "#" },
+                    { nom: "Justification_Pedagogique.pdf", url: "#" },
+                    { nom: "Planning_Utilisation.xlsx", url: "#" }
+                ]
+            },
+            { 
+                id: "DEM-2025-0141", 
+                date: "11/04/2025", 
+                departement: "Physique", 
+                type: "RH", 
+                objet: "Recrutement d'enseignant associé", 
+                priorite: "high", 
+                prioriteText: "Haute",
+                description: "Le département de Physique demande l'autorisation de recruter un enseignant associé spécialisé en physique quantique pour renforcer l'équipe pédagogique.",
+                attachments: [
+                    { nom: "Profil_Poste.pdf", url: "#" },
+                    { nom: "Budget_Previsionnel.pdf", url: "#" }
+                ]
+            },
+            { 
+                id: "DEM-2025-0140", 
+                date: "09/04/2025", 
+                departement: "Biologie", 
+                type: "Financier", 
+                objet: "Demande de financement laboratoire", 
+                priorite: "high", 
+                prioriteText: "Haute",
+                description: "Le département de Biologie sollicite un financement pour l'acquisition de nouveaux microscopes électroniques pour le laboratoire de recherche.",
+                attachments: [
+                    { nom: "Devis_Equipement.pdf", url: "#" },
+                    { nom: "Projet_Recherche.pdf", url: "#" }
+                ]
+            },
+            { 
+                id: "DEM-2025-0139", 
+                date: "08/04/2025", 
+                departement: "Informatique", 
+                type: "Académique", 
+                objet: "Modification de programme de licence", 
+                priorite: "medium", 
+                prioriteText: "Moyenne",
+                description: "Le département d'Informatique propose une mise à jour du programme de licence pour inclure davantage de modules sur l'intelligence artificielle et la science des données.",
+                attachments: [
+                    { nom: "Nouveau_Programme.pdf", url: "#" },
+                    { nom: "Comparatif_Programmes.xlsx", url: "#" }
+                ]
+            },
+            { 
+                id: "DEM-2025-0138", 
+                date: "07/04/2025", 
+                departement: "Géologie", 
+                type: "Académique", 
+                objet: "Organisation de conférence internationale", 
+                priorite: "low", 
+                prioriteText: "Basse",
+                description: "Le département de Géologie souhaite organiser une conférence internationale sur les changements climatiques et leur impact sur la géologie locale.",
+                attachments: [
+                    { nom: "Programme_Conference.pdf", url: "#" },
+                    { nom: "Budget_Previsionnel.xlsx", url: "#" },
+                    { nom: "Liste_Intervenants.pdf", url: "#" }
+                ]
+            }
+        ];
+
+        // Données d'exemple pour les demandes traitées
+        const demandesTraitees = [
+            { 
+                id: "DEM-2025-0137", 
+                date: "05/04/2025", 
+                departement: "Chimie", 
+                type: "Financier", 
+                objet: "Acquisition de matériel laboratoire", 
+                statut: "approved", 
+                statutText: "Approuvée",
+                description: "Le département de Chimie a demandé l'acquisition de nouveaux équipements pour le laboratoire d'analyse chimique.",
+                attachments: [
+                    { nom: "Liste_Equipements.pdf", url: "#" },
+                    { nom: "Devis_Final.pdf", url: "#" }
+                ]
+            },
+            { 
+                id: "DEM-2025-0136", 
+                date: "04/04/2025", 
+                departement: "Informatique", 
+                type: "RH", 
+                objet: "Recrutement de vacataires", 
+                statut: "approved", 
+                statutText: "Approuvée",
+                description: "Le département d'Informatique a demandé l'autorisation de recruter trois vacataires pour les travaux pratiques en programmation.",
+                attachments: [
+                    { nom: "Profils_Recherches.pdf", url: "#" },
+                    { nom: "Planning_Cours.pdf", url: "#" }
+                ]
+            },
+            { 
+                id: "DEM-2025-0135", 
+                date: "03/04/2025", 
+                departement: "Mathématiques", 
+                type: "Académique", 
+                objet: "Création d'une nouvelle spécialité", 
+                statut: "denied", 
+                statutText: "Refusée",
+                description: "Le département de Mathématiques a proposé la création d'une nouvelle spécialité en mathématiques financières.",
+                attachments: [
+                    { nom: "Programme_Propose.pdf", url: "#" },
+                    { nom: "Etude_Marche.pdf", url: "#" }
+                ]
+            }
+        ];
+
+        // Données d'exemple pour les résultats académiques
+        const resultatsAcademiques = [
+            { departement: "Informatique", tauxReussite: 78, moyenneGenerale: "13.2/20", tauxAbandons: 5, tauxExcellents: 22 },
+            { departement: "Mathématiques", tauxReussite: 74, moyenneGenerale: "12.8/20", tauxAbandons: 9, tauxExcellents: 18 },
+            { departement: "Physique", tauxReussite: 82, moyenneGenerale: "13.6/20", tauxAbandons: 4, tauxExcellents: 25 },
+            { departement: "Chimie", tauxReussite: 71, moyenneGenerale: "12.4/20", tauxAbandons: 11, tauxExcellents: 16 },
+            { departement: "Biologie", tauxReussite: 79, moyenneGenerale: "13.5/20", tauxAbandons: 7, tauxExcellents: 23 },
+            { departement: "Géologie", tauxReussite: 68, moyenneGenerale: "11.9/20", tauxAbandons: 14, tauxExcellents: 12 }
+        ];
+
+        // Fonction pour charger les données
+        function loadData() {
+            // Mettre à jour les statistiques
+            document.getElementById('total-etudiants').textContent = statistiques.totalEtudiants;
+            document.getElementById('total-enseignants').textContent = statistiques.totalEnseignants;
+            document.getElementById('total-departements').textContent = statistiques.totalDepartements;
+            document.getElementById('total-demandes').textContent = statistiques.totalDemandes;
+            
+            if (document.getElementById('taux-satisfaction')) {
+                document.getElementById('taux-satisfaction').textContent = statistiques.tauxSatisfaction;
+                document.getElementById('taux-reussite').textContent = statistiques.tauxReussite;
+                document.getElementById('completion-cours').textContent = statistiques.completionCours;
+                document.getElementById('budget-utilise').textContent = statistiques.budgetUtilise;
+            }
+
+            // Charger les activités récentes
+            const activitesTable = document.getElementById('activites-recentes-table');
+            if (activitesTable) {
+                activitesTable.innerHTML = '';
+                activitesRecentes.forEach(activite => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${activite.date}</td>
+                        <td>${activite.departement}</td>
+                        <td>${activite.activite}</td>
+                        <td><span class="status status-${activite.statut}">${activite.statutText}</span></td>
+                    `;
+                    activitesTable.appendChild(row);
+                });
+            }
+
+            // Charger les options pour les filtres de statuts des départements
+            const filterStatutDepartement = document.getElementById('filter-statut-departement');
+            if (filterStatutDepartement) {
+                filterStatutDepartement.innerHTML = '<option value="">Tous les statuts</option>';
+                statutsDepartements.forEach(statut => {
+                    const option = document.createElement('option');
+                    option.value = statut.id;
+                    option.textContent = statut.nom;
+                    filterStatutDepartement.appendChild(option);
+                });
+            }
+
+            // Charger la table des départements
+            const departementsTable = document.getElementById('departements-table');
+            if (departementsTable) {
+                departementsTable.innerHTML = '';
+                departements.forEach(departement => {
+                    const row = document.createElement('tr');
+                    const performanceColor = departement.performance >= 70 ? 'var(--success-color)' : 'var(--warning-color)';
+                    row.innerHTML = `
+                        <td>${departement.nom}</td>
+                        <td>${departement.chef}</td>
+                        <td>${departement.etudiants}</td>
+                        <td>${departement.enseignants}</td>
+                        <td>
+                            <div style="width:100%; background-color:#e2e8f0; border-radius:10px; height:10px;">
+                                <div style="width:${departement.performance}%; background:linear-gradient(to right, ${performanceColor}, ${departement.performance >= 70 ? '#10b981' : '#d97706'}); height:10px; border-radius:10px;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="action-btn success" onclick="voirDetailsDepartement('${departement.id}')">Détails</button>
+                            <button class="action-btn secondary">Rapports</button>
+                        </td>
+                    `;
+                    departementsTable.appendChild(row);
+                });
+            }
+
+            // Charger les options pour les filtres de types de demandes
+            const filterTypeDemande = document.getElementById('filter-type-demande');
+            if (filterTypeDemande) {
+                filterTypeDemande.innerHTML = '<option value="">Tous les types</option>';
+                typesDemandes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.id;
+                    option.textContent = type.nom;
+                    filterTypeDemande.appendChild(option);
+                });
+            }
+
+            // Charger les options pour les filtres de départements
+            const filterDepartement = document.getElementById('filter-departement');
+            if (filterDepartement) {
+                filterDepartement.innerHTML = '<option value="">Tous les départements</option>';
+                departements.forEach(departement => {
+                    const option = document.createElement('option');
+                    option.value = departement.id;
+                    option.textContent = departement.nom;
+                    filterDepartement.appendChild(option);
+                });
+            }
+
+            // Charger la table des demandes en attente
+            const demandesEnAttenteTable = document.getElementById('demandes-en-attente-table');
+            if (demandesEnAttenteTable) {
+                demandesEnAttenteTable.innerHTML = '';
+                demandesEnAttente.forEach(demande => {
+                    const prioriteClass = demande.priorite === 'high' ? 'status-approved' : demande.priorite === 'medium' ? 'status-pending' : 'status-pending';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${demande.id}</td>
+                        <td>${demande.date}</td>
+                        <td>${demande.departement}</td>
+                        <td>${demande.type}</td>
+                        <td>${demande.objet}</td>
+                        <td><span class="status ${prioriteClass}">${demande.prioriteText}</span></td>
+                        <td>
+                            <button class="action-btn" onclick="voirDetailsDemande('${demande.id}')">Examiner</button>
+                            <button class="action-btn success">Approuver</button>
+                            <button class="action-btn danger">Refuser</button>
+                        </td>
+                    `;
+                    demandesEnAttenteTable.appendChild(row);
+                });
+            }
+
+            // Charger la table des demandes traitées
+            const demandesTraiteesTable = document.getElementById('demandes-traitees-table');
+            if (demandesTraiteesTable) {
+                demandesTraiteesTable.innerHTML = '';
+                demandesTraitees.forEach(demande => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${demande.id}</td>
+                        <td>${demande.date}</td>
+                        <td>${demande.departement}</td>
+                        <td>${demande.type}</td>
+                        <td>${demande.objet}</td>
+                        <td><span class="status status-${demande.statut}">${demande.statutText}</span></td>
+                        <td>
+                            <button class="action-btn" onclick="voirDetailsDemande('${demande.id}')">Détails</button>
+                        </td>
+                    `;
+                    demandesTraiteesTable.appendChild(row);
+                });
+            }
+
+            // Charger la table des résultats académiques
+            const resultatsAcademiquesTable = document.getElementById('resultats-academiques-table');
+            if (resultatsAcademiquesTable) {
+                resultatsAcademiquesTable.innerHTML = '';
+                resultatsAcademiques.forEach(resultat => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${resultat.departement}</td>
+                        <td>${resultat.tauxReussite}</td>
+                        <td>${resultat.moyenneGenerale}</td>
+                        <td>${resultat.tauxAbandons}</td>
+                        <td>${resultat.tauxExcellents}</td>
+                    `;
+                    resultatsAcademiquesTable.appendChild(row);
+                });
+            }
+        }
+
+        // Fonction pour voir les détails d'un département
+        function voirDetailsDepartement(departementId) {
+            const departement = departements.find(d => d.id === departementId);
+            if (departement) {
+                document.getElementById('modal-department-title').textContent = `Détails du Département ${departement.nom}`;
+                document.getElementById('modal-department-name').value = departement.nom;
+                document.getElementById('modal-department-chef').value = departement.chef;
+                document.getElementById('modal-department-etudiants').value = departement.etudiants;
+                document.getElementById('modal-department-enseignants').value = departement.enseignants;
+                
+                const formationsList = document.getElementById('modal-department-formations');
+                formationsList.innerHTML = '';
+                departement.formations.forEach(formation => {
+                    const li = document.createElement('li');
+                    li.textContent = formation;
+                    formationsList.appendChild(li);
+                });
+                
+                openModal('modal-department-details');
+            }
+        }
+
+        // Fonction pour voir les détails d'une demande
+        function voirDetailsDemande(demandeId) {
+            const demande = [...demandesEnAttente, ...demandesTraitees].find(d => d.id === demandeId);
+            if (demande) {
+                document.getElementById('modal-request-title').textContent = `Détails de la Demande ${demande.id}`;
+                document.getElementById('modal-request-id').value = demande.id;
+                document.getElementById('modal-request-date').value = demande.date;
+                document.getElementById('modal-request-department').value = demande.departement;
+                document.getElementById('modal-request-type').value = demande.type;
+                document.getElementById('modal-request-objet').value = demande.objet;
+                document.getElementById('modal-request-description').value = demande.description;
+                
+                const attachmentsList = document.getElementById('modal-request-attachments');
+                attachmentsList.innerHTML = '';
+                demande.attachments.forEach(attachment => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="${attachment.url}" style="color: var(--primary-color);">${attachment.nom}</a>`;
+                    attachmentsList.appendChild(li);
+                });
+                
+                openModal('modal-request-details');
+            }
+        }
+
         // Function to change active tab
         function activateTab(element, contentId) {
             // Remove active class from all tabs
@@ -818,15 +1014,6 @@
             // Show the selected tab content
             document.getElementById(contentId).classList.add('active');
             
-            // Update the tab navigation to reflect the current section
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Find the corresponding tab and make it active
-            let tabSelector = '.tab:nth-child(' + (Array.from(document.querySelectorAll('.menu-item')).indexOf(event.currentTarget) + 1) + ')';
-            document.querySelector(tabSelector).classList.add('active');
-            
             // On mobile, close the sidebar after selection
             if (window.innerWidth < 992) {
                 document.getElementById('sidebar').classList.remove('active');
@@ -854,6 +1041,12 @@
                 event.target.style.display = 'none';
             }
         }
+
+        // Initialiser les données au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const REQUIRED_ROLE = 'doyen'; // Hardcoded role
             const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');

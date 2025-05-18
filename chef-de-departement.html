@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Chef de Département - Gestion Académique</title>
     <link href="style/chef-de-departement.css" rel="stylesheet">
-  
 </head>
 <body>
     <div class="dashboard-container">
@@ -86,14 +85,6 @@
                 </div>
             </div>
             
-            <div class="tabs">
-                <div class="tab" onclick="activateTab(this, 'tableau-bord-content')">Vue d'ensemble</div>
-                <div class="tab active" onclick="activateTab(this, 'specialites-content')">Gestion des Spécialités</div>
-                <div class="tab" onclick="activateTab(this, 'enseignants-content')">Gestion des Enseignants</div>
-                <div class="tab" onclick="activateTab(this, 'etudiants-content')">Gestion des Étudiants</div>
-                <div class="tab" onclick="activateTab(this, 'sanctions-content')">Sanctions et Validations</div>
-            </div>
-            
             <!-- Tab 1: Vue d'ensemble -->
             <div class="tab-content" id="tableau-bord-content">
                 <div class="cards-container">
@@ -105,7 +96,7 @@
                             </svg>
                             Étudiants
                         </div>
-                        <div class="card-value">512</div>
+                        <div class="card-value" id="total-etudiants">512</div>
                         <div class="card-label">Total d'étudiants en informatique</div>
                     </div>
                     
@@ -117,7 +108,7 @@
                             </svg>
                             Enseignants
                         </div>
-                        <div class="card-value">32</div>
+                        <div class="card-value" id="total-enseignants">32</div>
                         <div class="card-label">Nombre d'enseignants</div>
                     </div>
                     
@@ -130,7 +121,7 @@
                             </svg>
                             Spécialités
                         </div>
-                        <div class="card-value">3</div>
+                        <div class="card-value" id="total-specialites">3</div>
                         <div class="card-label">Options disponibles</div>
                     </div>
                     
@@ -143,7 +134,7 @@
                             </svg>
                             Demandes
                         </div>
-                        <div class="card-value">8</div>
+                        <div class="card-value" id="total-demandes">8</div>
                         <div class="card-label">Demandes à traiter</div>
                     </div>
                 </div>
@@ -167,7 +158,7 @@
                         <button class="action-btn success" onclick="openModal('modal-ajout-specialite')">Ajouter une spécialité</button>
                     </div>
                     
-                    <table>
+                    <table id="specialites-table">
                         <thead>
                             <tr>
                                 <th>Code</th>
@@ -178,36 +169,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>INF-GL</td>
-                                <td>Génie Logiciel</td>
-                                <td>L3</td>
-                                <td>78</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-specialite')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>INF-SI</td>
-                                <td>Systèmes d'Information</td>
-                                <td>L3</td>
-                                <td>65</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-specialite')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>INF-IA</td>
-                                <td>Intelligence Artificielle</td>
-                                <td>M1</td>
-                                <td>42</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-specialite')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
+                            <!-- Les données seront chargées dynamiquement ici -->
                         </tbody>
                     </table>
                 </div>
@@ -223,12 +185,7 @@
                             <option value="">Tous les grades</option>
                             <option value="prof">Professeur</option>
                             <option value="mca">Maître de Conférences A</option>
-                           
-
-
-
-
-                                <option value="mcb">Maître de Conférences B</option>
+                            <option value="mcb">Maître de Conférences B</option>
                             <option value="maa">Maître Assistant A</option>
                             <option value="mab">Maître Assistant B</option>
                             <option value="vacataire">Vacataire</option>
@@ -237,7 +194,7 @@
                         <button class="action-btn success" onclick="openModal('modal-ajout-enseignant')">Ajouter un enseignant</button>
                     </div>
                     
-                    <table>
+                    <table id="enseignants-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -249,39 +206,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>ENS-001</td>
-                                <td>Dr. Ahmed Mebarki</td>
-                                <td>Maître de Conférences A</td>
-                                <td>Génie Logiciel</td>
-                                <td>a.mebarki@univ.dz</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-enseignant')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>ENS-002</td>
-                                <td>Dr. Samia Benali</td>
-                                <td>Professeur</td>
-                                <td>Intelligence Artificielle</td>
-                                <td>s.benali@univ.dz</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-enseignant')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>ENS-003</td>
-                                <td>M. Karim Hadjali</td>
-                                <td>Maître Assistant A</td>
-                                <td>Systèmes d'Information</td>
-                                <td>k.hadjali@univ.dz</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-enseignant')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
+                            <!-- Les données seront chargées dynamiquement ici -->
                         </tbody>
                     </table>
                 </div>
@@ -303,7 +228,7 @@
                         <button class="action-btn success" onclick="openModal('modal-ajout-etudiant')">Ajouter un étudiant</button>
                     </div>
                     
-                    <table>
+                    <table id="etudiants-table">
                         <thead>
                             <tr>
                                 <th>Matricule</th>
@@ -316,42 +241,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>2022-0123</td>
-                                <td>Bencherif</td>
-                                <td>Yasmine</td>
-                                <td>L3</td>
-                                <td>Génie Logiciel</td>
-                                <td>15.75</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-etudiant')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2022-0234</td>
-                                <td>Boudiaf</td>
-                                <td>Mohamed</td>
-                                <td>L3</td>
-                                <td>Systèmes d'Information</td>
-                                <td>13.20</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-etudiant')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2021-0456</td>
-                                <td>Amrani</td>
-                                <td>Sofiane</td>
-                                <td>M1</td>
-                                <td>Intelligence Artificielle</td>
-                                <td>14.90</td>
-                                <td>
-                                    <button class="action-btn" onclick="openModal('modal-modifier-etudiant')">Modifier</button>
-                                    <button class="action-btn danger">Supprimer</button>
-                                </td>
-                            </tr>
+                            <!-- Les données seront chargées dynamiquement ici -->
                         </tbody>
                     </table>
                 </div>
@@ -377,7 +267,7 @@
                         <button class="search-btn">Rechercher</button>
                     </div>
                     
-                    <table>
+                    <table id="sanctions-table">
                         <thead>
                             <tr>
                                 <th>Réf.</th>
@@ -390,40 +280,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>SAN-2025-001</td>
-                                <td>Mohamed Boudiaf</td>
-                                <td>Sanction</td>
-                                <td>Absence non justifiée (3 séances)</td>
-                                <td>05/04/2025</td>
-                                <td><span class="status status-pending">En attente</span></td>
-                                <td>
-                                    <button class="action-btn success">Approuver</button>
-                                    <button class="action-btn danger">Refuser</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>VAL-2025-007</td>
-                                <td>Yasmine Bencherif</td>
-                                <td>Validation</td>
-                                <td>Validation de stage</td>
-                                <td>02/04/2025</td>
-                                <td><span class="status status-approved">Approuvé</span></td>
-                                <td>
-                                    <button class="action-btn secondary">Détails</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>SAN-2025-002</td>
-                                <td>Sofiane Amrani</td>
-                                <td>Sanction</td>
-                                <td>Plagiat détecté dans le projet</td>
-                                <td>01/04/2025</td>
-                                <td><span class="status status-denied">Refusé</span></td>
-                                <td>
-                                    <button class="action-btn secondary">Détails</button>
-                                </td>
-                            </tr>
+                            <!-- Les données seront chargées dynamiquement ici -->
                         </tbody>
                     </table>
                 </div>
@@ -481,25 +338,25 @@
             <div class="modal-content">
                 <div class="form-group">
                     <label class="form-label">Code de la spécialité</label>
-                    <input type="text" class="form-input" value="INF-GL">
+                    <input type="text" class="form-input" id="edit-specialite-code">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Nom de la spécialité</label>
-                    <input type="text" class="form-input" value="Génie Logiciel">
+                    <input type="text" class="form-input" id="edit-specialite-nom">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Niveau</label>
-                    <select class="form-select">
+                    <select class="form-select" id="edit-specialite-niveau">
                         <option value="L1">L1</option>
                         <option value="L2">L2</option>
-                        <option value="L3" selected>L3</option>
+                        <option value="L3">L3</option>
                         <option value="M1">M1</option>
                         <option value="M2">M2</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Description</label>
-                    <textarea class="form-textarea">La spécialité Génie Logiciel forme des informaticiens spécialisés dans la conception et le développement d'applications logicielles robustes et évolutives.</textarea>
+                    <textarea class="form-textarea" id="edit-specialite-description"></textarea>
                 </div>
                 <div class="form-actions">
                     <button class="action-btn secondary" onclick="closeModal('modal-modifier-specialite')">Annuler</button>
@@ -511,6 +368,231 @@
     
     <!-- Scripts -->
     <script>
+        // Données d'exemple pour les spécialités
+        const specialitesData = [
+            { code: "INF-GL", nom: "Génie Logiciel", niveau: "L3", nbEtudiants: 78 },
+            { code: "INF-SI", nom: "Systèmes d'Information", niveau: "L3", nbEtudiants: 65 },
+            { code: "INF-IA", nom: "Intelligence Artificielle", niveau: "M1", nbEtudiants: 42 },
+            { code: "INF-RS", nom: "Réseaux et Sécurité", niveau: "M1", nbEtudiants: 38 },
+            { code: "INF-BD", nom: "Big Data", niveau: "M2", nbEtudiants: 25 }
+        ];
+
+        // Données d'exemple pour les enseignants
+        const enseignantsData = [
+            { id: "ENS-001", nom: "Dr. Ahmed Mebarki", grade: "Maître de Conférences A", specialite: "Génie Logiciel", email: "a.mebarki@univ.dz" },
+            { id: "ENS-002", nom: "Dr. Samia Benali", grade: "Professeur", specialite: "Intelligence Artificielle", email: "s.benali@univ.dz" },
+            { id: "ENS-003", nom: "M. Karim Hadjali", grade: "Maître Assistant A", specialite: "Systèmes d'Information", email: "k.hadjali@univ.dz" },
+            { id: "ENS-004", nom: "Dr. Fatima Zohra", grade: "Maître de Conférences B", specialite: "Réseaux", email: "f.zohra@univ.dz" },
+            { id: "ENS-005", nom: "Prof. Rachid Ameur", grade: "Professeur", specialite: "Big Data", email: "r.ameur@univ.dz" }
+        ];
+
+        // Données d'exemple pour les étudiants
+        const etudiantsData = [
+            { matricule: "2022-0123", nom: "Bencherif", prenom: "Yasmine", niveau: "L3", specialite: "Génie Logiciel", moyenne: 15.75 },
+            { matricule: "2022-0234", nom: "Boudiaf", prenom: "Mohamed", niveau: "L3", specialite: "Systèmes d'Information", moyenne: 13.20 },
+            { matricule: "2021-0456", nom: "Amrani", prenom: "Sofiane", niveau: "M1", specialite: "Intelligence Artificielle", moyenne: 14.90 },
+            { matricule: "2022-0345", nom: "Khelifi", prenom: "Amina", niveau: "L3", specialite: "Génie Logiciel", moyenne: 16.30 },
+            { matricule: "2021-0567", nom: "Benmoussa", prenom: "Karim", niveau: "M1", specialite: "Réseaux et Sécurité", moyenne: 12.85 }
+        ];
+
+        // Données d'exemple pour les sanctions et validations
+        const sanctionsData = [
+            { ref: "SAN-2025-001", etudiant: "Mohamed Boudiaf", type: "Sanction", description: "Absence non justifiée (3 séances)", date: "05/04/2025", statut: "pending" },
+            { ref: "VAL-2025-007", etudiant: "Yasmine Bencherif", type: "Validation", description: "Validation de stage", date: "02/04/2025", statut: "approved" },
+            { ref: "SAN-2025-002", etudiant: "Sofiane Amrani", type: "Sanction", description: "Plagiat détecté dans le projet", date: "01/04/2025", statut: "denied" },
+            { ref: "VAL-2025-008", etudiant: "Amina Khelifi", type: "Validation", description: "Validation de projet", date: "03/04/2025", statut: "pending" },
+            { ref: "SAN-2025-003", etudiant: "Karim Benmoussa", type: "Sanction", description: "Comportement inapproprié", date: "30/03/2025", statut: "approved" }
+        ];
+
+        // Fonction pour charger les données dynamiquement
+        function loadData() {
+            // Mettre à jour les compteurs
+            document.getElementById('total-etudiants').textContent = etudiantsData.length;
+            document.getElementById('total-enseignants').textContent = enseignantsData.length;
+            document.getElementById('total-specialites').textContent = specialitesData.length;
+            document.getElementById('total-demandes').textContent = sanctionsData.filter(s => s.statut === 'pending').length;
+            
+            // Charger les spécialités
+            const specialitesTable = document.getElementById('specialites-table').getElementsByTagName('tbody')[0];
+            specialitesTable.innerHTML = '';
+            specialitesData.forEach(specialite => {
+                const row = specialitesTable.insertRow();
+                row.innerHTML = `
+                    <td>${specialite.code}</td>
+                    <td>${specialite.nom}</td>
+                    <td>${specialite.niveau}</td>
+                    <td>${specialite.nbEtudiants}</td>
+                    <td>
+                        <button class="action-btn" onclick="editSpecialite('${specialite.code}')">Modifier</button>
+                        <button class="action-btn danger" onclick="deleteSpecialite('${specialite.code}')">Supprimer</button>
+                    </td>
+                `;
+            });
+            
+            // Charger les enseignants
+            const enseignantsTable = document.getElementById('enseignants-table').getElementsByTagName('tbody')[0];
+            enseignantsTable.innerHTML = '';
+            enseignantsData.forEach(enseignant => {
+                const row = enseignantsTable.insertRow();
+                row.innerHTML = `
+                    <td>${enseignant.id}</td>
+                    <td>${enseignant.nom}</td>
+                    <td>${enseignant.grade}</td>
+                    <td>${enseignant.specialite}</td>
+                    <td>${enseignant.email}</td>
+                    <td>
+                        <button class="action-btn" onclick="editEnseignant('${enseignant.id}')">Modifier</button>
+                        <button class="action-btn danger" onclick="deleteEnseignant('${enseignant.id}')">Supprimer</button>
+                    </td>
+                `;
+            });
+            
+            // Charger les étudiants
+            const etudiantsTable = document.getElementById('etudiants-table').getElementsByTagName('tbody')[0];
+            etudiantsTable.innerHTML = '';
+            etudiantsData.forEach(etudiant => {
+                const row = etudiantsTable.insertRow();
+                row.innerHTML = `
+                    <td>${etudiant.matricule}</td>
+                    <td>${etudiant.nom}</td>
+                    <td>${etudiant.prenom}</td>
+                    <td>${etudiant.niveau}</td>
+                    <td>${etudiant.specialite}</td>
+                    <td>${etudiant.moyenne}</td>
+                    <td>
+                        <button class="action-btn" onclick="editEtudiant('${etudiant.matricule}')">Modifier</button>
+                        <button class="action-btn danger" onclick="deleteEtudiant('${etudiant.matricule}')">Supprimer</button>
+                    </td>
+                `;
+            });
+            
+            // Charger les sanctions
+            const sanctionsTable = document.getElementById('sanctions-table').getElementsByTagName('tbody')[0];
+            sanctionsTable.innerHTML = '';
+            sanctionsData.forEach(sanction => {
+                const row = sanctionsTable.insertRow();
+                let statutClass = '';
+                let statutText = '';
+                
+                switch(sanction.statut) {
+                    case 'pending':
+                        statutClass = 'status-pending';
+                        statutText = 'En attente';
+                        break;
+                    case 'approved':
+                        statutClass = 'status-approved';
+                        statutText = 'Approuvé';
+                        break;
+                    case 'denied':
+                        statutClass = 'status-denied';
+                        statutText = 'Refusé';
+                        break;
+                }
+                
+                let actions = '';
+                if (sanction.statut === 'pending') {
+                    actions = `
+                        <button class="action-btn success" onclick="approveSanction('${sanction.ref}')">Approuver</button>
+                        <button class="action-btn danger" onclick="denySanction('${sanction.ref}')">Refuser</button>
+                    `;
+                } else {
+                    actions = `<button class="action-btn secondary" onclick="viewSanctionDetails('${sanction.ref}')">Détails</button>`;
+                }
+                
+                row.innerHTML = `
+                    <td>${sanction.ref}</td>
+                    <td>${sanction.etudiant}</td>
+                    <td>${sanction.type}</td>
+                    <td>${sanction.description}</td>
+                    <td>${sanction.date}</td>
+                    <td><span class="status ${statutClass}">${statutText}</span></td>
+                    <td>${actions}</td>
+                `;
+            });
+        }
+
+        // Fonction pour modifier une spécialité
+        function editSpecialite(code) {
+            const specialite = specialitesData.find(s => s.code === code);
+            if (specialite) {
+                document.getElementById('edit-specialite-code').value = specialite.code;
+                document.getElementById('edit-specialite-nom').value = specialite.nom;
+                document.getElementById('edit-specialite-niveau').value = specialite.niveau;
+                document.getElementById('edit-specialite-description').value = "La spécialité " + specialite.nom + " forme des informaticiens spécialisés dans ce domaine.";
+                openModal('modal-modifier-specialite');
+            }
+        }
+
+        // Fonction pour supprimer une spécialité
+        function deleteSpecialite(code) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer la spécialité ${code} ?`)) {
+                // Simulation de suppression
+                const index = specialitesData.findIndex(s => s.code === code);
+                if (index !== -1) {
+                    specialitesData.splice(index, 1);
+                    loadData();
+                }
+            }
+        }
+
+        // Fonction pour modifier un enseignant
+        function editEnseignant(id) {
+            // Simulation d'ouverture du modal de modification
+            alert(`Modification de l'enseignant avec ID: ${id}`);
+        }
+
+        // Fonction pour supprimer un enseignant
+        function deleteEnseignant(id) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer l'enseignant avec ID ${id} ?`)) {
+                // Simulation de suppression
+                const index = enseignantsData.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    enseignantsData.splice(index, 1);
+                    loadData();
+                }
+            }
+        }
+
+        // Fonction pour modifier un étudiant
+        function editEtudiant(matricule) {
+            // Simulation d'ouverture du modal de modification
+            alert(`Modification de l'étudiant avec matricule: ${matricule}`);
+        }
+
+        // Fonction pour supprimer un étudiant
+        function deleteEtudiant(matricule) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer l'étudiant avec matricule ${matricule} ?`)) {
+                // Simulation de suppression
+                const index = etudiantsData.findIndex(e => e.matricule === matricule);
+                if (index !== -1) {
+                    etudiantsData.splice(index, 1);
+                    loadData();
+                }
+            }
+        }
+
+        // Fonctions pour les sanctions
+        function approveSanction(ref) {
+            const index = sanctionsData.findIndex(s => s.ref === ref);
+            if (index !== -1) {
+                sanctionsData[index].statut = 'approved';
+                loadData();
+            }
+        }
+
+        function denySanction(ref) {
+            const index = sanctionsData.findIndex(s => s.ref === ref);
+            if (index !== -1) {
+                sanctionsData[index].statut = 'denied';
+                loadData();
+            }
+        }
+
+        function viewSanctionDetails(ref) {
+            // Simulation d'affichage des détails
+            alert(`Détails de la sanction/validation avec référence: ${ref}`);
+        }
+
         // Function to change tab
         function changeTab(tabId) {
             // Hide all tab contents
@@ -530,48 +612,6 @@
             
             // Add active class to the clicked menu item
             event.currentTarget.classList.add('active');
-            
-            // Update tabs at the top
-            var tabs = document.querySelectorAll('.tab');
-            tabs.forEach(function(tab) {
-                tab.classList.remove('active');
-                if (tab.textContent.toLowerCase().includes(tabId)) {
-                    tab.classList.add('active');
-                }
-            });
-        }
-        
-        // Function to activate tab
-        function activateTab(tabElement, contentId) {
-            // Remove active class from all tabs
-            var tabs = document.querySelectorAll('.tab');
-            tabs.forEach(function(tab) {
-                tab.classList.remove('active');
-            });
-            
-            // Add active class to clicked tab
-            tabElement.classList.add('active');
-            
-            // Hide all tab contents
-            var tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(function(content) {
-                content.classList.remove('active');
-            });
-            
-            // Show selected tab content
-            document.getElementById(contentId).classList.add('active');
-            
-            // Update sidebar menu active state
-            var menuItems = document.querySelectorAll('.menu-item');
-            menuItems.forEach(function(item) {
-                item.classList.remove('active');
-                var itemText = item.textContent.trim().toLowerCase();
-                var contentName = contentId.replace('-content', '').toLowerCase();
-                
-                if (itemText.includes(contentName)) {
-                    item.classList.add('active');
-                }
-            });
         }
         
         // Function to open modal
@@ -605,7 +645,17 @@
                     sidebar.classList.toggle('active');
                 });
             }
+            
+            // Charger les données au chargement de la page
+            loadData();
+            
+            // Mettre à jour la date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            document.querySelector('.dashboard-date').textContent = today.toLocaleDateString('fr-FR', options);
         });
+
+        
         document.addEventListener('DOMContentLoaded', function() {
             const REQUIRED_ROLE = 'chef-de-departement'; // Hardcoded role
             const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
@@ -641,6 +691,7 @@
                 window.location.href = `admin-login.html?requestedRole=${REQUIRED_ROLE}`;
             });
         });
+        
     </script>
 </body>
 </html>
