@@ -1,318 +1,363 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Gestion des Sections</title>
-    <link href="style/gestion-section.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="style/gestion-section.css" rel="stylesheet" />
+    <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
     <script src="js/enseignant-auth.js"></script>
     <script src="js/sidebar-loader.js"></script>
-   
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div id="navbar-container"></div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">Gestion des Sections</h1>
-            </div>
-            
-            <div class="card">
-                <h2 class="card-title">Mes Sections</h2>
-                
-                <div class="search-section">
-                    <div class="search-box">
-                        <input type="text" id="search-input" placeholder="Rechercher une section...">
-                        <button onclick="searchSections()">🔍</button>
-                    </div>
-                </div>
-                
-                <div class="sections-list" id="sections-container">
-                    <div class="loading-message">Chargement des sections...</div>
-                </div>
-            </div>
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Gestion des Sections</h1>
         </div>
+
+        <div class="card">
+          <h2 class="card-title">Mes Sections</h2>
+
+          <div class="search-section">
+            <div class="search-box">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Rechercher une section..."
+              />
+              <button onclick="searchSections()">🔍</button>
+            </div>
+          </div>
+
+          <div class="sections-list" id="sections-container">
+            <div class="loading-message">Chargement des sections...</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Global variables
-        let currentUser = null;
-        let authToken = null;
-        let isBackendAvailable = true;
-        let allSections = [];
-        
-        document.addEventListener("DOMContentLoaded", async function () {
-            // Load navigation using the sidebar loader
-            await loadTeacherSidebar();
+      // Global variables
+      let currentUser = null;
+      let authToken = null;
+      let isBackendAvailable = true;
+      let allSections = [];
 
-            try {
-                // Verify authentication using our helper
-                const authResult = await verifyEnseignantAuth();
-                
-                if (!authResult.isAuthenticated) {
-                    return; // The helper will redirect to login
-                }
-                
-                // Set global variables
-                currentUser = authResult.user;
-                authToken = sessionStorage.getItem("enseignant_token") || localStorage.getItem("enseignant_token");
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load navigation using the sidebar loader
+        await loadTeacherSidebar();
 
-                // Load data
-                try {
-                    await loadUserData();
-                    await loadSections();
-                } catch (dataError) {
-                    console.error("Error loading data:", dataError);
-                    isBackendAvailable = false;
-                    loadFallbackData();
-                    addReconnectionButton();
-                }
-            } catch (error) {
-                console.error("Access denied:", error);
-                logout(); // Use our shared logout function
-            }
-        });
+        try {
+          // Verify authentication using our helper
+          const authResult = await verifyEnseignantAuth();
 
-        // Add reconnection button
-        function addReconnectionButton() {
-            const offlineNotice = document.querySelector(".alert.alert-warning");
+          if (!authResult.isAuthenticated) {
+            return; // The helper will redirect to login
+          }
 
-            if (!offlineNotice) {
-                const offlineNotice = document.createElement("div");
-                offlineNotice.className = "alert alert-warning";
-                offlineNotice.style.padding = "10px";
-                offlineNotice.style.margin = "10px 0";
-                offlineNotice.style.backgroundColor = "#fff3cd";
-                offlineNotice.style.color = "#856404";
-                offlineNotice.style.borderRadius = "4px";
-                offlineNotice.innerHTML =
-                    "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.";
-                
-                const reconnectBtn = document.createElement("button");
-                reconnectBtn.textContent = "Réessayer la connexion";
-                reconnectBtn.style.marginLeft = "10px";
-                reconnectBtn.style.padding = "5px 10px";
-                reconnectBtn.style.backgroundColor = "#007bff";
-                reconnectBtn.style.color = "#fff";
-                reconnectBtn.style.border = "none";
-                reconnectBtn.style.borderRadius = "4px";
-                reconnectBtn.style.cursor = "pointer";
-                reconnectBtn.onclick = function () {
-                    window.location.reload();
-                };
+          // Set global variables
+          currentUser = authResult.user;
+          authToken =
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
 
-                offlineNotice.appendChild(reconnectBtn);
-                document.querySelector(".main-content").prepend(offlineNotice);
-            }
+          // Load data
+          try {
+            await loadUserData();
+            await loadSections();
+          } catch (dataError) {
+            console.error("Error loading data:", dataError);
+            isBackendAvailable = false;
+            loadFallbackData();
+            addReconnectionButton();
+          }
+        } catch (error) {
+          console.error("Access denied:", error);
+          logout(); // Use our shared logout function
         }
+      });
 
-        // Load user data
-        async function loadUserData() {
+      // Add reconnection button
+      function addReconnectionButton() {
+        const offlineNotice = document.querySelector(".alert.alert-warning");
+
+        if (!offlineNotice) {
+          const offlineNotice = document.createElement("div");
+          offlineNotice.className = "alert alert-warning";
+          offlineNotice.style.padding = "10px";
+          offlineNotice.style.margin = "10px 0";
+          offlineNotice.style.backgroundColor = "#fff3cd";
+          offlineNotice.style.color = "#856404";
+          offlineNotice.style.borderRadius = "4px";
+          offlineNotice.innerHTML =
+            "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.";
+
+          const reconnectBtn = document.createElement("button");
+          reconnectBtn.textContent = "Réessayer la connexion";
+          reconnectBtn.style.marginLeft = "10px";
+          reconnectBtn.style.padding = "5px 10px";
+          reconnectBtn.style.backgroundColor = "#10b981"; // Changed from blue to green
+          reconnectBtn.style.color = "#fff";
+          reconnectBtn.style.border = "none";
+          reconnectBtn.style.borderRadius = "4px";
+          reconnectBtn.style.cursor = "pointer";
+          reconnectBtn.onclick = function () {
+            window.location.reload();
+          };
+
+          offlineNotice.appendChild(reconnectBtn);
+          document.querySelector(".main-content").prepend(offlineNotice);
+        }
+      }
+
+      // Load user data
+      async function loadUserData() {
+        try {
+          const enseignantDataJson =
+            localStorage.getItem("enseignantData") ||
+            sessionStorage.getItem("enseignantData");
+          let user = null;
+
+          if (enseignantDataJson) {
             try {
-                const enseignantDataJson =
-                    localStorage.getItem("enseignantData") ||
-                    sessionStorage.getItem("enseignantData");
-                let user = null;
+              user = JSON.parse(enseignantDataJson);
+              console.log("Using teacher data from localStorage");
 
-                if (enseignantDataJson) {
-                    try {
-                        user = JSON.parse(enseignantDataJson);
-                        console.log("Using teacher data from localStorage");
+              if (
+                !user ||
+                typeof user !== "object" ||
+                (!user.nom && !user.prenom)
+              ) {
+                console.warn("Invalid teacher data in localStorage");
+                user = null;
+              }
+            } catch (e) {
+              console.error("Error parsing stored teacher data:", e);
+              localStorage.removeItem("enseignantData");
+              sessionStorage.removeItem("enseignantData");
+            }
+          }
 
-                        if (!user || typeof user !== "object" || (!user.nom && !user.prenom)) {
-                            console.warn("Invalid teacher data in localStorage");
-                            user = null;
-                        }
-                    } catch (e) {
-                        console.error("Error parsing stored teacher data:", e);
-                        localStorage.removeItem("enseignantData");
-                        sessionStorage.removeItem("enseignantData");
-                    }
+          if (!user) {
+            // Try to fetch the enseignant data - first try by email
+            try {
+              // Get all enseignants and find by email
+              const response = await fetch(
+                `http://localhost:3000/api/enseignants`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${authToken}`,
+                  },
+                  signal: AbortSignal.timeout(5000),
                 }
+              );
+
+              if (response.ok) {
+                const allEnseignants = await response.json();
+                // Find by email
+                user = allEnseignants.find(
+                  (e) => e.email === currentUser.email
+                );
 
                 if (!user) {
-                    // Try to fetch the enseignant data - first try by email
-                    try {
-                        // Get all enseignants and find by email
-                        const response = await fetch(
-                            `http://localhost:3000/api/enseignants`,
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${authToken}`,
-                                },
-                                signal: AbortSignal.timeout(5000),
-                            }
-                        );
-                        
-                        if (response.ok) {
-                            const allEnseignants = await response.json();
-                            // Find by email
-                            user = allEnseignants.find(e => e.email === currentUser.email);
-                            
-                            if (!user) {
-                                throw new Error("No matching teacher found");
-                            }
-                            
-                            const storage = localStorage.getItem("enseignant_token")
-                                ? localStorage
-                                : sessionStorage;
-                            storage.setItem("enseignantData", JSON.stringify(user));
-                        } else {
-                            throw new Error("Failed to retrieve teachers list");
-                        }
-                    } catch (error) {
-                        console.error("Error finding teacher by email:", error);
-                        // Fallback to mock data in case of failure
-                        user = {
-                            id: currentUser.id,
-                            nom: "Enseignant",
-                            prenom: "Test",
-                            email: currentUser.email,
-                            matricule: "ENS" + currentUser.id,
-                            departement: "Informatique"
-                        };
-                        const storage = localStorage.getItem("enseignant_token")
-                            ? localStorage
-                            : sessionStorage;
-                        storage.setItem("enseignantData", JSON.stringify(user));
-                    }
+                  throw new Error("No matching teacher found");
                 }
 
-                // Update UI with user data if elements exist
-                if (document.getElementById("userFullName")) {
-                    document.getElementById("userFullName").textContent =
-                        `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
-                }
-                
-                if (document.getElementById("userId")) {
-                    document.getElementById("userId").textContent = user.matricule || "N/A";
-                }
-                
-                if (document.getElementById("userAvatar")) {
-                    document.getElementById("userAvatar").textContent = 
-                        `${(user.prenom || " ").charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
-                }
+                const storage = localStorage.getItem("enseignant_token")
+                  ? localStorage
+                  : sessionStorage;
+                storage.setItem("enseignantData", JSON.stringify(user));
+              } else {
+                throw new Error("Failed to retrieve teachers list");
+              }
             } catch (error) {
-                console.error("Error loading user data:", error);
-                if (error.name === "AbortError" || error.message.includes("Failed to fetch")) {
-                    isBackendAvailable = false;
-                }
-                throw error;
+              console.error("Error finding teacher by email:", error);
+              // Fallback to mock data in case of failure
+              user = {
+                id: currentUser.id,
+                nom: "Enseignant",
+                prenom: "Test",
+                email: currentUser.email,
+                matricule: "ENS" + currentUser.id,
+                departement: "Informatique",
+              };
+              const storage = localStorage.getItem("enseignant_token")
+                ? localStorage
+                : sessionStorage;
+              storage.setItem("enseignantData", JSON.stringify(user));
             }
+          }
+
+          // Update UI with user data if elements exist
+          if (document.getElementById("userFullName")) {
+            document.getElementById("userFullName").textContent =
+              `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
+          }
+
+          if (document.getElementById("userId")) {
+            document.getElementById("userId").textContent =
+              user.matricule || "N/A";
+          }
+
+          if (document.getElementById("userAvatar")) {
+            document.getElementById("userAvatar").textContent = `${(
+              user.prenom || " "
+            ).charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
+          }
+        } catch (error) {
+          console.error("Error loading user data:", error);
+          if (
+            error.name === "AbortError" ||
+            error.message.includes("Failed to fetch")
+          ) {
+            isBackendAvailable = false;
+          }
+          throw error;
+        }
+      }
+
+      // Load sections
+      async function loadSections() {
+        try {
+          // Use our helper function
+          const sections = await loadTeacherSections();
+          if (sections.length > 0) {
+            allSections = sections;
+            renderSections(sections);
+          } else {
+            throw new Error("No sections found");
+          }
+        } catch (error) {
+          console.error("Error loading sections:", error);
+          renderSections([]);
+          if (!isBackendAvailable) {
+            loadFallbackData();
+          }
+        }
+      }
+
+      // Load fallback data
+      function loadFallbackData() {
+        const sampleSections = [
+          {
+            id: "sec1",
+            filiere: "Informatique",
+            nom: "B",
+            niveau: "3ème année",
+            module: "Algorithmique",
+            semestre: "2",
+            nombreEtudiants: 28,
+          },
+          {
+            id: "sec2",
+            filiere: "Informatique",
+            nom: "A",
+            niveau: "3ème année",
+            module: "Algorithmique",
+            semestre: "2",
+            nombreEtudiants: 32,
+          },
+          {
+            id: "sec3",
+            filiere: "Mathématiques",
+            nom: "C",
+            niveau: "2ème année",
+            module: "Algèbre",
+            semestre: "2",
+            nombreEtudiants: 25,
+          },
+        ];
+
+        allSections = sampleSections;
+        renderSections(sampleSections);
+      }
+
+      // Render sections
+      function renderSections(sections) {
+        const container = document.getElementById("sections-container");
+        container.innerHTML = "";
+
+        if (!sections || sections.length === 0) {
+          container.innerHTML =
+            '<div class="empty-state">Aucune section assignée</div>';
+          return;
         }
 
-        // Load sections
-        async function loadSections() {
-            try {
-                // Use our helper function
-                const sections = await loadTeacherSections();
-                if (sections.length > 0) {
-                    allSections = sections;
-                    renderSections(sections);
-                } else {
-                    throw new Error("No sections found");
-                }
-            } catch (error) {
-                console.error("Error loading sections:", error);
-                renderSections([]);
-                if (!isBackendAvailable) {
-                    loadFallbackData();
-                }
-            }
-        }
+        sections.forEach((section) => {
+          const sectionElement = document.createElement("div");
+          sectionElement.className = "section-item";
 
-        // Load fallback data
-        function loadFallbackData() {
-            const sampleSections = [
-                {
-                    id: "sec1",
-                    filiere: "Informatique",
-                    nom: "B",
-                    niveau: "3ème année",
-                    module: "Algorithmique",
-                    semestre: "2",
-                    nombreEtudiants: 28
-                },
-                {
-                    id: "sec2",
-                    filiere: "Informatique",
-                    nom: "A",
-                    niveau: "3ème année",
-                    module: "Algorithmique",
-                    semestre: "2",
-                    nombreEtudiants: 32
-                },
-                {
-                    id: "sec3",
-                    filiere: "Mathématiques",
-                    nom: "C",
-                    niveau: "2ème année",
-                    module: "Algèbre",
-                    semestre: "2",
-                    nombreEtudiants: 25
-                }
-            ];
-            
-            allSections = sampleSections;
-            renderSections(sampleSections);
-        }
+          // Calculate student count
+          const totalOccupancy = section.groupes
+            ? section.groupes.reduce(
+                (sum, groupe) => sum + (groupe.currentOccupancy || 0),
+                0
+              )
+            : 0;
 
-        // Render sections
-        function renderSections(sections) {
-            const container = document.getElementById("sections-container");
-            container.innerHTML = "";
+          // Group counts by type
+          const tdGroups = section.groupes
+            ? section.groupes.filter((g) => g.type === "td").length
+            : 0;
+          const tpGroups = section.groupes
+            ? section.groupes.filter((g) => g.type === "tp").length
+            : 0;
 
-            if (!sections || sections.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucune section assignée</div>';
-                return;
-            }
-
-            sections.forEach((section) => {
-                const sectionElement = document.createElement("div");
-                sectionElement.className = "section-item";
-                
-                // Calculate student count
-                const totalOccupancy = section.groupes ? section.groupes.reduce((sum, groupe) => 
-                    sum + (groupe.currentOccupancy || 0), 0) : 0;
-                
-                // Group counts by type
-                const tdGroups = section.groupes ? section.groupes.filter(g => g.type === 'td').length : 0;
-                const tpGroups = section.groupes ? section.groupes.filter(g => g.type === 'tp').length : 0;
-                
-                sectionElement.innerHTML = `
+          sectionElement.innerHTML = `
                     <div class="section-info">
-                        <div class="section-name">${section.specialty || section.filiere || 'Filière'} - Section ${section.name || section.nom || ''}</div>
+                        <div class="section-name">${
+                          section.specialty || section.filiere || "Filière"
+                        } - Section ${section.name || section.nom || ""}</div>
                         <div class="section-details">
-                            <div>Code: ${section.code || 'Non spécifié'}</div>
-                            <div>Niveau: ${section.level || section.niveau || 'Non spécifié'}</div>
+                            <div>Code: ${section.code || "Non spécifié"}</div>
+                            <div>Niveau: ${
+                              section.level || section.niveau || "Non spécifié"
+                            }</div>
                             <div>Groupes: ${tdGroups} TD, ${tpGroups} TP</div>
                         </div>
                     </div>
                     <div class="student-count">${totalOccupancy} étudiants</div>
                     <div class="section-actions">
-                        <button class="btn btn-secondary" onclick="toggleStudents('${section.id}')">Voir étudiants</button>
-                        <button class="btn btn-primary" onclick="manageSection('${section.id}')">Gérer</button>
+                        <button class="btn btn-secondary" onclick="toggleStudents('${
+                          section.id
+                        }')">Voir étudiants</button>
+                        <button class="btn btn-primary" onclick="manageSection('${
+                          section.id
+                        }')">Gérer</button>
                     </div>
                 `;
-                
-                container.appendChild(sectionElement);
-                
-                // Add student panel (hidden initially)
-                const studentPanel = document.createElement("div");
-                studentPanel.className = "student-panel";
-                studentPanel.id = `${section.id}-students`;
-                studentPanel.style.display = "none";
-                
-                studentPanel.innerHTML = `
+
+          container.appendChild(sectionElement);
+
+          // Add student panel (hidden initially)
+          const studentPanel = document.createElement("div");
+          studentPanel.className = "student-panel";
+          studentPanel.id = `${section.id}-students`;
+          studentPanel.style.display = "none";
+
+          studentPanel.innerHTML = `
                     <div class="panel-header">
-                        <div class="panel-title">Étudiants - ${section.specialty || section.filiere || 'Filière'} Section ${section.name || section.nom || ''}</div>
-                        <button class="btn btn-secondary" onclick="toggleStudents('${section.id}')">Fermer</button>
+                        <div class="panel-title">Étudiants - ${
+                          section.specialty || section.filiere || "Filière"
+                        } Section ${section.name || section.nom || ""}</div>
+                        <button class="btn btn-secondary" onclick="toggleStudents('${
+                          section.id
+                        }')">Fermer</button>
                     </div>
-                    <div class="group-selector" id="group-selector-${section.id}">
-                        <select id="group-filter-${section.id}" onchange="filterSectionStudents('${section.id}')">
+                    <div class="group-selector" id="group-selector-${
+                      section.id
+                    }">
+                        <select id="group-filter-${
+                          section.id
+                        }" onchange="filterSectionStudents('${section.id}')">
                             <option value="">Tous les groupes</option>
                             ${renderGroupOptions(section.groupes)}
                         </select>
@@ -321,198 +366,221 @@
                         <div class="loading-message">Chargement des étudiants...</div>
                     </div>
                 `;
-                
-                container.appendChild(studentPanel);
-            });
+
+          container.appendChild(studentPanel);
+        });
+      }
+
+      // Helper function to render group options
+      function renderGroupOptions(groupes) {
+        if (!groupes || groupes.length === 0) return "";
+
+        let options = "";
+
+        // Group by type
+        const tdGroups = groupes.filter((g) => g.type === "td");
+        const tpGroups = groupes.filter((g) => g.type === "tp");
+
+        // Add TD groups
+        if (tdGroups.length > 0) {
+          options += '<optgroup label="Groupes TD">';
+          tdGroups.forEach((group) => {
+            options += `<option value="td-${group.id}">${
+              group.name || "Sans nom"
+            } (TD)</option>`;
+          });
+          options += "</optgroup>";
         }
-        
-        // Helper function to render group options
-        function renderGroupOptions(groupes) {
-            if (!groupes || groupes.length === 0) return '';
-            
-            let options = '';
-            
-            // Group by type
-            const tdGroups = groupes.filter(g => g.type === 'td');
-            const tpGroups = groupes.filter(g => g.type === 'tp');
-            
-            // Add TD groups
-            if (tdGroups.length > 0) {
-                options += '<optgroup label="Groupes TD">';
-                tdGroups.forEach(group => {
-                    options += `<option value="td-${group.id}">${group.name || 'Sans nom'} (TD)</option>`;
-                });
-                options += '</optgroup>';
-            }
-            
-            // Add TP groups
-            if (tpGroups.length > 0) {
-                options += '<optgroup label="Groupes TP">';
-                tpGroups.forEach(group => {
-                    options += `<option value="tp-${group.id}">${group.name || 'Sans nom'} (TP)</option>`;
-                });
-                options += '</optgroup>';
-            }
-            
-            return options;
+
+        // Add TP groups
+        if (tpGroups.length > 0) {
+          options += '<optgroup label="Groupes TP">';
+          tpGroups.forEach((group) => {
+            options += `<option value="tp-${group.id}">${
+              group.name || "Sans nom"
+            } (TP)</option>`;
+          });
+          options += "</optgroup>";
         }
-        
-        // Toggle student panel visibility
-        function toggleStudents(sectionId) {
-            const studentPanel = document.getElementById(sectionId + '-students');
-            if (studentPanel.style.display === 'block') {
-                studentPanel.style.display = 'none';
+
+        return options;
+      }
+
+      // Toggle student panel visibility
+      function toggleStudents(sectionId) {
+        const studentPanel = document.getElementById(sectionId + "-students");
+        if (studentPanel.style.display === "block") {
+          studentPanel.style.display = "none";
+        } else {
+          studentPanel.style.display = "block";
+          loadStudentsForSection(sectionId);
+        }
+      }
+
+      // Filter students within a section by group
+      function filterSectionStudents(sectionId) {
+        const groupFilterValue = document.getElementById(
+          `group-filter-${sectionId}`
+        ).value;
+
+        // Get all student items in this section
+        const studentItems = document.querySelectorAll(
+          `#student-list-${sectionId} .student-item`
+        );
+
+        if (!groupFilterValue) {
+          // Show all students
+          studentItems.forEach((item) => {
+            item.style.display = "flex";
+          });
+          return;
+        }
+
+        // Parse group type and ID
+        const [groupType, groupId] = groupFilterValue.split("-");
+
+        // Filter students
+        studentItems.forEach((item) => {
+          const studentGroupData = item.getAttribute("data-groups") || "{}";
+          try {
+            const groups = JSON.parse(studentGroupData);
+
+            if (
+              (groupType === "td" && groups.tdId === groupId) ||
+              (groupType === "tp" && groups.tpId === groupId)
+            ) {
+              item.style.display = "flex";
             } else {
-                studentPanel.style.display = 'block';
-                loadStudentsForSection(sectionId);
+              item.style.display = "none";
             }
+          } catch (e) {
+            console.error("Error parsing group data:", e);
+            item.style.display = "flex"; // Show by default on error
+          }
+        });
+      }
+
+      // Load students for a section
+      async function loadStudentsForSection(sectionId) {
+        const container = document.getElementById(`student-list-${sectionId}`);
+
+        try {
+          if (isBackendAvailable) {
+            // Get students directly from the section's students API
+            const response = await fetch(
+              `http://localhost:3000/api/sections/${sectionId}/etudiants`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+                signal: AbortSignal.timeout(5000),
+              }
+            );
+
+            if (response.ok) {
+              const students = await response.json();
+              renderSectionStudents(sectionId, students);
+            } else if (response.status === 403) {
+              console.error(
+                "Access denied for section students, using fallback data"
+              );
+              renderSectionStudents(sectionId, generateSampleStudents(5));
+            } else {
+              throw new Error("Failed to load students");
+            }
+          } else {
+            // Fallback data
+            renderSectionStudents(sectionId, generateSampleStudents(5));
+          }
+        } catch (error) {
+          console.error("Error loading students:", error);
+          container.innerHTML =
+            '<div class="error-message">Erreur de chargement des étudiants</div>';
         }
-        
-        // Filter students within a section by group
-        function filterSectionStudents(sectionId) {
-            const groupFilterValue = document.getElementById(`group-filter-${sectionId}`).value;
-            
-            // Get all student items in this section
-            const studentItems = document.querySelectorAll(`#student-list-${sectionId} .student-item`);
-            
-            if (!groupFilterValue) {
-                // Show all students
-                studentItems.forEach(item => {
-                    item.style.display = 'flex';
-                });
-                return;
-            }
-            
-            // Parse group type and ID
-            const [groupType, groupId] = groupFilterValue.split('-');
-            
-            // Filter students
-            studentItems.forEach(item => {
-                const studentGroupData = item.getAttribute('data-groups') || '{}';
-                try {
-                    const groups = JSON.parse(studentGroupData);
-                    
-                    if ((groupType === 'td' && groups.tdId === groupId) || 
-                        (groupType === 'tp' && groups.tpId === groupId)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                } catch (e) {
-                    console.error("Error parsing group data:", e);
-                    item.style.display = 'flex'; // Show by default on error
-                }
-            });
+      }
+
+      // Render students for a section
+      function renderSectionStudents(sectionId, students) {
+        const container = document.getElementById(`student-list-${sectionId}`);
+        container.innerHTML = "";
+
+        if (!students || students.length === 0) {
+          container.innerHTML =
+            '<div class="empty-state">Aucun étudiant dans cette section</div>';
+          return;
         }
-        
-        // Load students for a section
-        async function loadStudentsForSection(sectionId) {
-            const container = document.getElementById(`student-list-${sectionId}`);
-            
-            try {
-                if (isBackendAvailable) {
-                    // Get students directly from the section's students API
-                    const response = await fetch(
-                        `http://localhost:3000/api/sections/${sectionId}/etudiants`,
-                        {
-                            headers: {
-                                Authorization: `Bearer ${authToken}`,
-                            },
-                            signal: AbortSignal.timeout(5000),
-                        }
-                    );
-                    
-                    if (response.ok) {
-                        const students = await response.json();
-                        renderSectionStudents(sectionId, students);
-                    } else if (response.status === 403) {
-                        console.error("Access denied for section students, using fallback data");
-                        renderSectionStudents(sectionId, generateSampleStudents(5));
-                    } else {
-                        throw new Error("Failed to load students");
-                    }
-                } else {
-                    // Fallback data
-                    renderSectionStudents(sectionId, generateSampleStudents(5));
-                }
-            } catch (error) {
-                console.error("Error loading students:", error);
-                container.innerHTML = '<div class="error-message">Erreur de chargement des étudiants</div>';
+
+        // Get the section object
+        const section = allSections.find((s) => s.id === sectionId);
+        const sectionGroups = section?.groupes || [];
+
+        students.forEach((student) => {
+          const studentItem = document.createElement("div");
+          studentItem.className = "student-item";
+
+          // Extract fields with fallbacks for both data structures
+          const firstName = student.firstName || student.prenom || "";
+          const lastName = student.lastName || student.nom || "";
+          const matricule = student.matricule || student.id || "N/A";
+
+          // Extract group info
+          let tdGroup = "Non assigné";
+          let tpGroup = "Non assigné";
+          let tdGroupId = "";
+          let tpGroupId = "";
+
+          // Try to extract group info from different structures
+          if (student.tdGroupe) {
+            tdGroup = student.tdGroupe.name || "TD";
+            tdGroupId = student.tdGroupe.id;
+          } else if (student.groupe_td) {
+            if (typeof student.groupe_td === "object") {
+              tdGroup = student.groupe_td.name || "TD";
+              tdGroupId = student.groupe_td.id;
+            } else {
+              tdGroup = `TD ${student.groupe_td}`;
+
+              // Try to find group ID from section groups
+              const matchingTdGroup = sectionGroups.find(
+                (g) =>
+                  g.type === "td" && g.name === student.groupe_td.toString()
+              );
+              if (matchingTdGroup) tdGroupId = matchingTdGroup.id;
             }
-        }
-        
-        // Render students for a section
-        function renderSectionStudents(sectionId, students) {
-            const container = document.getElementById(`student-list-${sectionId}`);
-            container.innerHTML = "";
-            
-            if (!students || students.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aucun étudiant dans cette section</div>';
-                return;
+          }
+
+          if (student.tpGroupe) {
+            tpGroup = student.tpGroupe.name || "TP";
+            tpGroupId = student.tpGroupe.id;
+          } else if (student.groupe_tp) {
+            if (typeof student.groupe_tp === "object") {
+              tpGroup = student.groupe_tp.name || "TP";
+              tpGroupId = student.groupe_tp.id;
+            } else {
+              tpGroup = `TP ${student.groupe_tp}`;
+
+              // Try to find group ID from section groups
+              const matchingTpGroup = sectionGroups.find(
+                (g) =>
+                  g.type === "tp" && g.name === student.groupe_tp.toString()
+              );
+              if (matchingTpGroup) tpGroupId = matchingTpGroup.id;
             }
-            
-            // Get the section object
-            const section = allSections.find(s => s.id === sectionId);
-            const sectionGroups = section?.groupes || [];
-            
-            students.forEach(student => {
-                const studentItem = document.createElement("div");
-                studentItem.className = "student-item";
-                
-                // Extract fields with fallbacks for both data structures
-                const firstName = student.firstName || student.prenom || '';
-                const lastName = student.lastName || student.nom || '';
-                const matricule = student.matricule || student.id || 'N/A';
-                
-                // Extract group info
-                let tdGroup = 'Non assigné';
-                let tpGroup = 'Non assigné';
-                let tdGroupId = '';
-                let tpGroupId = '';
-                
-                // Try to extract group info from different structures
-                if (student.tdGroupe) {
-                    tdGroup = student.tdGroupe.name || 'TD';
-                    tdGroupId = student.tdGroupe.id;
-                } else if (student.groupe_td) {
-                    if (typeof student.groupe_td === 'object') {
-                        tdGroup = student.groupe_td.name || 'TD';
-                        tdGroupId = student.groupe_td.id;
-                    } else {
-                        tdGroup = `TD ${student.groupe_td}`;
-                        
-                        // Try to find group ID from section groups
-                        const matchingTdGroup = sectionGroups.find(g => 
-                            g.type === 'td' && g.name === student.groupe_td.toString());
-                        if (matchingTdGroup) tdGroupId = matchingTdGroup.id;
-                    }
-                }
-                
-                if (student.tpGroupe) {
-                    tpGroup = student.tpGroupe.name || 'TP';
-                    tpGroupId = student.tpGroupe.id;
-                } else if (student.groupe_tp) {
-                    if (typeof student.groupe_tp === 'object') {
-                        tpGroup = student.groupe_tp.name || 'TP';
-                        tpGroupId = student.groupe_tp.id;
-                    } else {
-                        tpGroup = `TP ${student.groupe_tp}`;
-                        
-                        // Try to find group ID from section groups
-                        const matchingTpGroup = sectionGroups.find(g => 
-                            g.type === 'tp' && g.name === student.groupe_tp.toString());
-                        if (matchingTpGroup) tpGroupId = matchingTpGroup.id;
-                    }
-                }
-                
-                // Store group IDs as data attribute for filtering
-                studentItem.setAttribute('data-groups', JSON.stringify({
-                    tdId: tdGroupId,
-                    tpId: tpGroupId
-                }));
-                
-                studentItem.innerHTML = `
-                    <div class="student-avatar">${firstName.charAt(0)}${lastName.charAt(0)}</div>
+          }
+
+          // Store group IDs as data attribute for filtering
+          studentItem.setAttribute(
+            "data-groups",
+            JSON.stringify({
+              tdId: tdGroupId,
+              tpId: tpGroupId,
+            })
+          );
+
+          studentItem.innerHTML = `
+                    <div class="student-avatar">${firstName.charAt(
+                      0
+                    )}${lastName.charAt(0)}</div>
                     <div class="student-info">
                         <div class="student-name">${firstName} ${lastName}</div>
                         <div class="student-id">${matricule}</div>
@@ -522,63 +590,87 @@
                         </div>
                     </div>
                 `;
-                
-                container.appendChild(studentItem);
-            });
+
+          container.appendChild(studentItem);
+        });
+      }
+
+      // Generate sample students
+      function generateSampleStudents(count) {
+        const firstNames = [
+          "Ahmed",
+          "Fatima",
+          "Karim",
+          "Lina",
+          "Yacine",
+          "Sara",
+          "Mohamed",
+          "Amina",
+        ];
+        const lastNames = [
+          "Saidi",
+          "Benali",
+          "Hadj",
+          "Mansouri",
+          "Boudiaf",
+          "Messaoudi",
+          "Benzema",
+          "Cherif",
+        ];
+
+        const students = [];
+        for (let i = 0; i < count; i++) {
+          students.push({
+            id: `stud${i + 1}`,
+            nom: lastNames[Math.floor(Math.random() * lastNames.length)],
+            prenom: firstNames[Math.floor(Math.random() * firstNames.length)],
+            matricule: `2023${Math.floor(1000 + Math.random() * 9000)}`,
+            groupe_td: Math.floor(Math.random() * 3) + 1,
+            groupe_tp: Math.floor(Math.random() * 3) + 1,
+          });
         }
-        
-        // Generate sample students
-        function generateSampleStudents(count) {
-            const firstNames = ["Ahmed", "Fatima", "Karim", "Lina", "Yacine", "Sara", "Mohamed", "Amina"];
-            const lastNames = ["Saidi", "Benali", "Hadj", "Mansouri", "Boudiaf", "Messaoudi", "Benzema", "Cherif"];
-            
-            const students = [];
-            for (let i = 0; i < count; i++) {
-                students.push({
-                    id: `stud${i+1}`,
-                    nom: lastNames[Math.floor(Math.random() * lastNames.length)],
-                    prenom: firstNames[Math.floor(Math.random() * firstNames.length)],
-                    matricule: `2023${Math.floor(1000 + Math.random() * 9000)}`,
-                    groupe_td: Math.floor(Math.random() * 3) + 1,
-                    groupe_tp: Math.floor(Math.random() * 3) + 1
-                });
-            }
-            
-            return students;
+
+        return students;
+      }
+
+      // Manage section function
+      function manageSection(sectionId) {
+        // Will be implemented later
+        alert("Fonctionnalité en cours de développement");
+      }
+
+      // Search sections
+      function searchSections() {
+        const searchValue = document
+          .getElementById("search-input")
+          .value.toLowerCase();
+
+        if (!searchValue.trim()) {
+          renderSections(allSections);
+          return;
         }
-        
-        // Manage section function
-        function manageSection(sectionId) {
-            // Will be implemented later
-            alert("Fonctionnalité en cours de développement");
-        }
-        
-        // Search sections
-        function searchSections() {
-            const searchValue = document.getElementById("search-input").value.toLowerCase();
-            
-            if (!searchValue.trim()) {
-                renderSections(allSections);
-                return;
-            }
-            
-            const filteredSections = allSections.filter(section => {
-                // Support both old and new data formats
-                const specialty = (section.specialty || section.filiere || '').toLowerCase();
-                const name = (section.name || section.nom || '').toLowerCase();
-                const code = (section.code || '').toLowerCase();
-                const level = (section.level || section.niveau || '').toLowerCase();
-                
-                return (
-                    specialty.includes(searchValue) ||
-                    name.includes(searchValue) ||
-                    code.includes(searchValue) ||
-                    level.includes(searchValue)
-                );
-            });
-            
-            renderSections(filteredSections);
-        }
+
+        const filteredSections = allSections.filter((section) => {
+          // Support both old and new data formats
+          const specialty = (
+            section.specialty ||
+            section.filiere ||
+            ""
+          ).toLowerCase();
+          const name = (section.name || section.nom || "").toLowerCase();
+          const code = (section.code || "").toLowerCase();
+          const level = (section.level || section.niveau || "").toLowerCase();
+
+          return (
+            specialty.includes(searchValue) ||
+            name.includes(searchValue) ||
+            code.includes(searchValue) ||
+            level.includes(searchValue)
+          );
+        });
+
+        renderSections(filteredSections);
+      }
     </script>
-</body>
+  </body>
 </html>

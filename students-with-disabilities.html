@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Étudiants en situation de handicap</title>
+    <link href="style/dashbord-teacher.css" rel="stylesheet" />
+    <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link href="style/teacher-sidebar.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <script src="js/enseignant-auth.js"></script>
+    <script src="js/sidebar-loader.js"></script>
+    <style>
+      body {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .students-container {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .filter-controls {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .search-box {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 300px;
+      }
+
+      .filter-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #555;
+        cursor: pointer;
+      }
+
+      .filter-label input[type="checkbox"] {
+        margin: 0;
+      }
+
+      .filter-options {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .filter-dropdown {
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: white;
+        font-size: 14px;
+      }
+
+      .student-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9f9f9;
+        transition: all 0.3s ease;
+      }
+
+      .student-card:hover {
+        background: #f0f0f0;
+        transform: translateY(-2px);
+      }
+
+      .student-info {
+        flex: 1;
+      }
+
+      .student-name {
+        font-weight: bold;
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .student-details {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+        margin-right: 5px;
+      }
+
+      .badge-disability {
+        background-color: #ffedd5;
+        color: #c2410c;
+      }
+
+      .badge-delegate {
+        background-color: #e0f2fe;
+        color: #0369a1;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .action-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.3s;
+      }
+
+      .view-btn {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .view-btn:hover {
+        background-color: #2563eb;
+      }
+
+      .delegate-btn {
+        background-color: #10b981;
+        color: white;
+      }
+
+      .delegate-btn:hover {
+        background-color: #059669;
+      }
+
+      .remove-btn {
+        background-color: #ef4444;
+        color: white;
+      }
+
+      .remove-btn:hover {
+        background-color: #dc2626;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        padding: 10px 0;
+      }
+
+      .page-btn {
+        padding: 8px 14px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        background: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+
+      .page-btn.active {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .page-btn:hover:not(.active) {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close-btn:hover,
+      .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #333;
+      }
+
+      .form-select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background-color: #3b82f6;
+        color: white;
+        font-weight: 600;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .btn-submit:hover {
+        background-color: #2563eb;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-secondary {
+        background-color: #cbd5e1;
+        color: #334155;
+      }
+
+      .btn-secondary:hover {
+        background-color: #94a3b8;
+        color: #1e293b;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-success {
+        background-color: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background-color: #059669;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .stats-card {
+        padding: 15px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .stats-card.highlighted {
+        background: linear-gradient(135deg, #fefce8 0%, #ffedd5 100%);
+        border-left: 4px solid #c2410c;
+      }
+
+      .stats-title {
+        font-size: 14px;
+        color: #64748b;
+        margin: 0 0 8px 0;
+      }
+
+      .stats-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #334155;
+        margin: 0;
+      }
+
+      .notification-bubble {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        background-color: #ef4444;
+        color: white;
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 8px;
+      }
+
+      .accessibility-icon {
+        margin-right: 6px;
+        color: #c2410c;
+      }
+
+      .disability-types {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 5px;
+      }
+
+      .disability-type {
+        font-size: 11px;
+        padding: 3px 6px;
+        border-radius: 10px;
+        background-color: #fffbeb;
+        border: 1px solid #fbbf24;
+        color: #92400e;
+      }
+
+      .return-to-all {
+        background-color: #f3f4f6;
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #4b5563;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        margin-bottom: 15px;
+      }
+
+      .return-to-all:hover {
+        background-color: #e5e7eb;
+        color: #1f2937;
+      }
+
+      .accessibility-panel {
+        background: #fffbeb;
+        border: 1px solid #fbbf24;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .accessibility-panel h3 {
+        color: #92400e;
+        margin-top: 0;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+      }
+
+      .tips-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 12px 0 0 0;
+      }
+
+      .tips-list li {
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+        font-size: 14px;
+        color: #4b5563;
+      }
+
+      .tips-list li::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #f59e0b;
+        font-weight: bold;
+      }
+
+      .view-toggle {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Navigation Sidebar -->
+      <div id="teacher-nav"></div>
+
+      <!-- Main Content Area -->
+      <div class="main-content">
+        <div class="welcome-header">
+          <h1>Gestion des étudiants en situation de handicap</h1>
+        </div>
+
+        <div class="students-container">
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stats-card highlighted">
+              <h4 class="stats-title">
+                <i class="fas fa-wheelchair accessibility-icon"></i>Étudiants en
+                situation de handicap
+              </h4>
+              <span class="stats-value" id="disabled-students">0</span>
+            </div>
+            <div class="stats-card">
+              <h4 class="stats-title">
+                <i class="fas fa-clipboard-list"></i>Demandes d'aménagement en
+                attente
+              </h4>
+              <span class="stats-value" id="pending-requests">0</span>
+            </div>
+            <div class="stats-card">
+              <h4 class="stats-title">
+                <i class="fas fa-check-circle"></i>Aménagements approuvés
+              </h4>
+              <span class="stats-value" id="approved-accommodations">0</span>
+            </div>
+            <div class="stats-card">
+              <h4 class="stats-title">
+                <i class="fas fa-bell"></i>Notifications
+              </h4>
+              <span class="stats-value" id="notification-count">0</span>
+            </div>
+          </div>
+
+          <!-- Accessibility Panel -->
+          <div class="accessibility-panel">
+            <h3>
+              <i class="fas fa-info-circle" style="margin-right: 8px"></i>
+              Informations sur l'accessibilité
+            </h3>
+            <p>
+              Cette page est spécialement conçue pour vous aider à gérer les
+              étudiants en situation de handicap de vos classes.
+            </p>
+            <ul class="tips-list">
+              <li>
+                Utilisez les filtres pour affiner votre recherche par type de
+                handicap
+              </li>
+              <li>Accédez aux demandes d'aménagement pour chaque étudiant</li>
+              <li>
+                Consultez les notes et recommandations du service handicap
+              </li>
+              <li>
+                Contactez les étudiants directement pour discuter de leurs
+                besoins spécifiques
+              </li>
+            </ul>
+          </div>
+
+          <div class="view-toggle">
+            <a href="gestion-etudiants.html" class="return-to-all">
+              <i class="fas fa-arrow-left"></i> Voir tous les étudiants
+            </a>
+          </div>
+
+          <!-- Filter Controls -->
+          <div class="filter-controls">
+            <input
+              type="text"
+              id="student-search"
+              placeholder="Rechercher un étudiant..."
+              class="search-box"
+            />
+            <div class="filter-options">
+              <select id="section-filter" class="filter-dropdown">
+                <option value="">Toutes les sections</option>
+                <!-- Populated dynamically -->
+              </select>
+              <select id="group-filter" class="filter-dropdown">
+                <option value="">Tous les groupes</option>
+                <option value="TD">TD</option>
+                <option value="TP">TP</option>
+              </select>
+              <select id="disability-type-filter" class="filter-dropdown">
+                <option value="">Tous les types de handicap</option>
+                <option value="moteur">Handicap moteur</option>
+                <option value="visuel">Handicap visuel</option>
+                <option value="auditif">Handicap auditif</option>
+                <option value="cognitif">Troubles cognitifs</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading-indicator" style="display: none; text-align: center">
+            <i class="fas fa-spinner fa-spin"></i> Chargement des étudiants...
+          </div>
+
+          <!-- Error Message -->
+          <div
+            id="error-message"
+            style="display: none; color: red; text-align: center"
+          ></div>
+
+          <!-- Students List -->
+          <div id="students-list">
+            <!-- Will be populated dynamically -->
+          </div>
+
+          <!-- Pagination -->
+          <div id="pagination" class="pagination">
+            <!-- Will be populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delegate Assignment Modal -->
+    <div id="delegate-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2>Désigner un délégué</h2>
+        <form id="delegate-form">
+          <div class="form-group">
+            <label for="assignment" class="form-label"
+              >Type d'assignation:</label
+            >
+            <select id="assignment" class="form-select">
+              <option value="section">Délégué de section</option>
+              <option value="group">Délégué de groupe</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-submit">Assigner</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load the teacher navigation
+        fetch("enseignant-nav.html")
+          .then((response) => response.text())
+          .then((html) => {
+            document.getElementById("teacher-nav").innerHTML = html;
+
+            // Highlight the appropriate navigation link
+            setTimeout(() => {
+              const navLinks = document.querySelectorAll(".nav-link");
+              navLinks.forEach((link) => {
+                if (
+                  link.href.includes("students-with-disabilities.html") ||
+                  link.href.includes("gestion-etudiants.html?disabled=true")
+                ) {
+                  link.classList.add("active");
+                }
+              });
+            }, 100);
+          });
+
+        // Set up variables
+        let currentTeacherId = null;
+        let authToken = localStorage.getItem("teacherToken");
+        let studentsData = [];
+        let currentStudentId = null;
+        let currentPage = 1;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+
+        // Global variables to store all students
+        let allStudentsData = [];
+        let filteredStudents = [];
+        const ITEMS_PER_PAGE = 10;
+
+        // Cache for section data to avoid unnecessary API calls
+        const sectionCache = {};
+
+        // Initialize the page
+        await loadInitialData();
+        await loadStudents();
+
+        // Debounce function to prevent excessive filtering on search
+        function debounce(func, wait) {
+          let timeout;
+          return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+          };
+        }
+
+        // Setup event listeners
+        document
+          .getElementById("student-search")
+          .addEventListener("input", debounce(handleSearchInput, 300)); // 300ms debounce
+        document
+          .getElementById("section-filter")
+          .addEventListener("change", handleFiltersChange);
+        document
+          .getElementById("group-filter")
+          .addEventListener("change", handleFiltersChange);
+        document
+          .getElementById("disability-type-filter")
+          .addEventListener("change", handleFiltersChange);
+
+        async function loadInitialData() {
+          try {
+            if (!authToken) {
+              window.location.href = "enseignant-login.html";
+              return;
+            }
+
+            const res = await fetch("http://localhost:3000/api/auth/verify", {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            });
+
+            if (res.ok) {
+              const data = await res.json();
+              if (data.user && data.user.id) {
+                currentTeacherId = data.user.id;
+
+                // Load teacher's assigned sections for the dropdown
+                try {
+                  const sectionsRes = await fetch(
+                    "http://localhost:3000/api/enseignants/my-sections",
+                    {
+                      headers: {
+                        Authorization: `Bearer ${authToken}`,
+                      },
+                    }
+                  );
+
+                  if (sectionsRes.ok) {
+                    const sections = await sectionsRes.json();
+                    const sectionFilter =
+                      document.getElementById("section-filter");
+
+                    sections.forEach((section) => {
+                      const option = document.createElement("option");
+                      option.value = section.id;
+                      option.textContent = `${section.specialite} - ${section.niveau}`;
+                      sectionFilter.appendChild(option);
+                    });
+
+                    // Check if there is a specific section in the URL to select
+                    const urlParams = new URLSearchParams(
+                      window.location.search
+                    );
+                    const sectionParam = urlParams.get("section");
+                    if (sectionParam) {
+                      sectionFilter.value = sectionParam;
+                    }
+                  } else {
+                    console.error("Failed to fetch sections");
+                  }
+                } catch (err) {
+                  console.error("Error fetching teacher sections:", err);
+                }
+              } else {
+                console.error("Failed to verify token");
+                window.location.href = "enseignant-login.html";
+              }
+            }
+          } catch (error) {
+            console.error("Error loading teacher data:", error);
+            showError("Erreur de connexion au serveur");
+          }
+        }
+
+        async function loadStudents(reloadData = true) {
+          const loadingIndicator = document.getElementById("loading-indicator");
+          const errorMessage = document.getElementById("error-message");
+          const studentsList = document.getElementById("students-list");
+          const sectionFilter = document.getElementById("section-filter").value;
+          const groupFilter = document.getElementById("group-filter").value;
+          const disabilityTypeFilter = document.getElementById(
+            "disability-type-filter"
+          ).value;
+          const searchTerm = document
+            .getElementById("student-search")
+            .value.toLowerCase();
+
+          loadingIndicator.style.display = "block";
+          errorMessage.style.display = "none";
+          studentsList.innerHTML = "";
+
+          try {
+            if (!currentTeacherId) {
+              throw new Error("ID de l'enseignant non disponible");
+            }
+
+            // Determine which section we're working with
+            let targetSectionId = sectionFilter;
+            if (!targetSectionId) {
+              // If no specific section is selected, use the first available section
+              const sections = await fetch(
+                `http://localhost:3000/api/enseignants/my-sections`,
+                {
+                  headers: { Authorization: `Bearer ${authToken}` },
+                }
+              ).then((r) => r.json());
+
+              if (sections && sections.length > 0) {
+                targetSectionId = sections[0].id;
+              } else {
+                throw new Error("Aucune section assignée à cet enseignant");
+              }
+            }
+
+            // Only fetch data if reloading is requested, we don't have cached data,
+            // or we're switching sections
+            if (reloadData || !sectionCache[targetSectionId]) {
+              // Fetch all students from the section - we'll filter for disabilities client-side
+              let endpoint = `http://localhost:3000/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
+
+              // Add group type filter if selected
+              if (groupFilter) {
+                endpoint += `&groupType=${groupFilter}`;
+              }
+
+              const res = await fetch(endpoint, {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+              });
+
+              if (!res.ok) {
+                if (res.status === 500 && retryCount < MAX_RETRIES) {
+                  retryCount++;
+                  throw new Error(
+                    `Server error (attempt ${retryCount}/${MAX_RETRIES})`
+                  );
+                }
+                throw new Error(`Error fetching students: ${res.status}`);
+              }
+
+              // Reset retry count on success
+              retryCount = 0;
+
+              const data = await res.json();
+
+              // Store all students in the cache by section
+              if (data && Array.isArray(data.students)) {
+                sectionCache[targetSectionId] = data.students || [];
+              } else {
+                sectionCache[targetSectionId] = Array.isArray(data) ? data : [];
+              }
+            }
+
+            // Get the data from cache
+            allStudentsData = sectionCache[targetSectionId] || [];
+
+            // Client-side filtering
+            filteredStudents = allStudentsData.filter((student) => {
+              // Only include students with disabilities
+              if (!student.hasDisability && !student.disability) {
+                return false;
+              }
+
+              // Apply disability type filter if selected
+              if (disabilityTypeFilter && student.disabilityDetails) {
+                try {
+                  const details = JSON.parse(student.disabilityDetails);
+                  if (details.types && Array.isArray(details.types)) {
+                    // Check if the selected disability type is in the student's types
+                    if (!details.types.includes(disabilityTypeFilter)) {
+                      return false;
+                    }
+                  } else if (
+                    student.disabilityType &&
+                    student.disabilityType !== disabilityTypeFilter
+                  ) {
+                    return false;
+                  }
+                } catch (e) {
+                  // If we can't parse the details, check the legacy field
+                  if (
+                    student.disabilityType &&
+                    student.disabilityType !== disabilityTypeFilter
+                  ) {
+                    return false;
+                  }
+                }
+              }
+
+              // Apply search filter
+              if (searchTerm) {
+                const fullName =
+                  `${student.firstName} ${student.lastName}`.toLowerCase();
+                const matricule = (student.matricule || "").toLowerCase();
+                const sectionName =
+                  student.sections && student.sections.length > 0
+                    ? (
+                        student.sections[0].name ||
+                        student.sections[0].code ||
+                        ""
+                      ).toLowerCase()
+                    : "";
+                const tdGroup = student.tdGroupe
+                  ? (student.tdGroupe.name || "").toLowerCase()
+                  : "";
+                const tpGroup = student.tpGroupe
+                  ? (student.tpGroupe.name || "").toLowerCase()
+                  : "";
+
+                // Search in multiple fields
+                if (
+                  !fullName.includes(searchTerm) &&
+                  !matricule.includes(searchTerm) &&
+                  !sectionName.includes(searchTerm) &&
+                  !tdGroup.includes(searchTerm) &&
+                  !tpGroup.includes(searchTerm)
+                ) {
+                  return false;
+                }
+              }
+
+              return true;
+            });
+
+            // Update stats right away
+            updateStats(filteredStudents);
+
+            // Display filtering summary
+            const filterSummary = document.createElement("div");
+            filterSummary.style.marginBottom = "15px";
+            filterSummary.style.fontStyle = "italic";
+            filterSummary.style.color = "#666";
+
+            // Count all students with disabilities in the data
+            const totalDisabledStudents = allStudentsData.filter(
+              (s) => s.hasDisability || s.disability
+            ).length;
+
+            filterSummary.textContent = `Affichage de ${filteredStudents.length} étudiant(s) en situation de handicap`;
+
+            if (searchTerm) {
+              filterSummary.textContent += ` (recherche: "${searchTerm}")`;
+            }
+
+            if (disabilityTypeFilter) {
+              filterSummary.textContent += ` (type: "${disabilityTypeFilter}")`;
+            }
+
+            if (filteredStudents.length < totalDisabledStudents) {
+              filterSummary.textContent += ` sur ${totalDisabledStudents} au total`;
+            }
+
+            // Add to page
+            studentsList.parentElement.insertBefore(
+              filterSummary,
+              studentsList
+            );
+
+            if (filteredStudents.length === 0) {
+              studentsList.innerHTML =
+                "<p>Aucun étudiant en situation de handicap trouvé dans cette section.</p>";
+              document.getElementById("disabled-students").textContent = "0";
+              document.getElementById("pagination").style.display = "none";
+              loadingIndicator.style.display = "none";
+              return;
+            }
+
+            // Setup pagination
+            setupPagination(filteredStudents.length);
+
+            // Get the slice of students for the current page
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = Math.min(
+              startIndex + ITEMS_PER_PAGE,
+              filteredStudents.length
+            );
+            const studentsToShow = filteredStudents.slice(startIndex, endIndex);
+
+            // Display the current page of students
+            displayStudents(studentsToShow);
+
+            loadingIndicator.style.display = "none";
+          } catch (error) {
+            console.error("Error:", error);
+            errorMessage.textContent =
+              error.message || "Erreur lors du chargement des données";
+            errorMessage.style.display = "block";
+            loadingIndicator.style.display = "none";
+          }
+        }
+        function displayStudents(students) {
+          const studentsList = document.getElementById("students-list");
+          studentsList.innerHTML = "";
+
+          if (!students.length) {
+            studentsList.innerHTML = "<p>Aucun étudiant trouvé</p>";
+            return;
+          }
+          students.forEach((student) => {
+            // Ensure we only display students with disabilities
+            if (!student.hasDisability && !student.disability) return;
+
+            const card = document.createElement("div");
+            card.className = "student-card";
+
+            let disabilityTypes = [];
+            if (student.disabilityDetails) {
+              try {
+                const details = JSON.parse(student.disabilityDetails);
+                if (details.types && Array.isArray(details.types)) {
+                  disabilityTypes = details.types;
+                }
+              } catch (e) {
+                console.error("Error parsing disability details:", e);
+              }
+            }
+
+            let disabilityTypesHTML = "";
+            if (disabilityTypes.length > 0) {
+              disabilityTypesHTML =
+                '<div class="disability-types">' +
+                disabilityTypes
+                  .map((type) => `<span class="disability-type">${type}</span>`)
+                  .join("") +
+                "</div>";
+            }
+
+            const delegateBadges = [];
+            if (student.isSectionDelegate) {
+              delegateBadges.push(
+                `<span class="status-badge badge-delegate">Délégué de section</span>`
+              );
+            }
+            if (student.isGroupDelegate) {
+              delegateBadges.push(
+                `<span class="status-badge badge-delegate">Délégué de groupe</span>`
+              );
+            }
+
+            card.innerHTML = `
+              <div class="student-info">
+                <div class="student-name">${student.firstName} ${
+              student.lastName
+            }</div>
+                <div class="student-details">
+                  <span class="status-badge badge-disability">
+                    <i class="fas fa-wheelchair"></i> Situation de handicap
+                  </span>
+                  ${delegateBadges.join("")}
+                  ${disabilityTypesHTML}
+                  <div style="margin-top: 5px;">
+                    <span><i class="fas fa-phone"></i> ${
+                      student.phone || "Non disponible"
+                    }</span>
+                    ${
+                      student.email
+                        ? `<span style="margin-left: 15px;"><i class="fas fa-envelope"></i> ${student.email}</span>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              </div>
+              <div class="actions">
+                <a href="mailto:${
+                  student.email || ""
+                }" class="action-btn view-btn" style="text-decoration: none;" ${
+              !student.email ? "disabled" : ""
+            }>
+                  <i class="fas fa-envelope"></i> Contacter
+                </a>
+                <button class="action-btn view-btn" onclick="viewStudentDetails('${
+                  student.id
+                }')">
+                  <i class="fas fa-info-circle"></i> Détails
+                </button>
+                <button class="action-btn delegate-btn" onclick="assignDelegate('${
+                  student.id
+                }')">
+                  <i class="fas fa-user-check"></i> Délégué
+                </button>
+              </div>
+            `;
+
+            studentsList.appendChild(card);
+          });
+        }
+
+        function setupPagination(total) {
+          const paginationDiv = document.getElementById("pagination");
+          let pageCount = Math.ceil(total / ITEMS_PER_PAGE);
+          const maxVisiblePages = 5; // Maximum number of page buttons to show
+
+          // Set minimum page count to 1 to avoid division by zero
+          pageCount = Math.max(1, pageCount);
+
+          if (pageCount <= 1) {
+            paginationDiv.style.display = "none";
+            return;
+          }
+
+          // Make sure current page is within valid range
+          currentPage = Math.max(1, Math.min(currentPage, pageCount));
+
+          paginationDiv.innerHTML = "";
+          paginationDiv.style.display = "flex";
+          paginationDiv.style.alignItems = "center";
+          paginationDiv.style.justifyContent = "center";
+
+          // First page button
+          const firstPageBtn = document.createElement("button");
+          firstPageBtn.className = "page-btn";
+          firstPageBtn.innerHTML = "&laquo;";
+          firstPageBtn.disabled = currentPage <= 1;
+          firstPageBtn.style.opacity = currentPage <= 1 ? "0.5" : "1";
+          firstPageBtn.setAttribute("aria-label", "Première page");
+          firstPageBtn.addEventListener("click", () => {
+            currentPage = 1;
+            // Use false to avoid reloading data from the server
+            loadStudents(false);
+          });
+          paginationDiv.appendChild(firstPageBtn);
+
+          // Previous button
+          const prevBtn = document.createElement("button");
+          prevBtn.className = "page-btn";
+          prevBtn.innerHTML = "&lsaquo;";
+          prevBtn.disabled = currentPage <= 1;
+          prevBtn.style.opacity = currentPage <= 1 ? "0.5" : "1";
+          prevBtn.setAttribute("aria-label", "Page précédente");
+          prevBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+              currentPage--;
+              loadStudents(false);
+            }
+          });
+          paginationDiv.appendChild(prevBtn);
+
+          // Calculate which page buttons to show
+          let startPage = Math.max(
+            1,
+            currentPage - Math.floor(maxVisiblePages / 2)
+          );
+          let endPage = Math.min(pageCount, startPage + maxVisiblePages - 1);
+
+          // Adjust if we're near the end
+          if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+          }
+
+          // Page buttons
+          for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement("button");
+            pageBtn.className =
+              i === currentPage ? "page-btn active" : "page-btn";
+            pageBtn.textContent = i;
+            pageBtn.addEventListener("click", () => {
+              currentPage = i;
+              loadStudents(false);
+            });
+            paginationDiv.appendChild(pageBtn);
+          }
+
+          // Next button
+          const nextBtn = document.createElement("button");
+          nextBtn.className = "page-btn";
+          nextBtn.innerHTML = "&rsaquo;";
+          nextBtn.disabled = currentPage >= pageCount;
+          nextBtn.style.opacity = currentPage >= pageCount ? "0.5" : "1";
+          nextBtn.setAttribute("aria-label", "Page suivante");
+          nextBtn.addEventListener("click", () => {
+            if (currentPage < pageCount) {
+              currentPage++;
+              loadStudents(false);
+            }
+          });
+          paginationDiv.appendChild(nextBtn);
+
+          // Last page button
+          const lastPageBtn = document.createElement("button");
+          lastPageBtn.className = "page-btn";
+          lastPageBtn.innerHTML = "&raquo;";
+          lastPageBtn.disabled = currentPage >= pageCount;
+          lastPageBtn.style.opacity = currentPage >= pageCount ? "0.5" : "1";
+          lastPageBtn.setAttribute("aria-label", "Dernière page");
+          lastPageBtn.addEventListener("click", () => {
+            currentPage = pageCount;
+            loadStudents(false);
+          });
+          paginationDiv.appendChild(lastPageBtn);
+
+          // Page info
+          const pageInfo = document.createElement("div");
+          pageInfo.className = "page-info";
+          pageInfo.style.marginLeft = "15px";
+          pageInfo.textContent = `Page ${currentPage} sur ${pageCount} (${total} étudiants)`;
+          paginationDiv.appendChild(pageInfo);
+        }
+
+        function updateStats(students) {
+          // Update the disability count
+          document.getElementById("disabled-students").textContent =
+            students.length;
+
+          // These would normally fetch from appropriate endpoints
+          // For demonstration, setting placeholder values
+          document.getElementById("pending-requests").textContent = "3";
+          document.getElementById("approved-accommodations").textContent = "12";
+          document.getElementById("notification-count").textContent = "2";
+        }
+
+        function handleSearchInput(e) {
+          // Reset to page 1 when searching
+          currentPage = 1;
+          // No need to reload data from server, just filter existing data
+          loadStudents(false);
+        }
+
+        function handleFiltersChange() {
+          // When changing filters like section or group, we need to reload from the server
+          currentPage = 1;
+          // Set to true to reload data with new filters
+          loadStudents(true);
+        }
+
+        // Expose these functions to the global scope for button click handlers
+        window.assignDelegate = function (studentId) {
+          currentStudentId = studentId;
+          document.getElementById("delegate-modal").style.display = "block";
+        };
+
+        window.closeModal = function () {
+          document.getElementById("delegate-modal").style.display = "none";
+        };
+
+        window.viewStudentDetails = function (studentId) {
+          window.location.href = `gestion-etudiant.html?id=${studentId}`;
+        };
+
+        document
+          .getElementById("delegate-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Handle delegate assignment logic here
+            const assignmentType = document.getElementById("assignment").value;
+            try {
+              // API call would go here
+              alert(
+                `Étudiant désigné comme délégué de ${
+                  assignmentType === "section" ? "section" : "groupe"
+                }`
+              );
+              closeModal();
+              await loadStudents(); // Reload students to reflect changes
+            } catch (error) {
+              console.error("Error assigning delegate:", error);
+              alert("Erreur lors de la désignation du délégué");
+            }
+          });
+
+        function showError(message) {
+          const errorMessage = document.getElementById("error-message");
+          errorMessage.textContent = message;
+          errorMessage.style.display = "block";
+          document.getElementById("loading-indicator").style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>

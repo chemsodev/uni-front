@@ -1,96 +1,153 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Gestion des Demandes - Espace Enseignant</title>
-    <link href="style/enseignant-demandes.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="style/enseignant-demandes.css" rel="stylesheet" />
+    <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
     <script src="js/enseignant-auth.js"></script>
     <script src="js/sidebar-loader.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-       <div id="navbar-container"></div>
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header header-actions">
-                <h1 class="page-title">Gestion des Demandes</h1>
-                <div class="header-buttons">
-                    <button onclick="window.location.href='dashbord-teacher.html'" class="btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour au tableau de bord
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Request type tabs -->
-            <div class="request-tab-bar">
-                <div class="request-tab active" data-status="all" onclick="filterRequests('all')">
-                    Toutes <span class="request-count request-count-all" id="count-all">0</span>
-                </div>
-                <div class="request-tab" data-status="pending" onclick="filterRequests('pending')">
-                    En attente <span class="request-count request-count-pending" id="count-pending">0</span>
-                </div>
-                <div class="request-tab" data-status="approved" onclick="filterRequests('approved')">
-                    Approuvées <span class="request-count request-count-approved" id="count-approved">0</span>
-                </div>
-                <div class="request-tab" data-status="rejected" onclick="filterRequests('rejected')">
-                    Rejetées <span class="request-count request-count-rejected" id="count-rejected">0</span>
-                </div>
-            </div>
-            
-            <!-- Search and filter controls -->
-            <div class="request-filters">
-                <div class="request-filter-dropdown">
-                    <select id="section-filter">
-                        <option value="all">Toutes les sections</option>
-                        <!-- Sections loaded dynamically -->
-                    </select>
-                </div>
-                
-                <div class="request-filter-dropdown">
-                    <select id="group-type-filter">
-                        <option value="all">Tous les types</option>
-                        <option value="td">Groupe TD</option>
-                        <option value="tp">Groupe TP</option>
-                    </select>
-                </div>
-                
-                <div class="search-container request-search">
-                    <input type="text" id="requests-search" placeholder="Rechercher par nom d'étudiant...">
-                    <button id="search-btn"><i class="fas fa-search"></i></button>
-                </div>
-            </div>
-            
-            <!-- Requests grid -->
-            <div id="requests-container" class="request-grid">
-                <div class="loading-spinner"></div>
-            </div>
-            
-            <!-- No results message -->
-            <div id="no-results" class="empty-state" style="display: none;">
-                <i class="fas fa-search"></i>
-                <p>Aucune demande ne correspond à vos critères de recherche</p>
-            </div>
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header header-actions">
+          <h1 class="page-title">Gestion des Demandes</h1>
+          <div class="header-buttons">
+            <button
+              onclick="window.location.href='dashbord-teacher.html'"
+              class="btn-secondary"
+            >
+              <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </button>
+          </div>
         </div>
+
+        <!-- Request type tabs -->
+        <div class="request-tab-bar">
+          <div
+            class="request-tab active"
+            data-status="all"
+            onclick="filterRequests('all')"
+          >
+            Toutes
+            <span class="request-count request-count-all" id="count-all"
+              >0</span
+            >
+          </div>
+          <div
+            class="request-tab"
+            data-status="pending"
+            onclick="filterRequests('pending')"
+          >
+            En attente
+            <span class="request-count request-count-pending" id="count-pending"
+              >0</span
+            >
+          </div>
+          <div
+            class="request-tab"
+            data-status="approved"
+            onclick="filterRequests('approved')"
+          >
+            Approuvées
+            <span
+              class="request-count request-count-approved"
+              id="count-approved"
+              >0</span
+            >
+          </div>
+          <div
+            class="request-tab"
+            data-status="rejected"
+            onclick="filterRequests('rejected')"
+          >
+            Rejetées
+            <span
+              class="request-count request-count-rejected"
+              id="count-rejected"
+              >0</span
+            >
+          </div>
+        </div>
+
+        <!-- Search and filter controls -->
+        <div class="request-filters">
+          <div class="request-filter-dropdown">
+            <select id="section-filter">
+              <option value="all">Toutes les sections</option>
+              <!-- Sections loaded dynamically -->
+            </select>
+          </div>
+
+          <div class="request-filter-dropdown">
+            <select id="group-type-filter">
+              <option value="all">Tous les types</option>
+              <option value="td">Groupe TD</option>
+              <option value="tp">Groupe TP</option>
+            </select>
+          </div>
+
+          <div class="search-container request-search">
+            <input
+              type="text"
+              id="requests-search"
+              placeholder="Rechercher par nom d'étudiant..."
+            />
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+
+        <!-- Requests grid -->
+        <div id="requests-container" class="request-grid">
+          <div class="loading-spinner"></div>
+        </div>
+
+        <!-- No results message -->
+        <div id="no-results" class="empty-state" style="display: none">
+          <i class="fas fa-search"></i>
+          <p>Aucune demande ne correspond à vos critères de recherche</p>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Request Detail Modal -->
     <div id="request-modal" class="request-modal">
-        <div class="request-modal-content">
-            <div class="request-modal-header">
-                <h3 class="request-modal-title">Détails de la demande</h3>
-                <button class="request-modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="request-modal-body" id="request-modal-body">
-                <!-- Content generated dynamically -->
-            </div>
-            <div class="request-modal-footer">
-                <button class="btn-secondary" onclick="closeModal()">Fermer</button>
-                <button class="btn btn-reject" id="reject-btn" onclick="handleRequest(false)">Rejeter</button>
-                <button class="btn btn-approve" id="approve-btn" onclick="handleRequest(true)">Approuver</button>
-            </div>
+      <div class="request-modal-content">
+        <div class="request-modal-header">
+          <h3 class="request-modal-title">Détails de la demande</h3>
+          <button class="request-modal-close" onclick="closeModal()">
+            &times;
+          </button>
         </div>
+        <div class="request-modal-body" id="request-modal-body">
+          <!-- Content generated dynamically -->
+        </div>
+        <div class="request-modal-footer">
+          <button class="btn-secondary" onclick="closeModal()">Fermer</button>
+          <button
+            class="btn btn-reject"
+            id="reject-btn"
+            onclick="handleRequest(false)"
+          >
+            Rejeter
+          </button>
+          <button
+            class="btn btn-approve"
+            id="approve-btn"
+            onclick="handleRequest(true)"
+          >
+            Approuver
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -100,15 +157,15 @@
       let isBackendAvailable = true;
       let allRequests = [];
       let allSections = [];
-      let currentFilter = 'all';
+      let currentFilter = "all";
       let currentRequestId = null;
-      
+
       // Map to track count by status
       const countMap = {
-          all: 0,
-          pending: 0,
-          approved: 0,
-          rejected: 0
+        all: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
       };
 
       document.addEventListener("DOMContentLoaded", async function () {
@@ -116,66 +173,75 @@
         await loadTeacherSidebar();
 
         try {
-            // Verify authentication using our helper
-            const authResult = await verifyEnseignantAuth();
-            
-            if (!authResult.isAuthenticated) {
-                return; // The helper will redirect to login
-            }
-            
-            // Set global variables
-            currentUser = authResult.user;
-            authToken = sessionStorage.getItem("enseignant_token") || localStorage.getItem("enseignant_token");
+          // Verify authentication using our helper
+          const authResult = await verifyEnseignantAuth();
 
-            // Load data
-            try {
-                // We don't need to call loadUserData() anymore since loadTeacherSidebar() does that
-                await loadData();
-                setupEventListeners();
-            } catch (dataError) {
-                console.error("Error loading data:", dataError);
-                isBackendAvailable = false;
-                loadFallbackData();
-                addReconnectionButton();
-            }
+          if (!authResult.isAuthenticated) {
+            return; // The helper will redirect to login
+          }
+
+          // Set global variables
+          currentUser = authResult.user;
+          authToken =
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+          // Load data
+          try {
+            // We don't need to call loadUserData() anymore since loadTeacherSidebar() does that
+            await loadData();
+            setupEventListeners();
+          } catch (dataError) {
+            console.error("Error loading data:", dataError);
+            isBackendAvailable = false;
+            loadFallbackData();
+            addReconnectionButton();
+          }
         } catch (error) {
-            console.error("Access denied:", error);
-            logout();
+          console.error("Access denied:", error);
+          logout();
         }
       });
-      
+
       // Setup event listeners
       function setupEventListeners() {
         // Search button click
-        document.getElementById('search-btn').addEventListener('click', function() {
+        document
+          .getElementById("search-btn")
+          .addEventListener("click", function () {
             applyFilters();
-        });
-        
+          });
+
         // Search input enter key
-        document.getElementById('requests-search').addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                applyFilters();
+        document
+          .getElementById("requests-search")
+          .addEventListener("keyup", function (e) {
+            if (e.key === "Enter") {
+              applyFilters();
             }
-        });
-        
+          });
+
         // Section filter change
-        document.getElementById('section-filter').addEventListener('change', function() {
+        document
+          .getElementById("section-filter")
+          .addEventListener("change", function () {
             applyFilters();
-        });
-        
+          });
+
         // Group type filter change
-        document.getElementById('group-type-filter').addEventListener('change', function() {
+        document
+          .getElementById("group-type-filter")
+          .addEventListener("change", function () {
             applyFilters();
-        });
+          });
       }
 
       // Add reconnection button for offline mode
       function addReconnectionButton() {
         document.querySelector(".main-content").insertAdjacentHTML(
-            'afterbegin',
-            `<div class="alert alert-warning" style="padding: 10px; margin: 10px 0; background-color: #fff3cd; color: #856404; border-radius: 4px;">
-                <strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.
-                <button onclick="window.location.reload()" style="margin-left: 10px; padding: 5px 10px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+          "afterbegin",
+          `<div class="alert alert-warning" style="padding: 10px; margin: 10px 0; background-color: #fff3cd; color: #856404; border-radius: 4px;">
+                <strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.                <button onclick="window.location.reload()" style="margin-left: 10px; padding: 5px 10px; background-color: #10b981; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
                     Réessayer la connexion
                 </button>
             </div>`
@@ -185,34 +251,36 @@
       // Load all necessary data
       async function loadData() {
         try {
-            // Load sections
-            const sections = await loadTeacherSections();
-            allSections = sections;
-            populateSectionFilter(sections);
-            
-            // Load group change requests
-            await loadGroupChangeRequests();
+          // Load sections
+          const sections = await loadTeacherSections();
+          allSections = sections;
+          populateSectionFilter(sections);
+
+          // Load group change requests
+          await loadGroupChangeRequests();
         } catch (error) {
-            console.error("Error loading data:", error);
-            throw error;
+          console.error("Error loading data:", error);
+          throw error;
         }
       }
-      
+
       // Populate section filter dropdown
       function populateSectionFilter(sections) {
-        const sectionFilter = document.getElementById('section-filter');
-        
+        const sectionFilter = document.getElementById("section-filter");
+
         // Clear existing options except the first one
         while (sectionFilter.options.length > 1) {
-            sectionFilter.remove(1);
+          sectionFilter.remove(1);
         }
-        
+
         // Add sections to dropdown
-        sections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section.id;
-            option.textContent = `${section.specialty || 'Section'} ${section.name}`;
-            sectionFilter.appendChild(option);
+        sections.forEach((section) => {
+          const option = document.createElement("option");
+          option.value = section.id;
+          option.textContent = `${section.specialty || "Section"} ${
+            section.name
+          }`;
+          sectionFilter.appendChild(option);
         });
       }
 
@@ -221,13 +289,13 @@
         try {
           const container = document.getElementById("requests-container");
           container.innerHTML = '<div class="loading-spinner"></div>';
-          
+
           if (isBackendAvailable) {
             try {
               // Increased timeout for better reliability
               const controller = new AbortController();
               const timeoutId = setTimeout(() => controller.abort(), 15000); // Increase timeout to 15 seconds
-              
+
               const response = await fetch(
                 "http://localhost:3000/api/enseignants/group-change-requests",
                 {
@@ -237,10 +305,10 @@
                   signal: controller.signal,
                 }
               );
-              
+
               // Clear the timeout regardless of result
               clearTimeout(timeoutId);
-              
+
               if (response.ok) {
                 const requests = await response.json();
                 allRequests = requests;
@@ -249,16 +317,20 @@
                 return;
               } else {
                 // Only log essential error information
-                if (response.status !== 404) { // Don't log 404s as they're expected sometimes
+                if (response.status !== 404) {
+                  // Don't log 404s as they're expected sometimes
                   console.warn(`API error: ${response.status}`);
                 }
                 useMockRequests();
               }
             } catch (error) {
               // Only log timeout or network errors, not application errors
-              if (error.name === 'AbortError') {
+              if (error.name === "AbortError") {
                 console.warn("Request timed out. Using fallback data.");
-              } else if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
+              } else if (
+                error.name === "TypeError" &&
+                error.message.includes("NetworkError")
+              ) {
                 console.warn("Network error. Using fallback data.");
               }
               useMockRequests();
@@ -268,11 +340,11 @@
           }
         } catch (error) {
           // Just display error UI without excessive logging
-          document.getElementById("requests-container").innerHTML = 
+          document.getElementById("requests-container").innerHTML =
             '<div class="error-message">Erreur de chargement des demandes</div>';
         }
       }
-      
+
       // Use mock data for requests
       function useMockRequests() {
         // Create fallback mock data
@@ -288,10 +360,11 @@
             currentGroupName: "2",
             requestedGroupType: "td",
             requestedGroupName: "1",
-            reason: "Conflit d'horaire avec un autre cours obligatoire. Je ne peux pas être présent aux deux cours en même temps.",
+            reason:
+              "Conflit d'horaire avec un autre cours obligatoire. Je ne peux pas être présent aux deux cours en même temps.",
             status: "pending",
             createdAt: new Date(Date.now() - 1200000), // 20 minutes ago
-            hasDocument: true
+            hasDocument: true,
           },
           {
             id: "req2",
@@ -302,12 +375,13 @@
             sectionName: "Informatique - Section A",
             currentGroupType: "tp",
             currentGroupName: "3",
-            requestedGroupType: "tp", 
+            requestedGroupType: "tp",
             requestedGroupName: "1",
-            reason: "Problèmes de transport, je ne peux pas rentrer chez moi après les séances qui finissent tard.",
+            reason:
+              "Problèmes de transport, je ne peux pas rentrer chez moi après les séances qui finissent tard.",
             status: "pending",
             createdAt: new Date(Date.now() - 86400000), // 1 day ago
-            hasDocument: false
+            hasDocument: false,
           },
           {
             id: "req3",
@@ -318,12 +392,13 @@
             sectionName: "Informatique - Section B",
             currentGroupType: "tp",
             currentGroupName: "1",
-            requestedGroupType: "tp", 
+            requestedGroupType: "tp",
             requestedGroupName: "2",
-            reason: "J'ai des problèmes de santé et je dois me rendre à des rendez-vous médicaux réguliers.",
+            reason:
+              "J'ai des problèmes de santé et je dois me rendre à des rendez-vous médicaux réguliers.",
             status: "approved",
             createdAt: new Date(Date.now() - 172800000), // 2 days ago
-            hasDocument: true
+            hasDocument: true,
           },
           {
             id: "req4",
@@ -334,20 +409,21 @@
             sectionName: "Informatique - Section A",
             currentGroupType: "td",
             currentGroupName: "1",
-            requestedGroupType: "td", 
+            requestedGroupType: "td",
             requestedGroupName: "2",
-            reason: "Je souhaite rejoindre le même groupe que mon binôme de projet pour faciliter notre collaboration.",
+            reason:
+              "Je souhaite rejoindre le même groupe que mon binôme de projet pour faciliter notre collaboration.",
             status: "rejected",
             createdAt: new Date(Date.now() - 259200000), // 3 days ago
-            hasDocument: false
-          }
+            hasDocument: false,
+          },
         ];
-        
+
         allRequests = mockRequests;
         countStatusTypes(mockRequests);
         renderRequests(mockRequests);
       }
-      
+
       // Count requests by status type
       function countStatusTypes(requests) {
         // Reset counts
@@ -355,17 +431,19 @@
         countMap.pending = 0;
         countMap.approved = 0;
         countMap.rejected = 0;
-        
+
         // Count by status
-        requests.forEach(req => {
-            countMap[req.status] = (countMap[req.status] || 0) + 1;
+        requests.forEach((req) => {
+          countMap[req.status] = (countMap[req.status] || 0) + 1;
         });
-        
+
         // Update UI counters
-        document.getElementById('count-all').textContent = countMap.all;
-        document.getElementById('count-pending').textContent = countMap.pending;
-        document.getElementById('count-approved').textContent = countMap.approved;
-        document.getElementById('count-rejected').textContent = countMap.rejected;
+        document.getElementById("count-all").textContent = countMap.all;
+        document.getElementById("count-pending").textContent = countMap.pending;
+        document.getElementById("count-approved").textContent =
+          countMap.approved;
+        document.getElementById("count-rejected").textContent =
+          countMap.rejected;
       }
 
       // Validate group type consistency
@@ -374,65 +452,70 @@
         if (!request.currentGroupType || !request.requestedGroupType) {
           return true;
         }
-        
+
         // Ensure the current and requested group types match
-        return request.currentGroupType.toLowerCase() === request.requestedGroupType.toLowerCase();
+        return (
+          request.currentGroupType.toLowerCase() ===
+          request.requestedGroupType.toLowerCase()
+        );
       }
 
       // Render requests
       function renderRequests(requests) {
         const container = document.getElementById("requests-container");
         container.innerHTML = "";
-        
+
         if (!requests || requests.length === 0) {
-          document.getElementById('no-results').style.display = 'flex';
+          document.getElementById("no-results").style.display = "flex";
           return;
         }
-        
-        document.getElementById('no-results').style.display = 'none';
-        
+
+        document.getElementById("no-results").style.display = "none";
+
         // Filter out requests with mismatched group types
         const validRequests = requests.filter(validateGroupTypeMatch);
-        
+
         if (validRequests.length === 0) {
-          document.getElementById('no-results').style.display = 'flex';
+          document.getElementById("no-results").style.display = "flex";
           return;
         }
-        
-        validRequests.forEach(req => {
+
+        validRequests.forEach((req) => {
           const card = document.createElement("div");
           card.className = "request-card";
           card.dataset.id = req.id;
           card.dataset.status = req.status;
           card.dataset.sectionId = req.sectionId;
           card.dataset.groupType = req.currentGroupType;
-          
+
           // Get student initials for avatar
-          const nameParts = req.studentName.split(' ');
-          const initials = nameParts.map(part => part.charAt(0).toUpperCase()).join('');
-          
+          const nameParts = req.studentName.split(" ");
+          const initials = nameParts
+            .map((part) => part.charAt(0).toUpperCase())
+            .join("");
+
           // Status text
           let statusText;
           let statusClass;
-          
-          switch(req.status) {
-            case 'pending':
-              statusText = 'En attente';
-              statusClass = 'status-pending';
+
+          switch (req.status) {
+            case "pending":
+              statusText = "En attente";
+              statusClass = "status-pending";
               break;
-            case 'approved':
-              statusText = 'Approuvée';
-              statusClass = 'status-approved';
+            case "approved":
+              statusText = "Approuvée";
+              statusClass = "status-approved";
               break;
-            case 'rejected':
-              statusText = 'Rejetée';
-              statusClass = 'status-rejected';
+            case "rejected":
+              statusText = "Rejetée";
+              statusClass = "status-rejected";
               break;
             default:
               statusText = req.status;
-              statusClass = '';
+              statusClass = "";
           }
-          
+
           card.innerHTML = `
             <div class="request-card-header">
               <div class="student-info">
@@ -452,25 +535,37 @@
                 </div>
                 <div class="request-info-row">
                   <span class="request-info-label">De:</span>
-                  <span class="request-info-value">${req.currentGroupType.toUpperCase()} ${req.currentGroupName}</span>
+                  <span class="request-info-value">${req.currentGroupType.toUpperCase()} ${
+            req.currentGroupName
+          }</span>
                 </div>
                 <div class="request-info-row">
                   <span class="request-info-label">Vers:</span>
-                  <span class="request-info-value">${req.requestedGroupType.toUpperCase()} ${req.requestedGroupName}</span>
+                  <span class="request-info-value">${req.requestedGroupType.toUpperCase()} ${
+            req.requestedGroupName
+          }</span>
                 </div>
                 <div class="request-info-row">
                   <span class="request-info-label">Date:</span>
-                  <span class="request-info-value">${formatDate(req.createdAt)}</span>
+                  <span class="request-info-value">${formatDate(
+                    req.createdAt
+                  )}</span>
                 </div>
               </div>
               <div class="request-reason">
-                ${req.reason.substring(0, 100)}${req.reason.length > 100 ? '...' : ''}
+                ${req.reason.substring(0, 100)}${
+            req.reason.length > 100 ? "..." : ""
+          }
               </div>
-              ${req.hasDocument ? `
+              ${
+                req.hasDocument
+                  ? `
               <div class="request-has-document">
                 <i class="fas fa-file-alt"></i> Document justificatif joint
               </div>
-              ` : ''}
+              `
+                  : ""
+              }
             </div>
             <div class="request-card-footer">
               <button class="btn-secondary" onclick="viewRequest('${req.id}')">
@@ -478,121 +573,142 @@
               </button>
             </div>
           `;
-          
+
           container.appendChild(card);
         });
       }
-      
+
       // Filter requests by tab (status)
       function filterRequests(status) {
         // Update active tab
-        document.querySelectorAll('.request-tab').forEach(tab => {
-          tab.classList.remove('active');
+        document.querySelectorAll(".request-tab").forEach((tab) => {
+          tab.classList.remove("active");
         });
-        document.querySelector(`.request-tab[data-status="${status}"]`).classList.add('active');
-        
+        document
+          .querySelector(`.request-tab[data-status="${status}"]`)
+          .classList.add("active");
+
         // Save current filter
         currentFilter = status;
-        
+
         // Apply all filters
         applyFilters();
       }
-      
+
       // Apply all filters (search, section, type, status)
       function applyFilters() {
         // Get filter values
-        const searchTerm = document.getElementById('requests-search').value.toLowerCase().trim();
-        const sectionFilter = document.getElementById('section-filter').value;
-        const groupTypeFilter = document.getElementById('group-type-filter').value;
-        
+        const searchTerm = document
+          .getElementById("requests-search")
+          .value.toLowerCase()
+          .trim();
+        const sectionFilter = document.getElementById("section-filter").value;
+        const groupTypeFilter =
+          document.getElementById("group-type-filter").value;
+
         // Apply filters
         let filteredRequests = allRequests;
-        
+
         // First filter by valid group type matches
         filteredRequests = filteredRequests.filter(validateGroupTypeMatch);
-        
+
         // Status filter (not "all")
-        if (currentFilter !== 'all') {
-          filteredRequests = filteredRequests.filter(req => req.status === currentFilter);
-        }
-        
-        // Section filter (not "all")
-        if (sectionFilter !== 'all') {
-          filteredRequests = filteredRequests.filter(req => req.sectionId === sectionFilter);
-        }
-        
-        // Group type filter (not "all")
-        if (groupTypeFilter !== 'all') {
-          filteredRequests = filteredRequests.filter(req => req.currentGroupType === groupTypeFilter);
-        }
-        
-        // Search term filter - enhanced to search across more fields
-        if (searchTerm) {
-          filteredRequests = filteredRequests.filter(req => 
-            req.studentName?.toLowerCase().includes(searchTerm) ||
-            req.matricule?.toLowerCase().includes(searchTerm) ||
-            req.reason?.toLowerCase().includes(searchTerm) ||
-            req.sectionName?.toLowerCase().includes(searchTerm) ||
-            (req.currentGroupType + req.currentGroupName)?.toLowerCase().includes(searchTerm) ||
-            (req.requestedGroupType + req.requestedGroupName)?.toLowerCase().includes(searchTerm)
+        if (currentFilter !== "all") {
+          filteredRequests = filteredRequests.filter(
+            (req) => req.status === currentFilter
           );
         }
-        
+
+        // Section filter (not "all")
+        if (sectionFilter !== "all") {
+          filteredRequests = filteredRequests.filter(
+            (req) => req.sectionId === sectionFilter
+          );
+        }
+
+        // Group type filter (not "all")
+        if (groupTypeFilter !== "all") {
+          filteredRequests = filteredRequests.filter(
+            (req) => req.currentGroupType === groupTypeFilter
+          );
+        }
+
+        // Search term filter - enhanced to search across more fields
+        if (searchTerm) {
+          filteredRequests = filteredRequests.filter(
+            (req) =>
+              req.studentName?.toLowerCase().includes(searchTerm) ||
+              req.matricule?.toLowerCase().includes(searchTerm) ||
+              req.reason?.toLowerCase().includes(searchTerm) ||
+              req.sectionName?.toLowerCase().includes(searchTerm) ||
+              (req.currentGroupType + req.currentGroupName)
+                ?.toLowerCase()
+                .includes(searchTerm) ||
+              (req.requestedGroupType + req.requestedGroupName)
+                ?.toLowerCase()
+                .includes(searchTerm)
+          );
+        }
+
         // Render filtered requests
         renderRequests(filteredRequests);
       }
-      
+
       // View request details in modal
       function viewRequest(requestId) {
         // Save current request ID
         currentRequestId = requestId;
-        
+
         // Get request data
-        const request = allRequests.find(req => req.id === requestId);
-        
+        const request = allRequests.find((req) => req.id === requestId);
+
         if (!request) {
           console.error(`Request with ID ${requestId} not found`);
           return;
         }
-        
+
         // Get student initials for avatar
-        const nameParts = request.studentName.split(' ');
-        const initials = nameParts.map(part => part.charAt(0).toUpperCase()).join('');
-        
+        const nameParts = request.studentName.split(" ");
+        const initials = nameParts
+          .map((part) => part.charAt(0).toUpperCase())
+          .join("");
+
         // Status text
         let statusText;
         let statusClass;
-        
-        switch(request.status) {
-          case 'pending':
-            statusText = 'En attente';
-            statusClass = 'status-pending';
+
+        switch (request.status) {
+          case "pending":
+            statusText = "En attente";
+            statusClass = "status-pending";
             break;
-          case 'approved':
-            statusText = 'Approuvée';
-            statusClass = 'status-approved';
+          case "approved":
+            statusText = "Approuvée";
+            statusClass = "status-approved";
             break;
-          case 'rejected':
-            statusText = 'Rejetée';
-            statusClass = 'status-rejected';
+          case "rejected":
+            statusText = "Rejetée";
+            statusClass = "status-rejected";
             break;
           default:
             statusText = request.status;
-            statusClass = '';
+            statusClass = "";
         }
-        
+
         // Populate modal
-        const modalBody = document.getElementById('request-modal-body');
+        const modalBody = document.getElementById("request-modal-body");
         modalBody.innerHTML = `
           <div class="student-info" style="margin-bottom: 20px;">
             <div class="student-info-avatar" style="width: 48px; height: 48px; font-size: 18px;">${initials}</div>
             <div class="student-info-details">
-              <h3 style="font-size: 18px; margin-bottom: 4px;">${request.studentName}</h3>
+              <h3 style="font-size: 18px; margin-bottom: 4px;">${
+                request.studentName
+              }</h3>
               <p>${request.matricule}</p>
               <span class="request-status ${statusClass}" style="margin-top: 6px; display: inline-block;">${statusText}</span>
             </div>
           </div>
-          
+
           <div class="request-info" style="margin-bottom: 20px;">
             <div class="request-info-row">
               <span class="request-info-label">Section:</span>
@@ -600,80 +716,96 @@
             </div>
             <div class="request-info-row">
               <span class="request-info-label">Groupe actuel:</span>
-              <span class="request-info-value">${request.currentGroupType.toUpperCase()} ${request.currentGroupName}</span>
+              <span class="request-info-value">${request.currentGroupType.toUpperCase()} ${
+          request.currentGroupName
+        }</span>
             </div>
             <div class="request-info-row">
               <span class="request-info-label">Groupe souhaité:</span>
-              <span class="request-info-value">${request.requestedGroupType.toUpperCase()} ${request.requestedGroupName}</span>
+              <span class="request-info-value">${request.requestedGroupType.toUpperCase()} ${
+          request.requestedGroupName
+        }</span>
             </div>
             <div class="request-info-row">
               <span class="request-info-label">Date de demande:</span>
-              <span class="request-info-value">${formatDate(request.createdAt)}</span>
+              <span class="request-info-value">${formatDate(
+                request.createdAt
+              )}</span>
             </div>
           </div>
-          
+
           <div style="margin-bottom: 20px;">
             <div style="font-weight: 500; margin-bottom: 8px; color: #4a5568;">Motif de la demande:</div>
-            <div class="request-reason" style="padding: 16px;">${request.reason}</div>
+            <div class="request-reason" style="padding: 16px;">${
+              request.reason
+            }</div>
           </div>
-          
-          ${request.hasDocument ? `
+
+          ${
+            request.hasDocument
+              ? `
           <div style="text-align: center;">
             <button class="btn-download" onclick="downloadRequestDocument('${request.id}')">
               <i class="fas fa-download"></i> Télécharger le document justificatif
             </button>
           </div>
-          ` : '<p style="color: #718096; text-align: center;">Aucun document joint à cette demande</p>'}
+          `
+              : '<p style="color: #718096; text-align: center;">Aucun document joint à cette demande</p>'
+          }
         `;
-        
+
         // Show/hide approval buttons based on status
-        const approveBtn = document.getElementById('approve-btn');
-        const rejectBtn = document.getElementById('reject-btn');
-        
-        if (request.status === 'pending') {
-          approveBtn.style.display = 'block';
-          rejectBtn.style.display = 'block';
+        const approveBtn = document.getElementById("approve-btn");
+        const rejectBtn = document.getElementById("reject-btn");
+
+        if (request.status === "pending") {
+          approveBtn.style.display = "block";
+          rejectBtn.style.display = "block";
         } else {
-          approveBtn.style.display = 'none';
-          rejectBtn.style.display = 'none';
+          approveBtn.style.display = "none";
+          rejectBtn.style.display = "none";
         }
-        
+
         // Show modal
-        const modal = document.getElementById('request-modal');
-        modal.classList.add('active');
+        const modal = document.getElementById("request-modal");
+        modal.classList.add("active");
       }
-      
+
       // Close the modal
       function closeModal() {
-        const modal = document.getElementById('request-modal');
-        modal.classList.remove('active');
+        const modal = document.getElementById("request-modal");
+        modal.classList.remove("active");
         currentRequestId = null;
       }
-      
+
       // Download document for a request
       async function downloadRequestDocument(requestId) {
         try {
           if (!isBackendAvailable) {
-            alert("Cette fonctionnalité n'est pas disponible en mode hors ligne.");
+            alert(
+              "Cette fonctionnalité n'est pas disponible en mode hors ligne."
+            );
             return;
           }
-          
+
           // Use document viewer
-          const viewerUrl = `document-viewer.html?id=${requestId}&token=${encodeURIComponent(authToken)}&context=teacher`;
-          window.open(viewerUrl, '_blank');
+          const viewerUrl = `document-viewer.html?id=${requestId}&token=${encodeURIComponent(
+            authToken
+          )}&context=teacher`;
+          window.open(viewerUrl, "_blank");
         } catch (error) {
           console.error("Error opening document:", error);
           alert("Une erreur est survenue lors de l'ouverture du document.");
         }
       }
-      
+
       // Handle request (approve/reject)
       async function handleRequest(isApproved) {
         if (!currentRequestId) return;
-        
+
         try {
           const message = isApproved ? "approuvée" : "rejetée";
-          
+
           if (isBackendAvailable) {
             try {
               const response = await fetch(
@@ -685,20 +817,24 @@
                     Authorization: `Bearer ${authToken}`,
                   },
                   body: JSON.stringify({
-                    status: isApproved ? "approved" : "rejected"
+                    status: isApproved ? "approved" : "rejected",
                   }),
                   signal: AbortSignal.timeout(5000),
                 }
               );
-              
+
               if (response.ok) {
                 alert(`La demande a été ${message} avec succès!`);
-                
+
                 // Update request status in our local data
-                const requestIndex = allRequests.findIndex(req => req.id === currentRequestId);
+                const requestIndex = allRequests.findIndex(
+                  (req) => req.id === currentRequestId
+                );
                 if (requestIndex !== -1) {
-                  allRequests[requestIndex].status = isApproved ? "approved" : "rejected";
-                  
+                  allRequests[requestIndex].status = isApproved
+                    ? "approved"
+                    : "rejected";
+
                   // Update counts
                   countMap.pending--;
                   if (isApproved) {
@@ -706,13 +842,16 @@
                   } else {
                     countMap.rejected++;
                   }
-                  
+
                   // Update UI counters
-                  document.getElementById('count-pending').textContent = countMap.pending;
-                  document.getElementById('count-approved').textContent = countMap.approved;
-                  document.getElementById('count-rejected').textContent = countMap.rejected;
+                  document.getElementById("count-pending").textContent =
+                    countMap.pending;
+                  document.getElementById("count-approved").textContent =
+                    countMap.approved;
+                  document.getElementById("count-rejected").textContent =
+                    countMap.rejected;
                 }
-                
+
                 // Re-apply filters to update the view
                 applyFilters();
               } else {
@@ -720,13 +859,19 @@
               }
             } catch (error) {
               console.error(`Error ${message} la demande:`, error);
-              alert(`La demande a été ${message} avec succès! (Mode hors ligne)`);
-              
+              alert(
+                `La demande a été ${message} avec succès! (Mode hors ligne)`
+              );
+
               // Update request status in our local data (fallback)
-              const requestIndex = allRequests.findIndex(req => req.id === currentRequestId);
+              const requestIndex = allRequests.findIndex(
+                (req) => req.id === currentRequestId
+              );
               if (requestIndex !== -1) {
-                allRequests[requestIndex].status = isApproved ? "approved" : "rejected";
-                
+                allRequests[requestIndex].status = isApproved
+                  ? "approved"
+                  : "rejected";
+
                 // Update counts
                 countMap.pending--;
                 if (isApproved) {
@@ -734,24 +879,31 @@
                 } else {
                   countMap.rejected++;
                 }
-                
+
                 // Update UI counters
-                document.getElementById('count-pending').textContent = countMap.pending;
-                document.getElementById('count-approved').textContent = countMap.approved;
-                document.getElementById('count-rejected').textContent = countMap.rejected;
+                document.getElementById("count-pending").textContent =
+                  countMap.pending;
+                document.getElementById("count-approved").textContent =
+                  countMap.approved;
+                document.getElementById("count-rejected").textContent =
+                  countMap.rejected;
               }
-              
+
               // Re-apply filters to update the view
               applyFilters();
             }
           } else {
             alert(`La demande a été ${message} avec succès! (Mode hors ligne)`);
-            
+
             // Update request status in our local data
-            const requestIndex = allRequests.findIndex(req => req.id === currentRequestId);
+            const requestIndex = allRequests.findIndex(
+              (req) => req.id === currentRequestId
+            );
             if (requestIndex !== -1) {
-              allRequests[requestIndex].status = isApproved ? "approved" : "rejected";
-              
+              allRequests[requestIndex].status = isApproved
+                ? "approved"
+                : "rejected";
+
               // Update counts
               countMap.pending--;
               if (isApproved) {
@@ -759,17 +911,20 @@
               } else {
                 countMap.rejected++;
               }
-              
+
               // Update UI counters
-              document.getElementById('count-pending').textContent = countMap.pending;
-              document.getElementById('count-approved').textContent = countMap.approved;
-              document.getElementById('count-rejected').textContent = countMap.rejected;
+              document.getElementById("count-pending").textContent =
+                countMap.pending;
+              document.getElementById("count-approved").textContent =
+                countMap.approved;
+              document.getElementById("count-rejected").textContent =
+                countMap.rejected;
             }
-            
+
             // Re-apply filters to update the view
             applyFilters();
           }
-          
+
           // Close modal
           closeModal();
         } catch (error) {
@@ -781,24 +936,24 @@
       // Load fallback data when backend is unavailable
       function loadFallbackData() {
         addReconnectionButton();
-        
+
         // Populate section filter with mock data
         const mockSections = [
           {
             id: "sect1",
             specialty: "Informatique",
-            name: "B"
+            name: "B",
           },
           {
             id: "sect2",
             specialty: "Mathématiques",
-            name: "A"
-          }
+            name: "A",
+          },
         ];
-        
+
         allSections = mockSections;
         populateSectionFilter(mockSections);
-        
+
         // Load mock requests
         useMockRequests();
       }
@@ -806,13 +961,13 @@
       // Helper function to format date
       function formatDate(dateString) {
         return new Date(dateString).toLocaleDateString("fr-FR", {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
         });
       }
     </script>
-</body>
-</html> 
+  </body>
+</html>

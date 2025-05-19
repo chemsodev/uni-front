@@ -1,0 +1,153 @@
+/* Shared CSS for teacher sidebar layout consistency */
+
+:root {
+  --sidebar-width: 260px;
+  --header-height: 70px;
+  --green-primary: #10b981;
+  --green-dark: #047857;
+  --green-light: #ecfdf5;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fb;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  height: 100vh; /* Ensure it takes full viewport height */
+  width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  position: relative; /* Establish positioning context */
+}
+
+/* Sidebar styles */
+#navbar-container {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  background-color: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  overflow-y: auto; /* Allow scrolling within sidebar if content is too tall */
+  display: flex; /* Enable flexbox for inner content */
+  flex-direction: column; /* Stack sidebar elements vertically */
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: 30px;
+  min-height: 100vh;
+  max-width: calc(
+    100% - var(--sidebar-width)
+  ); /* Prevent content from causing horizontal scrolling */
+  box-sizing: border-box; /* Include padding in width calculation */
+  overflow-y: auto; /* Enable vertical scrolling for content if needed */
+}
+
+/* Consistent header styling */
+.header,
+.header-actions {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-actions {
+  justify-content: flex-end;
+}
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--green-primary);
+  margin: 0;
+}
+
+/* Card styling consistency */
+.card,
+.panel {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+/* Button styling consistency */
+.btn-primary {
+  background: linear-gradient(
+    to right,
+    var(--green-primary),
+    var(--green-dark)
+  );
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: var(--green-dark);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #f9fafb;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--green-primary);
+  color: var(--green-primary);
+  transform: translateY(-1px);
+}
+
+/* For small screens */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  #navbar-container {
+    width: 100%;
+    height: auto;
+    position: relative;
+    min-height: auto;
+  }
+
+  .main-content {
+    margin-left: 0;
+    max-width: 100%;
+    padding: 20px;
+  }
+}

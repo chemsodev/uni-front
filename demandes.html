@@ -48,6 +48,61 @@
         background-color: #6c757d;
         color: white;
       }
+
+      /* Diagnostic styles */
+      #diagnostic-btn {
+        background-color: #17a2b8;
+        margin-left: 10px;
+      }
+
+      .diagnostic-container {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .diagnostic-container h4 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: #2c3e50;
+      }
+
+      .diagnostic-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+
+      .diagnostic-table th,
+      .diagnostic-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      .diagnostic-table th {
+        background-color: #f0f0f0;
+      }
+
+      .diagnostic-table tr.current {
+        background-color: #e3f2fd;
+      }
+
+      .diagnostic-table tr.full {
+        background-color: #ffecb3;
+      }
+
+      .error {
+        color: #dc3545;
+        font-weight: bold;
+      }
+
+      .warning {
+        color: #ffc107;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -61,8 +116,22 @@
           <h1 class="page-title">Mes Demandes</h1>
           <div class="header-actions">
             <button type="button" id="new-request-btn">Nouvelle Demande</button>
+            <button
+              type="button"
+              id="diagnostic-btn"
+              title="Diagnostiquer les problèmes de groupes"
+            >
+              Diagnostic
+            </button>
           </div>
         </div>
+
+        <!-- Container for diagnostic results -->
+        <div
+          id="diagnostic-results"
+          class="diagnostic-container"
+          style="display: none"
+        ></div>
 
         <!-- Contenu principal -->
         <div class="tab-container">
@@ -107,10 +176,18 @@
             <!-- Formulaire de changement de section -->
             <div id="section-form" class="form-card active">
               <h3>Demande de changement de section</h3>
-              <form id="section-change-form" class="request-form" enctype="multipart/form-data">
+              <form
+                id="section-change-form"
+                class="request-form"
+                enctype="multipart/form-data"
+              >
                 <div class="form-section">
                   <label for="current-section">Section actuelle:</label>
-                  <div class="current-value" id="current-section" data-id=""></div>
+                  <div
+                    class="current-value"
+                    id="current-section"
+                    data-id=""
+                  ></div>
                 </div>
 
                 <div class="form-section">
@@ -132,7 +209,9 @@
                 </div>
 
                 <div class="form-section">
-                  <label for="section-justification">Justification détaillée:</label>
+                  <label for="section-justification"
+                    >Justification détaillée:</label
+                  >
                   <textarea
                     id="section-justification"
                     placeholder="Veuillez expliquer en détail les raisons de votre demande..."
@@ -141,10 +220,18 @@
                 </div>
 
                 <div class="form-section">
-                  <label for="section-document">Document justificatif (si applicable):</label>
-                  <input type="file" id="section-document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <label for="section-document"
+                    >Document justificatif (si applicable):</label
+                  >
+                  <input
+                    type="file"
+                    id="section-document"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  />
                   <div id="section-file-name" class="file-name"></div>
-                  <div class="input-hint">Format: PDF, Word ou image (max 5MB)</div>
+                  <div class="input-hint">
+                    Format: PDF, Word ou image (max 5MB)
+                  </div>
                 </div>
 
                 <div id="section-form-error" class="error-message"></div>
@@ -161,7 +248,11 @@
             <!-- Group TD Form -->
             <div id="td-form" class="form-card">
               <h3>Demande de changement de groupe TD</h3>
-              <form id="td-change-form" class="request-form" enctype="multipart/form-data">
+              <form
+                id="td-change-form"
+                class="request-form"
+                enctype="multipart/form-data"
+              >
                 <div class="form-section">
                   <label for="current-td">Groupe TD actuel:</label>
                   <div class="current-value" id="current-td" data-id=""></div>
@@ -195,14 +286,30 @@
                 </div>
 
                 <div class="form-section">
-                  <label for="td-document">Document justificatif (si applicable):</label>
-                  <input type="file" id="td-document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <label for="td-document"
+                    >Document justificatif (si applicable):</label
+                  >
+                  <input
+                    type="file"
+                    id="td-document"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  />
                   <div id="td-file-name" class="file-name"></div>
-                  <div class="input-hint">Format: PDF, Word ou image (max 5MB)</div>
+                  <div class="input-hint">
+                    Format: PDF, Word ou image (max 5MB)
+                  </div>
                 </div>
 
-                <div id="td-form-error" class="error-message" style="display: none;"></div>
-                <div id="td-form-success" class="success-message" style="display: none;"></div>
+                <div
+                  id="td-form-error"
+                  class="error-message"
+                  style="display: none"
+                ></div>
+                <div
+                  id="td-form-success"
+                  class="success-message"
+                  style="display: none"
+                ></div>
 
                 <div class="form-actions">
                   <button type="submit" class="submit-btn">
@@ -215,7 +322,11 @@
             <!-- Group TP Form -->
             <div id="tp-form" class="form-card">
               <h3>Demande de changement de groupe TP</h3>
-              <form id="tp-change-form" class="request-form" enctype="multipart/form-data">
+              <form
+                id="tp-change-form"
+                class="request-form"
+                enctype="multipart/form-data"
+              >
                 <div class="form-section">
                   <label for="current-tp">Groupe TP actuel:</label>
                   <div class="current-value" id="current-tp" data-id=""></div>
@@ -249,14 +360,30 @@
                 </div>
 
                 <div class="form-section">
-                  <label for="tp-document">Document justificatif (si applicable):</label>
-                  <input type="file" id="tp-document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <label for="tp-document"
+                    >Document justificatif (si applicable):</label
+                  >
+                  <input
+                    type="file"
+                    id="tp-document"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  />
                   <div id="tp-file-name" class="file-name"></div>
-                  <div class="input-hint">Format: PDF, Word ou image (max 5MB)</div>
+                  <div class="input-hint">
+                    Format: PDF, Word ou image (max 5MB)
+                  </div>
                 </div>
 
-                <div id="tp-form-error" class="error-message" style="display: none;"></div>
-                <div id="tp-form-success" class="success-message" style="display: none;"></div>
+                <div
+                  id="tp-form-error"
+                  class="error-message"
+                  style="display: none"
+                ></div>
+                <div
+                  id="tp-form-success"
+                  class="success-message"
+                  style="display: none"
+                ></div>
 
                 <div class="form-actions">
                   <button type="submit" class="submit-btn">
@@ -310,56 +437,70 @@
     </div>
 
     <script src="demandes.js"></script>
-    
+
     <!-- Add a reference to ensure the logout function is bound correctly -->
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener("DOMContentLoaded", function () {
         // Make sure the logout button has the correct event handler
         const logoutBtn = document.querySelector('a[onclick="logout()"]');
         if (logoutBtn) {
-          logoutBtn.onclick = function(e) {
+          logoutBtn.onclick = function (e) {
             e.preventDefault();
             logout();
             return false;
           };
         }
-        
+
         // Add direct click handlers for the main tabs
-        const tabButtons = document.querySelectorAll('.tab-container > .tab-buttons > .tab-button');
-        tabButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
+        const tabButtons = document.querySelectorAll(
+          ".tab-container > .tab-buttons > .tab-button"
+        );
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const targetId = this.getAttribute("data-target");
             console.log(`Direct click on tab button: ${targetId}`);
-            
+
             // Deactivate all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-container > .tab-buttons > .tab-button').forEach(btn => btn.classList.remove('active'));
-            
+            document
+              .querySelectorAll(".tab-content")
+              .forEach((tab) => tab.classList.remove("active"));
+            document
+              .querySelectorAll(".tab-container > .tab-buttons > .tab-button")
+              .forEach((btn) => btn.classList.remove("active"));
+
             // Activate selected tab
-            document.getElementById(targetId).classList.add('active');
-            this.classList.add('active');
-            
+            document.getElementById(targetId).classList.add("active");
+            this.classList.add("active");
+
             // For the "suivi" tab, reload requests
-            if (targetId === 'suivi') {
-              console.log('Suivi tab activated - requests loaded via main script');
+            if (targetId === "suivi") {
+              console.log(
+                "Suivi tab activated - requests loaded via main script"
+              );
             }
           });
         });
-        
+
         // Add direct click handlers for the form tabs
-        const formTabButtons = document.querySelectorAll('#formulaires .tab-buttons .tab-button');
-        formTabButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
+        const formTabButtons = document.querySelectorAll(
+          "#formulaires .tab-buttons .tab-button"
+        );
+        formTabButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const targetId = this.getAttribute("data-target");
             console.log(`Direct click on form tab: ${targetId}`);
-            
+
             // Deactivate all form tabs
-            document.querySelectorAll('.form-card').forEach(form => form.classList.remove('active'));
-            document.querySelectorAll('#formulaires .tab-buttons .tab-button').forEach(btn => btn.classList.remove('active'));
-            
+            document
+              .querySelectorAll(".form-card")
+              .forEach((form) => form.classList.remove("active"));
+            document
+              .querySelectorAll("#formulaires .tab-buttons .tab-button")
+              .forEach((btn) => btn.classList.remove("active"));
+
             // Activate selected form tab
-            document.getElementById(targetId).classList.add('active');
-            this.classList.add('active');
+            document.getElementById(targetId).classList.add("active");
+            this.classList.add("active");
           });
         });
       });
@@ -368,29 +509,31 @@
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
         // Set up file input behavior to show file names
-        setupFileInput('section-document', 'section-file-name');
-        setupFileInput('td-document', 'td-file-name');
-        setupFileInput('tp-document', 'tp-file-name');
+        setupFileInput("section-document", "section-file-name");
+        setupFileInput("td-document", "td-file-name");
+        setupFileInput("tp-document", "tp-file-name");
       });
-      
+
       // Function to display selected file name
       function setupFileInput(inputId, displayId) {
         const fileInput = document.getElementById(inputId);
         const fileNameDisplay = document.getElementById(displayId);
-        
+
         if (fileInput && fileNameDisplay) {
-          fileInput.addEventListener('change', function() {
+          fileInput.addEventListener("change", function () {
             if (this.files && this.files.length > 0) {
               fileNameDisplay.textContent = this.files[0].name;
               fileNameDisplay.title = this.files[0].name;
-              fileNameDisplay.style.display = 'block';
+              fileNameDisplay.style.display = "block";
             } else {
-              fileNameDisplay.textContent = '';
-              fileNameDisplay.style.display = 'none';
+              fileNameDisplay.textContent = "";
+              fileNameDisplay.style.display = "none";
             }
           });
         }
       }
     </script>
+    <script src="js/request-notifications.js"></script>
+    <script src="js/request-tracker.js"></script>
   </body>
 </html>

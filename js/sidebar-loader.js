@@ -8,38 +8,43 @@
  * @param {string} containerId - The ID of the container element to load the sidebar into
  * @returns {Promise<void>}
  */
-async function loadTeacherSidebar(containerId = "navbar-container") {
-    try {
-        // 1. Load the sidebar HTML
-        const container = document.getElementById(containerId);
-        if (!container) {
-            console.error(`Sidebar container with ID "${containerId}" not found`);
-            return;
-        }
+function loadTeacherSidebar(containerId = "navbar-container") {
+  // 1. Load the sidebar HTML
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error(`Sidebar container with ID "${containerId}" not found`);
+    return;
+  }
 
-        // Fetch the sidebar HTML
-        const response = await fetch("enseignant-nav.html");
-        const html = await response.text();
-        container.innerHTML = html;
+  // Fetch the sidebar HTML
+  fetch("enseignant-nav.html")
+    .then((response) => response.text())
+    .then((html) => {
+      container.innerHTML = html;
 
-        // 2. Make sure enseignant-auth.js is loaded
-        if (typeof getCurrentTeacherData !== 'function') {
-            console.warn("getCurrentTeacherData function not found, loading script");
-            await loadScript("js/enseignant-auth.js");
-        }
+      // 2. Make sure enseignant-auth.js is loaded
+      if (typeof getCurrentTeacherData !== "function") {
+        console.warn("getCurrentTeacherData function not found");
+        // Can't use await in a non-async function
+        loadScript("js/enseignant-auth.js");
+      }
 
-        // 3. Update the user info in the sidebar
+      // 3. Update the user info in the sidebar
+      try {
         const user = getCurrentTeacherData();
         if (user) {
-            updateSidebarUserInfo(user);
+          updateSidebarUserInfo(user);
         }
+      } catch (e) {
+        console.error("Error getting teacher data:", e);
+      }
 
-        // 4. Mark the active link
-        setActiveSidebarLink();
-
-    } catch (error) {
-        console.error("Error loading teacher sidebar:", error);
-    }
+      // 4. Mark the active link
+      setActiveSidebarLink();
+    })
+    .catch((error) => {
+      console.error("Error loading teacher sidebar:", error);
+    });
 }
 
 /**
@@ -47,57 +52,76 @@ async function loadTeacherSidebar(containerId = "navbar-container") {
  * @param {Object} user - The teacher user data
  */
 function updateSidebarUserInfo(user) {
-    if (!user) return;
+  if (!user) return;
 
-    try {
-        // Get elements from the sidebar
-        const nameElement = document.getElementById("userFullName");
-        const idElement = document.getElementById("userId");
-        const avatarElement = document.getElementById("userAvatar");
-        const deptElement = document.getElementById("userDepartment");
+  try {
+    // Get elements from the sidebar
+    const nameElement = document.getElementById("userFullName");
+    const idElement = document.getElementById("userId");
+    const avatarElement = document.getElementById("userAvatar");
+    const deptElement = document.getElementById("userDepartment");
 
-        // Update elements if they exist
-        if (nameElement) {
-            const fullName = `${user.prenom || ""} ${user.nom || ""}`.trim();
-            nameElement.textContent = fullName || "Enseignant";
-        }
+    // Update elements if they exist
+    if (nameElement) {
+      // Get enseignantData from local or session storage
+      let enseignantData = JSON.parse(
+        localStorage.getItem("enseignantData") ||
+          sessionStorage.getItem("enseignantData") ||
+          "{}"
+      );
+      let fullName;
 
-        if (idElement) {
-            idElement.textContent = user.matricule || "N/A";
-        }
+      // Extract name from email: get part before @, replace dots with spaces
+      if (enseignantData && enseignantData.email) {
+        const emailPart = enseignantData.email.split("@")[0];
+        fullName = emailPart.replace(/\./g, " ");
+      } else {
+        fullName = `${user.prenom || ""} ${user.nom || ""}`.trim();
+      }
 
-        if (avatarElement) {
-            const initials = `${(user.prenom || " ").charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
-            avatarElement.textContent = initials || "EN";
-        }
-
-        if (deptElement) {
-            deptElement.textContent = user.departement || "Informatique";
-        }
-    } catch (error) {
-        console.error("Error updating sidebar user info:", error);
+      nameElement.textContent = fullName || "Enseignant";
     }
+
+    if (idElement) {
+      idElement.textContent = user.matricule || "N/A";
+    }
+
+    if (avatarElement) {
+      const initials = `${(user.prenom || " ").charAt(0)}${(
+        user.nom || " "
+      ).charAt(0)}`.toUpperCase();
+      avatarElement.textContent = initials || "EN";
+    }
+
+    if (deptElement) {
+      deptElement.textContent = user.departement || "Informatique";
+    }
+  } catch (error) {
+    console.error("Error updating sidebar user info:", error);
+  }
 }
 
 /**
  * Mark the active link in the sidebar based on current page
  */
 function setActiveSidebarLink() {
-    const currentPage = window.location.pathname.split("/").pop();
-    
-    try {
-        document.querySelectorAll(".sidebar .nav-link").forEach((link) => {
-            link.classList.remove("active");
-            
-            const href = link.getAttribute("href");
-            if (href === currentPage || 
-               (currentPage === "" && href === "dashbord-teacher.html")) {
-                link.classList.add("active");
-            }
-        });
-    } catch (error) {
-        console.error("Error setting active sidebar link:", error);
-    }
+  const currentPage = window.location.pathname.split("/").pop();
+
+  try {
+    document.querySelectorAll(".sidebar .nav-link").forEach((link) => {
+      link.classList.remove("active");
+
+      const href = link.getAttribute("href");
+      if (
+        href === currentPage ||
+        (currentPage === "" && href === "dashbord-teacher.html")
+      ) {
+        link.classList.add("active");
+      }
+    });
+  } catch (error) {
+    console.error("Error setting active sidebar link:", error);
+  }
 }
 
 /**
@@ -106,11 +130,11 @@ function setActiveSidebarLink() {
  * @returns {Promise<void>} - Resolves when script is loaded
  */
 function loadScript(src) {
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = () => resolve();
-        script.onerror = (err) => reject(err);
-        document.head.appendChild(script);
-    });
-} 
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = (err) => reject(err);
+    document.head.appendChild(script);
+  });
+}

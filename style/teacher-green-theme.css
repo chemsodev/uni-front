@@ -1,0 +1,251 @@
+/* Green theme for teacher pages */
+
+/* Main color changes */
+.page-title {
+  color: #10b981 !important;
+}
+
+/* All blue accents to green */
+.text-blue,
+.text-primary {
+  color: #10b981 !important;
+}
+
+/* Navigation links */
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+
+/* Buttons */
+.button-primary,
+.btn-primary {
+  background: linear-gradient(to right, #10b981, #047857) !important;
+  border-color: #047857 !important;
+}
+
+.button-primary:hover,
+.btn-primary:hover {
+  background: #047857 !important;
+}
+
+/* Links */
+a:not(.btn):not(.badge):not(.nav-link) {
+  color: #10b981 !important;
+}
+
+/* Header and section titles */
+.card-header,
+.section-title {
+  color: #10b981 !important;
+}
+
+/* Primary badges */
+.badge-primary {
+  background: #10b981 !important;
+  border-color: #047857 !important;
+}
+
+/* Borders */
+.border-primary,
+.border-blue {
+  border-color: #10b981 !important;
+}
+
+/* Accent elements like icons */
+.icon-primary,
+.icon-accent {
+  color: #10b981 !important;
+}
+
+/* Profile circle or avatar highlights */
+.profile-circle {
+  border-color: #10b981 !important;
+}
+
+/* Tab buttons when active */
+.tab-button.active {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+
+/* Progress bars and similar elements */
+.progress-bar {
+  background-color: #10b981 !important;
+}
+
+/* Any blue gradients */
+.bg-gradient-blue {
+  background: linear-gradient(to right, #10b981, #047857) !important;
+}
+
+/* Menu items */
+.menu-item:hover,
+.menu-item.active {
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+
+/* Any blue backgrounds */
+.bg-blue,
+.bg-primary {
+  background-color: #10b981 !important;
+}
+
+/* Specific dashboard cards with blue headers */
+.card.dashboard-card .card-header {
+  border-top: 4px solid #10b981 !important;
+}
+
+/* Additional elements that might still be blue */
+.btn-icon:hover {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #10b981 !important;
+}
+
+/* Stat icons in dashboard */
+.stat-icon {
+  background: #ecfdf5 !important;
+  color: #10b981 !important;
+}
+
+.pagination-btn.active {
+  background-color: #10b981 !important;
+  border-color: #047857 !important;
+}
+
+.section-card.active {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3) !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: #10b981 !important;
+  border-bottom-color: #10b981 !important;
+}
+
+/* Fix for buttons that might still be blue */
+.btn-secondary:hover {
+  border-color: #10b981 !important;
+}
+
+/* Fix for any inline styles */
+[style*="color: #007bff"],
+[style*="color:#007bff"],
+[style*="color: rgb(0, 123, 255)"],
+[style*="color:rgb(0,123,255)"] {
+  color: #10b981 !important;
+}
+
+[style*="background-color: #007bff"],
+[style*="background-color:#007bff"],
+[style*="background-color: rgb(0, 123, 255)"],
+[style*="background-color:rgb(0,123,255)"] {
+  background-color: #10b981 !important;
+}
+
+/* Form elements focus state */
+.form-control:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Fix for notification and alert components */
+.notification-icon.info,
+.alert-info {
+  color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Reconnection button in offline notice */
+.alert.alert-warning button {
+  background-color: #10b981 !important;
+  color: #fff !important;
+}
+
+/* Table headers */
+th.sortable:hover {
+  color: #10b981 !important;
+}
+
+/* Selection highlight */
+::selection {
+  background-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Fix any links in the sub-link class */
+.sub-link:hover,
+.sub-link.active {
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+  background-color: #ecfdf5 !important;
+}
+
+/* Fix for pagination buttons */
+.pagination-item.active {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+/* Fix for filter dropdowns and form elements */
+select:focus,
+input:focus,
+textarea:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Fix for section cards and panels */
+.panel-header h2 i,
+.card-title i,
+.panel-title i {
+  color: #10b981 !important;
+}
+
+/* Fix for panel and card headers */
+.panel-header,
+.card-header {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Fix for panel hovering effects */
+.panel:hover,
+.card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Fix dropdown menus */
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active {
+  background-color: #ecfdf5 !important;
+  color: #10b981 !important;
+}
+
+/* Fix calendar events if using fullcalendar */
+.fc-event,
+.fc-event-dot {
+  background-color: #10b981 !important;
+  border-color: #047857 !important;
+}
+
+/* Fix any calendar buttons */
+.fc-button-primary {
+  background-color: #10b981 !important;
+  border-color: #047857 !important;
+}
+
+/* Fix any remaining blue focus states */
+*:focus {
+  outline-color: #10b981 !important;
+}
+
+/* Fix alerts and notices */
+.alert-info,
+.notice-info {
+  background-color: #ecfdf5 !important;
+  border-color: #10b981 !important;
+  color: #047857 !important;
+}

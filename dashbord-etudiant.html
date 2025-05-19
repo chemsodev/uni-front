@@ -4,10 +4,39 @@
     <meta charset="UTF-8" />
     <title>Dashboard Étudiant</title>
     <link href="style/dashbord-etudiant.css" rel="stylesheet" />
+    <link href="style/notification-enhanced.css" rel="stylesheet" />
     <style>
-      /* ... existing styles ... */
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
 
-      /* Request item styles */
+      .card-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      .view-all-link {
+        display: block;
+        text-align: center;
+        margin-top: 12px;
+        padding: 8px;
+        color: #3b82f6;
+        font-weight: 500;
+        text-decoration: none;
+        border-radius: 4px;
+        background-color: #f0f9ff;
+      }
+
+      .view-all-link:hover {
+        background-color: #e1f5fe;
+        text-decoration: underline;
+      }
+
       .request-item {
         margin-bottom: 10px;
         padding: 8px 12px;
@@ -64,6 +93,92 @@
 
       .more-link:hover {
         text-decoration: underline;
+      }
+
+      /* Notifications section styles */
+      .notifications-list {
+        margin-top: 10px;
+        width: 100%;
+        max-height: 400px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .notification-item {
+        padding: 15px;
+        border-left: 3px solid #3b82f6;
+        background-color: #f0f9ff;
+        margin-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+      }
+
+      .notification-item:hover {
+        background-color: #e1f5fe;
+        transform: translateY(-1px);
+      }
+
+      .notification-item.unread {
+        border-left-color: #ef4444;
+      }
+
+      .notification-item.cours {
+        border-left-color: #3b82f6;
+      }
+
+      .notification-item.examen {
+        border-left-color: #ef4444;
+      }
+
+      .notification-item.emploi_du_temps {
+        border-left-color: #10b981;
+      }
+
+      .notification-title {
+        font-weight: 600;
+        color: #1e40af;
+        margin-bottom: 5px;
+      }
+
+      .notification-message {
+        color: #334155;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+      }
+
+      .notification-time {
+        display: block;
+        font-size: 0.8rem;
+        color: #64748b;
+        text-align: right;
+      }
+
+      .notification-action {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 5px 12px;
+        background-color: #3b82f6;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: background-color 0.2s;
+      }
+
+      .notification-action:hover {
+        background-color: #2563eb;
+      }
+
+      .empty-state {
+        padding: 20px;
+        text-align: center;
+        color: #64748b;
+        font-style: italic;
+        background-color: #f9fafb;
+        border-radius: 6px;
       }
     </style>
   </head>
@@ -123,10 +238,17 @@
           </div>
 
           <!-- Notifications -->
-          <div class="card">
-            <h2 class="card-title">Notifications Récentes</h2>
-            <div class="card-content" id="notificationsList">
-              <div class="loading">Chargement...</div>
+          <div class="dashboard-card">
+            <div class="card-header">
+              <h2>Notifications Récentes</h2>
+              <a href="notification.html" class="more-link">Tout voir</a>
+            </div>
+            <div class="card-content">
+              <div id="notificationsList" class="notifications-list">
+                <div class="loading-indicator">
+                  Chargement des notifications...
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -689,12 +811,11 @@
           case "rejected":
             return '<span class="status-rejected">Rejetée</span>';
           case "cancelled":
-            return '<span class="status-cancelled">Annulée</span>'; 
+            return '<span class="status-cancelled">Annulée</span>';
           default:
             return '<span class="status-pending">En traitement</span>';
         }
       }
-
       function renderNotifications(notifications) {
         const container = document.getElementById("notificationsList");
         container.innerHTML = "";
@@ -710,22 +831,56 @@
 
         recentNotifications.forEach((notif) => {
           const div = document.createElement("div");
-          div.className = "notification-item";
+          div.className = `notification-item ${notif.type || ""} ${
+            !notif.isRead ? "unread" : ""
+          }`;
+
+          // Add data attributes for future reference
+          div.dataset.id = notif.id;
+          div.dataset.type = notif.type || "";
+          div.dataset.read = notif.isRead ? "true" : "false";
+
+          let actionHtml = "";
+          if (notif.actionLink && notif.actionLabel) {
+            actionHtml = `<a href="${notif.actionLink}" class="notification-action">${notif.actionLabel}</a>`;
+          }
+
           div.innerHTML = `
-            <strong>${notif.title || "Notification"}</strong> -
-                ${notif.message}
-                <span class="notification-time">(${formatTimeAgo(
-                  notif.createdAt
-                )})</span>
+            <div class="notification-title">${
+              notif.title || "Notification"
+            }</div>
+            <div class="notification-message">${
+              notif.content || notif.message
+            }</div>
+            ${actionHtml}
+            <span class="notification-time">${formatTimeAgo(
+              notif.createdAt
+            )}</span>
             `;
+
+          // Add click handler to mark as read and navigate if needed
+          div.addEventListener("click", () => {
+            // Mark as read
+            if (!notif.isRead) {
+              markNotificationAsRead(notif.id);
+              div.classList.remove("unread");
+              div.dataset.read = "true";
+            }
+
+            // Navigate if has action link
+            if (notif.actionLink) {
+              window.location.href = notif.actionLink;
+            }
+          });
+
           container.appendChild(div);
         });
-
         if (notifications.length > 3) {
           const moreLink = document.createElement("a");
           moreLink.href = "notification.html";
-          moreLink.className = "more-link";
-          moreLink.textContent = "Voir toutes les notifications";
+          moreLink.className = "view-all-link";
+          moreLink.innerHTML =
+            '<i class="fas fa-arrow-right"></i> Voir toutes les notifications';
           container.appendChild(moreLink);
         }
       }
@@ -884,6 +1039,57 @@
           if (mainContent) {
             mainContent.insertBefore(notification, mainContent.firstChild);
           }
+        }
+      }
+
+      // Mark notification as read
+      async function markNotificationAsRead(id) {
+        if (!id || !authToken) return;
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/notifications/${id}/mark-read`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (response.ok) {
+            console.log(`Notification ${id} marked as read`);
+            // Update notification badge count
+            updateUnreadNotificationCount();
+          }
+        } catch (error) {
+          console.error("Error marking notification as read:", error);
+        }
+      }
+
+      // Update notification badge count
+      async function updateUnreadNotificationCount() {
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/notifications/unread-count",
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            const badge = document.querySelector(".notification-badge-count");
+            if (badge) {
+              badge.textContent = data.count;
+              badge.style.display = data.count > 0 ? "flex" : "none";
+            }
+          }
+        } catch (error) {
+          console.error("Error updating notification count:", error);
         }
       }
 

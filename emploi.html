@@ -1,599 +1,721 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Emploi du temps - Espace Enseignant</title>
-    <link href="style/emploi.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="style/emploi.css" rel="stylesheet" />
+    <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
     <script src="js/enseignant-auth.js"></script>
     <script src="js/sidebar-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-</head>
-<body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div id="navbar-container"></div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header header-actions">
-                <h1 class="page-title">Emploi du temps</h1>
-                <div class="header-buttons">
-                    <button onclick="openModal('requestRoomModal')" class="btn-primary">
-                        <i class="fas fa-door-open"></i> Demander une salle
-                    </button>
-                    <button onclick="openModal('addEventModal')" class="btn-secondary">
-                        <i class="fas fa-calendar-plus"></i> Ajouter un évènement
-                    </button>
-                </div>
-            </div>
-            
-            <div class="content-container">
-                <!-- Information sur les affectations -->
-                <div class="card">
-                    <h2 class="card-title">
-                        <span class="card-title-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
-                            </svg>
-                        </span>
-                        Mes affectations
-                    </h2>
-                    <div class="info-grid" id="teacher-info">
-                        <div class="loading-message">Chargement des informations...</div>
-                    </div>
-                </div>
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
 
-                <!-- Documents pour mes sections -->
-                <div class="card">
-                    <h2 class="card-title">
-                        <span class="card-title-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2.5 3a.5.5 0 0 0-.5.5V6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5zM14 7H2v5.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V7z"/>
-                            </svg>
-                        </span>
-                        Emploi du temps de mes sections
-                    </h2>
-                    
-                    <div class="section-selector">
-                        <select id="section-schedule-filter" onchange="displaySectionSchedule()">
-                            <option value="">Sélectionner une section</option>
-                            <!-- Sections loaded dynamically -->
-                        </select>
-                    </div>
-                    
-                    <div id="section-schedule-container" class="section-schedules">
-                        <div class="empty-state">Sélectionnez une section pour voir son emploi du temps</div>
-                    </div>
-                </div>
-                
-                <!-- Upload Emploi du temps -->
-                <div class="card">
-                    <h2 class="card-title">
-                        <span class="card-title-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
-                            </svg>
-                        </span>
-                        Emploi du temps personnalisé
-                    </h2>
-                    
-                    <div class="file-upload-container">
-                        <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
-                        <div class="upload-area" id="uploadArea">
-                            <i class="fas fa-cloud-upload-alt upload-icon" style="font-size: 48px;"></i>
-                            <div class="upload-text">Glissez et déposez votre emploi du temps</div>
-                            <div class="upload-hint">Format accepté: JPG, PNG, PDF (max. 5 Mo)</div>
-                            <button class="upload-btn" id="selectFileBtn">
-                                <i class="fas fa-file-upload"></i> Sélectionner un fichier
-                            </button>
-                        </div>
-                        
-                        <div class="preview-container" id="previewContainer" style="display: none;">
-                            <div class="preview-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <div class="preview-title" style="font-weight: 600; color: #2d3748;">
-                                    <i class="fas fa-file-alt"></i> Aperçu de l'emploi du temps
-                                </div>
-                                <div class="preview-actions" style="display: flex; gap: 10px;">
-                                    <button class="btn-secondary" id="downloadBtn">
-                                        <i class="fas fa-download"></i> Télécharger
-                                    </button>
-                                    <button class="btn-secondary" id="deleteBtn" style="color: #e53e3e;">
-                                        <i class="fas fa-trash-alt"></i> Supprimer
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="preview-content" id="previewContent" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; min-height: 200px; background-color: #f7fafc;">
-                                <!-- Preview content will be inserted here -->
-                            </div>
-                            <div id="fileName" style="margin-top: 10px; font-size: 14px; color: #4a5568;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header header-actions">
+          <h1 class="page-title">Emploi du temps</h1>
+          <div class="header-buttons">
+            <button onclick="openModal('requestRoomModal')" class="btn-primary">
+              <i class="fas fa-door-open"></i> Demander une salle
+            </button>
+            <button onclick="openModal('addEventModal')" class="btn-secondary">
+              <i class="fas fa-calendar-plus"></i> Ajouter un évènement
+            </button>
+          </div>
         </div>
+
+        <div class="content-container">
+          <!-- Information sur les affectations -->
+          <div class="card">
+            <h2 class="card-title">
+              <span class="card-title-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+                  />
+                </svg>
+              </span>
+              Mes affectations
+            </h2>
+            <div class="info-grid" id="teacher-info">
+              <div class="loading-message">Chargement des informations...</div>
+            </div>
+          </div>
+
+          <!-- Documents pour mes sections -->
+          <div class="card">
+            <h2 class="card-title">
+              <span class="card-title-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2.5 3a.5.5 0 0 0-.5.5V6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5zM14 7H2v5.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V7z"
+                  />
+                </svg>
+              </span>
+              Emploi du temps de mes sections
+            </h2>
+
+            <div class="section-selector">
+              <select
+                id="section-schedule-filter"
+                onchange="displaySectionSchedule()"
+              >
+                <option value="">Sélectionner une section</option>
+                <!-- Sections loaded dynamically -->
+              </select>
+            </div>
+
+            <div id="section-schedule-container" class="section-schedules">
+              <div class="empty-state">
+                Sélectionnez une section pour voir son emploi du temps
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Emploi du temps -->
+          <div class="card">
+            <h2 class="card-title">
+              <span class="card-title-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"
+                  />
+                </svg>
+              </span>
+              Emploi du temps personnalisé
+            </h2>
+
+            <div class="file-upload-container">
+              <input
+                type="file"
+                id="fileInput"
+                class="file-input"
+                accept=".jpg,.jpeg,.png,.pdf"
+              />
+              <div class="upload-area" id="uploadArea">
+                <i
+                  class="fas fa-cloud-upload-alt upload-icon"
+                  style="font-size: 48px"
+                ></i>
+                <div class="upload-text">
+                  Glissez et déposez votre emploi du temps
+                </div>
+                <div class="upload-hint">
+                  Format accepté: JPG, PNG, PDF (max. 5 Mo)
+                </div>
+                <button class="upload-btn" id="selectFileBtn">
+                  <i class="fas fa-file-upload"></i> Sélectionner un fichier
+                </button>
+              </div>
+
+              <div
+                class="preview-container"
+                id="previewContainer"
+                style="display: none"
+              >
+                <div
+                  class="preview-header"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 16px;
+                  "
+                >
+                  <div
+                    class="preview-title"
+                    style="font-weight: 600; color: #2d3748"
+                  >
+                    <i class="fas fa-file-alt"></i> Aperçu de l'emploi du temps
+                  </div>
+                  <div class="preview-actions" style="display: flex; gap: 10px">
+                    <button class="btn-secondary" id="downloadBtn">
+                      <i class="fas fa-download"></i> Télécharger
+                    </button>
+                    <button
+                      class="btn-secondary"
+                      id="deleteBtn"
+                      style="color: #e53e3e"
+                    >
+                      <i class="fas fa-trash-alt"></i> Supprimer
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="preview-content"
+                  id="previewContent"
+                  style="
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    padding: 16px;
+                    min-height: 200px;
+                    background-color: #f7fafc;
+                  "
+                >
+                  <!-- Preview content will be inserted here -->
+                </div>
+                <div
+                  id="fileName"
+                  style="margin-top: 10px; font-size: 14px; color: #4a5568"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Modal pour demander une salle -->
     <div id="requestRoomModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Demander une salle</h3>
-                <span class="close-modal" onclick="closeModal('requestRoomModal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="requestRoomForm">
-                    <div class="form-group">
-                        <label for="roomType">Type de salle</label>
-                        <select id="roomType" required>
-                            <option value="">Sélectionner un type</option>
-                            <option value="amphi">Amphi</option>
-                            <option value="td">TD</option>
-                            <option value="tp">TP</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="requestDate">Date</label>
-                        <input type="date" id="requestDate" required>
-                    </div>
-                    
-                    <div class="form-group time-group">
-                        <div>
-                            <label for="startTime">Heure de début</label>
-                            <input type="time" id="startTime" required>
-                        </div>
-                        <div>
-                            <label for="endTime">Heure de fin</label>
-                            <input type="time" id="endTime" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reason">Motif</label>
-                        <textarea id="reason" rows="3" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-paper-plane"></i> Soumettre la demande
-                        </button>
-                    </div>
-                </form>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Demander une salle</h3>
+          <span class="close-modal" onclick="closeModal('requestRoomModal')"
+            >&times;</span
+          >
         </div>
+        <div class="modal-body">
+          <form id="requestRoomForm">
+            <div class="form-group">
+              <label for="roomType">Type de salle</label>
+              <select id="roomType" required>
+                <option value="">Sélectionner un type</option>
+                <option value="amphi">Amphi</option>
+                <option value="td">TD</option>
+                <option value="tp">TP</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="requestDate">Date</label>
+              <input type="date" id="requestDate" required />
+            </div>
+
+            <div class="form-group time-group">
+              <div>
+                <label for="startTime">Heure de début</label>
+                <input type="time" id="startTime" required />
+              </div>
+              <div>
+                <label for="endTime">Heure de fin</label>
+                <input type="time" id="endTime" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="reason">Motif</label>
+              <textarea id="reason" rows="3" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Soumettre la demande
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Modal pour ajouter un événement -->
     <div id="addEventModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Ajouter un événement</h3>
-                <span class="close-modal" onclick="closeModal('addEventModal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="addEventForm">
-                    <div class="form-group">
-                        <label for="eventTitle">Titre</label>
-                        <input type="text" id="eventTitle" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="eventDate">Date</label>
-                        <input type="date" id="eventDate" required>
-                    </div>
-                    
-                    <div class="form-group time-group">
-                        <div>
-                            <label for="eventStartTime">Heure de début</label>
-                            <input type="time" id="eventStartTime" required>
-                        </div>
-                        <div>
-                            <label for="eventEndTime">Heure de fin</label>
-                            <input type="time" id="eventEndTime" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="eventType">Type</label>
-                        <select id="eventType" required>
-                            <option value="">Sélectionner un type</option>
-                            <option value="exam">Examen</option>
-                            <option value="meeting">Réunion</option>
-                            <option value="course">Cours</option>
-                            <option value="other">Autre</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="eventLocation">Lieu</label>
-                        <input type="text" id="eventLocation">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="eventDescription">Description</label>
-                        <textarea id="eventDescription" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-plus-circle"></i> Ajouter l'événement
-                        </button>
-                    </div>
-                </form>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Ajouter un événement</h3>
+          <span class="close-modal" onclick="closeModal('addEventModal')"
+            >&times;</span
+          >
         </div>
+        <div class="modal-body">
+          <form id="addEventForm">
+            <div class="form-group">
+              <label for="eventTitle">Titre</label>
+              <input type="text" id="eventTitle" required />
+            </div>
+
+            <div class="form-group">
+              <label for="eventDate">Date</label>
+              <input type="date" id="eventDate" required />
+            </div>
+
+            <div class="form-group time-group">
+              <div>
+                <label for="eventStartTime">Heure de début</label>
+                <input type="time" id="eventStartTime" required />
+              </div>
+              <div>
+                <label for="eventEndTime">Heure de fin</label>
+                <input type="time" id="eventEndTime" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="eventType">Type</label>
+              <select id="eventType" required>
+                <option value="">Sélectionner un type</option>
+                <option value="exam">Examen</option>
+                <option value="meeting">Réunion</option>
+                <option value="course">Cours</option>
+                <option value="other">Autre</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="eventLocation">Lieu</label>
+              <input type="text" id="eventLocation" />
+            </div>
+
+            <div class="form-group">
+              <label for="eventDescription">Description</label>
+              <textarea id="eventDescription" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-plus-circle"></i> Ajouter l'événement
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    
+
     <script>
-        // Global variables
-        let currentUser = null;
-        let authToken = null;
-        let isBackendAvailable = true; 
-        let teacherSections = [];
-        
-        document.addEventListener("DOMContentLoaded", async function () {
-            try {
-                // Verify authentication using our helper
-                const authResult = await verifyEnseignantAuth();
-                
-                if (!authResult.isAuthenticated) {
-                    return; // The helper will redirect to login
-                }
-                
-                // Set global variables
-                currentUser = authResult.user;
-                authToken = sessionStorage.getItem("enseignant_token") || localStorage.getItem("enseignant_token");
+      // Global variables
+      let currentUser = null;
+      let authToken = null;
+      let isBackendAvailable = true;
+      let teacherSections = [];
 
-                // Load navigation using sidebar-loader
-                await loadTeacherSidebar("navbar-container");
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          // Verify authentication using our helper
+          const authResult = await verifyEnseignantAuth();
 
-                // Initialize file upload handling
-                initFileUpload();
-                
-                // Initialize form handling
-                initFormHandling();
-                
-                // Load data
-                try {
-                    await loadTeacherAssignments();
-                    await populateSectionDropdown();
-                } catch (dataError) {
-                    // Only log critical errors
-                    if (dataError.name !== 'AbortError') {
-                        console.warn("Error loading data, using fallback");
-                    }
-                    isBackendAvailable = false;
-                    loadFallbackData();
-                    addReconnectionButton();
-                }
-            } catch (error) {
-                console.error("Authentication error:", error);
-                logout(); // Use our shared logout function
+          if (!authResult.isAuthenticated) {
+            return; // The helper will redirect to login
+          }
+
+          // Set global variables
+          currentUser = authResult.user;
+          authToken =
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+          // Load navigation using sidebar-loader
+          await loadTeacherSidebar("navbar-container");
+
+          // Initialize file upload handling
+          initFileUpload();
+
+          // Initialize form handling
+          initFormHandling();
+
+          // Load data
+          try {
+            await loadTeacherAssignments();
+            await populateSectionDropdown();
+          } catch (dataError) {
+            // Only log critical errors
+            if (dataError.name !== "AbortError") {
+              console.warn("Error loading data, using fallback");
             }
+            isBackendAvailable = false;
+            loadFallbackData();
+            addReconnectionButton();
+          }
+        } catch (error) {
+          console.error("Authentication error:", error);
+          logout(); // Use our shared logout function
+        }
+      });
+
+      // Initialize file upload features
+      function initFileUpload() {
+        const fileInput = document.getElementById("fileInput");
+        const uploadArea = document.getElementById("uploadArea");
+        const selectFileBtn = document.getElementById("selectFileBtn");
+        const previewContainer = document.getElementById("previewContainer");
+        const previewContent = document.getElementById("previewContent");
+        const fileName = document.getElementById("fileName");
+        const deleteBtn = document.getElementById("deleteBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+
+        // Show file selector when button is clicked
+        selectFileBtn.addEventListener("click", () => {
+          fileInput.click();
         });
-        
-        // Initialize file upload features
-        function initFileUpload() {
-            const fileInput = document.getElementById('fileInput');
-            const uploadArea = document.getElementById('uploadArea');
-            const selectFileBtn = document.getElementById('selectFileBtn');
-            const previewContainer = document.getElementById('previewContainer');
-            const previewContent = document.getElementById('previewContent');
-            const fileName = document.getElementById('fileName');
-            const deleteBtn = document.getElementById('deleteBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
 
-            // Show file selector when button is clicked
-            selectFileBtn.addEventListener('click', () => {
-                fileInput.click();
-            });
+        // Handle file selection
+        fileInput.addEventListener("change", (e) => {
+          handleFiles(e.target.files);
+        });
 
-            // Handle file selection
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(e.target.files);
-            });
+        // Handle drag and drop events
+        uploadArea.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          uploadArea.classList.add("drag-over");
+        });
 
-            // Handle drag and drop events
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('drag-over');
-            });
-            
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('drag-over');
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-                handleFiles(e.dataTransfer.files);
-            });
-            
-            // Handle delete button click
-            deleteBtn.addEventListener('click', () => {
-                fileInput.value = '';
-                uploadArea.style.display = 'block';
-                previewContainer.style.display = 'none';
-                previewContent.innerHTML = '';
-                fileName.textContent = '';
-            });
+        uploadArea.addEventListener("dragleave", () => {
+          uploadArea.classList.remove("drag-over");
+        });
 
-            // Handle download button click (placeholder)
-            downloadBtn.addEventListener('click', () => {
-                alert('Téléchargement en cours...');
-            });
-        }
-        
-        // Initialize form handling
-        function initFormHandling() {
-            // Handle form submissions
-            const requestRoomForm = document.getElementById('requestRoomForm');
-            if (requestRoomForm) {
-                requestRoomForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    handleRoomRequest();
-                });
-            }
-            
-            const addEventForm = document.getElementById('addEventForm');
-            if (addEventForm) {
-                addEventForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    handleAddEvent();
-                });
-            }
+        uploadArea.addEventListener("drop", (e) => {
+          e.preventDefault();
+          uploadArea.classList.remove("drag-over");
+          handleFiles(e.dataTransfer.files);
+        });
+
+        // Handle delete button click
+        deleteBtn.addEventListener("click", () => {
+          fileInput.value = "";
+          uploadArea.style.display = "block";
+          previewContainer.style.display = "none";
+          previewContent.innerHTML = "";
+          fileName.textContent = "";
+        });
+
+        // Handle download button click (placeholder)
+        downloadBtn.addEventListener("click", () => {
+          alert("Téléchargement en cours...");
+        });
+      }
+
+      // Initialize form handling
+      function initFormHandling() {
+        // Handle form submissions
+        const requestRoomForm = document.getElementById("requestRoomForm");
+        if (requestRoomForm) {
+          requestRoomForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            handleRoomRequest();
+          });
         }
 
-        // Add reconnection button
-        function addReconnectionButton() {
-            const offlineNotice = document.querySelector(".alert.alert-warning");
+        const addEventForm = document.getElementById("addEventForm");
+        if (addEventForm) {
+          addEventForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            handleAddEvent();
+          });
+        }
+      }
 
-            if (!offlineNotice) {
-                const mainContent = document.querySelector(".main-content");
-                mainContent.insertAdjacentHTML('afterbegin', `
+      // Add reconnection button
+      function addReconnectionButton() {
+        const offlineNotice = document.querySelector(".alert.alert-warning");
+
+        if (!offlineNotice) {
+          const mainContent = document.querySelector(".main-content");
+          mainContent.insertAdjacentHTML(
+            "afterbegin",
+            `
                     <div class="alert alert-warning" style="padding: 10px; margin: 10px 0; background-color: #fff3cd; color: #856404; border-radius: 4px;">
                         <strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.
                         <button onclick="window.location.reload()" style="margin-left: 10px; padding: 5px 10px; background-color: #3182ce; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
                             Réessayer la connexion
                         </button>
                     </div>
-                `);
-            }
+                `
+          );
         }
+      }
 
-        // User data now handled by sidebar-loader.js
+      // User data now handled by sidebar-loader.js
 
-        // Load teacher assignments
-        async function loadTeacherAssignments() {
-            try {
-                if (isBackendAvailable) {
-                    // Use our helper function to get teacher's sections
-                    const sections = await loadTeacherSections();
-                    
-                    // Store sections globally for reuse
-                    teacherSections = sections || [];
-                    
-                    if (sections && sections.length > 0) {
-                        // Use the sections to create teacher assignment info
-                        const assignments = {
-                            departement: sections.length > 0 ? (sections[0].department?.name || "Informatique") : "Informatique",
-                            grade: "Maître de Conférences", // This could be fetched from teacher profile
-                            responsabilite: sections.length > 0 ? 
-                                `Responsable ${sections.length} Section${sections.length > 1 ? 's' : ''}` : 
-                                "Resp. Module Algorithmique",
-                            anneeAcademique: "2023-2024"
-                        };
-                        
-                        displayTeacherInfo(assignments);
-                    } else {
-                        throw new Error("No sections found");
-                    }
-                } else {
-                    // Load fallback data
-                    displayFallbackTeacherInfo();
-                }
-            } catch (error) {
-                console.error("Error loading assignments:", error);
-                displayFallbackTeacherInfo();
+      // Load teacher assignments
+      async function loadTeacherAssignments() {
+        try {
+          if (isBackendAvailable) {
+            // Use our helper function to get teacher's sections
+            const sections = await loadTeacherSections();
+
+            // Store sections globally for reuse
+            teacherSections = sections || [];
+
+            if (sections && sections.length > 0) {
+              // Use the sections to create teacher assignment info
+              const assignments = {
+                departement:
+                  sections.length > 0
+                    ? sections[0].department?.name || "Informatique"
+                    : "Informatique",
+                grade: "Maître de Conférences", // This could be fetched from teacher profile
+                responsabilite:
+                  sections.length > 0
+                    ? `Responsable ${sections.length} Section${
+                        sections.length > 1 ? "s" : ""
+                      }`
+                    : "Resp. Module Algorithmique",
+                anneeAcademique: "2023-2024",
+              };
+
+              displayTeacherInfo(assignments);
+            } else {
+              throw new Error("No sections found");
             }
+          } else {
+            // Load fallback data
+            displayFallbackTeacherInfo();
+          }
+        } catch (error) {
+          console.error("Error loading assignments:", error);
+          displayFallbackTeacherInfo();
         }
+      }
 
-        // Display teacher information
-        function displayTeacherInfo(data) {
-            const container = document.getElementById('teacher-info');
-            container.innerHTML = `
+      // Display teacher information
+      function displayTeacherInfo(data) {
+        const container = document.getElementById("teacher-info");
+        container.innerHTML = `
                 <div class="info-item">
                     <div class="info-label">Département</div>
-                    <div class="info-value">${data.departement || 'Informatique'}</div>
+                    <div class="info-value">${
+                      data.departement || "Informatique"
+                    }</div>
                 </div>
-                
+
                 <div class="info-item">
                     <div class="info-label">Grade</div>
-                    <div class="info-value">${data.grade || 'Maître de Conférences'}</div>
+                    <div class="info-value">${
+                      data.grade || "Maître de Conférences"
+                    }</div>
                 </div>
-                
+
                 <div class="info-item">
                     <div class="info-label">Responsabilité</div>
-                    <div class="info-value">${data.responsabilite || 'Resp. Module Algorithmique'}</div>
+                    <div class="info-value">${
+                      data.responsabilite || "Resp. Module Algorithmique"
+                    }</div>
                 </div>
-                
+
                 <div class="info-item">
                     <div class="info-label">Année académique</div>
-                    <div class="info-value">${data.anneeAcademique || '2023-2024'}</div>
+                    <div class="info-value">${
+                      data.anneeAcademique || "2023-2024"
+                    }</div>
                 </div>
             `;
+      }
+
+      // Display fallback teacher information
+      function displayFallbackTeacherInfo() {
+        displayTeacherInfo({
+          departement: "Informatique",
+          grade: "Maître de Conférences",
+          responsabilite: "Resp. Module Algorithmique",
+          anneeAcademique: "2023-2024",
+        });
+      }
+
+      // Load fallback data
+      function loadFallbackData() {
+        displayFallbackTeacherInfo();
+      }
+
+      // Handle files
+      function handleFiles(files) {
+        if (files.length === 0) return;
+
+        const file = files[0];
+        const previewContainer = document.getElementById("previewContainer");
+        const previewContent = document.getElementById("previewContent");
+        const fileName = document.getElementById("fileName");
+        const uploadArea = document.getElementById("uploadArea");
+
+        // Check file size (5 MB max)
+        if (file.size > 5 * 1024 * 1024) {
+          alert("Le fichier est trop volumineux. Taille maximale: 5 Mo.");
+          return;
         }
 
-        // Display fallback teacher information
-        function displayFallbackTeacherInfo() {
-            displayTeacherInfo({
-                departement: 'Informatique',
-                grade: 'Maître de Conférences',
-                responsabilite: 'Resp. Module Algorithmique',
-                anneeAcademique: '2023-2024'
-            });
-        }
+        // Show preview based on file type
+        const reader = new FileReader();
 
-        // Load fallback data
-        function loadFallbackData() {
-            displayFallbackTeacherInfo();
-        }
+        reader.onload = (e) => {
+          const fileExt = file.name.split(".").pop().toLowerCase();
 
-        // Handle files
-        function handleFiles(files) {
-            if (files.length === 0) return;
-            
-            const file = files[0];
-            const previewContainer = document.getElementById('previewContainer');
-            const previewContent = document.getElementById('previewContent');
-            const fileName = document.getElementById('fileName');
-            const uploadArea = document.getElementById('uploadArea');
-            
-            // Check file size (5 MB max)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Le fichier est trop volumineux. Taille maximale: 5 Mo.');
-                return;
-            }
-            
-            // Show preview based on file type
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                const fileExt = file.name.split('.').pop().toLowerCase();
-                
-                if (fileExt === 'pdf') {
-                    previewContent.innerHTML = `
+          if (fileExt === "pdf") {
+            previewContent.innerHTML = `
                         <div style="text-align: center; padding: 20px;">
                             <i class="fas fa-file-pdf" style="font-size: 48px; color: #e53e3e; margin-bottom: 10px;"></i>
                             <div>Document PDF</div>
                         </div>
                     `;
-                } else if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.maxWidth = '100%';
-                    img.style.maxHeight = '400px';
-                    img.style.display = 'block';
-                    img.style.margin = '0 auto';
-                    previewContent.innerHTML = '';
-                    previewContent.appendChild(img);
-                }
-                
-                fileName.textContent = file.name;
-                uploadArea.style.display = 'none';
-                previewContainer.style.display = 'block';
-            };
-            
-            if (['jpg', 'jpeg', 'png'].includes(file.name.split('.').pop().toLowerCase())) {
-                reader.readAsDataURL(file);
-            } else {
-                reader.readAsText(file); // Just to trigger onload for PDF
-            }
-        }
+          } else if (["jpg", "jpeg", "png"].includes(fileExt)) {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.maxWidth = "100%";
+            img.style.maxHeight = "400px";
+            img.style.display = "block";
+            img.style.margin = "0 auto";
+            previewContent.innerHTML = "";
+            previewContent.appendChild(img);
+          }
 
-        // Handle room request
-        function handleRoomRequest() {
-            alert('Votre demande de salle a été soumise avec succès!');
-            closeModal('requestRoomModal');
-            document.getElementById('requestRoomForm').reset();
-        }
-
-        // Handle add event
-        function handleAddEvent() {
-            alert('Votre événement a été ajouté avec succès!');
-            closeModal('addEventModal');
-            document.getElementById('addEventForm').reset();
-        }
-
-        // Open modal
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-
-        // Close modal
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const modals = document.getElementsByClassName('modal');
-            for (let i = 0; i < modals.length; i++) {
-                if (event.target === modals[i]) {
-                    modals[i].style.display = 'none';
-                }
-            }
+          fileName.textContent = file.name;
+          uploadArea.style.display = "none";
+          previewContainer.style.display = "block";
         };
 
-        // Populate section dropdown for schedules
-        async function populateSectionDropdown() {
-            try {
-                const select = document.getElementById('section-schedule-filter');
-                select.innerHTML = '<option value="">Sélectionner une section</option>';
-                
-                if (teacherSections.length === 0) {
-                    // Try loading teacher sections if not already loaded
-                    const sections = await loadTeacherSections();
-                    teacherSections = sections || [];
-                }
-                
-                teacherSections.forEach(section => {
-                    const option = document.createElement('option');
-                    option.value = section.id;
-                    option.textContent = `${section.specialty || section.filiere || 'Filière'} - Section ${section.name || section.nom || ''}`;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error("Error populating section dropdown:", error);
-            }
+        if (
+          ["jpg", "jpeg", "png"].includes(
+            file.name.split(".").pop().toLowerCase()
+          )
+        ) {
+          reader.readAsDataURL(file);
+        } else {
+          reader.readAsText(file); // Just to trigger onload for PDF
         }
-        
-        // Load schedule for a specific section
-        async function displaySectionSchedule() {
-            const sectionId = document.getElementById('section-schedule-filter').value;
-            const container = document.getElementById('section-schedule-container');
-            
-            if (!sectionId) {
-                container.innerHTML = '<div class="empty-state">Sélectionnez une section pour voir son emploi du temps</div>';
-                return;
-            }
-            
-            try {
-                container.innerHTML = '<div class="loading-message">Chargement de l\'emploi du temps...</div>';
-                
-                // Use our helper function to get section schedules
-                const scheduleData = await fetchSectionSchedule(sectionId);
-                
-                if (scheduleData && scheduleData.length > 0) {
-                    // Display the schedule data
-                    displayScheduleData(scheduleData, container);
-                } else {
-                    container.innerHTML = '<div class="empty-state">Aucun emploi du temps trouvé pour cette section</div>';
-                }
-            } catch (error) {
-                console.error("Error loading section schedule:", error);
-                container.innerHTML = '<div class="error-message">Erreur de chargement de l\'emploi du temps</div>';
-            }
+      }
+
+      // Handle room request
+      function handleRoomRequest() {
+        alert("Votre demande de salle a été soumise avec succès!");
+        closeModal("requestRoomModal");
+        document.getElementById("requestRoomForm").reset();
+      }
+
+      // Handle add event
+      function handleAddEvent() {
+        alert("Votre événement a été ajouté avec succès!");
+        closeModal("addEventModal");
+        document.getElementById("addEventForm").reset();
+      }
+
+      // Open modal
+      function openModal(modalId) {
+        document.getElementById(modalId).style.display = "flex";
+      }
+
+      // Close modal
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      // Close modals when clicking outside
+      window.onclick = function (event) {
+        const modals = document.getElementsByClassName("modal");
+        for (let i = 0; i < modals.length; i++) {
+          if (event.target === modals[i]) {
+            modals[i].style.display = "none";
+          }
         }
-        
-        // Display schedule data
-        function displayScheduleData(schedules, container) {
-            const scheduleList = document.createElement('div');
-            scheduleList.className = 'schedule-documents';
-            
-            schedules.forEach(schedule => {
-                const documentDate = new Date(schedule.createdAt).toLocaleDateString('fr-FR');
-                
-                const scheduleItem = document.createElement('div');
-                scheduleItem.className = 'schedule-item';
-                
-                scheduleItem.innerHTML = `
+      };
+
+      // Populate section dropdown for schedules
+      async function populateSectionDropdown() {
+        try {
+          const select = document.getElementById("section-schedule-filter");
+          select.innerHTML =
+            '<option value="">Sélectionner une section</option>';
+
+          if (teacherSections.length === 0) {
+            // Try loading teacher sections if not already loaded
+            const sections = await loadTeacherSections();
+            teacherSections = sections || [];
+          }
+
+          teacherSections.forEach((section) => {
+            const option = document.createElement("option");
+            option.value = section.id;
+            option.textContent = `${
+              section.specialty || section.filiere || "Filière"
+            } - Section ${section.name || section.nom || ""}`;
+            select.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error populating section dropdown:", error);
+        }
+      }
+
+      // Load schedule for a specific section
+      async function displaySectionSchedule() {
+        const sectionId = document.getElementById(
+          "section-schedule-filter"
+        ).value;
+        const container = document.getElementById("section-schedule-container");
+
+        if (!sectionId) {
+          container.innerHTML =
+            '<div class="empty-state">Sélectionnez une section pour voir son emploi du temps</div>';
+          return;
+        }
+
+        try {
+          container.innerHTML =
+            '<div class="loading-message">Chargement de l\'emploi du temps...</div>';
+
+          // Use our helper function to get section schedules
+          const scheduleData = await fetchSectionSchedule(sectionId);
+
+          if (scheduleData && scheduleData.length > 0) {
+            // Display the schedule data
+            displayScheduleData(scheduleData, container);
+          } else {
+            container.innerHTML =
+              '<div class="empty-state">Aucun emploi du temps trouvé pour cette section</div>';
+          }
+        } catch (error) {
+          console.error("Error loading section schedule:", error);
+          container.innerHTML =
+            '<div class="error-message">Erreur de chargement de l\'emploi du temps</div>';
+        }
+      }
+
+      // Display schedule data
+      function displayScheduleData(schedules, container) {
+        const scheduleList = document.createElement("div");
+        scheduleList.className = "schedule-documents";
+
+        schedules.forEach((schedule) => {
+          const documentDate = new Date(schedule.createdAt).toLocaleDateString(
+            "fr-FR"
+          );
+
+          const scheduleItem = document.createElement("div");
+          scheduleItem.className = "schedule-item";
+
+          scheduleItem.innerHTML = `
                     <div class="schedule-info">
-                        <div class="schedule-title">${schedule.title || 'Emploi du temps'}</div>
+                        <div class="schedule-title">${
+                          schedule.title || "Emploi du temps"
+                        }</div>
                         <div class="schedule-date">Publié le ${documentDate}</div>
-                        <div class="schedule-description">${schedule.description || 'Aucune description'}</div>
+                        <div class="schedule-description">${
+                          schedule.description || "Aucune description"
+                        }</div>
                     </div>
                     <div class="schedule-preview pdf-preview">
                         <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
@@ -603,16 +725,20 @@
                             <line x1="16" y1="17" x2="8" y2="17"></line>
                             <polyline points="10 9 9 9 8 9"></polyline>
                         </svg>
-                        <div>${schedule.title.includes('examen') ? 'Planning d\'examens' : 'Emploi du temps global'}</div>
+                        <div>${
+                          schedule.title.includes("examen")
+                            ? "Planning d'examens"
+                            : "Emploi du temps global"
+                        }</div>
                     </div>
                 `;
-                
-                scheduleList.appendChild(scheduleItem);
-            });
-            
-            container.innerHTML = '';
-            container.appendChild(scheduleList);
-        }
+
+          scheduleList.appendChild(scheduleItem);
+        });
+
+        container.innerHTML = "";
+        container.appendChild(scheduleList);
+      }
     </script>
-</body>
+  </body>
 </html>

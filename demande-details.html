@@ -60,7 +60,7 @@
 
       .document-link:hover {
         background-color: #dee2e6;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       }
 
       .document-link::before {
@@ -125,7 +125,7 @@
         background-color: #6c757d;
         color: white;
       }
-     
+
       .loading-indicator {
         padding: 20px;
         text-align: center;
@@ -140,7 +140,7 @@
         border-radius: 4px;
         margin: 20px 0;
       }
-      
+
       .success-message {
         padding: 20px;
         background-color: #d4edda;
@@ -161,7 +161,7 @@
         max-width: 100%;
         max-height: 300px;
         border-radius: 4px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         cursor: zoom-in;
         transition: transform 0.2s ease;
       }
@@ -190,7 +190,10 @@
         <div class="header">
           <h1 class="page-title">Détails de la demande</h1>
           <div class="header-actions">
-            <button onclick="window.location.href='demandes.html'" class="btn btn-back">
+            <button
+              onclick="window.location.href='demandes.html'"
+              class="btn btn-back"
+            >
               Retour aux demandes
             </button>
           </div>
@@ -202,10 +205,22 @@
             Chargement des détails...
           </div>
 
-          <div id="request-error" class="error-message" style="display: none;"></div>
-          <div id="request-success" class="success-message" style="display: none;"></div>
+          <div
+            id="request-error"
+            class="error-message"
+            style="display: none"
+          ></div>
+          <div
+            id="request-success"
+            class="success-message"
+            style="display: none"
+          ></div>
 
-          <div id="request-details" class="request-details" style="display: none;">
+          <div
+            id="request-details"
+            class="request-details"
+            style="display: none"
+          >
             <div class="field-group">
               <div class="field-label">Numéro de demande:</div>
               <div class="field-value" id="request-number"></div>
@@ -241,25 +256,43 @@
               <div class="field-value" id="request-justification"></div>
             </div>
 
-            <div class="field-group" id="document-group" style="display: none;">
+            <div class="field-group" id="document-group" style="display: none">
               <div class="field-label">Document:</div>
               <div class="field-value">
-                <a href="#" class="document-link" id="document-link" target="_blank">
+                <a
+                  href="#"
+                  class="document-link"
+                  id="document-link"
+                  target="_blank"
+                >
                   Voir le document
                 </a>
-                <div class="document-preview" id="document-preview" style="display: none;">
-                  <img id="document-image" class="document-image" alt="Preview du document" />
+                <div
+                  class="document-preview"
+                  id="document-preview"
+                  style="display: none"
+                >
+                  <img
+                    id="document-image"
+                    class="document-image"
+                    alt="Preview du document"
+                  />
                 </div>
               </div>
             </div>
 
-            <div class="field-group" id="response-group" style="display: none;">
+            <div class="field-group" id="response-group" style="display: none">
               <div class="field-label">Réponse de l'administration:</div>
               <div class="field-value" id="admin-response"></div>
             </div>
 
             <div class="action-buttons" id="action-buttons">
-              <button class="btn btn-cancel" id="cancel-btn" onclick="cancelRequest()" style="display: none;">
+              <button
+                class="btn btn-cancel"
+                id="cancel-btn"
+                onclick="cancelRequest()"
+                style="display: none"
+              >
                 Annuler la demande
               </button>
             </div>
@@ -283,7 +316,9 @@
 
         // Auth checks
         try {
-          authToken = sessionStorage.getItem("etudiant_token") || localStorage.getItem("etudiant_token");
+          authToken =
+            sessionStorage.getItem("etudiant_token") ||
+            localStorage.getItem("etudiant_token");
           if (!authToken) {
             window.location.href = "etudiant-login.html";
             return;
@@ -292,10 +327,11 @@
           // Verify token and get user info
           const userData = await verifyToken();
           if (!userData) throw new Error("Invalid token");
-          if (userData.userType !== "etudiant") throw new Error("Access denied");
+          if (userData.userType !== "etudiant")
+            throw new Error("Access denied");
 
           currentUser = { id: userData.userId, email: userData.email };
-          
+
           // Initialize sidebar
           initializeSidebar();
 
@@ -321,7 +357,7 @@
           document.getElementById("navbar-container").innerHTML = html;
 
           // Set active link
-          document.querySelectorAll(".nav-link").forEach(link => {
+          document.querySelectorAll(".nav-link").forEach((link) => {
             if (link.getAttribute("href") === "demandes.html") {
               link.classList.add("active");
             }
@@ -330,30 +366,37 @@
           console.error("Error loading navbar:", e);
         }
       }
-      
+
       // Initialize sidebar with user information
       function initializeSidebar() {
         // Check if we need to load student data
-        const studentData = JSON.parse(localStorage.getItem("studentData") || "null");
-        
+        const studentData = JSON.parse(
+          localStorage.getItem("studentData") || "null"
+        );
+
         // Get the user avatar, name and ID elements
         const userAvatar = document.getElementById("userAvatar");
         const userFullName = document.getElementById("userFullName");
         const userId = document.getElementById("userId");
-        
+
         // If we have studentData cached, use it
         if (studentData) {
           if (userAvatar) {
-            const initials = ((studentData.firstName || "")[0] || "") + ((studentData.lastName || "")[0] || "");
+            const initials =
+              ((studentData.firstName || "")[0] || "") +
+              ((studentData.lastName || "")[0] || "");
             userAvatar.textContent = initials.toUpperCase();
           }
-          
+
           if (userFullName) {
-            userFullName.textContent = `${studentData.firstName || ""} ${studentData.lastName || ""}`;
+            userFullName.textContent = `${studentData.firstName || ""} ${
+              studentData.lastName || ""
+            }`;
           }
-          
+
           if (userId) {
-            userId.textContent = studentData.matricule || studentData.email || "";
+            userId.textContent =
+              studentData.matricule || studentData.email || "";
           }
         }
       }
@@ -364,8 +407,8 @@
           const response = await fetch(`${API_BASE_URL}/auth/verify`, {
             headers: {
               Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json"
-            }
+              "Content-Type": "application/json",
+            },
           });
           if (!response.ok) throw new Error("Token verification failed");
           return await response.json();
@@ -374,24 +417,24 @@
           return null;
         }
       }
-      
+
       // Global logout function
       function logout() {
         console.log("Logout called");
-        
+
         // Clear all auth tokens
         localStorage.removeItem("etudiant_token");
         sessionStorage.removeItem("etudiant_token");
-        
+
         // Clear data
         localStorage.removeItem("studentData");
-        localStorage.removeItem("offlineRequests"); 
+        localStorage.removeItem("offlineRequests");
         localStorage.removeItem("lastLogin");
         localStorage.removeItem("userPreferences");
-        
+
         // Clear other session data
         sessionStorage.clear();
-        
+
         // Redirect to login
         window.location.href = "index.html";
       }
@@ -409,16 +452,21 @@
         successEl.style.display = "none";
 
         try {
-          const response = await fetch(`${API_BASE_URL}/change-requests/${requestId}`, {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json"
-            },
-            signal: AbortSignal.timeout(5000)
-          });
+          const response = await fetch(
+            `${API_BASE_URL}/change-requests/${requestId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              signal: AbortSignal.timeout(5000),
+            }
+          );
 
           if (!response.ok) {
-            throw new Error(`Failed to fetch request details (${response.status})`);
+            throw new Error(
+              `Failed to fetch request details (${response.status})`
+            );
           }
 
           const request = await response.json();
@@ -427,24 +475,27 @@
           displayRequestDetails(request);
           loadingEl.style.display = "none";
           detailsEl.style.display = "block";
-          
+
           // Check for status parameter to show success message
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('status') === 'cancelled') {
+          if (urlParams.get("status") === "cancelled") {
             showSuccess("Votre demande a été annulée avec succès.");
           }
         } catch (e) {
           console.error("Error loading request details:", e);
           loadingEl.style.display = "none";
-          errorEl.textContent = "Erreur lors du chargement des détails de la demande: " + e.message;
+          errorEl.textContent =
+            "Erreur lors du chargement des détails de la demande: " + e.message;
           errorEl.style.display = "block";
         }
       }
 
       // --- UI FUNCTIONS ---
       function displayRequestDetails(request) {
-        document.getElementById("request-number").textContent = request.requestNumber || request.id || "-";
-        document.getElementById("request-date").textContent = formatDate(request.createdAt) || "-";
+        document.getElementById("request-number").textContent =
+          request.requestNumber || request.id || "-";
+        document.getElementById("request-date").textContent =
+          formatDate(request.createdAt) || "-";
 
         // Status
         const statusElement = document.getElementById("request-status");
@@ -456,117 +507,129 @@
 
         // Current & Requested assignments
         document.getElementById("current-assignment").textContent =
-          request.currentSection?.name || request.currentGroupe?.name || "Non spécifié";
+          request.currentSection?.name ||
+          request.currentGroupe?.name ||
+          "Non spécifié";
 
         document.getElementById("requested-assignment").textContent =
-          request.requestedSection?.name || request.requestedGroupe?.name || "Non spécifié";
+          request.requestedSection?.name ||
+          request.requestedGroupe?.name ||
+          "Non spécifié";
 
         // Justification
-        document.getElementById("request-justification").textContent = request.justification || "-";
+        document.getElementById("request-justification").textContent =
+          request.justification || "-";
 
         // Document - now using the new binary endpoint
         const documentLink = document.getElementById("document-link");
         const documentGroup = document.getElementById("document-group");
         const documentPreview = document.getElementById("document-preview");
         const documentImage = document.getElementById("document-image");
-        
-        const hasDocument = request.documentData !== undefined || 
-                           request.documentName || 
-                           request.documentMimeType || 
-                           request.documentPath;
-        
+
+        const hasDocument =
+          request.documentData !== undefined ||
+          request.documentName ||
+          request.documentMimeType ||
+          request.documentPath;
+
         if (hasDocument) {
           documentGroup.style.display = "flex";
-          
+
           // Check document existence before setting up the link
           fetch(`${API_BASE_URL}/change-requests/${request.id}/document`, {
             headers: {
-              Authorization: `Bearer ${authToken}`
-            }
-          }).then(response => {
-            if (response.status === 204) {
-              console.log(response);
-              console.log("No document content available");
-              documentPreview.style.display = "none";
-              documentLink.textContent = "Aucun document disponible";
-              documentLink.style.opacity = "0.7";
-              documentLink.style.cursor = "not-allowed";
-              documentLink.onclick = function(e) {
-                e.preventDefault();
-                alert("Aucun document n'a été joint à cette demande.");
-              };
-              return null;
-            } else if (!response.ok) {
-              throw new Error(`Erreur ${response.status}`);
-            }
-            
-            // Document exists and has content
-            const docUrl = `${API_BASE_URL}/change-requests/${request.id}/document`;
-            documentLink.href = docUrl;
-            
-            // If we know the document name, display it
-            if (request.documentName) {
-              documentLink.textContent = request.documentName;
-              documentLink.title = request.documentName;
-              
-              // Check if it's an image to show preview
-              const isImage = request.documentMimeType?.startsWith('image/') || 
-                             /\.(jpe?g|png|gif|bmp)$/i.test(request.documentName);
-              
-              if (isImage) {
-                // Add authorization token to the image source
-                documentImage.onload = function() {
-                  documentPreview.style.display = "block";
+              Authorization: `Bearer ${authToken}`,
+            },
+          })
+            .then((response) => {
+              if (response.status === 204) {
+                console.log(response);
+                console.log("No document content available");
+                documentPreview.style.display = "none";
+                documentLink.textContent = "Aucun document disponible";
+                documentLink.style.opacity = "0.7";
+                documentLink.style.cursor = "not-allowed";
+                documentLink.onclick = function (e) {
+                  e.preventDefault();
+                  alert("Aucun document n'a été joint à cette demande.");
                 };
-                
-                documentImage.onerror = function() {
-                  console.error("Error loading image");
-                  documentPreview.style.display = "none";
-                };
-                
-                // Set image source using fetch with auth token
-                fetchDocumentWithAuth(request.id)
-                  .then(imageUrl => {
-                    if (!imageUrl) {
-                      documentPreview.style.display = "none";
-                      return;
-                    }
-                    
-                    documentImage.src = imageUrl;
-                  })
-                  .catch(err => {
-                    console.error("Error fetching image:", err);
+                return null;
+              } else if (!response.ok) {
+                throw new Error(`Erreur ${response.status}`);
+              }
+
+              // Document exists and has content
+              const docUrl = `${API_BASE_URL}/change-requests/${request.id}/document`;
+              documentLink.href = docUrl;
+
+              // If we know the document name, display it
+              if (request.documentName) {
+                documentLink.textContent = request.documentName;
+                documentLink.title = request.documentName;
+
+                // Check if it's an image to show preview
+                const isImage =
+                  request.documentMimeType?.startsWith("image/") ||
+                  /\.(jpe?g|png|gif|bmp)$/i.test(request.documentName);
+
+                if (isImage) {
+                  // Add authorization token to the image source
+                  documentImage.onload = function () {
+                    documentPreview.style.display = "block";
+                  };
+
+                  documentImage.onerror = function () {
+                    console.error("Error loading image");
                     documentPreview.style.display = "none";
-                  });
-                
-                // Add click handler to toggle fullscreen view
-                documentImage.onclick = function() {
-                  if (this.requestFullscreen) {
-                    this.requestFullscreen();
-                  }
-                };
+                  };
+
+                  // Set image source using fetch with auth token
+                  fetchDocumentWithAuth(request.id)
+                    .then((imageUrl) => {
+                      if (!imageUrl) {
+                        documentPreview.style.display = "none";
+                        return;
+                      }
+
+                      documentImage.src = imageUrl;
+                    })
+                    .catch((err) => {
+                      console.error("Error fetching image:", err);
+                      documentPreview.style.display = "none";
+                    });
+
+                  // Add click handler to toggle fullscreen view
+                  documentImage.onclick = function () {
+                    if (this.requestFullscreen) {
+                      this.requestFullscreen();
+                    }
+                  };
+                } else {
+                  documentPreview.style.display = "none";
+                }
               } else {
+                documentLink.textContent = "Voir le document";
                 documentPreview.style.display = "none";
               }
-            } else {
-              documentLink.textContent = "Voir le document";
+
+              // Make document link use document viewer with auth token
+              documentLink.onclick = function (e) {
+                e.preventDefault();
+                window.open(
+                  createAuthenticatedDocumentUrl(request.id),
+                  "_blank"
+                );
+              };
+            })
+            .catch((error) => {
+              console.error("Error checking document:", error);
               documentPreview.style.display = "none";
-            }
-            
-            // Make document link use document viewer with auth token
-            documentLink.onclick = function(e) {
-              e.preventDefault();
-              window.open(createAuthenticatedDocumentUrl(request.id), '_blank');
-            };
-          }).catch(error => {
-            console.error("Error checking document:", error);
-            documentPreview.style.display = "none";
-            documentLink.textContent = "Erreur: Document non disponible";
-            documentLink.onclick = function(e) {
-              e.preventDefault();
-              alert("Erreur lors de l'accès au document: " + error.message);
-            };
-          });
+              documentLink.textContent = "Erreur: Document non disponible";
+              documentLink.onclick = function (e) {
+                e.preventDefault();
+                alert("Erreur lors de l'accès au document: " + error.message);
+              };
+            });
         } else {
           documentGroup.style.display = "none";
           documentPreview.style.display = "none";
@@ -575,7 +638,8 @@
         // Show admin response if available
         if (request.responseMessage) {
           document.getElementById("response-group").style.display = "flex";
-          document.getElementById("admin-response").textContent = request.responseMessage;
+          document.getElementById("admin-response").textContent =
+            request.responseMessage;
         } else {
           document.getElementById("response-group").style.display = "none";
         }
@@ -591,7 +655,7 @@
 
       function getStatusLabel(status) {
         const statusLower = (status || "").toUpperCase();
-        
+
         switch (statusLower) {
           case "PENDING":
             return '<span class="request-status status-pending">En attente</span>';
@@ -602,13 +666,13 @@
           case "CANCELLED":
             return '<span class="request-status status-cancelled">Annulée</span>';
           default:
-            return '<span class="request-status">' + status + '</span>';
+            return '<span class="request-status">' + status + "</span>";
         }
       }
 
       function getRequestTypeLabel(type) {
         const typeStr = String(type).toLowerCase();
-        
+
         switch (typeStr) {
           case "section":
             return "Changement de section";
@@ -628,12 +692,12 @@
         errorEl.textContent = message;
         errorEl.style.display = "block";
       }
-      
+
       function showSuccess(message) {
         const successEl = document.getElementById("request-success");
         successEl.textContent = message;
         successEl.style.display = "block";
-        successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        successEl.scrollIntoView({ behavior: "smooth", block: "center" });
       }
 
       // --- ACTION FUNCTIONS ---
@@ -652,25 +716,30 @@
           const cancelBtn = document.getElementById("cancel-btn");
           cancelBtn.disabled = true;
           cancelBtn.textContent = "Annulation en cours...";
-          
+
           console.log(`Cancelling request: ${currentRequest.id}`);
-          
+
           // Make sure we have a valid token
           if (!authToken) {
-            throw new Error("Vous n'êtes pas authentifié. Veuillez vous reconnecter.");
+            throw new Error(
+              "Vous n'êtes pas authentifié. Veuillez vous reconnecter."
+            );
           }
-          
-          const response = await fetch(`${API_BASE_URL}/change-requests/${currentRequest.id}/cancel`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              status: "CANCELLED",
-              responseMessage: "Demande annulée par l'étudiant"
-            })
-          });
+
+          const response = await fetch(
+            `${API_BASE_URL}/change-requests/${currentRequest.id}/cancel`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                status: "CANCELLED",
+                responseMessage: "Demande annulée par l'étudiant",
+              }),
+            }
+          );
 
           // Get detailed error information if available
           if (!response.ok) {
@@ -689,30 +758,46 @@
           // Get the updated data and update page status
           const updatedRequest = await response.json();
           console.log("Request cancelled successfully:", updatedRequest);
-          
+
           // Update current request with new status
           currentRequest.status = "CANCELLED";
           if (updatedRequest.responseMessage) {
             currentRequest.responseMessage = updatedRequest.responseMessage;
           }
-          
+
           // Update the UI to show cancelled status
           const statusElement = document.getElementById("request-status");
           statusElement.innerHTML = getStatusLabel("CANCELLED");
-          
+
           // Show admin response if available
           document.getElementById("response-group").style.display = "flex";
-          document.getElementById("admin-response").textContent = currentRequest.responseMessage || "Demande annulée par l'étudiant";
-          
+          document.getElementById("admin-response").textContent =
+            currentRequest.responseMessage || "Demande annulée par l'étudiant";
+
           // Hide cancel button
           cancelBtn.style.display = "none";
-          
+          // Create a notification for the cancelled request
+          if (typeof createChangeRequestNotification === "function") {
+            try {
+              await createChangeRequestNotification(
+                currentRequest,
+                "cancelled"
+              );
+              console.log("Cancellation notification created");
+            } catch (notifError) {
+              console.error(
+                "Failed to create cancellation notification:",
+                notifError
+              );
+            }
+          }
+
           // Show success message
           showSuccess("Demande annulée avec succès");
         } catch (e) {
           console.error("Error cancelling request:", e);
           showError("Erreur lors de l'annulation: " + e.message);
-          
+
           // Reset button state
           const cancelBtn = document.getElementById("cancel-btn");
           cancelBtn.disabled = false;
@@ -723,7 +808,7 @@
       // --- HELPER FUNCTIONS ---
       function getRequestIdFromUrl() {
         const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('id');
+        return urlParams.get("id");
       }
 
       function formatDate(dateString) {
@@ -736,7 +821,7 @@
           month: "2-digit",
           year: "numeric",
           hour: "2-digit",
-          minute: "2-digit"
+          minute: "2-digit",
         });
       }
 
@@ -744,22 +829,25 @@
       async function fetchDocumentWithAuth(requestId) {
         try {
           // Create a blob URL that includes authentication
-          const response = await fetch(`${API_BASE_URL}/change-requests/${requestId}/document`, {
-            headers: {
-              Authorization: `Bearer ${authToken}`
+          const response = await fetch(
+            `${API_BASE_URL}/change-requests/${requestId}/document`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
             }
-          });
-          
+          );
+
           // Check for 204 No Content response (no document)
           if (response.status === 204) {
             console.log("No document available for this request");
             return null;
           }
-          
+
           if (!response.ok) {
             throw new Error(`Document fetch failed: ${response.status}`);
           }
-          
+
           const blob = await response.blob();
           return URL.createObjectURL(blob);
         } catch (error) {
@@ -767,15 +855,19 @@
           throw error;
         }
       }
-      
+
       // Function to create an authenticated document URL for opening in a new tab
       function createAuthenticatedDocumentUrl(requestId) {
         // For direct URL access, we need to use a method that includes the auth token
         // Since we can't add headers to a window.open request, we'll use a data URL or temporary blob URL
-        
+
         // Return a URL that will fetch the document with auth
-        return `document-viewer.html?id=${requestId}&token=${encodeURIComponent(authToken)}`;
+        return `document-viewer.html?id=${requestId}&token=${encodeURIComponent(
+          authToken
+        )}`;
       }
     </script>
+    <script src="js/request-notifications.js"></script>
+    <script src="js/request-tracker.js"></script>
   </body>
 </html>

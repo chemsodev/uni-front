@@ -56,6 +56,7 @@
       color: #1a365d;
       border-radius: 10px;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .nav-link:hover {
@@ -65,6 +66,24 @@
     .nav-link.active {
       background-color: #3b82f6;
       color: white;
+    }
+
+    /* Notification Badge Styling */
+    .notification-badge-count {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 12px;
+      height: 18px;
+      min-width: 18px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      font-weight: bold;
     }
 
     @media (max-width: 767px) {
@@ -115,7 +134,10 @@
       <a href="demandes.html" class="nav-link">Demandes</a>
     </li>
     <li class="nav-item">
-      <a href="notification.html" class="nav-link">Notifications</a>
+      <a href="notification.html" class="nav-link">
+        Notifications
+        <span class="notification-badge-count" style="display: none">0</span>
+      </a>
     </li>
     <li class="nav-item">
       <a href="#" class="nav-link" onclick="logout()">Déconnexion</a>
@@ -151,66 +173,75 @@
   document.addEventListener("DOMContentLoaded", function () {
     // Give a small timeout to ensure links are loaded
     setTimeout(setActiveLink, 100);
-    
+
     // Load user info
     loadUserInfo();
   });
-  
+
   // Function to load user info in the sidebar
   async function loadUserInfo() {
     try {
       // Get user data from token
-      const authToken = sessionStorage.getItem("etudiant_token") || localStorage.getItem("etudiant_token");
-      
+      const authToken =
+        sessionStorage.getItem("etudiant_token") ||
+        localStorage.getItem("etudiant_token");
+
       if (!authToken) {
         console.warn("No auth token found, redirecting to login");
         window.location.href = "etudiant-login.html";
         return;
       }
-      
+
       // Try to get cached student data first
       let userData = JSON.parse(localStorage.getItem("studentData"));
-      
+
       // If no cached data, fetch from server
       if (!userData) {
         const res = await fetch("http://localhost:3000/api/auth/verify", {
-          headers: { Authorization: `Bearer ${authToken}` }
+          headers: { Authorization: `Bearer ${authToken}` },
         });
-        
+
         if (!res.ok) {
           throw new Error("Invalid token");
         }
-        
+
         const tokenData = await res.json();
-        
+
         // Now fetch student details
-        const studentRes = await fetch(`http://localhost:3000/api/etudiants/${tokenData.userId}`, {
-          headers: { Authorization: `Bearer ${authToken}` }
-        });
-        
+        const studentRes = await fetch(
+          `http://localhost:3000/api/etudiants/${tokenData.userId}`,
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
+
         if (!studentRes.ok) {
           throw new Error("Failed to fetch student data");
         }
-        
+
         userData = await studentRes.json();
         localStorage.setItem("studentData", JSON.stringify(userData));
       }
-      
+
       // Update user info in sidebar
       const userAvatar = document.getElementById("userAvatar");
       const userFullName = document.getElementById("userFullName");
       const userId = document.getElementById("userId");
-      
+
       if (userAvatar && userData) {
         // Set initials in avatar
-        const initials = ((userData.firstName || "")[0] || "") + ((userData.lastName || "")[0] || "");
+        const initials =
+          ((userData.firstName || "")[0] || "") +
+          ((userData.lastName || "")[0] || "");
         userAvatar.textContent = initials.toUpperCase();
       }
-      
+
       if (userFullName && userData) {
-        userFullName.textContent = `${userData.firstName || ""} ${userData.lastName || ""}`;
+        userFullName.textContent = `${userData.firstName || ""} ${
+          userData.lastName || ""
+        }`;
       }
-      
+
       if (userId && userData) {
         userId.textContent = userData.matricule || userData.email || "";
       }

@@ -3,6 +3,7 @@ let currentUser = null;
 let authToken = null;
 let isBackendAvailable = true;
 let requestsLoaded = false; // Flag to track if requests have been loaded
+let tokenRefreshAttempted = false; // Flag to prevent infinite refresh loops
 
 // TAB MANAGEMENT
 function openTab(evt, tabName) {
@@ -30,7 +31,7 @@ function openTab(evt, tabName) {
     const firstSubTab = document.querySelector("[data-target='section-form']");
     firstSubTab?.click();
   }
-  
+
   // If switching to suivi tab, ensure requests are loaded (only once)
   if (tabName === "suivi" && !requestsLoaded) {
     loadUserRequests();
@@ -82,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (userData) {
       currentUser = { id: userData.userId, email: userData.email };
       await loadUserData();
-      
+
       // Load requests but don't switch to that tab yet
       await loadUserRequests();
     } else if (!isBackendAvailable) {
@@ -99,13 +100,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   } catch (e) {
     console.error("Error during initialization:", e);
+
+    // Add diagnostics button event listener
+    document.getElementById("diagnostic-btn")?.addEventListener("click", () => {
+      checkStudentGroupAssignments();
+    });
     isBackendAvailable = false;
     loadFallbackData();
   }
 
   // Set up tab functionality
   setupTabNavigation();
-  
+
   // Set up file input displays
   setupFileInputDisplays();
 
@@ -119,43 +125,84 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (newRequestBtn) {
     newRequestBtn.addEventListener("click", function (e) {
       e.preventDefault();
+      console.log("New request button clicked, switching to forms tab");
       // Click the first tab button to switch to formulaires
-      const formulairesTab = document.querySelector('[data-target="formulaires"]');
-      if (formulairesTab) formulairesTab.click();
+      const formulairesTab = document.querySelector(
+        '[data-target="formulaires"]'
+      );
+      if (formulairesTab) {
+        // Manually trigger the click event
+        const clickEvent = new Event("click");
+        formulairesTab.dispatchEvent(clickEvent);
+      }
     });
   }
-  
+
   // Add specific listener for the suivi tab to make sure requests load
   const suiviTabButton = document.querySelector('[data-target="suivi"]');
   if (suiviTabButton) {
-    suiviTabButton.addEventListener('click', function() {
+    suiviTabButton.addEventListener("click", function () {
       console.log("Suivi tab clicked, reloading requests");
       loadUserRequests();
     });
   }
 });
 
+// Initialize sidebar with user information
+function initializeSidebar() {
+  try {
+    // Try to load user data from localStorage if available
+    const storedData = localStorage.getItem("studentData");
+    if (storedData) {
+      const userData = JSON.parse(storedData);
+
+      const userAvatar = document.getElementById("userAvatar");
+      const userFullName = document.getElementById("userFullName");
+      const userId = document.getElementById("userId");
+
+      if (userAvatar) {
+        const initials =
+          ((userData.firstName || "")[0] || "") +
+          ((userData.lastName || "")[0] || "");
+        userAvatar.textContent = initials.toUpperCase() || "ET";
+      }
+
+      if (userFullName) {
+        userFullName.textContent =
+          `${userData.firstName || ""} ${userData.lastName || ""}` ||
+          "Étudiant";
+      }
+
+      if (userId) {
+        userId.textContent = userData.matricule || userData.email || "";
+      }
+    }
+  } catch (e) {
+    console.error("Error initializing sidebar:", e);
+  }
+}
+
 // Setup file input displays
 function setupFileInputDisplays() {
-  setupFileInput('section-document', 'section-file-name');
-  setupFileInput('td-document', 'td-file-name');
-  setupFileInput('tp-document', 'tp-file-name');
+  setupFileInput("section-document", "section-file-name");
+  setupFileInput("td-document", "td-file-name");
+  setupFileInput("tp-document", "tp-file-name");
 }
 
 // Function to display selected file name
 function setupFileInput(inputId, displayId) {
   const fileInput = document.getElementById(inputId);
   const fileNameDisplay = document.getElementById(displayId);
-  
+
   if (fileInput && fileNameDisplay) {
-    fileInput.addEventListener('change', function() {
+    fileInput.addEventListener("change", function () {
       if (this.files && this.files.length > 0) {
         fileNameDisplay.textContent = this.files[0].name;
         fileNameDisplay.title = this.files[0].name;
-        fileNameDisplay.style.display = 'block';
+        fileNameDisplay.style.display = "block";
       } else {
-        fileNameDisplay.textContent = '';
-        fileNameDisplay.style.display = 'none';
+        fileNameDisplay.textContent = "";
+        fileNameDisplay.style.display = "none";
       }
     });
   }
@@ -165,88 +212,100 @@ function setupFileInput(inputId, displayId) {
 function setupTabNavigation() {
   console.log("Setting up tab navigation");
   // Set up main tab buttons
-  document.querySelectorAll('.tab-container > .tab-buttons > .tab-button').forEach(button => {
-    button.addEventListener('click', function(e) {
-      e.preventDefault();
-      const target = this.getAttribute('data-target');
-      console.log(`Tab clicked: ${target}`);
-      
-      // Hide all main tabs
-      document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      
-      // Deactivate all main tab buttons
-      document.querySelectorAll('.tab-container > .tab-buttons > .tab-button').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      // Show selected tab and activate button
-      const selectedTab = document.getElementById(target);
-      if (selectedTab) {
-        selectedTab.classList.add('active');
-        console.log(`Activated tab: ${target}`);
-      } else {
-        console.error(`Tab element not found with id: ${target}`);
-      }
-      this.classList.add('active');
-      
-      // If switching to "suivi" tab, only load requests if not already loaded
-      if (target === 'suivi') {
-        console.log("Handling Suivi tab activation");
-        if (!requestsLoaded) {
-          console.log("Loading requests for first time");
-          loadUserRequests();
-        } else {
-          console.log("Requests already loaded, skipping reload");
-        }
-        // Make sure the suivi tab is visible by forcing display
-        document.getElementById('suivi').style.display = 'block';
-      }
-      
-      // If switching to forms tab, activate first sub-tab
-      if (target === 'formulaires') {
-        const firstSubTab = document.querySelector('#formulaires .tab-buttons .tab-button');
-        if (firstSubTab) {
-          firstSubTab.click();
-        }
-      }
-    });
-  });
-  
-  // Set up form sub-tab buttons
-  document.querySelectorAll('#formulaires .tab-buttons .tab-button').forEach(button => {
-    button.addEventListener('click', function(e) {
+  document
+    .querySelectorAll(".tab-container > .tab-buttons > .tab-button")
+    .forEach((button) => {
+      button.addEventListener("click", function (e) {
         e.preventDefault();
-      const target = this.getAttribute('data-target');
-      
-      // Hide all form cards
-      document.querySelectorAll('.form-card').forEach(form => {
-        form.classList.remove('active');
+        const target = this.getAttribute("data-target");
+        console.log(`Tab clicked: ${target}`);
+
+        // Hide all main tabs
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Deactivate all main tab buttons
+        document
+          .querySelectorAll(".tab-container > .tab-buttons > .tab-button")
+          .forEach((btn) => {
+            btn.classList.remove("active");
+          });
+
+        // Show selected tab and activate button
+        const selectedTab = document.getElementById(target);
+        if (selectedTab) {
+          selectedTab.classList.add("active");
+          console.log(`Activated tab: ${target}`);
+        } else {
+          console.error(`Tab element not found with id: ${target}`);
+        }
+        this.classList.add("active");
+
+        // If switching to "suivi" tab, only load requests if not already loaded
+        if (target === "suivi") {
+          console.log("Handling Suivi tab activation");
+          if (!requestsLoaded) {
+            console.log("Loading requests for first time");
+            loadUserRequests();
+          } else {
+            console.log("Requests already loaded, skipping reload");
+          }
+          // Make sure the suivi tab is visible by forcing display
+          document.getElementById("suivi").style.display = "block";
+        }
+
+        // If switching to forms tab, activate first sub-tab
+        if (target === "formulaires") {
+          const firstSubTab = document.querySelector(
+            "#formulaires .tab-buttons .tab-button"
+          );
+          if (firstSubTab) {
+            firstSubTab.click();
+          }
+        }
       });
-      
-      // Deactivate all form tab buttons
-      document.querySelectorAll('#formulaires .tab-buttons .tab-button').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      // Show selected form and activate button
-      const selectedForm = document.getElementById(target);
-      if (selectedForm) {
-        selectedForm.classList.add('active');
-        console.log(`Activated form: ${target}`);
-      } else {
-        console.error(`Form element not found with id: ${target}`);
-      }
-      this.classList.add('active');
     });
-  });
-  
+
+  // Set up form sub-tab buttons
+  document
+    .querySelectorAll("#formulaires .tab-buttons .tab-button")
+    .forEach((button) => {
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        const target = this.getAttribute("data-target");
+
+        // Hide all form cards
+        document.querySelectorAll(".form-card").forEach((form) => {
+          form.classList.remove("active");
+        });
+
+        // Deactivate all form tab buttons
+        document
+          .querySelectorAll("#formulaires .tab-buttons .tab-button")
+          .forEach((btn) => {
+            btn.classList.remove("active");
+          });
+
+        // Show selected form and activate button
+        const selectedForm = document.getElementById(target);
+        if (selectedForm) {
+          selectedForm.classList.add("active");
+          console.log(`Activated form: ${target}`);
+        } else {
+          console.error(`Form element not found with id: ${target}`);
+        }
+        this.classList.add("active");
+      });
+    });
+
   // Add a test click on the Suivi tab once DOM is fully loaded
   setTimeout(() => {
     console.log("Testing tab navigation");
     const suiviTab = document.querySelector('[data-target="suivi"]');
-    const formulairesTab = document.querySelector('[data-target="formulaires"]');
+    const formulairesTab = document.querySelector(
+      '[data-target="formulaires"]'
+    );
     if (suiviTab) {
       console.log("Suivi tab found:", suiviTab);
     } else {
@@ -288,33 +347,38 @@ function setupSubmitForForm(formId, requestType, prefix) {
     console.error(`Form not found: ${formId}`);
     return;
   }
-  
+
   console.log(`Setting up form submission for ${formId}`, {
     requestType,
     prefix,
-    formFound: !!form
+    formFound: !!form,
   });
-  
+
   // Add proper form submission handler
-  form.addEventListener('submit', function(e) {
+  form.addEventListener("submit", function (e) {
     e.preventDefault();
     console.log(`Form ${formId} submitted`);
-    
+
     // Validate request type and prefix match - especially for TP groups
     if (requestType === "TP_GROUP" && prefix !== "tp") {
-      console.error("Mismatch between requestType and prefix:", { requestType, prefix });
-      alert("Erreur de configuration du formulaire. Veuillez rafraîchir la page.");
+      console.error("Mismatch between requestType and prefix:", {
+        requestType,
+        prefix,
+      });
+      alert(
+        "Erreur de configuration du formulaire. Veuillez rafraîchir la page."
+      );
       return;
     }
-    
+
     submitRequest(requestType, prefix, e);
     return false;
   });
-  
+
   // Also handle direct button click
-  const submitBtn = form.querySelector('.submit-btn');
+  const submitBtn = form.querySelector(".submit-btn");
   if (submitBtn) {
-    submitBtn.addEventListener('click', function(e) {
+    submitBtn.addEventListener("click", function (e) {
       e.preventDefault();
       console.log(`Submit button clicked for ${formId}`);
       submitRequest(requestType, prefix, e);
@@ -334,7 +398,7 @@ async function loadUserData() {
       tdGroup: studentData.tdGroupe?.name,
       tpGroup: studentData.tpGroupe?.name,
       tdId: studentData.tdGroupe?.id,
-      tpId: studentData.tpGroupe?.id
+      tpId: studentData.tpGroupe?.id,
     });
 
     // Set current values with IDs
@@ -349,7 +413,12 @@ async function loadUserData() {
 
     setCurrent("current-section", studentData.sections?.[0]);
     setCurrent("current-td", studentData.tdGroupe);
-    setCurrent("current-tp", studentData.tpGroupe);
+    setCurrent("current-tp", studentData.tpGroupe); // Log current group IDs before loading options
+    console.log("Current IDs being passed to loadAvailableOptions:", {
+      sectionId: studentData.sections?.[0]?.id,
+      tdGroupId: studentData.tdGroupe?.id,
+      tpGroupId: studentData.tpGroupe?.id,
+    });
 
     // Load options
     await loadAvailableOptions("section", studentData.sections?.[0]?.id);
@@ -372,28 +441,29 @@ async function fetchStudentData() {
 
   if (!res.ok) throw new Error("Failed to fetch student data");
   const data = await res.json();
-  
+
   // Save to localStorage
   localStorage.setItem("studentData", JSON.stringify(data));
-  
+
   // Update sidebar with fresh data
   const userAvatar = document.getElementById("userAvatar");
   const userFullName = document.getElementById("userFullName");
   const userId = document.getElementById("userId");
-  
+
   if (userAvatar) {
-    const initials = ((data.firstName || "")[0] || "") + ((data.lastName || "")[0] || "");
+    const initials =
+      ((data.firstName || "")[0] || "") + ((data.lastName || "")[0] || "");
     userAvatar.textContent = initials.toUpperCase();
   }
-  
+
   if (userFullName) {
     userFullName.textContent = `${data.firstName || ""} ${data.lastName || ""}`;
   }
-  
+
   if (userId) {
     userId.textContent = data.matricule || data.email || "";
   }
-  
+
   return data;
 }
 
@@ -402,7 +472,7 @@ async function loadAvailableOptions(type, currentId) {
   if (!select) return;
 
   select.innerHTML = `<option value="">Sélectionnez...</option>`;
-  
+
   // Show loading state
   select.disabled = true;
   select.innerHTML = `<option value="">Chargement...</option>`;
@@ -413,31 +483,56 @@ async function loadAvailableOptions(type, currentId) {
       : getFallbackGroups(type);
 
     // Reset select after loading
-    select.innerHTML = `<option value="">Sélectionnez...</option>`;
-    
-    // Filter out invalid options first
-    const validGroups = groups.filter(group => {
+    select.innerHTML = `<option value="">Sélectionnez...</option>`; // Filter out invalid options first
+    const validGroups = groups.filter((group) => {
       // Filter out the current group - can't switch to same group
-      if (group.id?.toString() === currentId?.toString()) {
+      const groupIdStr = String(group.id || "");
+      const currentIdStr = String(currentId || "");
+
+      console.log(`Comparing IDs for ${group.name}:`, {
+        groupId: group.id,
+        currentId: currentId,
+        groupIdStr,
+        currentIdStr,
+        areEqual: groupIdStr === currentIdStr,
+      });
+
+      if (groupIdStr === currentIdStr) {
+        console.log(
+          `Filtered out current group: ${group.name} (ID match: ${groupIdStr})`
+        );
         return false;
       }
-      
-      // Filter out full groups that can't accept more students
-      if (group.capacity && group.currentOccupancy && group.capacity <= group.currentOccupancy) {
-        console.log(`Filtering out full group: ${group.name} (${group.currentOccupancy}/${group.capacity})`);
+
+      // Allow groups that are at capacity or slightly over (up to 10% over)
+      // This is needed because some groups might already be slightly over capacity
+      const capacityThreshold = group.capacity
+        ? Math.ceil(group.capacity * 1.1)
+        : Number.MAX_SAFE_INTEGER;
+
+      if (
+        group.capacity &&
+        group.currentOccupancy &&
+        group.currentOccupancy >= capacityThreshold
+      ) {
+        console.log(
+          `Filtering out full group: ${group.name} (${group.currentOccupancy}/${group.capacity})`
+        );
         return false;
       }
-      
+
       return true;
     });
-    
-    console.log(`Showing ${validGroups.length} valid options for ${type} from ${groups.length} total`);
-    
+
+    console.log(
+      `Showing ${validGroups.length} valid options for ${type} from ${groups.length} total`
+    );
+
     // Update the select with valid options
     validGroups.forEach((group) => {
       // Add the type to the name if it's not already there
       let displayName = group.name;
-      
+
       // Add capacity information if available
       if (group.capacity && group.currentOccupancy) {
         // Add the type to the name if it's not already there
@@ -446,7 +541,7 @@ async function loadAvailableOptions(type, currentId) {
         } else if (type === "td" && !displayName.toLowerCase().includes("td")) {
           displayName = `${displayName} (TD)`;
         }
-        
+
         // Add occupancy info
         displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
       } else {
@@ -457,36 +552,71 @@ async function loadAvailableOptions(type, currentId) {
           displayName = `${displayName} (TD)`;
         }
       }
-      
+
       const option = new Option(displayName, group.id);
       select.add(option);
     });
-    
+
     // Re-enable the select
-    select.disabled = false;
-    
-    // If there are no options, show a message
+    select.disabled = false; // If there are no options, show a message
     if (validGroups.length === 0) {
       select.innerHTML = `<option value="">Aucune option disponible</option>`;
-      select.disabled = true;
-      
-      // Show an error message
+      select.disabled = true; // Show an error message with more details
       const errorDivId = `${type}-form-error`;
       const errorDiv = document.getElementById(errorDivId);
       if (errorDiv) {
-        errorDiv.textContent = "Aucun groupe disponible pour changement. Les groupes peuvent être complets ou vous êtes déjà dans le seul groupe disponible.";
+        // Get more specific information based on whether it's a section or group
+        let message = "";
+
+        if (type === "section") {
+          message =
+            "Aucune section disponible pour changement. Vous êtes dans la seule section disponible pour votre spécialité/niveau.";
+        } else {
+          message = `Aucun groupe ${type.toUpperCase()} disponible pour changement. `;
+
+          // Check specific scenarios
+          const allGroupsOfType = select.getAttribute("data-all-groups")
+            ? JSON.parse(select.getAttribute("data-all-groups"))
+            : [];
+
+          if (allGroupsOfType.length <= 1) {
+            message += "Vous êtes dans le seul groupe disponible.";
+          } else {
+            const fullGroups = allGroupsOfType.filter(
+              (g) => g.capacity && g.currentOccupancy >= g.capacity
+            );
+
+            if (fullGroups.length === allGroupsOfType.length - 1) {
+              message += "Tous les autres groupes sont complets.";
+            } else {
+              message +=
+                "Les groupes peuvent être complets ou vous êtes déjà dans le seul groupe disponible.";
+            }
+          }
+        }
+
+        console.log("No groups available message:", message);
+        errorDiv.textContent = message;
         errorDiv.style.display = "block";
       }
     }
   } catch (e) {
     console.error(`Error loading ${type} groups:`, e);
-    
+
+    // Show error message in a more visible way
+    const errorDivId = `${type}-form-error`;
+    const errorDiv = document.getElementById(errorDivId);
+    if (errorDiv) {
+      errorDiv.textContent = `Une erreur est survenue lors du chargement des groupes: ${e.message}`;
+      errorDiv.style.display = "block";
+    }
+
     // Reset select and add fallback options
-    select.innerHTML = `<option value="">Sélectionnez...</option>`;
+    select.innerHTML = `<option value="">Erreur de chargement</option>`;
     getFallbackGroups(type).forEach((group) => {
       select.add(new Option(group.name, group.id));
     });
-    
+
     // Re-enable the select
     select.disabled = false;
   }
@@ -516,29 +646,8 @@ async function fetchGroups(type, currentId) {
     }
     if (studentData.tdGroupe) {
       console.log("TD Group found in student data:", studentData.tdGroupe);
-    }
-
-    // First, let's try to get all available groups via a more direct endpoint
-    try {
-      // Special endpoint to get available groups for changing (if it exists)
-      const availableGroupsUrl = `http://localhost:3000/api/etudiants/${currentUser.id}/available-${type}-groups`;
-      console.log(`Trying to fetch available groups from: ${availableGroupsUrl}`);
-      
-      const availableRes = await fetch(availableGroupsUrl, {
-        headers: { Authorization: `Bearer ${authToken}` },
-        signal: AbortSignal.timeout(5000),
-      });
-      
-      if (availableRes.ok) {
-        const availableGroups = await availableRes.json();
-        console.log(`Got ${availableGroups.length} available ${type} groups from API:`, availableGroups);
-        return availableGroups;
-      } else {
-        console.log(`Available groups endpoint not found or failed, using fallback approach`);
-      }
-    } catch (availableError) {
-      console.log(`Error getting available groups, using fallback approach:`, availableError);
-    }
+    } // Use the working fallback approach directly instead of trying to use a non-existent endpoint
+    console.log(`Using direct approach to get available ${type} groups`);
 
     // Continue with the fallback approach
     let url;
@@ -546,16 +655,20 @@ async function fetchGroups(type, currentId) {
       // For section changes, find sections in the same specialty and level
       const specialty = studentData.sections?.[0]?.specialty;
       const level = studentData.sections?.[0]?.level;
-      
+
       if (!specialty || !level) {
-        console.warn("No specialty or level assigned for student, using fallback data");
+        console.warn(
+          "No specialty or level assigned for student, using fallback data"
+        );
         return getFallbackGroups(type);
       }
-      
+
       // For sections, we'll request all sections with the same specialty and level
       url = `http://localhost:3000/api/sections?specialty=${specialty}&level=${level}`;
-      console.log(`Finding available sections for specialty: ${specialty}, level: ${level}`);
-      
+      console.log(
+        `Finding available sections for specialty: ${specialty}, level: ${level}`
+      );
+
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${authToken}` },
         signal: AbortSignal.timeout(5000),
@@ -563,10 +676,13 @@ async function fetchGroups(type, currentId) {
 
       if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
       const allSections = await res.json();
-      
+
       // Filter out the current section and any full sections
-      return allSections.filter(section => {
-        return section.id !== currentId && section.currentOccupancy < section.capacity;
+      return allSections.filter((section) => {
+        return (
+          section.id !== currentId &&
+          section.currentOccupancy < section.capacity
+        );
       });
     } else {
       // For group changes (TD/TP), we need to get all groups in the same section
@@ -575,91 +691,140 @@ async function fetchGroups(type, currentId) {
         console.warn("No section assigned for student, using fallback data");
         return getFallbackGroups(type);
       }
-      
+
       // Try to fetch all groups for this section from a dedicated endpoint
       const groupsUrl = `http://localhost:3000/api/sections/${sectionId}/groupes`;
-      
+
       try {
         const groupsRes = await fetch(groupsUrl, {
           headers: { Authorization: `Bearer ${authToken}` },
           signal: AbortSignal.timeout(5000),
         });
-        
+
         if (groupsRes.ok) {
           const allGroups = await groupsRes.json();
-          console.log(`Fetched ${allGroups.length} groups for section ${sectionId}`);
-          
+          console.log(
+            `Fetched ${allGroups.length} groups for section ${sectionId}`
+          );
           // Filter groups by type and availability
-          const filteredGroups = allGroups.filter(group => {
-            return group.type === type && 
-                  group.id !== currentId && 
-                  (!group.capacity || group.currentOccupancy < group.capacity);
+          console.log(`All groups before filtering:`, allGroups);
+          const filteredGroups = allGroups.filter((group) => {
+            const isCorrectType = group.type === type;
+
+            // String comparison fix: convert IDs to strings for reliable comparison
+            const groupIdStr = String(group.id);
+            const currentIdStr = String(currentId);
+            const isNotCurrentGroup = groupIdStr !== currentIdStr;
+
+            // Allow groups that are at capacity or slightly over (up to 10% over)
+            // This is needed because some groups might already be slightly over capacity
+            const capacityThreshold = group.capacity
+              ? Math.ceil(group.capacity * 1.1)
+              : Number.MAX_SAFE_INTEGER;
+            const hasCapacity =
+              !group.capacity || group.currentOccupancy < capacityThreshold;
+
+            console.log(`Filtering group ${group.name}:`, {
+              id: group.id,
+              type: group.type,
+              currentId: currentId,
+              isCorrectType,
+              isNotCurrentGroup,
+              idComparison: `${groupIdStr} !== ${currentIdStr}`,
+              currentOccupancy: group.currentOccupancy,
+              capacity: group.capacity,
+              capacityThreshold: capacityThreshold,
+              hasCapacity,
+            });
+
+            return isCorrectType && isNotCurrentGroup && hasCapacity;
           });
-          
-          console.log(`Found ${filteredGroups.length} available ${type} groups`, filteredGroups);
+          console.log(
+            `Found ${filteredGroups.length} available ${type} groups`,
+            filteredGroups
+          );
+
+          // Save all groups data for error message use
+          const select = document.getElementById(`${type}-select`);
+          if (select) {
+            select.setAttribute("data-all-groups", JSON.stringify(allGroups));
+          }
+
           return filteredGroups;
         }
       } catch (groupsError) {
-        console.log("Error fetching groups from dedicated endpoint:", groupsError);
+        console.log(
+          "Error fetching groups from dedicated endpoint:",
+          groupsError
+        );
       }
-      
+
       // Fall back to using groups from student data
       const currentGroups = studentData.sections?.[0]?.groupes || [];
-      
+
       console.log(`Found ${currentGroups.length} total groups in section`, {
         sectionName: studentData.sections?.[0]?.name,
-        groups: currentGroups.map(g => `${g.type} ${g.name}`)
+        groups: currentGroups.map((g) => `${g.type} ${g.name}`),
       });
-      
+
       // Need a more reliable way to filter groups due to data inconsistency
       // For TP form, filter groups that most likely are TP groups
       let availableGroups;
-      if (type === 'tp') {
+      if (type === "tp") {
         // For TP groups, filter based on group name containing TP or database type
-        availableGroups = currentGroups.filter(group => {
-          const isNamedTP = group.name.toLowerCase().includes('tp');
-          const isTypeTP = group.type === 'tp';
+        availableGroups = currentGroups.filter((group) => {
+          const isNamedTP = group.name.toLowerCase().includes("tp");
+          const isTypeTP = group.type === "tp";
           const isNotCurrentGroup = group.id !== currentId;
-          const hasCapacity = !group.capacity || group.currentOccupancy < group.capacity;
-          
+          const hasCapacity =
+            !group.capacity || group.currentOccupancy < group.capacity;
+
           // Log each group for debugging
           console.log(`Filtering TP group: ${group.name}`, {
             isNamedTP,
             isTypeTP,
             isValidTP: isNamedTP || isTypeTP,
             isNotCurrentGroup,
-            hasCapacity
+            hasCapacity,
           });
-          
+
           // Include if either the name contains TP or type is tp, and meets other criteria
           return (isNamedTP || isTypeTP) && isNotCurrentGroup && hasCapacity;
         });
       } else {
         // For TD groups, similar approach but for TD groups
-        availableGroups = currentGroups.filter(group => {
-          const isNamedTD = group.name.toLowerCase().includes('td');
-          const isTypeTD = group.type === 'td';
+        availableGroups = currentGroups.filter((group) => {
+          const isNamedTD = group.name.toLowerCase().includes("td");
+          const isTypeTD = group.type === "td";
           const isNotCurrentGroup = group.id !== currentId;
-          const hasCapacity = !group.capacity || group.currentOccupancy < group.capacity;
-          
+          const hasCapacity =
+            !group.capacity || group.currentOccupancy < group.capacity;
+
           // Log each group for debugging
           console.log(`Filtering TD group: ${group.name}`, {
             isNamedTD,
             isTypeTD,
             isValidTD: isNamedTD || isTypeTD,
             isNotCurrentGroup,
-            hasCapacity
+            hasCapacity,
           });
-          
+
           // Include if either the name contains TD or type is td, and meets other criteria
           return (isNamedTD || isTypeTD) && isNotCurrentGroup && hasCapacity;
         });
       }
-      
-      console.log(`Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`, {
-        availableGroups: availableGroups.map(g => ({ id: g.id, name: g.name, type: g.type }))
-      });
-      
+
+      console.log(
+        `Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`,
+        {
+          availableGroups: availableGroups.map((g) => ({
+            id: g.id,
+            name: g.name,
+            type: g.type,
+          })),
+        }
+      );
+
       return availableGroups;
     }
   } catch (e) {
@@ -678,6 +843,321 @@ function getFallbackGroups(type) {
     return [1, 2, 4, 5].map((id) => ({ id, name: `Groupe TD ${id}` }));
   } else {
     return [1, 3, 4].map((id) => ({ id, name: `Groupe TP ${id}` }));
+  }
+}
+
+// Diagnostic function to check student assignment
+async function checkStudentGroupAssignments() {
+  try {
+    const diagnosticResults = document.getElementById("diagnostic-results");
+    if (diagnosticResults) {
+      diagnosticResults.innerHTML = "<p>Analyse en cours...</p>";
+      diagnosticResults.style.display = "block";
+    }
+
+    if (!currentUser?.id) {
+      console.error("User not logged in");
+      if (diagnosticResults) {
+        diagnosticResults.innerHTML =
+          '<p class="error">Erreur: Utilisateur non connecté</p>';
+      }
+      return;
+    }
+
+    // Get student data
+    const studentRes = await fetch(
+      `http://localhost:3000/api/etudiants/${currentUser.id}`,
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+    );
+
+    if (!studentRes.ok) {
+      console.error("Failed to fetch student data");
+      if (diagnosticResults) {
+        diagnosticResults.innerHTML =
+          '<p class="error">Erreur: Impossible de récupérer les données de l\'étudiant</p>';
+      }
+      return;
+    }
+
+    const studentData = await studentRes.json();
+    console.log("STUDENT DATA:", studentData);
+
+    let html = "<h4>Informations Étudiant</h4>";
+    html += `<p>Nom: ${studentData.firstName} ${studentData.lastName}</p>`;
+
+    // Get section data
+    const sectionId = studentData.sections?.[0]?.id;
+    if (!sectionId) {
+      html += '<p class="warning">Aucune section assignée à cet étudiant!</p>';
+      if (diagnosticResults) {
+        diagnosticResults.innerHTML = html;
+      }
+      return;
+    }
+
+    html += `<p>Section ID: ${sectionId}</p>`;
+
+    const sectionRes = await fetch(
+      `http://localhost:3000/api/sections/${sectionId}`,
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+    );
+
+    if (!sectionRes.ok) {
+      html +=
+        '<p class="error">Erreur: Impossible de récupérer les données de la section</p>';
+      if (diagnosticResults) {
+        diagnosticResults.innerHTML = html;
+      }
+      return;
+    }
+    const sectionData = await sectionRes.json();
+    console.log("SECTION DATA:", sectionData);
+
+    html += `<p>Section: ${sectionData.name} (Spécialité: ${sectionData.specialty}, Niveau: ${sectionData.level})</p>`;
+
+    // Get all available sections for the same specialty and level
+    try {
+      const availableSectionsRes = await fetch(
+        `http://localhost:3000/api/sections?specialty=${sectionData.specialty}&level=${sectionData.level}`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }
+      );
+
+      if (availableSectionsRes.ok) {
+        const allSections = await availableSectionsRes.json();
+        console.log("ALL SECTIONS:", allSections);
+
+        // Filter out current section and full sections
+        const availableSections = allSections.filter(
+          (section) =>
+            section.id !== sectionId &&
+            (!section.capacity || section.currentOccupancy < section.capacity)
+        );
+
+        html += "<h4>Sections disponibles</h4>";
+
+        if (allSections.length <= 1) {
+          html +=
+            "<p class=\"warning\">Il n'y a qu'une seule section pour votre spécialité et niveau.</p>";
+        } else if (availableSections.length === 0) {
+          html +=
+            '<p class="warning">Toutes les autres sections sont complètes.</p>';
+        } else {
+          html += '<table class="diagnostic-table">';
+          html +=
+            "<tr><th>ID</th><th>Nom</th><th>Spécialité</th><th>Niveau</th><th>Occupants</th><th>Capacité</th></tr>";
+
+          allSections.forEach((section) => {
+            const isCurrent = section.id === sectionId;
+            const hasCapacity =
+              !section.capacity || section.currentOccupancy < section.capacity;
+
+            html += `<tr class="${isCurrent ? "current" : ""} ${
+              !hasCapacity ? "full" : ""
+            }">
+              <td>${section.id}</td>
+              <td>${section.name}</td>
+              <td>${section.specialty}</td>
+              <td>${section.level}</td>
+              <td>${section.currentOccupancy || 0}</td>
+              <td>${section.capacity || "Non définie"}</td>
+            </tr>`;
+          });
+
+          html += "</table>";
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching all sections:", error);
+      html +=
+        '<p class="error">Erreur lors de la récupération des sections disponibles</p>';
+    }
+
+    // Get groups for this section
+    const groupsRes = await fetch(
+      `http://localhost:3000/api/sections/${sectionId}/groupes`,
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+    );
+
+    if (!groupsRes.ok) {
+      html +=
+        '<p class="error">Erreur: Impossible de récupérer les groupes de la section</p>';
+      if (diagnosticResults) {
+        diagnosticResults.innerHTML = html;
+      }
+      return;
+    }
+
+    const groupsData = await groupsRes.json();
+    console.log("ALL SECTION GROUPS:", groupsData); // Analyze TP groups
+    const tpGroups = groupsData.filter((g) => g.type === "tp");
+    console.log("TP GROUPS:", tpGroups);
+
+    // Find student's TP group
+    const studentTpGroup = studentData.tpGroupe;
+    const currentTpGroupId = studentTpGroup?.id;
+
+    html += "<h4>Groupes TP</h4>";
+    if (currentTpGroupId) {
+      html += `<p>Groupe TP actuel: ${
+        studentTpGroup.name
+      } (ID: ${currentTpGroupId} / Type: ${typeof currentTpGroupId})</p>`;
+    } else {
+      html += '<p class="warning">Aucun groupe TP assigné!</p>';
+    }
+
+    html += '<table class="diagnostic-table">';
+    html +=
+      "<tr><th>ID</th><th>Nom</th><th>Type</th><th>Occupants</th><th>Capacité</th><th>ID égalité</th><th>Disponible</th></tr>";
+
+    tpGroups.forEach((group) => {
+      // Check equality with all three methods
+      const strictEqual = group.id === currentTpGroupId;
+      const looseEqual = group.id == currentTpGroupId;
+      const stringEqual = String(group.id) === String(currentTpGroupId);
+
+      const isCurrent = stringEqual; // Use string comparison
+      const hasCapacity =
+        !group.capacity || group.currentOccupancy < group.capacity;
+      const isAvailable = !isCurrent && hasCapacity;
+
+      html += `<tr class="${isCurrent ? "current" : ""} ${
+        !hasCapacity ? "full" : ""
+      }">
+        <td>${group.id}</td>
+        <td>${group.name}</td>
+        <td>${group.type}</td>
+        <td>${group.currentOccupancy || 0}</td>
+        <td>${group.capacity || "Non définie"}</td>
+        <td>strict: ${strictEqual}, loose: ${looseEqual}, string: ${stringEqual}</td>
+        <td>${isAvailable ? "Oui" : "Non"}</td>
+      </tr>`;
+    });
+
+    html += "</table>"; // Analyze TD groups
+    const tdGroups = groupsData.filter((g) => g.type === "td");
+    console.log("TD GROUPS:", tdGroups);
+
+    // Find student's TD group
+    const studentTdGroup = studentData.tdGroupe;
+    const currentTdGroupId = studentTdGroup?.id;
+
+    html += "<h4>Groupes TD</h4>";
+    if (currentTdGroupId) {
+      html += `<p>Groupe TD actuel: ${
+        studentTdGroup.name
+      } (ID: ${currentTdGroupId} / Type: ${typeof currentTdGroupId})</p>`;
+    } else {
+      html += '<p class="warning">Aucun groupe TD assigné!</p>';
+    }
+
+    html += '<table class="diagnostic-table">';
+    html +=
+      "<tr><th>ID</th><th>Nom</th><th>Type</th><th>Occupants</th><th>Capacité</th><th>ID égalité</th><th>Disponible</th></tr>";
+
+    tdGroups.forEach((group) => {
+      // Check equality with all three methods
+      const strictEqual = group.id === currentTdGroupId;
+      const looseEqual = group.id == currentTdGroupId;
+      const stringEqual = String(group.id) === String(currentTdGroupId);
+
+      const isCurrent = stringEqual; // Use string comparison
+      const hasCapacity =
+        !group.capacity || group.currentOccupancy < group.capacity;
+      const isAvailable = !isCurrent && hasCapacity;
+
+      html += `<tr class="${isCurrent ? "current" : ""} ${
+        !hasCapacity ? "full" : ""
+      }">
+        <td>${group.id}</td>
+        <td>${group.name}</td>
+        <td>${group.type}</td>
+        <td>${group.currentOccupancy || 0}</td>
+        <td>${group.capacity || "Non définie"}</td>
+        <td>strict: ${strictEqual}, loose: ${looseEqual}, string: ${stringEqual}</td>
+        <td>${isAvailable ? "Oui" : "Non"}</td>
+      </tr>`;
+    });
+
+    html += "</table>";
+
+    // Summary
+    const availableTpGroups = tpGroups.filter(
+      (g) =>
+        g.id !== currentTpGroupId &&
+        (!g.capacity || g.currentOccupancy < g.capacity)
+    );
+
+    const availableTdGroups = tdGroups.filter(
+      (g) =>
+        g.id !== currentTdGroupId &&
+        (!g.capacity || g.currentOccupancy < g.capacity)
+    ); // Get section availability info if we have it
+    let availableSectionsSummary = "";
+    try {
+      // This variable should be defined in the section we added above
+      if (typeof availableSections !== "undefined") {
+        availableSectionsSummary = `<p>Sections disponibles pour changement: ${availableSections.length}</p>`;
+      }
+    } catch (e) {
+      console.log("Section data not loaded yet");
+    }
+
+    html += "<h4>Résumé</h4>";
+    if (availableSectionsSummary) {
+      html += availableSectionsSummary;
+    }
+    html += `<p>Groupes TP disponibles pour changement: ${availableTpGroups.length}</p>`;
+    html += `<p>Groupes TD disponibles pour changement: ${availableTdGroups.length}</p>`;
+
+    if (availableTpGroups.length === 0) {
+      html += '<p class="warning">Aucun groupe TP disponible pour changement. ';
+      if (tpGroups.length <= 1) {
+        html += "Il n'y a qu'un seul groupe TP dans cette section.</p>";
+      } else {
+        const fullTpGroups = tpGroups.filter(
+          (g) => g.capacity && g.currentOccupancy >= g.capacity
+        );
+        if (fullTpGroups.length === tpGroups.length - 1) {
+          html += "Tous les autres groupes TP sont complets.</p>";
+        } else {
+          html += "Vous êtes déjà dans le seul groupe disponible.</p>";
+        }
+      }
+    }
+
+    if (availableTdGroups.length === 0) {
+      html += '<p class="warning">Aucun groupe TD disponible pour changement. ';
+      if (tdGroups.length <= 1) {
+        html += "Il n'y a qu'un seul groupe TD dans cette section.</p>";
+      } else {
+        const fullTdGroups = tdGroups.filter(
+          (g) => g.capacity && g.currentOccupancy >= g.capacity
+        );
+        if (fullTdGroups.length === tdGroups.length - 1) {
+          html += "Tous les autres groupes TD sont complets.</p>";
+        } else {
+          html += "Vous êtes déjà dans le seul groupe disponible.</p>";
+        }
+      }
+    }
+
+    if (diagnosticResults) {
+      diagnosticResults.innerHTML = html;
+    }
+  } catch (error) {
+    console.error("Error checking assignments:", error);
+    const diagnosticResults = document.getElementById("diagnostic-results");
+    if (diagnosticResults) {
+      diagnosticResults.innerHTML = `<p class="error">Erreur lors de l'analyse: ${error.message}</p>`;
+    }
   }
 }
 
@@ -700,7 +1180,9 @@ async function submitRequest(type, prefix, e) {
     const requestedSelect = document.getElementById(`requested-${prefix}`);
     const requested = requestedSelect.value;
     const reason = document.getElementById(`${prefix}-reason`).value;
-    const justification = document.getElementById(`${prefix}-justification`).value;
+    const justification = document.getElementById(
+      `${prefix}-justification`
+    ).value;
 
     // Log form values for debugging
     console.log(`Form values for ${prefix}:`, {
@@ -708,25 +1190,29 @@ async function submitRequest(type, prefix, e) {
       reason,
       justification,
       hasJustification: Boolean(justification),
-      justificationLength: justification?.length
+      justificationLength: justification?.length,
     });
 
     if (!requested) {
-      throw new Error(`Veuillez sélectionner ${prefix === 'section' ? 'une section' : 'un groupe'} souhaité`);
+      throw new Error(
+        `Veuillez sélectionner ${
+          prefix === "section" ? "une section" : "un groupe"
+        } souhaité`
+      );
     }
-    
+
     if (!reason) {
       throw new Error("Veuillez sélectionner un motif");
     }
-    
-    if (!justification || justification.trim() === '') {
+
+    if (!justification || justification.trim() === "") {
       throw new Error("La justification détaillée est obligatoire");
     }
 
     // Get current ID
     const currentElement = document.getElementById(`current-${prefix}`);
     const currentId = currentElement.dataset.id;
-    
+
     if (!currentId) {
       throw new Error("Information d'affectation actuelle manquante");
     }
@@ -740,7 +1226,7 @@ async function submitRequest(type, prefix, e) {
     // Map the request type to backend enum values
     let requestType;
     let isSection = false;
-    
+
     switch (type) {
       case "SECTION":
         requestType = "section";
@@ -760,32 +1246,37 @@ async function submitRequest(type, prefix, e) {
     console.log(`Processing ${type} change request`);
     console.log(`Current ${prefix} ID:`, currentId);
     console.log(`Element ID used: current-${prefix}`);
-    
+
     // Enforce that group changes must maintain the same group type
     if (!isSection) {
       // For TD or TP changes, we need to be flexible since there's a data inconsistency
       // where TP groups might have type 'td' in the database
       const formType = prefix; // Use the form prefix (tp or td) instead of relying on database type
-      
+
       // Get selected option text to check if it looks like a TD or TP group
-      const selectedOption = requestedSelect.options[requestedSelect.selectedIndex];
+      const selectedOption =
+        requestedSelect.options[requestedSelect.selectedIndex];
       const requestedText = selectedOption ? selectedOption.text : "";
-      
+
       console.log("Validating group types:", {
         formType,
         requestedText,
         currentElement: currentElement.textContent,
-        requestType
+        requestType,
       });
-      
+
       // For TP form, we should be selecting groups that have TP in their name
       if (formType === "tp" && !requestedText.toLowerCase().includes("tp")) {
-        throw new Error("Les demandes de changement doivent concerner des groupes du même type (TP vers TP)");
+        throw new Error(
+          "Les demandes de changement doivent concerner des groupes du même type (TP vers TP)"
+        );
       }
-      
+
       // For TD form, we should be selecting groups that have TD in their name
       if (formType === "td" && !requestedText.toLowerCase().includes("td")) {
-        throw new Error("Les demandes de changement doivent concerner des groupes du même type (TD vers TD)");
+        throw new Error(
+          "Les demandes de changement doivent concerner des groupes du même type (TD vers TD)"
+        );
       }
     }
 
@@ -808,77 +1299,83 @@ async function submitRequest(type, prefix, e) {
     }
 
     let response;
-    
+
     // Create FormData for all request types
     const formData = new FormData();
-    
-    // Common fields - ensure justification is trimmed and not empty
+
+    // Common fields - ensure justification is sent correctly
     formData.append("requestType", requestType);
     formData.append("reason", reason);
     formData.append("justification", justification.trim());
-    
+
     // Add file if present for all forms
     const fileInput = document.getElementById(`${prefix}-document`);
     if (fileInput?.files.length > 0) {
       formData.append("document", fileInput.files[0]);
     }
-    
+
     // Debug: Log FormData contents (can't directly console.log FormData)
     console.log("FormData entries:");
     for (let pair of formData.entries()) {
-      if (pair[0] === 'document') {
+      if (pair[0] === "document") {
         console.log(pair[0], pair[1].name, pair[1].size);
       } else {
         console.log(pair[0], pair[1]);
       }
     }
-    
+
     if (isSection) {
       // For section changes
       formData.append("currentSectionId", currentId.trim());
       formData.append("requestedSectionId", requested.trim());
-      
+
       console.log("Submitting section change request with document");
-      
+
       // For section changes, create a separate JSON payload for required fields and include
       // document in FormData. We need to ensure justification is sent correctly.
       const sectionData = {
-      requestType,
+        requestType,
         currentSectionId: currentId.trim(),
         requestedSectionId: requested.trim(),
         reason,
-        justification: justification.trim()
+        justification: justification.trim(),
       };
-      
+
       // If we have a document, use multipart FormData
       if (fileInput?.files.length > 0) {
         formData.append("data", JSON.stringify(sectionData));
-        
+
         // Submit request with multipart form data for file upload
-        response = await fetch("http://localhost:3000/api/change-requests/section-with-document", {
-          method: "POST",
-          headers: { 
-            Authorization: `Bearer ${authToken}`
-            // Don't set Content-Type for FormData
-          },
-          body: formData
-        });
+        response = await fetch(
+          "http://localhost:3000/api/change-requests/section-with-document",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              // Don't set Content-Type for FormData
+            },
+            body: formData,
+          }
+        );
       } else {
         // No document, use regular JSON request
-        response = await fetch("http://localhost:3000/api/change-requests/section", {
-          method: "POST",
-          headers: { 
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(sectionData)
-        });
+        response = await fetch(
+          "http://localhost:3000/api/change-requests/section",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(sectionData),
+          }
+        );
       }
     } else {
       // For TD/TP group changes
       formData.append("currentId", currentId.trim());
       formData.append("requestedId", requested.trim());
-      
+
       console.log("Submitting group change request with document");
       console.log("Request type:", requestType);
       console.log("Current ID used:", currentId);
@@ -890,19 +1387,22 @@ async function submitRequest(type, prefix, e) {
         currentId: currentId.trim(),
         requestedId: requested.trim(),
         reason,
-        justification: justification.trim()
+        justification: justification.trim(),
       };
       console.log("Group change request payload:", groupChangeData);
 
       // Submit request for group change with file
-      response = await fetch("http://localhost:3000/api/change-requests/group", {
-      method: "POST",
-        headers: { 
-          Authorization: `Bearer ${authToken}`
-          // Don't set Content-Type for FormData
-        },
-        body: formData
-      });
+      response = await fetch(
+        "http://localhost:3000/api/change-requests/group",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            // Don't set Content-Type for FormData
+          },
+          body: formData,
+        }
+      );
     }
 
     // Reset button state
@@ -914,7 +1414,7 @@ async function submitRequest(type, prefix, e) {
     // Check response status
     if (!response.ok) {
       let errorMessage = `Erreur lors de l'envoi de la demande (${response.status})`;
-      
+
       try {
         const errorData = await response.json();
         if (errorData && errorData.message) {
@@ -923,33 +1423,50 @@ async function submitRequest(type, prefix, e) {
       } catch (e) {
         console.error("Failed to parse error response", e);
       }
-      
+
       throw new Error(errorMessage);
+    } // Get request data from response
+    const requestData = await response.json();
+
+    // Create notification for the new request
+    if (typeof createChangeRequestNotification === "function") {
+      try {
+        await createChangeRequestNotification(
+          {
+            id: requestData.id || requestData.requestId,
+            type: requestType,
+          },
+          "pending"
+        );
+        console.log("Request notification created");
+      } catch (notifError) {
+        console.error("Failed to create notification:", notifError);
+      }
     }
 
     // Show success and reload requests
     if (successDiv) {
       successDiv.textContent = "Demande soumise avec succès.";
       successDiv.style.display = "block";
-      
+
       // Automatically scroll to show success message
-      successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      successDiv.scrollIntoView({ behavior: "smooth", block: "center" });
     }
     form.reset();
-    
+
     // Reset file name displays
     const fileNameDisplay = document.getElementById(`${prefix}-file-name`);
     if (fileNameDisplay) {
-      fileNameDisplay.textContent = '';
-      fileNameDisplay.style.display = 'none';
+      fileNameDisplay.textContent = "";
+      fileNameDisplay.style.display = "none";
     }
-    
+
     // Switch to the requests tab
     const requestsTab = document.querySelector('[data-target="suivi"]');
     if (requestsTab) {
       requestsTab.click();
     }
-    
+
     // Load updated requests
     loadUserRequests();
   } catch (e) {
@@ -957,9 +1474,9 @@ async function submitRequest(type, prefix, e) {
     if (errorDiv) {
       errorDiv.textContent = e.message || "Erreur lors de la soumission.";
       errorDiv.style.display = "block";
-      errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      errorDiv.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-    
+
     // Reset button state in case of error
     const submitBtn = form.querySelector(".submit-btn");
     if (submitBtn) {
@@ -987,7 +1504,7 @@ async function loadUserRequests() {
       empty: !!empty,
       table: !!table,
       errorDiv: !!errorDiv,
-      suiviTab: !!suiviTab
+      suiviTab: !!suiviTab,
     });
     return;
   }
@@ -1025,7 +1542,7 @@ async function loadUserRequests() {
         },
         signal: AbortSignal.timeout(5000),
       });
-      
+
       if (!tokenCheck.ok) {
         console.error("Token validation failed:", tokenCheck.status);
         alert("Votre session a expiré. Veuillez vous reconnecter.");
@@ -1035,76 +1552,51 @@ async function loadUserRequests() {
     } catch (tokenError) {
       console.warn("Token check failed:", tokenError);
       // Continue anyway, maybe just network issue
-    }
-
-    // Load both request types
-    console.log("Fetching change requests and profile requests...");
+    } // Fetch both change requests and profile requests
     const [changeRequests, profileRequests] = await Promise.all([
       fetchRequests("change-requests"),
       fetchRequests("profile-requests"),
     ]);
 
-    console.log("Loaded requests:", {
-      changeRequests: changeRequests.length,
-      profileRequests: profileRequests.length
-    });
+    // Combine the results
+    window.allUserRequests = [...changeRequests, ...profileRequests];
 
-    // Use a Map to track unique requests by ID
-    const uniqueRequestsMap = new Map();
-    
-    // Add change requests to the map
-    changeRequests.forEach(req => {
-      uniqueRequestsMap.set(req.id, req);
-    });
-    
-    // Add profile requests to the map
-    profileRequests.forEach(req => {
-      uniqueRequestsMap.set(req.id, req);
-    });
-    
-    // Convert map values to array and sort
-    const allRequests = Array.from(uniqueRequestsMap.values()).sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-
-    // Store all requests globally for filtering
-    window.allUserRequests = allRequests;
-    
-    // Check if we need to add search functionality
-    if (!document.getElementById('requests-search')) {
-      // Add search/filter controls if they don't exist
-      const filterControls = document.createElement('div');
-      filterControls.className = 'filter-controls';
-      filterControls.innerHTML = `
-        <div class="search-container">
-          <input type="text" id="requests-search" placeholder="Rechercher une demande...">
-          <button id="requests-search-btn"><i class="fas fa-search"></i> Rechercher</button>
-        </div>
-        <div class="filter-dropdown">
-          <select id="requests-status-filter">
-            <option value="all">Tous les statuts</option>
-            <option value="pending">En attente</option>
-            <option value="approved">Approuvées</option>
-            <option value="rejected">Rejetées</option>
-          </select>
-        </div>
-      `;
-      
-      // Insert before the table
-      table.parentNode.insertBefore(filterControls, table);
-      
-      // Add event listeners for search and filter
-      document.getElementById('requests-search-btn').addEventListener('click', filterUserRequests);
-      document.getElementById('requests-search').addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') filterUserRequests();
-      });
-      document.getElementById('requests-status-filter').addEventListener('change', filterUserRequests);
+    // Track status changes and create notifications if necessary
+    if (
+      typeof updateRequestStatusCache === "function" &&
+      typeof processRequestStatusChanges === "function"
+    ) {
+      try {
+        const changedRequests = updateRequestStatusCache(
+          window.allUserRequests
+        );
+        if (changedRequests.length > 0) {
+          console.log(
+            "Detected changes in request statuses:",
+            changedRequests.length
+          );
+          await processRequestStatusChanges(changedRequests);
+        }
+      } catch (e) {
+        console.error("Error processing request status changes:", e);
+      }
     }
-    
-    // Display all requests initially
-    displayUserRequests(allRequests);
-    
-    // Mark requests as loaded
+
+    // Hide loading, show results
+    loading.style.display = "none";
+
+    if (window.allUserRequests.length === 0) {
+      table.style.display = "none";
+      empty.style.display = "block";
+    } else {
+      table.style.display = "table";
+      empty.style.display = "none";
+
+      // Filter and display the requests
+      filterUserRequests();
+    }
+
+    // Set flag to indicate requests have been loaded
     requestsLoaded = true;
   } catch (e) {
     console.error("Error loading requests:", e);
@@ -1122,35 +1614,42 @@ async function loadUserRequests() {
 // Filter user requests based on search and status
 function filterUserRequests() {
   // Get filter values
-  const searchTerm = document.getElementById('requests-search')?.value.toLowerCase().trim() || '';
-  const statusFilter = document.getElementById('requests-status-filter')?.value || 'all';
-  
+  const searchTerm =
+    document.getElementById("requests-search")?.value.toLowerCase().trim() ||
+    "";
+  const statusFilter =
+    document.getElementById("requests-status-filter")?.value || "all";
+
   // Get stored requests
   const allRequests = window.allUserRequests || [];
-  
+
   if (allRequests.length === 0) {
     console.log("No requests to filter");
     return;
   }
-  
+
   console.log("Filtering requests with:", { searchTerm, statusFilter });
-  
+
   // Apply filters
-  const filteredRequests = allRequests.filter(req => {
+  const filteredRequests = allRequests.filter((req) => {
     // Status filter
-    const statusMatch = statusFilter === 'all' || req.status?.toLowerCase() === statusFilter;
-    
+    const statusMatch =
+      statusFilter === "all" || req.status?.toLowerCase() === statusFilter;
+
     // Search term filter
-    const searchMatch = !searchTerm || 
+    const searchMatch =
+      !searchTerm ||
       req.type?.toLowerCase().includes(searchTerm) ||
       req.current?.toLowerCase().includes(searchTerm) ||
       req.requested?.toLowerCase().includes(searchTerm) ||
       getRequestTypeLabel(req.type).toLowerCase().includes(searchTerm) ||
-      getStatusLabel(req.status, req.requestType === 'profile').toLowerCase().includes(searchTerm);
-    
+      getStatusLabel(req.status, req.requestType === "profile")
+        .toLowerCase()
+        .includes(searchTerm);
+
     return statusMatch && searchMatch;
   });
-  
+
   // Display filtered requests
   displayUserRequests(filteredRequests);
 }
@@ -1160,11 +1659,11 @@ function displayUserRequests(requests) {
   const tbody = document.getElementById("requests-table-body");
   const empty = document.getElementById("no-requests-message");
   const table = document.getElementById("requests-table");
-  
+
   if (!tbody || !empty || !table) return;
-  
+
   tbody.innerHTML = "";
-  
+
   if (requests.length === 0) {
     empty.style.display = "block";
     table.style.display = "none";
@@ -1180,34 +1679,60 @@ function displayUserRequests(requests) {
 
 async function fetchRequests(endpoint) {
   try {
-    console.log(`Fetching ${endpoint} from ${`http://localhost:3000/api/${endpoint}/my-requests`}`);
-    
+    // Normalize the endpoint to avoid double URLs
+    const apiEndpoint = endpoint.includes("http://")
+      ? `${endpoint}/my-requests`
+      : `http://localhost:3000/api/${endpoint}/my-requests`;
+
+    console.log(`Fetching requests from ${apiEndpoint}`);
+
     // Make sure we have a valid token
     if (!authToken) {
       console.error("No auth token available for request");
       return [];
     }
-    
-    const res = await fetch(
-      `http://localhost:3000/api/${endpoint}/my-requests`,
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-        signal: AbortSignal.timeout(10000), // Increase timeout to 10 seconds
-      }
-    );
+
+    const res = await fetch(apiEndpoint, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(10000), // Increase timeout to 10 seconds
+    });
 
     // Log the response status and headers for debugging
     console.log(`Response for ${endpoint}:`, {
       status: res.status,
       statusText: res.statusText,
-      contentType: res.headers.get('content-type')
+      contentType: res.headers.get("content-type"),
     });
-
     if (!res.ok) {
-      console.error(`Error fetching ${endpoint}: ${res.status} ${res.statusText}`);
+      console.error(
+        `Error fetching ${endpoint}: ${res.status} ${res.statusText}`
+      );
+
+      // Try token refresh for 401 Unauthorized errors
+      if (res.status === 401 && typeof refreshToken === "function") {
+        console.log("Attempting to refresh token due to 401 error");
+        const refreshed = await refreshToken();
+
+        if (refreshed) {
+          console.log("Token refreshed, retrying request");
+          // Reset tokenRefreshAttempted for next usage
+          tokenRefreshAttempted = false;
+
+          // Retry the request with the new token
+          return await fetchRequests(endpoint);
+        } else {
+          console.error("Token refresh failed, redirecting to login");
+          alert("Votre session a expiré. Veuillez vous reconnecter.");
+          sessionStorage.removeItem("etudiant_token");
+          localStorage.removeItem("etudiant_token");
+          window.location.href = "etudiant-login.html";
+          return [];
+        }
+      }
+
       // Try to get error details if available
       try {
         const errorData = await res.json();
@@ -1217,7 +1742,7 @@ async function fetchRequests(endpoint) {
       }
       return [];
     }
-    
+
     const data = await res.json();
     console.log(`Received ${data.length} ${endpoint}`, data.slice(0, 2)); // Log first 2 items
 
@@ -1236,14 +1761,16 @@ async function fetchRequests(endpoint) {
     }));
   } catch (e) {
     console.error(`Error in fetchRequests(${endpoint}):`, e);
-    
+
     // Check for CORS or network errors
-    if (e.name === 'TypeError' && e.message.includes('Failed to fetch')) {
-      console.error("Network error - check CORS settings or server availability");
-    } else if (e.name === 'AbortError') {
+    if (e.name === "TypeError" && e.message.includes("Failed to fetch")) {
+      console.error(
+        "Network error - check CORS settings or server availability"
+      );
+    } else if (e.name === "AbortError") {
       console.error("Request timed out - server may be slow or unresponsive");
     }
-    
+
     return [];
   }
 }
@@ -1325,10 +1852,62 @@ function loadFallbackRequests() {
   }
 }
 
+// OFFLINE FALLBACK
+function loadFallbackData() {
+  // Add offline notice
+  if (!document.querySelector(".alert.alert-warning")) {
+    const notice = document.createElement("div");
+    notice.className = "alert alert-warning";
+    notice.innerHTML = `
+      <strong>Mode hors ligne:</strong>
+      Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.
+      <button onclick="location.reload()" style="margin-left:10px;padding:5px 10px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer">
+        Réessayer la connexion
+      </button>
+    `;
+    document.querySelector(".tab-container")?.prepend(notice);
+  }
+
+  // Set fallback values
+  const setCurrent = (elementId, name, id) => {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.textContent = name || "Non assigné";
+      el.dataset.id = id || "";
+    }
+  };
+
+  setCurrent("current-section", "Section B", "2");
+  setCurrent("current-td", "Groupe TD 3", "3");
+  setCurrent("current-tp", "Groupe TP 2", "2");
+
+  // Load fallback options
+  loadAvailableOptions("section", "2");
+  loadAvailableOptions("td", "3");
+  loadAvailableOptions("tp", "2");
+
+  // Setup user info in sidebar
+  const userAvatar = document.getElementById("userAvatar");
+  const userFullName = document.getElementById("userFullName");
+  const userId = document.getElementById("userId");
+
+  if (userAvatar) {
+    userAvatar.textContent = "ET";
+  }
+
+  if (userFullName) {
+    userFullName.textContent = "Étudiant Test";
+  }
+
+  if (userId) {
+    userId.textContent = "etudiant@example.com";
+  }
+}
+
 // HELPERS
 function getRequestTypeLabel(type) {
   const typeStr = String(type).toLowerCase();
-  
+
   switch (typeStr) {
     case "section":
       return "Changement de Section";
@@ -1435,92 +2014,876 @@ async function verifyToken() {
   }
 }
 
-// OFFLINE FALLBACK
-function loadFallbackData() {
-  // Add offline notice
-  if (!document.querySelector(".alert.alert-warning")) {
-    const notice = document.createElement("div");
-    notice.className = "alert alert-warning";
-    notice.innerHTML = `
-      <strong>Mode hors ligne:</strong>
-      Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.
-      <button onclick="location.reload()" style="margin-left:10px;padding:5px 10px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer">
-        Réessayer la connexion
-      </button>
-    `;
-    document.querySelector(".tab-container").prepend(notice);
-  }
-
-  // Set fallback values
-  document.getElementById("current-section").value = "B";
-  document.getElementById("current-section").dataset.id = "2";
-  document.getElementById("current-td").value = "TD3";
-  document.getElementById("current-td").dataset.id = "3";
-  document.getElementById("current-tp").value = "TP2";
-  document.getElementById("current-tp").dataset.id = "2";
-
-  // Load fallback options
-  loadAvailableOptions("section", "2");
-  loadAvailableOptions("td", "3");
-  loadAvailableOptions("tp", "2");
-}
-
 // GLOBAL AUTH FUNCTIONS
 function logout() {
-  console.log("Logout called");
-  
-  // Clear all auth tokens
-  localStorage.removeItem("etudiant_token");
+  // Clear tokens
   sessionStorage.removeItem("etudiant_token");
-  
-  // Clear data
+  localStorage.removeItem("etudiant_token");
+  sessionStorage.removeItem("etudiant_refresh_token");
+  localStorage.removeItem("etudiant_refresh_token");
+
+  // Clear user data
   localStorage.removeItem("studentData");
-  localStorage.removeItem("offlineRequests"); 
-  localStorage.removeItem("lastLogin");
-  localStorage.removeItem("userPreferences");
-  
-  // Clear other session data
-  sessionStorage.clear();
-  
-  // Redirect to login
-  window.location.href = "index.html";
+  localStorage.removeItem("studentRequests");
+
+  // Redirect to login page
+  window.location.href = "etudiant-login.html";
 }
 
-// Initialize sidebar with user information
-function initializeSidebar() {
-  // Check if we need to load student data
-  const studentData = JSON.parse(localStorage.getItem("studentData") || "null");
-  const token = sessionStorage.getItem("etudiant_token") || localStorage.getItem("etudiant_token");
-  
-  if (!token) {
-    // No token, redirect to login
+// Initialize data source and helpers
+function initializeData() {
+  // Initialize request status change cache
+  window.requestStatusCache = window.requestStatusCache || new Map();
+
+  // Default global variables if not already set
+  window.allUserRequests = window.allUserRequests || [];
+
+  // Set up filter handlers if the elements exist
+  const searchInput = document.getElementById("requests-search");
+  const statusFilter = document.getElementById("requests-status-filter");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", filterUserRequests);
+  }
+
+  if (statusFilter) {
+    statusFilter.addEventListener("change", filterUserRequests);
+  }
+}
+
+// Attempt to refresh an expired token
+async function refreshToken() {
+  try {
+    // Check if we've already attempted a refresh to prevent loops
+    if (tokenRefreshAttempted) {
+      console.warn("Token refresh already attempted, preventing loop");
+      return false;
+    }
+
+    tokenRefreshAttempted = true;
+
+    // Get refresh token if it exists
+    const refreshTokenValue =
+      sessionStorage.getItem("etudiant_refresh_token") ||
+      localStorage.getItem("etudiant_refresh_token");
+
+    if (!refreshTokenValue) {
+      console.warn("No refresh token available");
+      return false;
+    }
+
+    console.log("Attempting to refresh token...");
+
+    const response = await fetch("http://localhost:3000/api/auth/refresh", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      console.warn("Token refresh failed:", response.status);
+      return false;
+    }
+
+    const data = await response.json();
+
+    // Update stored tokens
+    authToken = data.accessToken;
+
+    // Update storage
+    if (localStorage.getItem("etudiant_token")) {
+      localStorage.setItem("etudiant_token", data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem("etudiant_refresh_token", data.refreshToken);
+      }
+    } else {
+      sessionStorage.setItem("etudiant_token", data.accessToken);
+      if (data.refreshToken) {
+        sessionStorage.setItem("etudiant_refresh_token", data.refreshToken);
+      }
+    }
+
+    console.log("Token refreshed successfully");
+    return true;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    return false;
+  }
+}
+
+// DOCUMENT READY
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadNavbar();
+
+  // Initialize sidebar user information
+  initializeSidebar();
+
+  // Auth setup
+  authToken =
+    sessionStorage.getItem("etudiant_token") ||
+    localStorage.getItem("etudiant_token");
+  if (!authToken) {
     window.location.href = "etudiant-login.html";
     return;
   }
 
-  // Get the user avatar, name and ID elements
+  try {
+    // Check backend connectivity first
+    await checkBackendConnectivity();
+
+    const userData = await verifyToken();
+    if (userData) {
+      currentUser = { id: userData.userId, email: userData.email };
+      await loadUserData();
+
+      // Load requests but don't switch to that tab yet
+      await loadUserRequests();
+    } else if (!isBackendAvailable) {
+      // No user data but backend is down
+      console.warn("Backend is not available, loading fallback data");
+      loadFallbackData();
+    } else {
+      // Auth issue - redirect to login
+      console.error("Authentication failed, redirecting to login");
+      sessionStorage.removeItem("etudiant_token");
+      localStorage.removeItem("etudiant_token");
+      window.location.href = "etudiant-login.html";
+      return;
+    }
+  } catch (e) {
+    console.error("Error during initialization:", e);
+
+    // Add diagnostics button event listener
+    document.getElementById("diagnostic-btn")?.addEventListener("click", () => {
+      checkStudentGroupAssignments();
+    });
+    isBackendAvailable = false;
+    loadFallbackData();
+  }
+
+  // Set up tab functionality
+  setupTabNavigation();
+
+  // Set up file input displays
+  setupFileInputDisplays();
+
+  // Direct submit button handling for each form
+  setupSubmitForForm("section-change-form", "SECTION", "section");
+  setupSubmitForForm("td-change-form", "TD_GROUP", "td");
+  setupSubmitForForm("tp-change-form", "TP_GROUP", "tp");
+
+  // Also handle the "new-request-btn" if it exists
+  const newRequestBtn = document.getElementById("new-request-btn");
+  if (newRequestBtn) {
+    newRequestBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      console.log("New request button clicked, switching to forms tab");
+      // Click the first tab button to switch to formulaires
+      const formulairesTab = document.querySelector(
+        '[data-target="formulaires"]'
+      );
+      if (formulairesTab) {
+        // Manually trigger the click event
+        const clickEvent = new Event("click");
+        formulairesTab.dispatchEvent(clickEvent);
+      }
+    });
+  }
+
+  // Add specific listener for the suivi tab to make sure requests load
+  const suiviTabButton = document.querySelector('[data-target="suivi"]');
+  if (suiviTabButton) {
+    suiviTabButton.addEventListener("click", function () {
+      console.log("Suivi tab clicked, reloading requests");
+      loadUserRequests();
+    });
+  }
+});
+
+// Initialize sidebar with user information
+function initializeSidebar() {
+  try {
+    // Try to load user data from localStorage if available
+    const storedData = localStorage.getItem("studentData");
+    if (storedData) {
+      const userData = JSON.parse(storedData);
+
+      const userAvatar = document.getElementById("userAvatar");
+      const userFullName = document.getElementById("userFullName");
+      const userId = document.getElementById("userId");
+
+      if (userAvatar) {
+        const initials =
+          ((userData.firstName || "")[0] || "") +
+          ((userData.lastName || "")[0] || "");
+        userAvatar.textContent = initials.toUpperCase() || "ET";
+      }
+
+      if (userFullName) {
+        userFullName.textContent =
+          `${userData.firstName || ""} ${userData.lastName || ""}` ||
+          "Étudiant";
+      }
+
+      if (userId) {
+        userId.textContent = userData.matricule || userData.email || "";
+      }
+    }
+  } catch (e) {
+    console.error("Error initializing sidebar:", e);
+  }
+}
+
+// Setup file input displays
+function setupFileInputDisplays() {
+  setupFileInput("section-document", "section-file-name");
+  setupFileInput("td-document", "td-file-name");
+  setupFileInput("tp-document", "tp-file-name");
+}
+
+// Function to display selected file name
+function setupFileInput(inputId, displayId) {
+  const fileInput = document.getElementById(inputId);
+  const fileNameDisplay = document.getElementById(displayId);
+
+  if (fileInput && fileNameDisplay) {
+    fileInput.addEventListener("change", function () {
+      if (this.files && this.files.length > 0) {
+        fileNameDisplay.textContent = this.files[0].name;
+        fileNameDisplay.title = this.files[0].name;
+        fileNameDisplay.style.display = "block";
+      } else {
+        fileNameDisplay.textContent = "";
+        fileNameDisplay.style.display = "none";
+      }
+    });
+  }
+}
+
+// Improved tab navigation setup
+function setupTabNavigation() {
+  console.log("Setting up tab navigation");
+  // Set up main tab buttons
+  document
+    .querySelectorAll(".tab-container > .tab-buttons > .tab-button")
+    .forEach((button) => {
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        const target = this.getAttribute("data-target");
+        console.log(`Tab clicked: ${target}`);
+
+        // Hide all main tabs
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Deactivate all main tab buttons
+        document
+          .querySelectorAll(".tab-container > .tab-buttons > .tab-button")
+          .forEach((btn) => {
+            btn.classList.remove("active");
+          });
+
+        // Show selected tab and activate button
+        const selectedTab = document.getElementById(target);
+        if (selectedTab) {
+          selectedTab.classList.add("active");
+          console.log(`Activated tab: ${target}`);
+        } else {
+          console.error(`Tab element not found with id: ${target}`);
+        }
+        this.classList.add("active");
+
+        // If switching to "suivi" tab, only load requests if not already loaded
+        if (target === "suivi") {
+          console.log("Handling Suivi tab activation");
+          if (!requestsLoaded) {
+            console.log("Loading requests for first time");
+            loadUserRequests();
+          } else {
+            console.log("Requests already loaded, skipping reload");
+          }
+          // Make sure the suivi tab is visible by forcing display
+          document.getElementById("suivi").style.display = "block";
+        }
+
+        // If switching to forms tab, activate first sub-tab
+        if (target === "formulaires") {
+          const firstSubTab = document.querySelector(
+            "#formulaires .tab-buttons .tab-button"
+          );
+          if (firstSubTab) {
+            firstSubTab.click();
+          }
+        }
+      });
+    });
+
+  // Set up form sub-tab buttons
+  document
+    .querySelectorAll("#formulaires .tab-buttons .tab-button")
+    .forEach((button) => {
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        const target = this.getAttribute("data-target");
+
+        // Hide all form cards
+        document.querySelectorAll(".form-card").forEach((form) => {
+          form.classList.remove("active");
+        });
+
+        // Deactivate all form tab buttons
+        document
+          .querySelectorAll("#formulaires .tab-buttons .tab-button")
+          .forEach((btn) => {
+            btn.classList.remove("active");
+          });
+
+        // Show selected form and activate button
+        const selectedForm = document.getElementById(target);
+        if (selectedForm) {
+          selectedForm.classList.add("active");
+          console.log(`Activated form: ${target}`);
+        } else {
+          console.error(`Form element not found with id: ${target}`);
+        }
+        this.classList.add("active");
+      });
+    });
+
+  // Add a test click on the Suivi tab once DOM is fully loaded
+  setTimeout(() => {
+    console.log("Testing tab navigation");
+    const suiviTab = document.querySelector('[data-target="suivi"]');
+    const formulairesTab = document.querySelector(
+      '[data-target="formulaires"]'
+    );
+    if (suiviTab) {
+      console.log("Suivi tab found:", suiviTab);
+    } else {
+      console.error("Suivi tab not found");
+    }
+    if (formulairesTab) {
+      console.log("Formulaires tab found:", formulairesTab);
+    } else {
+      console.error("Formulaires tab not found");
+    }
+  }, 1000);
+}
+
+// Check backend connectivity
+async function checkBackendConnectivity() {
+  try {
+    // Try loading student data instead of using a non-existent health endpoint
+    const response = await fetch("http://localhost:3000/api/auth/verify", {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+      method: "GET",
+      signal: AbortSignal.timeout(3000),
+    });
+
+    isBackendAvailable = response.ok;
+    return response.ok;
+  } catch (error) {
+    console.warn("Backend connectivity check failed:", error);
+    isBackendAvailable = false;
+    return false;
+  }
+}
+
+// Fixed form submission setup
+function setupSubmitForForm(formId, requestType, prefix) {
+  const form = document.getElementById(formId);
+  if (!form) {
+    console.error(`Form not found: ${formId}`);
+    return;
+  }
+
+  console.log(`Setting up form submission for ${formId}`, {
+    requestType,
+    prefix,
+    formFound: !!form,
+  });
+
+  // Add proper form submission handler
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    console.log(`Form ${formId} submitted`);
+
+    // Validate request type and prefix match - especially for TP groups
+    if (requestType === "TP_GROUP" && prefix !== "tp") {
+      console.error("Mismatch between requestType and prefix:", {
+        requestType,
+        prefix,
+      });
+      alert(
+        "Erreur de configuration du formulaire. Veuillez rafraîchir la page."
+      );
+      return;
+    }
+
+    submitRequest(requestType, prefix, e);
+    return false;
+  });
+
+  // Also handle direct button click
+  const submitBtn = form.querySelector(".submit-btn");
+  if (submitBtn) {
+    submitBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      console.log(`Submit button clicked for ${formId}`);
+      submitRequest(requestType, prefix, e);
+    });
+  }
+}
+
+// DATA LOADING
+async function loadUserData() {
+  try {
+    const studentData = isBackendAvailable
+      ? await fetchStudentData()
+      : JSON.parse(localStorage.getItem("studentData")) || {};
+
+    console.log("Student data loaded:", {
+      section: studentData.sections?.[0]?.name,
+      tdGroup: studentData.tdGroupe?.name,
+      tpGroup: studentData.tpGroupe?.name,
+      tdId: studentData.tdGroupe?.id,
+      tpId: studentData.tpGroupe?.id,
+    });
+
+    // Set current values with IDs
+    const setCurrent = (elementId, data) => {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.textContent = data?.name || "Non assigné";
+        el.dataset.id = data?.id || "";
+        console.log(`Set ${elementId} to:`, { name: data?.name, id: data?.id });
+      }
+    };
+
+    setCurrent("current-section", studentData.sections?.[0]);
+    setCurrent("current-td", studentData.tdGroupe);
+    setCurrent("current-tp", studentData.tpGroupe); // Log current group IDs before loading options
+    console.log("Current IDs being passed to loadAvailableOptions:", {
+      sectionId: studentData.sections?.[0]?.id,
+      tdGroupId: studentData.tdGroupe?.id,
+      tpGroupId: studentData.tpGroupe?.id,
+    });
+
+    // Load options
+    await loadAvailableOptions("section", studentData.sections?.[0]?.id);
+    await loadAvailableOptions("td", studentData.tdGroupe?.id);
+    await loadAvailableOptions("tp", studentData.tpGroupe?.id);
+  } catch (e) {
+    console.error("Error loading user data:", e);
+    loadFallbackData();
+  }
+}
+
+async function fetchStudentData() {
+  const res = await fetch(
+    `http://localhost:3000/api/etudiants/${currentUser.id}`,
+    {
+      headers: { Authorization: `Bearer ${authToken}` },
+      signal: AbortSignal.timeout(5000),
+    }
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch student data");
+  const data = await res.json();
+
+  // Save to localStorage
+  localStorage.setItem("studentData", JSON.stringify(data));
+
+  // Update sidebar with fresh data
   const userAvatar = document.getElementById("userAvatar");
   const userFullName = document.getElementById("userFullName");
   const userId = document.getElementById("userId");
-  
-  // If we have studentData cached, use it
-  if (studentData) {
-    if (userAvatar) {
-      const initials = ((studentData.firstName || "")[0] || "") + ((studentData.lastName || "")[0] || "");
-      userAvatar.textContent = initials.toUpperCase();
+
+  if (userAvatar) {
+    const initials =
+      ((data.firstName || "")[0] || "") + ((data.lastName || "")[0] || "");
+    userAvatar.textContent = initials.toUpperCase();
+  }
+
+  if (userFullName) {
+    userFullName.textContent = `${data.firstName || ""} ${data.lastName || ""}`;
+  }
+
+  if (userId) {
+    userId.textContent = data.matricule || data.email || "";
+  }
+
+  return data;
+}
+
+async function loadAvailableOptions(type, currentId) {
+  const select = document.getElementById(`requested-${type}`);
+  if (!select) return;
+
+  select.innerHTML = `<option value="">Sélectionnez...</option>`;
+
+  // Show loading state
+  select.disabled = true;
+  select.innerHTML = `<option value="">Chargement...</option>`;
+
+  try {
+    const groups = isBackendAvailable
+      ? await fetchGroups(type, currentId)
+      : getFallbackGroups(type);
+
+    // Reset select after loading
+    select.innerHTML = `<option value="">Sélectionnez...</option>`; // Filter out invalid options first
+    const validGroups = groups.filter((group) => {
+      // Filter out the current group - can't switch to same group
+      const groupIdStr = String(group.id || "");
+      const currentIdStr = String(currentId || "");
+
+      console.log(`Comparing IDs for ${group.name}:`, {
+        groupId: group.id,
+        currentId: currentId,
+        groupIdStr,
+        currentIdStr,
+        areEqual: groupIdStr === currentIdStr,
+      });
+
+      if (groupIdStr === currentIdStr) {
+        console.log(
+          `Filtered out current group: ${group.name} (ID match: ${groupIdStr})`
+        );
+        return false;
+      }
+
+      // Allow groups that are at capacity or slightly over (up to 10% over)
+      // This is needed because some groups might already be slightly over capacity
+      const capacityThreshold = group.capacity
+        ? Math.ceil(group.capacity * 1.1)
+        : Number.MAX_SAFE_INTEGER;
+
+      if (
+        group.capacity &&
+        group.currentOccupancy &&
+        group.currentOccupancy >= capacityThreshold
+      ) {
+        console.log(
+          `Filtering out full group: ${group.name} (${group.currentOccupancy}/${group.capacity})`
+        );
+        return false;
+      }
+
+      return true;
+    });
+
+    console.log(
+      `Showing ${validGroups.length} valid options for ${type} from ${groups.length} total`
+    );
+
+    // Update the select with valid options
+    validGroups.forEach((group) => {
+      // Add the type to the name if it's not already there
+      let displayName = group.name;
+
+      // Add capacity information if available
+      if (group.capacity && group.currentOccupancy) {
+        // Add the type to the name if it's not already there
+        if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
+          displayName = `${displayName} (TP)`;
+        } else if (type === "td" && !displayName.toLowerCase().includes("td")) {
+          displayName = `${displayName} (TD)`;
+        }
+
+        // Add occupancy info
+        displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
+      } else {
+        // Just add the type if needed
+        if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
+          displayName = `${displayName} (TP)`;
+        } else if (type === "td" && !displayName.toLowerCase().includes("td")) {
+          displayName = `${displayName} (TD)`;
+        }
+      }
+
+      const option = new Option(displayName, group.id);
+      select.add(option);
+    });
+
+    // Re-enable the select
+    select.disabled = false; // If there are no options, show a message
+    if (validGroups.length === 0) {
+      select.innerHTML = `<option value="">Aucune option disponible</option>`;
+      select.disabled = true; // Show an error message with more details
+      const errorDivId = `${type}-form-error`;
+      const errorDiv = document.getElementById(errorDivId);
+      if (errorDiv) {
+        // Get more specific information based on whether it's a section or group
+        let message = "";
+
+        if (type === "section") {
+          message =
+            "Aucune section disponible pour changement. Vous êtes dans la seule section disponible pour votre spécialité/niveau.";
+        } else {
+          message = `Aucun groupe ${type.toUpperCase()} disponible pour changement. `;
+
+          // Check specific scenarios
+          const allGroupsOfType = select.getAttribute("data-all-groups")
+            ? JSON.parse(select.getAttribute("data-all-groups"))
+            : [];
+
+          if (allGroupsOfType.length <= 1) {
+            message += "Vous êtes dans le seul groupe disponible.";
+          } else {
+            const fullGroups = allGroupsOfType.filter(
+              (g) => g.capacity && g.currentOccupancy >= g.capacity
+            );
+
+            if (fullGroups.length === allGroupsOfType.length - 1) {
+              message += "Tous les autres groupes sont complets.";
+            } else {
+              message +=
+                "Les groupes peuvent être complets ou vous êtes déjà dans le seul groupe disponible.";
+            }
+          }
+        }
+
+        console.log("No groups available message:", message);
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+      }
     }
-    
-    if (userFullName) {
-      userFullName.textContent = `${studentData.firstName || ""} ${studentData.lastName || ""}`;
+  } catch (e) {
+    console.error(`Error loading ${type} groups:`, e);
+
+    // Show error message in a more visible way
+    const errorDivId = `${type}-form-error`;
+    const errorDiv = document.getElementById(errorDivId);
+    if (errorDiv) {
+      errorDiv.textContent = `Une erreur est survenue lors du chargement des groupes: ${e.message}`;
+      errorDiv.style.display = "block";
     }
-    
-    if (userId) {
-      userId.textContent = studentData.matricule || studentData.email || "";
+
+    // Reset select and add fallback options
+    select.innerHTML = `<option value="">Erreur de chargement</option>`;
+    getFallbackGroups(type).forEach((group) => {
+      select.add(new Option(group.name, group.id));
+    });
+
+    // Re-enable the select
+    select.disabled = false;
+  }
+}
+
+async function fetchGroups(type, currentId) {
+  if (!currentUser?.id) return [];
+
+  try {
+    // First get student data to get section/filiere info
+    const studentRes = await fetch(
+      `http://localhost:3000/api/etudiants/${currentUser.id}`,
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+
+    if (!studentRes.ok) throw new Error("Failed to fetch student data");
+    const studentData = await studentRes.json();
+    console.log("Student data for group fetch:", studentData);
+    console.log(`Fetching groups for type: ${type}, currentId: ${currentId}`);
+
+    // Log TP and TD groups directly
+    if (studentData.tpGroupe) {
+      console.log("TP Group found in student data:", studentData.tpGroupe);
     }
-  } else {
-    // No cached data, sidebar will be updated after fetchStudentData is called
-    if (userAvatar) userAvatar.textContent = "...";
-    if (userFullName) userFullName.textContent = "Chargement...";
-    if (userId) userId.textContent = "...";
+    if (studentData.tdGroupe) {
+      console.log("TD Group found in student data:", studentData.tdGroupe);
+    } // Use the working fallback approach directly instead of trying to use a non-existent endpoint
+    console.log(`Using direct approach to get available ${type} groups`);
+
+    // Continue with the fallback approach
+    let url;
+    if (type === "section") {
+      // For section changes, find sections in the same specialty and level
+      const specialty = studentData.sections?.[0]?.specialty;
+      const level = studentData.sections?.[0]?.level;
+
+      if (!specialty || !level) {
+        console.warn(
+          "No specialty or level assigned for student, using fallback data"
+        );
+        return getFallbackGroups(type);
+      }
+
+      // For sections, we'll request all sections with the same specialty and level
+      url = `http://localhost:3000/api/sections?specialty=${specialty}&level=${level}`;
+      console.log(
+        `Finding available sections for specialty: ${specialty}, level: ${level}`
+      );
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${authToken}` },
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
+      const allSections = await res.json();
+
+      // Filter out the current section and any full sections
+      return allSections.filter((section) => {
+        return (
+          section.id !== currentId &&
+          section.currentOccupancy < section.capacity
+        );
+      });
+    } else {
+      // For group changes (TD/TP), we need to get all groups in the same section
+      const sectionId = studentData.sections?.[0]?.id;
+      if (!sectionId) {
+        console.warn("No section assigned for student, using fallback data");
+        return getFallbackGroups(type);
+      }
+
+      // Try to fetch all groups for this section from a dedicated endpoint
+      const groupsUrl = `http://localhost:3000/api/sections/${sectionId}/groupes`;
+
+      try {
+        const groupsRes = await fetch(groupsUrl, {
+          headers: { Authorization: `Bearer ${authToken}` },
+          signal: AbortSignal.timeout(5000),
+        });
+
+        if (groupsRes.ok) {
+          const allGroups = await groupsRes.json();
+          console.log(
+            `Fetched ${allGroups.length} groups for section ${sectionId}`
+          );
+          // Filter groups by type and availability
+          console.log(`All groups before filtering:`, allGroups);
+          const filteredGroups = allGroups.filter((group) => {
+            const isCorrectType = group.type === type;
+
+            // String comparison fix: convert IDs to strings for reliable comparison
+            const groupIdStr = String(group.id);
+            const currentIdStr = String(currentId);
+            const isNotCurrentGroup = groupIdStr !== currentIdStr;
+
+            // Allow groups that are at capacity or slightly over (up to 10% over)
+            // This is needed because some groups might already be slightly over capacity
+            const capacityThreshold = group.capacity
+              ? Math.ceil(group.capacity * 1.1)
+              : Number.MAX_SAFE_INTEGER;
+            const hasCapacity =
+              !group.capacity || group.currentOccupancy < capacityThreshold;
+
+            console.log(`Filtering group ${group.name}:`, {
+              id: group.id,
+              type: group.type,
+              currentId: currentId,
+              isCorrectType,
+              isNotCurrentGroup,
+              idComparison: `${groupIdStr} !== ${currentIdStr}`,
+              currentOccupancy: group.currentOccupancy,
+              capacity: group.capacity,
+              capacityThreshold: capacityThreshold,
+              hasCapacity,
+            });
+
+            return isCorrectType && isNotCurrentGroup && hasCapacity;
+          });
+          console.log(
+            `Found ${filteredGroups.length} available ${type} groups`,
+            filteredGroups
+          );
+
+          // Save all groups data for error message use
+          const select = document.getElementById(`${type}-select`);
+          if (select) {
+            select.setAttribute("data-all-groups", JSON.stringify(allGroups));
+          }
+
+          return filteredGroups;
+        }
+      } catch (groupsError) {
+        console.log(
+          "Error fetching groups from dedicated endpoint:",
+          groupsError
+        );
+      }
+
+      // Fall back to using groups from student data
+      const currentGroups = studentData.sections?.[0]?.groupes || [];
+
+      console.log(`Found ${currentGroups.length} total groups in section`, {
+        sectionName: studentData.sections?.[0]?.name,
+        groups: currentGroups.map((g) => `${g.type} ${g.name}`),
+      });
+
+      // Need a more reliable way to filter groups due to data inconsistency
+      // For TP form, filter groups that most likely are TP groups
+      let availableGroups;
+      if (type === "tp") {
+        // For TP groups, filter based on group name containing TP or database type
+        availableGroups = currentGroups.filter((group) => {
+          const isNamedTP = group.name.toLowerCase().includes("tp");
+          const isTypeTP = group.type === "tp";
+          const isNotCurrentGroup = group.id !== currentId;
+          const hasCapacity =
+            !group.capacity || group.currentOccupancy < group.capacity;
+
+          // Log each group for debugging
+          console.log(`Filtering TP group: ${group.name}`, {
+            isNamedTP,
+            isTypeTP,
+            isValidTP: isNamedTP || isTypeTP,
+            isNotCurrentGroup,
+            hasCapacity,
+          });
+
+          // Include if either the name contains TP or type is tp, and meets other criteria
+          return (isNamedTP || isTypeTP) && isNotCurrentGroup && hasCapacity;
+        });
+      } else {
+        // For TD groups, similar approach but for TD groups
+        availableGroups = currentGroups.filter((group) => {
+          const isNamedTD = group.name.toLowerCase().includes("td");
+          const isTypeTD = group.type === "td";
+          const isNotCurrentGroup = group.id !== currentId;
+          const hasCapacity =
+            !group.capacity || group.currentOccupancy < group.capacity;
+
+          // Log each group for debugging
+          console.log(`Filtering TD group: ${group.name}`, {
+            isNamedTD,
+            isTypeTD,
+            isValidTD: isNamedTD || isTypeTD,
+            isNotCurrentGroup,
+            hasCapacity,
+          });
+
+          // Include if either the name contains TD or type is td, and meets other criteria
+          return (isNamedTD || isTypeTD) && isNotCurrentGroup && hasCapacity;
+        });
+      }
+
+      console.log(
+        `Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`,
+        {
+          availableGroups: availableGroups.map((g) => ({
+            id: g.id,
+            name: g.name,
+            type: g.type,
+          })),
+        }
+      );
+
+      return availableGroups;
+    }
+  } catch (e) {
+    console.error(`Error fetching ${type} groups:`, e);
+    return getFallbackGroups(type);
   }
 }

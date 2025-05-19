@@ -9,7 +9,6 @@
       </div>
     </div>
   </div>
-  
   <div class="sidebar-menu">
     <a href="dashbord-teacher.html" class="nav-link">
       <i class="fas fa-tachometer-alt"></i>
@@ -19,12 +18,24 @@
       <i class="fas fa-clipboard-list"></i>
       <span>Demandes d'étudiants</span>
     </a>
+    <a href="teacher-announcements.html" class="nav-link">
+      <i class="fas fa-bullhorn"></i>
+      <span>Annonces et Événements</span>
+    </a>
     <a href="emploi.html" class="nav-link">
       <i class="fas fa-calendar-alt"></i>
       <span>Emploi du temps</span>
     </a>
+    <a href="gestion-etudiants.html" class="nav-link">
+      <i class="fas fa-user-graduate"></i>
+      <span>Gestion des Étudiants</span>
+    </a>
+    <a href="gestion-etudiants.html?disabled=true" class="nav-link sub-link">
+      <i class="fas fa-wheelchair"></i>
+      <span>Étudiants en situation de handicap</span>
+    </a>
   </div>
-  
+
   <div class="sidebar-footer">
     <a href="#" class="nav-link" onclick="logout(); return false;">
       <i class="fas fa-sign-out-alt"></i>
@@ -37,28 +48,28 @@
   .sidebar {
     width: 250px;
     height: 100%;
+    min-height: 100vh; /* Ensure full viewport height */
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto; /* Allow scrolling for tall content */
   }
-  
+
   .sidebar-header {
     padding: 20px;
     border-bottom: 1px solid #e2e8f0;
   }
-  
+
   .user-info {
     display: flex;
     align-items: center;
   }
-  
   .user-avatar {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #3182ce, #2c5282);
+    background: linear-gradient(135deg, #10b981, #047857);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -68,38 +79,38 @@
     font-size: 18px;
     margin-right: 12px;
   }
-  
+
   .user-details h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
     color: #2d3748;
   }
-  
+
   .user-details p {
     margin: 4px 0 0 0;
     font-size: 12px;
     color: #718096;
   }
-  
+
   .user-department {
     font-size: 11px;
     font-style: italic;
     color: #4a5568;
     margin-top: 2px !important;
   }
-  
+
   .sidebar-menu {
     padding: 20px 0;
     flex: 1;
     overflow-y: auto;
   }
-  
+
   .sidebar-footer {
     padding: 15px 0;
     border-top: 1px solid #e2e8f0;
   }
-  
+
   .nav-link {
     display: flex;
     align-items: center;
@@ -109,52 +120,66 @@
     transition: all 0.2s ease;
     margin-bottom: 5px;
   }
-  
+
   .nav-link i {
     width: 20px;
     margin-right: 12px;
     font-size: 16px;
     text-align: center;
   }
-  
   .nav-link:hover {
     background: #f7fafc;
-    color: #3182ce;
+    color: #10b981;
   }
-  
   .nav-link.active {
-    background: #ebf8ff;
-    color: #3182ce;
+    background: #ecfdf5;
+    color: #10b981;
     font-weight: 500;
-    border-right: 3px solid #3182ce;
+    border-right: 3px solid #10b981;
   }
-  
+
+  .sub-link {
+    padding-left: 40px;
+    font-size: 0.9em;
+    color: #718096;
+  }
+
+  .sub-link:hover {
+    background-color: #f7fafc;
+  }
+  .sub-link.active {
+    background-color: #ecfdf5;
+    color: #059669;
+    border-right: 3px solid #059669;
+  }
+
   .sidebar-footer .nav-link {
     color: #e53e3e;
   }
-  
+
   .sidebar-footer .nav-link:hover {
     background: #fed7d7;
   }
-  
+
   @media (max-width: 768px) {
     .sidebar {
       width: 100%;
       height: auto;
       margin-bottom: 20px;
     }
-    
+
     .user-info {
       justify-content: center;
     }
-    
-    .sidebar-menu, .sidebar-footer {
+
+    .sidebar-menu,
+    .sidebar-footer {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       padding: 10px;
     }
-    
+
     .nav-link {
       padding: 10px 15px;
       margin: 5px;
@@ -162,13 +187,13 @@
       flex-direction: column;
       text-align: center;
     }
-    
+
     .nav-link i {
       margin-right: 0;
       margin-bottom: 5px;
       font-size: 20px;
     }
-    
+
     .nav-link.active {
       border-right: none;
       border-bottom: 3px solid #3182ce;
@@ -181,20 +206,41 @@
   // Fonction pour marquer le lien actif
   function setActiveLink() {
     const currentPage = window.location.pathname.split("/").pop();
-    console.log("Current page:", currentPage);
+    const queryParams = new URLSearchParams(window.location.search);
+    const isDisabledView = queryParams.get("disabled") === "true";
+
+    console.log("Current page:", currentPage, "Disabled view:", isDisabledView);
 
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.classList.remove("active");
 
       const href = link.getAttribute("href");
+      const isDisabledLink = href.includes("disabled=true");
 
-      // Handle both exact match and potential default.html filenames
+      // Handle normal links
       if (
-        href === currentPage ||
-        (currentPage === "" && href === "dashbord-teacher.html") 
+        href.split("?")[0] === currentPage &&
+        !link.classList.contains("sub-link")
+      ) {
+        if (!isDisabledView) {
+          link.classList.add("active");
+          console.log("Set active:", href);
+        }
+      }
+
+      // Handle sub-link for disabled students
+      if (
+        isDisabledLink &&
+        isDisabledView &&
+        currentPage === "gestion-etudiants.html"
       ) {
         link.classList.add("active");
-        console.log("Set active:", href);
+        console.log("Set active (disabled view):", href);
+      }
+
+      // Handle default page
+      if (currentPage === "" && href === "dashbord-teacher.html") {
+        link.classList.add("active");
       }
     });
   }
@@ -206,17 +252,19 @@
       const user = getCurrentTeacherData();
       if (user) {
         // Update the user info in the sidebar
-        document.getElementById("userFullName").textContent = 
+        document.getElementById("userFullName").textContent =
           `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
         document.getElementById("userId").textContent = user.matricule || "N/A";
-        document.getElementById("userAvatar").textContent = 
-          `${(user.prenom || " ").charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
-        document.getElementById("userDepartment").textContent = user.departement || "N/A";
+        document.getElementById("userAvatar").textContent = `${(
+          user.prenom || " "
+        ).charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
+        document.getElementById("userDepartment").textContent =
+          user.departement || "N/A";
       }
     } catch (error) {
       console.error("Error updating sidebar user info:", error);
     }
-    
+
     // Give a small timeout to ensure links are loaded
     setTimeout(setActiveLink, 100);
   });

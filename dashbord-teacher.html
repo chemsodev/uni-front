@@ -1,153 +1,319 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Dashboard Enseignant</title>
-    <link href="style/dashbord-teacher.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="style/dashbord-teacher.css" rel="stylesheet" />
+    <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link href="style/teacher-sidebar.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
     <script src="js/enseignant-auth.js"></script>
     <script src="js/sidebar-loader.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-       <div id="navbar-container"></div>
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header header-actions">
-                <h1 class="page-title">Espace Enseignant</h1>
-                <div class="header-buttons">
-                    <button onclick="window.location.href='enseignant-demandes.html'" class="btn-primary">
-                        <i class="fas fa-clipboard-list"></i> Gérer les demandes
-                    </button>
-                    <button onclick="window.location.href='emploi.html'" class="btn-secondary">
-                        <i class="fas fa-calendar-alt"></i> Emploi du temps
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Stats Overview -->
-            <div class="stats-overview">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h2 id="total-students">--</h2>
-                        <p>Étudiants</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h2 id="total-sections">--</h2>
-                        <p>Sections</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clipboard-list"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h2 id="pending-requests">--</h2>
-                        <p>Demandes en attente</p>
-                    </div>
-                    </div>
-                </div>
-                
-            <!-- Main dashboard content -->
-            <div class="dashboard-content">
-                <!-- Sections panel -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title"><i class="fas fa-layer-group"></i> Mes Sections</h2>
-                        <div class="panel-actions">
-                            <button id="refreshSectionsBtn" class="btn-icon">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="panel-body" id="sectionsList">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </div>
-                
-                <!-- Section details and student management panel -->
-                <div class="panel section-details-panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title"><i class="fas fa-users"></i> <span id="sectionDetailsTitle">Étudiants</span></h2>
-                        <div class="panel-actions">
-                            <div class="search-container">
-                                <input type="text" id="student-search" placeholder="Rechercher un étudiant...">
-                                <button id="searchBtn"><i class="fas fa-search"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body" id="sectionStudentsList">
-                        <div class="no-section-selected">
-                            <i class="fas fa-hand-point-left"></i>
-                            <p>Sélectionnez une section pour afficher ses étudiants</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Espace Enseignant</h1>
+          <div class="header-buttons header-actions">
+            <button
+              onclick="window.location.href='teacher-announcements.html'"
+              class="btn-primary"
+            >
+              <i class="fas fa-bullhorn"></i> Annonces et Événements
+            </button>
+            <button
+              onclick="window.location.href='enseignant-demandes.html'"
+              class="btn-primary"
+            >
+              <i class="fas fa-clipboard-list"></i> Gérer les demandes
+            </button>
+            <button
+              onclick="window.location.href='emploi.html'"
+              class="btn-secondary"
+            >
+              <i class="fas fa-calendar-alt"></i> Emploi du temps
+            </button>
+            <button
+              onclick="window.location.href='gestion-etudiants.html'"
+              class="btn-secondary"
+            >
+              <i class="fas fa-user-graduate"></i> Gestion des Étudiants
+            </button>
+          </div>
         </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <h2 id="total-students">--</h2>
+              <p>Étudiants</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="stat-info">
+              <h2 id="total-sections">--</h2>
+              <p>Sections</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-info">
+              <h2 id="pending-requests">--</h2>
+              <p>Demandes en attente</p>
+            </div>
+          </div>
+        </div>
+        <!-- Main dashboard content -->
+        <div class="dashboard-content">
+          <!-- Sections panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <i class="fas fa-layer-group"></i> Mes Sections
+              </h2>
+              <div class="panel-actions">
+                <button id="refreshSectionsBtn" class="btn-icon">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
+            </div>
+            <div class="panel-body" id="sectionsList">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+          <!-- Recent Announcements panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <i class="fas fa-bullhorn"></i> Annonces Récentes
+              </h2>
+              <div class="panel-actions">
+                <button
+                  id="refreshAnnouncementsBtn"
+                  class="btn-icon"
+                  title="Actualiser les annonces"
+                >
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+                <button
+                  onclick="window.location.href='teacher-announcements.html'"
+                  class="btn-icon"
+                  title="Créer une nouvelle annonce"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <table class="announcements-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Sections</th>
+                  </tr>
+                </thead>
+                <tbody id="recentAnnouncementsList">
+                  <tr>
+                    <td>18 Mai 2025</td>
+                    <td><span class="badge badge-exam">Examen</span></td>
+                    <td>Examen d'Algorithmique avancée</td>
+                    <td>L2 Informatique</td>
+                  </tr>
+                  <tr>
+                    <td>17 Mai 2025</td>
+                    <td><span class="badge badge-room">Salle</span></td>
+                    <td>Changement de salle: B204 au lieu de A103</td>
+                    <td>M1 Informatique</td>
+                  </tr>
+                  <tr>
+                    <td>15 Mai 2025</td>
+                    <td><span class="badge badge-cancel">Annulation</span></td>
+                    <td>TD Programmation avancée annulé</td>
+                    <td>L3 Informatique</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section details and student management panel -->
+          <div class="panel section-details-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <i class="fas fa-users"></i>
+                <span id="sectionDetailsTitle">Étudiants</span>
+              </h2>
+              <div class="panel-actions">
+                <div class="search-container">
+                  <input
+                    type="text"
+                    id="student-search"
+                    placeholder="Rechercher un étudiant..."
+                  />
+                  <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="panel-body" id="sectionStudentsList">
+              <div class="no-section-selected">
+                <i class="fas fa-hand-point-left"></i>
+                <p>Sélectionnez une section pour afficher ses étudiants</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
       // Global variables
       let currentUser = null;
       let authToken = null;
-      let isBackendAvailable = true; 
+      let selectedSection = null;
+      let selectedStudentId = null;
       let currentSectionId = null;
+      let isBackendAvailable = true;
       let allSections = [];
       let allStudents = {};
-      let stats = {
-          students: 0,
-          sections: 0,
-          requests: 0
+      const apiUrl = "http://localhost:3000";
+      const stats = {
+        students: 0,
+        sections: 0,
+        requests: 0,
       };
-
       document.addEventListener("DOMContentLoaded", async function () {
         // Load navigation using the sidebar loader
         await loadTeacherSidebar();
 
         try {
-          // Verify authentication using our helper
-          const authResult = await verifyEnseignantAuth();
-          
-          if (!authResult.isAuthenticated) {
-            return; // The helper will redirect to login
-          }
-          
-          // Set global variables
-          currentUser = authResult.user;
-          authToken = sessionStorage.getItem("enseignant_token") || localStorage.getItem("enseignant_token");
+          // Use the new robust authentication helper that doesn't clear session on failure
+          const authResult = await verifyEnseignantAuthRobust();
 
-          // Load dashboard data
-              try {
-                await loadUserData();
-                await loadDashboardData();
-              } catch (dataError) {
-                console.error("Error loading data:", dataError);
-                isBackendAvailable = false;
-                loadFallbackData();
-                addReconnectionButton();
+          if (!authResult.isAuthenticated) {
+            console.warn("Authentication failed:", authResult.error);
+
+            if (authResult.shouldRedirect) {
+              // Only redirect if it's a real auth failure (not just backend unavailable)
+              window.location.href = "enseignant-login.html";
+              return;
+            } else {
+              // Backend might be unavailable but we have a token
+              isBackendAvailable = false;
+
+              // Try to get user data from storage as fallback
+              const cachedUserData =
+                sessionStorage.getItem("enseignantUserData") ||
+                localStorage.getItem("enseignantData");
+              if (cachedUserData) {
+                try {
+                  currentUser = JSON.parse(cachedUserData);
+                  console.log(
+                    "Using cached user data in offline mode:",
+                    currentUser
+                  );
+                } catch (e) {
+                  console.error("Failed to parse cached user data:", e);
+                }
               }
-          
-          // Set up event listeners
-          document.getElementById('refreshSectionsBtn').addEventListener('click', refreshSections);
-          document.getElementById('searchBtn').addEventListener('click', searchStudents);
-          document.getElementById('student-search').addEventListener('keyup', function(e) {
-            if(e.key === 'Enter') {
-                searchStudents();
+
+              if (!currentUser) {
+                // Create a placeholder user to prevent errors
+                currentUser = {
+                  id: "offline",
+                  prenom: "Enseignant",
+                  nom: "Utilisateur",
+                  matricule: "ENS000",
+                };
+              }
+
+              // Show offline mode notice
+              addReconnectionButton();
             }
-          });
+          } else {
+            // Auth succeeded, set the current user
+            currentUser = authResult.user;
+
+            // Check if we're in offline mode
+            if (authResult.backendDown) {
+              isBackendAvailable = false;
+              addReconnectionButton();
+            }
+          }
+
+          // Set auth token
+          authToken =
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+          try {
+            await loadUserData();
+            await loadDashboardData();
+            // Load recent announcements
+            await loadRecentAnnouncements();
+          } catch (dataError) {
+            console.error("Error loading data:", dataError);
+            isBackendAvailable = false;
+            loadFallbackData();
+            addReconnectionButton();
+          } // Set up event listeners
+          document
+            .getElementById("refreshSectionsBtn")
+            .addEventListener("click", refreshSections);
+          document
+            .getElementById("refreshAnnouncementsBtn")
+            .addEventListener("click", function () {
+              loadRecentAnnouncements();
+            });
+          document
+            .getElementById("searchBtn")
+            .addEventListener("click", searchStudents);
+          document
+            .getElementById("student-search")
+            .addEventListener("keyup", function (e) {
+              if (e.key === "Enter") {
+                searchStudents();
+              }
+            });
         } catch (error) {
-          console.error("Access denied:", error);
-          logout(); // Use our shared logout function
+          console.error("Error initializing dashboard:", error);
+
+          // Check if we have a token before logging out
+          const hasToken =
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+          if (hasToken) {
+            // If we have a token, attempt to recover rather than immediately logout
+            console.warn(
+              "Error occurred but token exists, trying to recover..."
+            );
+            isBackendAvailable = false;
+            loadFallbackData();
+            addReconnectionButton();
+          } else {
+            // No token, must logout
+            console.error(
+              "No valid authentication token, redirecting to login"
+            );
+            logout();
+          }
         }
       });
 
@@ -165,12 +331,11 @@
           offlineNotice.style.borderRadius = "4px";
           offlineNotice.innerHTML =
             "<strong>Mode hors ligne:</strong> Le serveur est actuellement indisponible. Certaines fonctionnalités sont limitées.";
-          
           const reconnectBtn = document.createElement("button");
           reconnectBtn.textContent = "Réessayer la connexion";
           reconnectBtn.style.marginLeft = "10px";
           reconnectBtn.style.padding = "5px 10px";
-          reconnectBtn.style.backgroundColor = "#007bff";
+          reconnectBtn.style.backgroundColor = "#10b981"; // Changed from blue to green
           reconnectBtn.style.color = "#fff";
           reconnectBtn.style.border = "none";
           reconnectBtn.style.borderRadius = "4px";
@@ -182,9 +347,7 @@
           offlineNotice.appendChild(reconnectBtn);
           document.querySelector(".main-content").prepend(offlineNotice);
         }
-      }
-
-      // Load user data
+      } // Load user data
       async function loadUserData() {
         try {
           // Use the enhanced getCurrentTeacherData function from the auth helper
@@ -194,29 +357,79 @@
             console.error("No user data available");
             throw new Error("User data not available");
           }
-          
+
+          // Make sure we don't logout if ID is "unknown" or "error" from getCurrentTeacherData
+          // Instead, try using currentUser if it exists
+          if (
+            ((user.id === "unknown" || user.id === "error") &&
+              currentUser &&
+              currentUser.id) ||
+            currentUser.userId
+          ) {
+            console.warn(
+              "Got placeholder user data, trying to use currentUser instead"
+            );
+            // Using currentUser data from the successful auth check
+            const mergedUser = {
+              ...user,
+              id: currentUser.id || currentUser.userId,
+              nom: currentUser.lastName || currentUser.nom || user.nom,
+              prenom:
+                currentUser.firstName || currentUser.prenom || user.prenom,
+              email: currentUser.email || user.email,
+              matricule:
+                currentUser.matricule ||
+                currentUser.teacherId ||
+                `ENS${currentUser.id || "0000"}`,
+            };
+
+            console.log("Using merged user data:", mergedUser);
+
+            // Save the merged user data
+            const storage = localStorage.getItem("enseignant_token")
+              ? localStorage
+              : sessionStorage;
+            storage.setItem("enseignantData", JSON.stringify(mergedUser));
+
+            // Update sidebar with merged data
+            updateSidebarUserInfo(mergedUser);
+
+            return mergedUser;
+          }
+
           console.log("Teacher data loaded:", user);
-          
+
           // Make sure we save complete user data for other pages
-          const storage = localStorage.getItem("enseignant_token") ? localStorage : sessionStorage;
-                storage.setItem("enseignantData", JSON.stringify(user));
-          
+          const storage = localStorage.getItem("enseignant_token")
+            ? localStorage
+            : sessionStorage;
+          storage.setItem("enseignantData", JSON.stringify(user));
+
           // Update sidebar elements
           updateSidebarUserInfo(user);
-          
+
           return user;
-            } catch (error) {
+        } catch (error) {
           console.error("Error loading user data:", error);
-          
-          // Even in case of error, try to display something reasonable in the sidebar
-          updateSidebarUserInfo({
-            prenom: "Enseignant",
-            nom: "Utilisateur",
-            matricule: "ENS000"
-          });
-          
-          if (error.name === "AbortError" || error.message.includes("Failed to fetch")) {
-            isBackendAvailable = false;
+
+          // Don't logout if backend is unavailable
+          isBackendAvailable = false;
+
+          if (currentUser) {
+            console.log("Using currentUser as fallback:", currentUser);
+            updateSidebarUserInfo(currentUser);
+            return currentUser;
+          } else {
+            // Even in case of error, try to display something reasonable in the sidebar
+            const placeholderUser = {
+              id: "placeholder",
+              prenom: "Enseignant",
+              nom: "Utilisateur",
+              matricule: "ENS000",
+            };
+
+            updateSidebarUserInfo(placeholderUser);
+            return placeholderUser;
           }
         }
       }
@@ -225,176 +438,211 @@
       function updateSidebarUserInfo(user) {
         if (!user) return;
 
-          // Update UI with user data if elements exist
-          if (document.getElementById("userFullName")) {
-            document.getElementById("userFullName").textContent =
-              `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
-          }
-          
-          if (document.getElementById("userId")) {
-          document.getElementById("userId").textContent = user.matricule || "N/A";
-          }
+        // Update UI with user data if elements exist
+        if (document.getElementById("userFullName")) {
+          document.getElementById("userFullName").textContent =
+            `${user.prenom || ""} ${user.nom || ""}`.trim() || "Enseignant";
+        }
 
-          if (document.getElementById("userAvatar")) {
-            document.getElementById("userAvatar").textContent = 
-              `${(user.prenom || " ").charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
+        if (document.getElementById("userId")) {
+          document.getElementById("userId").textContent =
+            user.matricule || "N/A";
+        }
+
+        if (document.getElementById("userAvatar")) {
+          document.getElementById("userAvatar").textContent = `${(
+            user.prenom || " "
+          ).charAt(0)}${(user.nom || " ").charAt(0)}`.toUpperCase();
         }
       }
 
       // Load dashboard data
       async function loadDashboardData() {
         try {
-            await Promise.all([
-                loadSections(),
-                loadPendingRequests()
-            ]);
-            
-            // Update stats
-            updateStatistics();
+          await Promise.all([loadSections(), loadPendingRequests()]);
+
+          // Update stats
+          updateStatistics();
         } catch (error) {
-            console.error("Error loading dashboard data:", error);
-            loadFallbackData();
+          console.error("Error loading dashboard data:", error);
+          loadFallbackData();
         }
-      }
-      
-      // Load sections
+      } // Load sections
       async function loadSections() {
         try {
-            const sections = await loadTeacherSections();
-            allSections = sections;
-            stats.sections = sections.length;
-            
-            // Calculate total students across all sections
-            let totalStudents = 0;
-            sections.forEach(section => {
-                const occupancy = section.groupes ? section.groupes.reduce((sum, groupe) => 
-                    sum + (groupe.currentOccupancy || 0), 0) : 0;
-                totalStudents += occupancy;
-            });
-            stats.students = totalStudents;
-            
-            renderSections(sections);
-            return sections;
+          const sections = await loadTeacherSections();
+          allSections = sections;
+          stats.sections = sections.length;
+
+          // Calculate total students across all sections
+          // We need to be careful about counting students only once per section
+          let totalStudents = 0;
+          sections.forEach((section) => {
+            // If we have raw studentCount, use it directly
+            if (section.studentCount || section.nombreEtudiants) {
+              totalStudents +=
+                section.studentCount || section.nombreEtudiants || 0;
+            } else {
+              // Otherwise, use the TD groups as they should contain unique students
+              // (using TP + TD would count students twice)
+              const tdGroups = section.groupes
+                ? section.groupes.filter((g) => g.type === "td")
+                : [];
+              if (tdGroups.length > 0) {
+                const tdOccupancy = tdGroups.reduce(
+                  (sum, groupe) => sum + (groupe.currentOccupancy || 0),
+                  0
+                );
+                totalStudents += tdOccupancy;
+              } else {
+                // Fallback to all groups if no TD groups exist
+                const occupancy = section.groupes
+                  ? section.groupes.reduce(
+                      (sum, groupe) => sum + (groupe.currentOccupancy || 0),
+                      0
+                    )
+                  : 0;
+                // Divide by 2 to avoid double counting if both TP and TD
+                totalStudents +=
+                  section.groupes &&
+                  section.groupes.some((g) => g.type === "tp")
+                    ? Math.round(occupancy / 2)
+                    : occupancy;
+              }
+            }
+          });
+          stats.students = totalStudents;
+
+          renderSections(sections);
+          return sections;
         } catch (error) {
-            console.error("Error loading sections:", error);
-            throw error;
+          console.error("Error loading sections:", error);
+          throw error;
         }
       }
-      
+
       // Refresh sections data
       async function refreshSections() {
-        const refreshBtn = document.getElementById('refreshSectionsBtn');
+        const refreshBtn = document.getElementById("refreshSectionsBtn");
         refreshBtn.innerHTML = '<i class="fas fa-spin fa-spinner"></i>';
         refreshBtn.disabled = true;
-        
+
         try {
-            // Clear session storage to force a fresh fetch
-            sessionStorage.removeItem("teacherSections");
-            await loadSections();
-            
-            // If a section was selected, refresh its students
-            if (currentSectionId) {
-                await loadSectionStudents(currentSectionId);
-            }
-            
-            // Update stats
-            updateStatistics();
+          // Clear session storage to force a fresh fetch
+          sessionStorage.removeItem("teacherSections");
+          await loadSections();
+
+          // If a section was selected, refresh its students
+          if (currentSectionId) {
+            await loadSectionStudents(currentSectionId);
+          }
+
+          // Update stats
+          updateStatistics();
         } catch (error) {
-            console.error("Error refreshing sections:", error);
+          console.error("Error refreshing sections:", error);
         } finally {
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
-            refreshBtn.disabled = false;
+          refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+          refreshBtn.disabled = false;
         }
       }
-      
+
       // Load pending requests count
       async function loadPendingRequests() {
         try {
-            if (!isBackendAvailable) {
-                stats.requests = 2; // Fallback
-                return;
+          if (!isBackendAvailable) {
+            stats.requests = 2; // Fallback
+            return;
+          }
+
+          const response = await fetch(
+            "http://localhost:3000/api/enseignants/group-change-requests",
+            {
+              headers: { Authorization: `Bearer ${authToken}` },
+              signal: AbortSignal.timeout(5000),
             }
-            
-            const response = await fetch(
-                "http://localhost:3000/api/enseignants/group-change-requests",
-                {
-                    headers: { Authorization: `Bearer ${authToken}` },
-                    signal: AbortSignal.timeout(5000)
-                }
+          );
+
+          if (response.ok) {
+            const requests = await response.json();
+            // Only count pending requests
+            const pendingRequests = requests.filter(
+              (req) => req.status === "pending"
             );
-            
-            if (response.ok) {
-                const requests = await response.json();
-                // Only count pending requests
-                const pendingRequests = requests.filter(req => req.status === 'pending');
-                stats.requests = pendingRequests.length;
-                return pendingRequests.length;
-            } else {
-                console.warn(`Error loading requests: ${response.status}`);
-                stats.requests = 0;
-            }
-        } catch (error) {
-            console.error("Error loading pending requests:", error);
+            stats.requests = pendingRequests.length;
+            return pendingRequests.length;
+          } else {
+            console.warn(`Error loading requests: ${response.status}`);
             stats.requests = 0;
+          }
+        } catch (error) {
+          console.error("Error loading pending requests:", error);
+          stats.requests = 0;
         }
       }
-      
+
       // Load students for a specific section
       async function loadSectionStudents(sectionId) {
         try {
-            // Set the current section
-            currentSectionId = sectionId;
-            
-            // Find the section in our cached data
-            const section = allSections.find(s => s.id === sectionId);
-            if (!section) {
-                throw new Error(`Section ${sectionId} not found`);
+          // Set the current section
+          currentSectionId = sectionId;
+
+          // Find the section in our cached data
+          const section = allSections.find((s) => s.id === sectionId);
+          if (!section) {
+            throw new Error(`Section ${sectionId} not found`);
+          }
+
+          // Update section details title
+          document.getElementById(
+            "sectionDetailsTitle"
+          ).textContent = `Étudiants - ${section.specialty} ${section.name}`;
+
+          // Show loading state
+          document.getElementById("sectionStudentsList").innerHTML =
+            '<div class="loading-spinner"></div>';
+
+          // Check if we already have this section's students cached
+          if (allStudents[sectionId]) {
+            renderSectionStudents(allStudents[sectionId], section);
+            return allStudents[sectionId];
+          }
+
+          // Get teacher ID
+          const teacherId = currentUser.userId;
+
+          if (!isBackendAvailable) {
+            const mockStudents = generateMockStudents(10, section);
+            allStudents[sectionId] = mockStudents;
+            renderSectionStudents(mockStudents, section);
+            return mockStudents;
+          }
+
+          const response = await fetch(
+            `http://localhost:3000/api/enseignants/${teacherId}/sections/${sectionId}/students`,
+            {
+              headers: { Authorization: `Bearer ${authToken}` },
+              signal: AbortSignal.timeout(5000),
             }
-            
-            // Update section details title
-            document.getElementById('sectionDetailsTitle').textContent = `Étudiants - ${section.specialty} ${section.name}`;
-            
-            // Show loading state
-            document.getElementById('sectionStudentsList').innerHTML = '<div class="loading-spinner"></div>';
-            
-            // Check if we already have this section's students cached
-            if (allStudents[sectionId]) {
-                renderSectionStudents(allStudents[sectionId], section);
-                return allStudents[sectionId];
-            }
-            
-            // Get teacher ID
-            const teacherId = currentUser.userId;
-            
-            if (!isBackendAvailable) {
-                const mockStudents = generateMockStudents(10, section);
-                allStudents[sectionId] = mockStudents;
-                renderSectionStudents(mockStudents, section);
-                return mockStudents;
-            }
-            
-            const response = await fetch(
-                `http://localhost:3000/api/enseignants/${teacherId}/sections/${sectionId}/students`,
-                {
-                    headers: { Authorization: `Bearer ${authToken}` },
-                    signal: AbortSignal.timeout(5000)
-                }
-            );
-            
-            if (response.ok) {
-                const students = await response.json();
-                allStudents[sectionId] = students;
-                renderSectionStudents(students, section);
-                return students;
-            } else {
-                console.warn(`Error loading students: ${response.status}`);
-                document.getElementById('sectionStudentsList').innerHTML = 
-                    '<div class="error-message">Erreur lors du chargement des étudiants</div>';
-            }
+          );
+
+          if (response.ok) {
+            const students = await response.json();
+            allStudents[sectionId] = students;
+            renderSectionStudents(students, section);
+            return students;
+          } else {
+            console.warn(`Error loading students: ${response.status}`);
+            document.getElementById("sectionStudentsList").innerHTML =
+              '<div class="error-message">Erreur lors du chargement des étudiants</div>';
+          }
         } catch (error) {
-            console.error(`Error loading students for section ${sectionId}:`, error);
-            document.getElementById('sectionStudentsList').innerHTML = 
-                '<div class="error-message">Erreur lors du chargement des étudiants</div>';
+          console.error(
+            `Error loading students for section ${sectionId}:`,
+            error
+          );
+          document.getElementById("sectionStudentsList").innerHTML =
+            '<div class="error-message">Erreur lors du chargement des étudiants</div>';
         }
       }
 
@@ -404,32 +652,41 @@
         container.innerHTML = "";
 
         if (!sections || sections.length === 0) {
-          container.innerHTML = '<div class="empty-state">Aucune section assignée</div>';
+          container.innerHTML =
+            '<div class="empty-state">Aucune section assignée</div>';
           return;
         }
 
         const list = document.createElement("div");
         list.className = "sections-grid";
-        
+
         sections.forEach((section) => {
           // Calculate total occupancy from all groups
-          const totalOccupancy = section.groupes ? section.groupes.reduce((sum, groupe) => 
-            sum + (groupe.currentOccupancy || 0), 0) : 0;
-          
+          const totalOccupancy = section.groupes
+            ? section.groupes.reduce(
+                (sum, groupe) => sum + (groupe.currentOccupancy || 0),
+                0
+              )
+            : 0;
+
           // Group counts by type
-          const tdGroups = section.groupes ? section.groupes.filter(g => g.type === 'td').length : 0;
-          const tpGroups = section.groupes ? section.groupes.filter(g => g.type === 'tp').length : 0;
-          
+          const tdGroups = section.groupes
+            ? section.groupes.filter((g) => g.type === "td").length
+            : 0;
+          const tpGroups = section.groupes
+            ? section.groupes.filter((g) => g.type === "tp").length
+            : 0;
+
           const card = document.createElement("div");
           card.className = "section-card";
           if (currentSectionId === section.id) {
-              card.classList.add("active");
+            card.classList.add("active");
           }
-          
+
           card.innerHTML = `
             <div class="section-card-header">
-                <h3>${section.specialty || 'Filière'}</h3>
-                <span class="section-badge">Section ${section.name || ''}</span>
+                <h3>${section.specialty || "Filière"}</h3>
+                <span class="section-badge">Section ${section.name || ""}</span>
             </div>
             <div class="section-card-body">
                 <div class="section-info">
@@ -443,7 +700,7 @@
                     </div>
                     <div class="info-item">
                         <i class="fas fa-code"></i>
-                        <span>Code: ${section.code || 'N/A'}</span>
+                        <span>Code: ${section.code || "N/A"}</span>
                     </div>
                 </div>
             </div>
@@ -451,30 +708,34 @@
                 <button class="btn-view-students">Voir les étudiants</button>
             </div>
           `;
-          
+
           // Add click handler
-          card.querySelector('.btn-view-students').addEventListener('click', () => {
+          card
+            .querySelector(".btn-view-students")
+            .addEventListener("click", () => {
               // Mark this card as active and remove active from others
-              document.querySelectorAll('.section-card.active').forEach(el => el.classList.remove('active'));
-              card.classList.add('active');
-              
+              document
+                .querySelectorAll(".section-card.active")
+                .forEach((el) => el.classList.remove("active"));
+              card.classList.add("active");
+
               // Load the students for this section
               loadSectionStudents(section.id);
-          });
-          
+            });
+
           list.appendChild(card);
         });
-        
+
         container.appendChild(list);
       }
 
       // Render students for a section
       function renderSectionStudents(students, section) {
-        const container = document.getElementById('sectionStudentsList');
-        container.innerHTML = '';
-        
+        const container = document.getElementById("sectionStudentsList");
+        container.innerHTML = "";
+
         if (!students || students.length === 0) {
-            container.innerHTML = `
+          container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-users-slash"></i>
                     <p>Aucun étudiant dans cette section</p>
@@ -487,58 +748,61 @@
         const itemsPerPage = 10;
         const totalPages = Math.ceil(students.length / itemsPerPage);
         let currentPage = 1;
-        
+
         // Create a table for students
-        const table = document.createElement('table');
-        table.className = 'students-table';
-        
+        const table = document.createElement("table");
+        table.className = "students-table";
+
         // Table header
-        const thead = document.createElement('thead');
+        const thead = document.createElement("thead");
         thead.innerHTML = `
           <tr>
                 <th>Nom & Prénom</th>
             <th>Matricule</th>
             <th>Groupe TD</th>
             <th>Groupe TP</th>
-                <th>Actions</th>
           </tr>
         `;
         table.appendChild(thead);
-        
+
         // Table body
-        const tbody = document.createElement('tbody');
+        const tbody = document.createElement("tbody");
         table.appendChild(tbody);
-        
+
         // Function to render a specific page
         function renderPage(page) {
-            currentPage = page;
-            tbody.innerHTML = '';
-            
-            const start = (page - 1) * itemsPerPage;
-            const end = Math.min(start + itemsPerPage, students.length);
-            const pageStudents = students.slice(start, end);
-            
-            pageStudents.forEach(student => {
-                const row = document.createElement('tr');
-                
-                // Find TD and TP groups if available
-                let tdGroup = 'Non assigné';
-                let tpGroup = 'Non assigné';
-                
-                if (student.tdGroupe) {
-                    tdGroup = `Groupe ${student.tdGroupe.name}`;
-                }
-                
-                if (student.tpGroupe) {
-                    tpGroup = `Groupe ${student.tpGroupe.name}`;
-                }
-                
-          row.innerHTML = `
+          currentPage = page;
+          tbody.innerHTML = "";
+
+          const start = (page - 1) * itemsPerPage;
+          const end = Math.min(start + itemsPerPage, students.length);
+          const pageStudents = students.slice(start, end);
+
+          pageStudents.forEach((student) => {
+            const row = document.createElement("tr");
+
+            // Find TD and TP groups if available
+            let tdGroup = "Non assigné";
+            let tpGroup = "Non assigné";
+
+            if (student.tdGroupe) {
+              tdGroup = `${student.tdGroupe.name}`;
+            }
+
+            if (student.tpGroupe) {
+              tpGroup = `${student.tpGroupe.name}`;
+            }
+
+            row.innerHTML = `
                     <td>
                         <div class="student-name">
-                            <div class="student-avatar">${student.firstName.charAt(0)}${student.lastName.charAt(0)}</div>
+                            <div class="student-avatar">${student.firstName.charAt(
+                              0
+                            )}${student.lastName.charAt(0)}</div>
                             <div>
-                                <div class="full-name">${student.lastName} ${student.firstName}</div>
+                                <div class="full-name">${student.lastName} ${
+              student.firstName
+            }</div>
                                 <div class="email">${student.email}</div>
                             </div>
                         </div>
@@ -546,103 +810,85 @@
                     <td>${student.matricule}</td>
                     <td><span class="group-badge">${tdGroup}</span></td>
                     <td><span class="group-badge">${tpGroup}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-icon btn-view-profile" title="Voir profil">
-                                <i class="fas fa-user"></i>
-                            </button>
-                            <button class="btn-icon btn-view-grades" title="Voir notes">
-                                <i class="fas fa-graduation-cap"></i>
-                            </button>
-                        </div>
-                    </td>
                 `;
-                
-                // Add event listeners for actions
-                row.querySelector('.btn-view-profile').addEventListener('click', () => {
-                    // Open student profile
-                    alert(`Affichage du profil de ${student.firstName} ${student.lastName} à implémenter`);
-                });
-                
-                row.querySelector('.btn-view-grades').addEventListener('click', () => {
-                    // View student grades
-                    alert(`Affichage des notes de ${student.firstName} ${student.lastName} à implémenter`);
-                });
-                
-          tbody.appendChild(row);
-        });
-            
-            // Update pagination UI
-            updatePaginationUI();
+
+            tbody.appendChild(row);
+          });
+
+          // Update pagination UI
+          updatePaginationUI();
         }
-        
+
         // Create pagination container
-        const pagination = document.createElement('div');
-        pagination.className = 'pagination-container';
-        
+        const pagination = document.createElement("div");
+        pagination.className = "pagination-container";
+
         // Function to update pagination UI
         function updatePaginationUI() {
-            pagination.innerHTML = '';
-            
-            // Info text
-            const pageInfo = document.createElement('div');
-            pageInfo.className = 'pagination-info';
-            const start = (currentPage - 1) * itemsPerPage + 1;
-            const end = Math.min(currentPage * itemsPerPage, students.length);
-            pageInfo.textContent = `Affichage ${start}-${end} sur ${students.length} étudiants`;
-            pagination.appendChild(pageInfo);
-            
-            // Page buttons
-            const pageButtons = document.createElement('div');
-            pageButtons.className = 'pagination-buttons';
-            
-            // Previous button
-            const prevButton = document.createElement('button');
-            prevButton.className = 'pagination-btn prev';
-            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
-            prevButton.disabled = currentPage === 1;
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) renderPage(currentPage - 1);
-            });
-            pageButtons.appendChild(prevButton);
-            
-            // Page numbers
-            const maxVisiblePages = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-            
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = 'pagination-btn page-number';
-                if (i === currentPage) pageBtn.classList.add('active');
-                pageBtn.textContent = i;
-                pageBtn.addEventListener('click', () => renderPage(i));
-                pageButtons.appendChild(pageBtn);
-            }
-            
-            // Next button
-            const nextButton = document.createElement('button');
-            nextButton.className = 'pagination-btn next';
-            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) renderPage(currentPage + 1);
-            });
-            pageButtons.appendChild(nextButton);
-            
-            pagination.appendChild(pageButtons);
+          pagination.innerHTML = "";
+
+          // Info text
+          const pageInfo = document.createElement("div");
+          pageInfo.className = "pagination-info";
+          const start = (currentPage - 1) * itemsPerPage + 1;
+          const end = Math.min(currentPage * itemsPerPage, students.length);
+          pageInfo.textContent = `Affichage ${start}-${end} sur ${students.length} étudiants`;
+          pagination.appendChild(pageInfo);
+
+          // Page buttons
+          const pageButtons = document.createElement("div");
+          pageButtons.className = "pagination-buttons";
+
+          // Previous button
+          const prevButton = document.createElement("button");
+          prevButton.className = "pagination-btn prev";
+          prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+          prevButton.disabled = currentPage === 1;
+          prevButton.addEventListener("click", () => {
+            if (currentPage > 1) renderPage(currentPage - 1);
+          });
+          pageButtons.appendChild(prevButton);
+
+          // Page numbers
+          const maxVisiblePages = 5;
+          let startPage = Math.max(
+            1,
+            currentPage - Math.floor(maxVisiblePages / 2)
+          );
+          let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+          if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement("button");
+            pageBtn.className = "pagination-btn page-number";
+            if (i === currentPage) pageBtn.classList.add("active");
+            pageBtn.textContent = i;
+            pageBtn.addEventListener("click", () => renderPage(i));
+            pageButtons.appendChild(pageBtn);
+          }
+
+          // Next button
+          const nextButton = document.createElement("button");
+          nextButton.className = "pagination-btn next";
+          nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+          nextButton.disabled = currentPage === totalPages;
+          nextButton.addEventListener("click", () => {
+            if (currentPage < totalPages) renderPage(currentPage + 1);
+          });
+          pageButtons.appendChild(nextButton);
+
+          pagination.appendChild(pageButtons);
         }
-        
+
         container.appendChild(table);
         container.appendChild(pagination);
-        
+
         // Add export/print options
-        const actionBar = document.createElement('div');
-        actionBar.className = 'student-list-actions';
+        const actionBar = document.createElement("div");
+        actionBar.className = "student-list-actions";
         actionBar.innerHTML = `
             <button class="btn-secondary btn-export-excel">
                 <i class="fas fa-file-excel"></i> Exporter Excel
@@ -651,87 +897,98 @@
                 <i class="fas fa-print"></i> Imprimer
             </button>
         `;
-        
+
         // Add event listeners for export/print
-        actionBar.querySelector('.btn-export-excel').addEventListener('click', () => {
+        actionBar
+          .querySelector(".btn-export-excel")
+          .addEventListener("click", () => {
             alert(`Export Excel pour ${section.name} à implémenter`);
+          });
+
+        actionBar.querySelector(".btn-print").addEventListener("click", () => {
+          alert(`Impression de la liste pour ${section.name} à implémenter`);
         });
-        
-        actionBar.querySelector('.btn-print').addEventListener('click', () => {
-            alert(`Impression de la liste pour ${section.name} à implémenter`);
-        });
-        
+
         container.appendChild(actionBar);
-        
+
         // Render the first page
         renderPage(1);
       }
-      
+
       // Search students
       function searchStudents() {
-        const searchTerm = document.getElementById('student-search').value.toLowerCase().trim();
-        
+        const searchTerm = document
+          .getElementById("student-search")
+          .value.toLowerCase()
+          .trim();
+
         if (!currentSectionId) {
-            // If no section is selected, show a message
-            document.getElementById('sectionStudentsList').innerHTML = `
+          // If no section is selected, show a message
+          document.getElementById("sectionStudentsList").innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-hand-point-left"></i>
                     <p>Sélectionnez une section pour afficher ses étudiants</p>
                 </div>
             `;
-            return;
+          return;
         }
-        
+
         if (!searchTerm) {
-            // If search term is empty, show all students
-            const section = allSections.find(s => s.id === currentSectionId);
-            const students = allStudents[currentSectionId] || [];
-            renderSectionStudents(students, section);
-            return;
+          // If search term is empty, show all students
+          const section = allSections.find((s) => s.id === currentSectionId);
+          const students = allStudents[currentSectionId] || [];
+          renderSectionStudents(students, section);
+          return;
         }
-        
+
         // Get students for the current section
         const students = allStudents[currentSectionId] || [];
         if (students.length === 0) {
-            document.getElementById('sectionStudentsList').innerHTML = `
+          document.getElementById("sectionStudentsList").innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-user-slash"></i>
                     <p>Aucun étudiant trouvé dans cette section</p>
                 </div>
             `;
-            return;
+          return;
         }
-        
+
         // Filter students based on search term with null checks
-        const filteredStudents = students.filter(student => {
-            return (student.firstName || '').toLowerCase().includes(searchTerm) ||
-                   (student.lastName || '').toLowerCase().includes(searchTerm) ||
-                   (student.matricule || '').toLowerCase().includes(searchTerm) ||
-                   (student.email || '').toLowerCase().includes(searchTerm) ||
-                   (`${student.firstName || ''} ${student.lastName || ''}`).toLowerCase().includes(searchTerm);
+        const filteredStudents = students.filter((student) => {
+          return (
+            (student.firstName || "").toLowerCase().includes(searchTerm) ||
+            (student.lastName || "").toLowerCase().includes(searchTerm) ||
+            (student.matricule || "").toLowerCase().includes(searchTerm) ||
+            (student.email || "").toLowerCase().includes(searchTerm) ||
+            `${student.firstName || ""} ${student.lastName || ""}`
+              .toLowerCase()
+              .includes(searchTerm)
+          );
         });
-        
+
         // Find the section for rendering
-        const section = allSections.find(s => s.id === currentSectionId);
-        
+        const section = allSections.find((s) => s.id === currentSectionId);
+
         // Render filtered students
         renderSectionStudents(filteredStudents, section);
-        
+
         // Show search results message
-        const container = document.getElementById('sectionStudentsList');
-        const resultsMsg = document.createElement('div');
-        resultsMsg.className = 'search-results-msg';
+        const container = document.getElementById("sectionStudentsList");
+        const resultsMsg = document.createElement("div");
+        resultsMsg.className = "search-results-msg";
         resultsMsg.innerHTML = `
             <p>Résultats pour "${searchTerm}": ${filteredStudents.length} étudiant(s) trouvé(s)</p>
             <button class="btn-text btn-clear-search">Effacer la recherche</button>
         `;
-        
+
         // Add event listener to clear search
-        resultsMsg.querySelector('.btn-clear-search').addEventListener('click', () => {
-            document.getElementById('student-search').value = '';
+        resultsMsg
+          .querySelector(".btn-clear-search")
+          .addEventListener("click", () => {
+            document.getElementById("student-search").value = "";
             renderSectionStudents(students, section);
-        });
-        
+          });
+
         // Insert at the beginning
         container.insertBefore(resultsMsg, container.firstChild);
       }
@@ -742,42 +999,77 @@
         container.innerHTML = "";
 
         if (!notifications || notifications.length === 0) {
-          container.innerHTML = '<div class="empty-state">Aucune notification récente</div>';
+          container.innerHTML =
+            '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Aucune notification récente</p></div>';
           return;
         }
 
         const recentNotifications = notifications.slice(0, 3);
-        const list = document.createElement('div');
-        list.className = 'notification-list';
+        const list = document.createElement("div");
+        list.className = "notification-list";
 
         recentNotifications.forEach((notif) => {
           const div = document.createElement("div");
           div.className = "notification-item";
-          
+
+          // Determine icon based on notification type (if available)
+          let icon = "fa-bell";
+          if (notif.type === "warning") icon = "fa-exclamation-triangle";
+          else if (notif.type === "success") icon = "fa-check-circle";
+          else if (notif.type === "info") icon = "fa-info-circle";
+
           // Format time
           const timeAgo = formatTimeAgo(notif.createdAt);
-          
+
           div.innerHTML = `
-            <div class="notification-icon">
-                <i class="fas fa-bell"></i>
+            <div class="notification-icon ${notif.type || ""}">
+                <i class="fas ${icon}"></i>
             </div>
             <div class="notification-content">
-                <h4>${notif.title}</h4>
-            <p>${notif.message}</p>
+                <h4 class="notification-title">${notif.title}</h4>
+                <p class="notification-message">${notif.message}</p>
                 <span class="notification-time">${timeAgo}</span>
             </div>
+            <div class="notification-actions">
+                <button class="btn-icon btn-mark-read" title="Marquer comme lu">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
           `;
+
+          // Add click event to mark as read
+          div.querySelector(".btn-mark-read").addEventListener("click", (e) => {
+            e.stopPropagation();
+            div.classList.add("read");
+            // Here you would add actual functionality to mark as read in the backend
+          });
+
+          // Make entire notification clickable
+          div.addEventListener("click", () => {
+            // Here you would add navigation to notification detail if needed
+            console.log(`Notification clicked: ${notif.title}`);
+          });
+
           list.appendChild(div);
         });
-        
+
+        // Add "View all" link if there are more notifications
+        if (notifications.length > 3) {
+          const viewAllLink = document.createElement("div");
+          viewAllLink.className = "view-all-link";
+          viewAllLink.innerHTML = `<a href="notifications.html"><i class="fas fa-arrow-right"></i> Voir toutes les notifications (${notifications.length})</a>`;
+          list.appendChild(viewAllLink);
+        }
+
         container.appendChild(list);
       }
-      
+
       // Update statistics in UI
       function updateStatistics() {
-        document.getElementById('total-students').textContent = stats.students;
-        document.getElementById('total-sections').textContent = stats.sections;
-        document.getElementById('pending-requests').textContent = stats.requests;
+        document.getElementById("total-students").textContent = stats.students;
+        document.getElementById("total-sections").textContent = stats.sections;
+        document.getElementById("pending-requests").textContent =
+          stats.requests;
       }
 
       // Load fallback data when backend is unavailable
@@ -795,12 +1087,12 @@
             level: "3ème année",
             nombreEtudiants: 32,
             groupes: [
-                { type: "td", name: "1", currentOccupancy: 16 },
-                { type: "td", name: "2", currentOccupancy: 16 },
-                { type: "tp", name: "1", currentOccupancy: 10 },
-                { type: "tp", name: "2", currentOccupancy: 12 },
-                { type: "tp", name: "3", currentOccupancy: 10 }
-            ]
+              { type: "td", name: "1", currentOccupancy: 16 },
+              { type: "td", name: "2", currentOccupancy: 16 },
+              { type: "tp", name: "1", currentOccupancy: 10 },
+              { type: "tp", name: "2", currentOccupancy: 12 },
+              { type: "tp", name: "3", currentOccupancy: 10 },
+            ],
           },
           {
             id: "sect2",
@@ -811,64 +1103,340 @@
             level: "2ème année",
             nombreEtudiants: 28,
             groupes: [
-                { type: "td", name: "1", currentOccupancy: 14 },
-                { type: "td", name: "2", currentOccupancy: 14 },
-                { type: "tp", name: "1", currentOccupancy: 14 },
-                { type: "tp", name: "2", currentOccupancy: 14 }
-            ]
-          }
+              { type: "td", name: "1", currentOccupancy: 14 },
+              { type: "td", name: "2", currentOccupancy: 14 },
+              { type: "tp", name: "1", currentOccupancy: 14 },
+              { type: "tp", name: "2", currentOccupancy: 14 },
+            ],
+          },
         ];
         allSections = sampleSections;
-        stats.sections = sampleSections.length;
-        
-        // Count total students
+        stats.sections = sampleSections.length; // Count total students correctly (avoiding double counting between TD and TP)
         let totalStudents = 0;
-        sampleSections.forEach(section => {
-            const occupancy = section.groupes ? section.groupes.reduce((sum, groupe) => 
-                sum + (groupe.currentOccupancy || 0), 0) : 0;
-            totalStudents += occupancy;
+        sampleSections.forEach((section) => {
+          // Use only TD groups to avoid counting students twice
+          const tdGroups = section.groupes
+            ? section.groupes.filter((g) => g.type === "td")
+            : [];
+          if (tdGroups.length > 0) {
+            const tdOccupancy = tdGroups.reduce(
+              (sum, groupe) => sum + (groupe.currentOccupancy || 0),
+              0
+            );
+            totalStudents += tdOccupancy;
+          } else {
+            // Fallback to all groups if no TD groups exist
+            const occupancy = section.groupes
+              ? section.groupes.reduce(
+                  (sum, groupe) => sum + (groupe.currentOccupancy || 0),
+                  0
+                )
+              : 0;
+            totalStudents +=
+              section.groupes && section.groupes.some((g) => g.type === "tp")
+                ? Math.round(occupancy / 2)
+                : occupancy;
+          }
         });
         stats.students = totalStudents;
-        
+
         renderSections(sampleSections);
-        
+
         // Set pending requests count
         stats.requests = 2;
-        
+
         // Update statistics
         updateStatistics();
       }
-      
+
       // Generate mock students for testing
       function generateMockStudents(count, section) {
         const students = [];
-        const firstNames = ["Ahmed", "Sara", "Mohamed", "Fatima", "Youssef", "Yasmine", "Omar", "Lina", "Nour", "Amine"];
-        const lastNames = ["Benali", "Taleb", "Bouazizi", "Khelifi", "Mansouri", "Rahmani", "Ziani", "Hadj", "Benmoussa", "Abid"];
-        
+        const firstNames = [
+          "Ahmed",
+          "Sara",
+          "Mohamed",
+          "Fatima",
+          "Youssef",
+          "Yasmine",
+          "Omar",
+          "Lina",
+          "Nour",
+          "Amine",
+        ];
+        const lastNames = [
+          "Benali",
+          "Taleb",
+          "Bouazizi",
+          "Khelifi",
+          "Mansouri",
+          "Rahmani",
+          "Ziani",
+          "Hadj",
+          "Benmoussa",
+          "Abid",
+        ];
+
         for (let i = 0; i < count; i++) {
-            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-            
-            // Generate TD and TP groups
-            const tdGroups = section.groupes.filter(g => g.type === 'td');
-            const tpGroups = section.groupes.filter(g => g.type === 'tp');
-            
-            const tdGroup = tdGroups.length > 0 ? tdGroups[Math.floor(Math.random() * tdGroups.length)] : null;
-            const tpGroup = tpGroups.length > 0 ? tpGroups[Math.floor(Math.random() * tpGroups.length)] : null;
-            
-            students.push({
-                id: `stud${i+1}`,
-                firstName: firstName,
-                lastName: lastName,
-                matricule: `202${Math.floor(Math.random() * 10000)}`,
-                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-                phone: `+213 5${Math.floor(Math.random() * 10000000)}`,
-                tdGroupe: tdGroup,
-                tpGroupe: tpGroup
-            });
+          const firstName =
+            firstNames[Math.floor(Math.random() * firstNames.length)];
+          const lastName =
+            lastNames[Math.floor(Math.random() * lastNames.length)];
+
+          // Generate TD and TP groups
+          const tdGroups = section.groupes.filter((g) => g.type === "td");
+          const tpGroups = section.groupes.filter((g) => g.type === "tp");
+
+          const tdGroup =
+            tdGroups.length > 0
+              ? tdGroups[Math.floor(Math.random() * tdGroups.length)]
+              : null;
+          const tpGroup =
+            tpGroups.length > 0
+              ? tpGroups[Math.floor(Math.random() * tpGroups.length)]
+              : null;
+
+          students.push({
+            id: `stud${i + 1}`,
+            firstName: firstName,
+            lastName: lastName,
+            matricule: `202${Math.floor(Math.random() * 10000)}`,
+            email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+            phone: `+213 5${Math.floor(Math.random() * 10000000)}`,
+            tdGroupe: tdGroup,
+            tpGroupe: tpGroup,
+          });
         }
-        
+
         return students;
+      }
+      /**
+       * Load and display recent announcements in the dashboard
+       */
+      async function loadRecentAnnouncements() {
+        const announcementsContainer = document.getElementById(
+          "recentAnnouncementsList"
+        );
+        const refreshButton = document.getElementById(
+          "refreshAnnouncementsBtn"
+        );
+
+        if (!announcementsContainer) {
+          console.error("Announcements container not found");
+          return;
+        }
+
+        // Disable refresh button and show loading icon
+        if (refreshButton) {
+          refreshButton.disabled = true;
+          refreshButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
+        // Show loading message
+        announcementsContainer.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center">Chargement des annonces récentes...</td>
+          </tr>
+        `;
+
+        try {
+          // Get authentication token
+          if (!authToken) {
+            authToken =
+              sessionStorage.getItem("enseignant_token") ||
+              localStorage.getItem("enseignant_token");
+          }
+
+          if (!authToken) {
+            announcementsContainer.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center">Erreur d'authentification. Veuillez vous reconnecter.</td>
+              </tr>
+            `;
+            return;
+          }
+
+          // Get current teacher ID from currentUser
+          const teacherId = currentUser
+            ? currentUser.id || currentUser.userId
+            : null;
+          if (!teacherId) {
+            announcementsContainer.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center">Impossible d'identifier l'enseignant actuel.</td>
+              </tr>
+            `;
+            return;
+          }
+
+          // Fetch notifications created by this teacher
+          let response;
+          try {
+            response = await fetch(
+              `http://localhost:3000/api/notifications/from-teacher/${teacherId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+              }
+            );
+
+            if (!response.ok) {
+              // If the API endpoint doesn't exist or returns 404, use fallback
+              if (response.status === 404) {
+                console.warn(
+                  "API endpoint not found, falling back to main notifications endpoint"
+                );
+                response = await fetch(
+                  `http://localhost:3000/api/notifications`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${authToken}`,
+                    },
+                  }
+                );
+
+                if (!response.ok) {
+                  throw new Error(
+                    `Erreur lors de la récupération des notifications (fallback): ${response.status}`
+                  );
+                }
+              } else {
+                throw new Error(
+                  `Erreur lors de la récupération des notifications: ${response.status}`
+                );
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching notifications:", error);
+            throw new Error(
+              `Erreur lors de la récupération des notifications: ${error.message}`
+            );
+          }
+
+          const notifications = await response.json();
+
+          // Group notifications by title and content to avoid duplicates
+          const groupedNotifications = {};
+
+          // Keep track of unique students per announcement to avoid double counting
+          const studentTracker = {};
+
+          notifications.forEach((notification) => {
+            // Create a unique key for each distinct announcement
+            const key = `${notification.title}-${
+              notification.type
+            }-${notification.createdAt.substring(0, 10)}`;
+
+            // Create tracker for this announcement if it doesn't exist
+            if (!studentTracker[key]) {
+              studentTracker[key] = new Set();
+            }
+
+            // Add student ID to tracker (if available)
+            if (notification.studentId) {
+              studentTracker[key].add(notification.studentId);
+            } else {
+              // If no studentId is available, use the notification ID as a fallback
+              studentTracker[key].add(`notification-${notification.id}`);
+            }
+
+            if (!groupedNotifications[key]) {
+              groupedNotifications[key] = {
+                id: notification.id,
+                title: notification.title,
+                type: notification.type,
+                date: new Date(notification.createdAt).toLocaleDateString(
+                  "fr-FR"
+                ),
+                recipients: studentTracker[key].size || 1, // Count unique students
+                status: notification.status || "sent",
+                createdAt: notification.createdAt, // Keep for sorting
+              };
+            } else {
+              // Update recipient count with unique student count
+              groupedNotifications[key].recipients = studentTracker[key].size;
+            }
+          });
+
+          // Convert to array and sort by date (newest first)
+          const announcementHistory = Object.values(groupedNotifications).sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+
+          // Prepare HTML for the tbody
+          let tableHTML = "";
+
+          // Only show top 3 announcements in dashboard
+          const recentAnnouncements = announcementHistory.slice(0, 3);
+
+          if (recentAnnouncements.length > 0) {
+            // Add rows
+            recentAnnouncements.forEach((announcement) => {
+              const badgeClass = `badge-${announcement.type}`;
+              let typeText = "";
+
+              switch (announcement.type) {
+                case "cours":
+                  typeText = "Cours";
+                  break;
+                case "examen":
+                  typeText = "Examen";
+                  break;
+                case "emploi_du_temps":
+                  typeText = "EDT";
+                  break;
+                default:
+                  typeText = "Autre";
+              }
+
+              // Create a row that matches the structure in the dashboard
+              tableHTML += `
+                <tr>
+                  <td>${announcement.date}</td>
+                  <td><span class="badge ${badgeClass}">${typeText}</span></td>
+                  <td>${announcement.title}</td>
+                  <td>${Math.ceil(announcement.recipients / 2)} étudiant${
+                announcement.recipients > 1 ? "s" : ""
+              }</td>
+                </tr>
+              `;
+            });
+
+            // Show "view all" row if there are more than 3 announcements
+            if (announcementHistory.length > 3) {
+              tableHTML += `
+                <tr class="view-all-row">
+                  <td colspan="4" class="text-center">
+                    <a href="teacher-announcements.html" class="view-all-link">
+                      <i class="fas fa-arrow-right"></i> Voir toutes les annonces (${announcementHistory.length})
+                    </a>
+                  </td>
+                </tr>
+              `;
+            }
+            announcementsContainer.innerHTML = tableHTML;
+          } else {
+            announcementsContainer.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center">Aucune annonce récente trouvée.</td>
+              </tr>
+            `;
+          }
+        } catch (error) {
+          console.error("Error loading announcement history:", error);
+          announcementsContainer.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center">Erreur lors du chargement des annonces récentes.</td>
+            </tr>
+          `;
+        } finally {
+          // Re-enable refresh button
+          if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
+          }
+        }
       }
 
       // Helper functions
@@ -889,9 +1457,9 @@
 
       function formatDate(dateString) {
         return new Date(dateString).toLocaleDateString("fr-FR", {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
+          day: "numeric",
+          month: "short",
+          year: "numeric",
         });
       }
 
@@ -913,5 +1481,5 @@
         }
       }
     </script>
-</body>
+  </body>
 </html>

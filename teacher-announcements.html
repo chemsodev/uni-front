@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Annonces et Événements</title>
+    <link href="style/dashbord-teacher.css" rel="stylesheet" />
+    <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link href="style/teacher-sidebar.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <script src="js/enseignant-auth.js"></script>
+    <script src="js/sidebar-loader.js"></script>
+    <script src="js/accessibility-checker.js"></script>
+    <script src="js/sections-groups-handler.js"></script>
+    <script src="js/teacher-announcements.js"></script>
+    <style>
+      /* Additional styles for announcements page */
+      .announcement-form {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group.full-width {
+        grid-column: span 2;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      .form-control:focus {
+        border-color: #4361ee;
+        outline: none;
+      }
+
+      textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .select-container {
+        position: relative;
+      }
+
+      .select-container select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+      }
+
+      .select-container select:focus {
+        border-color: #4361ee;
+        outline: none;
+      }
+
+      .select-container select[multiple] {
+        height: 120px;
+        background-image: none;
+        padding: 5px;
+      }
+
+      .select-container select[multiple] option {
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .checkbox-label input[type="checkbox"] {
+        margin-right: 10px;
+      }
+
+      .btn-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s;
+      }
+
+      .btn-primary {
+        background: #4361ee;
+        color: white;
+      }
+
+      .btn-secondary {
+        background: #edf2f7;
+        color: #4a5568;
+      }
+
+      .btn-primary:hover {
+        background: #3a56e4;
+      }
+
+      .btn-secondary:hover {
+        background: #e2e8f0;
+      }
+
+      .btn-primary i,
+      .btn-secondary i {
+        margin-right: 8px;
+      }
+
+      .form-section {
+        margin-bottom: 30px;
+      }
+
+      .form-section-title {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 18px;
+        color: #2d3748;
+      }
+
+      .tab-container {
+        margin-bottom: 30px;
+      }
+
+      .tab-buttons {
+        display: flex;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .tab-button {
+        padding: 10px 20px;
+        border: none;
+        background: none;
+        border-bottom: 3px solid transparent;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .tab-button.active {
+        border-bottom-color: #4361ee;
+        color: #4361ee;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        display: none;
+      }
+
+      .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+      }
+
+      /* History table */
+      .announcement-history {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+      }
+
+      .announcement-history th,
+      .announcement-history td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      .announcement-history th {
+        font-weight: 600;
+        color: #2d3748;
+        background-color: #f8f9fa;
+      }
+
+      .announcement-history tr:hover {
+        background-color: #f8f9fa;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 4px;
+      }
+
+      .badge-cours {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+      }
+
+      .badge-examen {
+        background-color: #ffebee;
+        color: #b71c1c;
+      }
+
+      /* Additional badge styles for the dashboard version */
+      .badge-exam {
+        background-color: #ffebee;
+        color: #b71c1c;
+      }
+
+      .badge-room {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+      }
+
+      .badge-cancel {
+        background-color: #fafafa;
+        color: #616161;
+      }
+
+      .badge-emploi_du_temps {
+        background-color: #e8f5e9;
+        color: #1b5e20;
+      }
+
+      /* Accessibility warning styles */
+      .accessibility-check {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 15px 20px;
+        background-color: #fff3cd;
+        color: #856404;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.8;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.8;
+        }
+      }
+
+      .accessibility-banner {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        border-radius: 4px;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+      }
+
+      .accessibility-banner i {
+        font-size: 24px;
+        margin-right: 15px;
+        color: #856404;
+      }
+
+      .accessibility-banner-content {
+        flex: 1;
+      }
+
+      .accessibility-banner h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+        color: #856404;
+      }
+
+      .accessibility-banner p {
+        margin: 0;
+        color: #856404;
+      }
+
+      .accessibility-banner .btn-link {
+        color: #856404;
+        text-decoration: underline;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        font-weight: 500;
+      }
+
+      /* Fix for the announcements table display */
+      .panel {
+        width: 100%;
+        margin-bottom: 30px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: visible;
+      }
+
+      .panel-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .panel-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .panel-title i {
+        margin-right: 10px;
+        color: #10b981;
+      }
+
+      .panel-body {
+        padding: 20px;
+        overflow-x: auto; /* Allow horizontal scrolling if necessary */
+        width: 100%;
+      }
+
+      /* Announcements table styling */
+      .announcements-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      .announcements-table th {
+        text-align: left;
+        padding: 12px 15px;
+        background-color: rgba(16, 185, 129, 0.1);
+        font-weight: 600;
+        color: #10b981;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .announcements-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #4a5568;
+      }
+
+      .announcements-table tr:hover {
+        background-color: rgba(16, 185, 129, 0.05);
+      }
+
+      /* Ensure Description column takes more space */
+      .announcements-table th:nth-child(3),
+      .announcements-table td:nth-child(3) {
+        width: 40%;
+      }
+
+      /* Center alignment helper */
+      .text-center {
+        text-align: center;
+      }
+
+      /* Button icon style for the refresh button */
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: transparent;
+        border: none;
+        color: #10b981;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-icon:hover {
+        background-color: rgba(16, 185, 129, 0.1);
+      }
+
+      .btn-icon i {
+        font-size: 16px;
+      }
+
+      /* Make announcements table responsive */
+      @media (max-width: 768px) {
+        .announcements-table {
+          min-width: 600px; /* Ensure table has minimum width on smaller screens */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Annonces et Événements</h1>
+          <div class="header-actions">
+            <button
+              onclick="window.location.href='dashbord-teacher.html'"
+              class="btn-secondary"
+            >
+              <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </button>
+          </div>
+        </div>
+        <!-- Alert Messages -->
+        <div id="alert-success" class="alert alert-success">
+          <i class="fas fa-check-circle"></i> <span id="success-message"></span>
+        </div>
+
+        <div id="alert-error" class="alert alert-danger">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="error-message"></span>
+        </div>
+
+        <!-- Accessibility Banner -->
+        <div class="accessibility-banner" id="accessibility-banner">
+          <i class="fas fa-universal-access"></i>
+          <div class="accessibility-banner-content">
+            <h4>Accessibilité des annonces</h4>
+            <p>
+              Des étudiants en situation de handicap sont présents dans vos
+              sections. Veuillez vous assurer que vos annonces sont accessibles
+              à tous.
+              <a href="students-with-disabilities.html" class="btn-link"
+                >Voir la liste des étudiants concernés</a
+              >
+            </p>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-container">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-tab="room-change">
+              Changement de salle
+            </button>
+            <button class="tab-button" data-tab="test">
+              Interrogation / Examen
+            </button>
+            <button class="tab-button" data-tab="course-material">
+              Support de cours
+            </button>
+            <button class="tab-button" data-tab="custom">
+              Annonce personnalisée
+            </button>
+          </div>
+
+          <!-- Room Change Tab -->
+          <div class="tab-content active" id="room-change">
+            <div class="announcement-form">
+              <h3 class="form-section-title">
+                Annoncer un changement de salle
+              </h3>
+              <form id="room-change-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="room-course-name">Nom du cours</label>
+                    <input
+                      type="text"
+                      id="room-course-name"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Algorithmique"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="room-date-time">Date et heure</label>
+                    <input
+                      type="text"
+                      id="room-date-time"
+                      class="form-control"
+                      required
+                      placeholder="Ex: 20/05/2025 à 14h00"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="room-old">Salle initiale</label>
+                    <input
+                      type="text"
+                      id="room-old"
+                      class="form-control"
+                      required
+                      placeholder="Ex: A103"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="room-new">Nouvelle salle</label>
+                    <input
+                      type="text"
+                      id="room-new"
+                      class="form-control"
+                      required
+                      placeholder="Ex: B204"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="room-sections">Sections concernées</label>
+                    <div class="select-container">
+                      <select
+                        id="room-sections"
+                        class="form-control"
+                        multiple
+                        required
+                      >
+                        <!-- Sections will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="room-groups"
+                      >Groupes concernés (optionnel)</label
+                    >
+                    <div class="select-container">
+                      <select id="room-groups" class="form-control" multiple>
+                        <!-- Groups will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+
+                  <div
+                    class="form-group full-width"
+                    id="room-accessibility-container"
+                    style="display: none"
+                  >
+                    <label class="form-label">Accessibilité</label>
+                    <div class="checkbox-label">
+                      <input type="checkbox" id="room-new-accessible" />
+                      <label for="room-new-accessible"
+                        >La nouvelle salle est accessible aux personnes à
+                        mobilité réduite</label
+                      >
+                    </div>
+                    <p
+                      class="info-text"
+                      style="color: #6c757d; font-size: 13px; margin-top: 5px"
+                    >
+                      <i class="fas fa-info-circle"></i> Cette information sera
+                      affichée automatiquement si des étudiants en situation de
+                      handicap sont concernés.
+                    </p>
+                  </div>
+                </div>
+                <div class="btn-container">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="resetForm('room-change-form')"
+                  >
+                    <i class="fas fa-times"></i> Annuler
+                  </button>
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Envoyer l'annonce
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Test Announcement Tab -->
+          <div class="tab-content" id="test">
+            <div class="announcement-form">
+              <h3 class="form-section-title">
+                Annoncer une interrogation ou un examen
+              </h3>
+              <form id="test-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="test-course-name">Nom du cours</label>
+                    <input
+                      type="text"
+                      id="test-course-name"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Algorithmique"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="test-type">Type</label>
+                    <div class="select-container">
+                      <select id="test-type" class="form-control" required>
+                        <option value="">-- Sélectionner --</option>
+                        <option value="Interrogation">Interrogation</option>
+                        <option value="Examen">Examen</option>
+                        <option value="Quiz">Quiz</option>
+                        <option value="Contrôle">Contrôle</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="test-date-time">Date et heure</label>
+                    <input
+                      type="text"
+                      id="test-date-time"
+                      class="form-control"
+                      required
+                      placeholder="Ex: 25/05/2025 à 10h30"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="test-room">Salle</label>
+                    <input
+                      type="text"
+                      id="test-room"
+                      class="form-control"
+                      required
+                      placeholder="Ex: A103"
+                    />
+                  </div>
+                  <div class="form-group full-width">
+                    <label for="test-details">Détails (optionnel)</label>
+                    <textarea
+                      id="test-details"
+                      class="form-control"
+                      placeholder="Ex: L'interrogation portera sur les chapitres 3 et 4. Les calculatrices sont autorisées."
+                    ></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="test-sections">Sections concernées</label>
+                    <div class="select-container">
+                      <select
+                        id="test-sections"
+                        class="form-control"
+                        multiple
+                        required
+                      >
+                        <!-- Sections will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="test-groups"
+                      >Groupes concernés (optionnel)</label
+                    >
+                    <div class="select-container">
+                      <select id="test-groups" class="form-control" multiple>
+                        <!-- Groups will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+
+                  <div
+                    class="form-group full-width"
+                    id="test-accessibility-container"
+                    style="display: none"
+                  >
+                    <label class="form-label">Accessibilité</label>
+                    <div class="checkbox-label">
+                      <input type="checkbox" id="test-room-accessible" />
+                      <label for="test-room-accessible"
+                        >La salle est accessible aux personnes à mobilité
+                        réduite</label
+                      >
+                    </div>
+                    <div class="checkbox-label">
+                      <input
+                        type="checkbox"
+                        id="test-allows-extra-time"
+                        checked
+                      />
+                      <label for="test-allows-extra-time"
+                        >Le tiers-temps est accordé aux étudiants
+                        éligibles</label
+                      >
+                    </div>
+                    <p
+                      class="info-text"
+                      style="color: #6c757d; font-size: 13px; margin-top: 5px"
+                    >
+                      <i class="fas fa-info-circle"></i> Ces informations seront
+                      affichées automatiquement si des étudiants en situation de
+                      handicap sont concernés.
+                    </p>
+                  </div>
+                </div>
+                <div class="btn-container">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="resetForm('test-form')"
+                  >
+                    <i class="fas fa-times"></i> Annuler
+                  </button>
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Envoyer l'annonce
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Course Material Tab -->
+          <div class="tab-content" id="course-material">
+            <div class="announcement-form">
+              <h3 class="form-section-title">
+                Annoncer un nouveau support de cours
+              </h3>
+              <form id="material-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="material-course-name">Nom du cours</label>
+                    <input
+                      type="text"
+                      id="material-course-name"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Algorithmique"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="material-type">Type de support</label>
+                    <div class="select-container">
+                      <select id="material-type" class="form-control" required>
+                        <option value="">-- Sélectionner --</option>
+                        <option value="Polycopié">Polycopié</option>
+                        <option value="TD">TD</option>
+                        <option value="TP">TP</option>
+                        <option value="Exercices">Exercices</option>
+                        <option value="Correction">Correction</option>
+                        <option value="Document">Document</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="material-title">Titre du document</label>
+                    <input
+                      type="text"
+                      id="material-title"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Introduction aux algorithmes de tri"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="material-link">Lien (optionnel)</label>
+                    <input
+                      type="url"
+                      id="material-link"
+                      class="form-control"
+                      placeholder="Ex: https://drive.google.com/document.pdf"
+                    />
+                  </div>
+                  <div class="form-group full-width">
+                    <label for="material-details">Détails (optionnel)</label>
+                    <textarea
+                      id="material-details"
+                      class="form-control"
+                      placeholder="Ex: Ce document couvre les notions fondamentales des algorithmes de tri. Veuillez le lire avant le prochain cours."
+                    ></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="material-sections">Sections concernées</label>
+                    <div class="select-container">
+                      <select
+                        id="material-sections"
+                        class="form-control"
+                        multiple
+                        required
+                      >
+                        <!-- Sections will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="material-groups"
+                      >Groupes concernés (optionnel)</label
+                    >
+                    <div class="select-container">
+                      <select
+                        id="material-groups"
+                        class="form-control"
+                        multiple
+                      >
+                        <!-- Groups will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="btn-container">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="resetForm('material-form')"
+                  >
+                    <i class="fas fa-times"></i> Annuler
+                  </button>
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Envoyer l'annonce
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Custom Announcement Tab -->
+          <div class="tab-content" id="custom">
+            <div class="announcement-form">
+              <h3 class="form-section-title">
+                Créer une annonce personnalisée
+              </h3>
+              <form id="custom-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="custom-title">Titre</label>
+                    <input
+                      type="text"
+                      id="custom-title"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Information importante"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="custom-type">Type d'annonce</label>
+                    <div class="select-container">
+                      <select id="custom-type" class="form-control" required>
+                        <option value="">-- Sélectionner --</option>
+                        <option value="cours">Cours</option>
+                        <option value="examen">Examen</option>
+                        <option value="emploi_du_temps">Emploi du temps</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group full-width">
+                    <label for="custom-content">Contenu</label>
+                    <textarea
+                      id="custom-content"
+                      class="form-control"
+                      required
+                      placeholder="Contenu détaillé de l'annonce..."
+                    ></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="custom-action-label"
+                      >Libellé du bouton d'action (optionnel)</label
+                    >
+                    <input
+                      type="text"
+                      id="custom-action-label"
+                      class="form-control"
+                      placeholder="Ex: Voir détails"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="custom-action-link"
+                      >Lien d'action (optionnel)</label
+                    >
+                    <input
+                      type="url"
+                      id="custom-action-link"
+                      class="form-control"
+                      placeholder="Ex: emploi.html"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="custom-sections">Sections concernées</label>
+                    <div class="select-container">
+                      <select
+                        id="custom-sections"
+                        class="form-control"
+                        multiple
+                        required
+                      >
+                        <!-- Sections will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="custom-groups"
+                      >Groupes concernés (optionnel)</label
+                    >
+                    <div class="select-container">
+                      <select id="custom-groups" class="form-control" multiple>
+                        <!-- Groups will be populated dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="btn-container">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="resetForm('custom-form')"
+                  >
+                    <i class="fas fa-times"></i> Annuler
+                  </button>
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Envoyer l'annonce
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- Recent Announcements panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <i class="fas fa-bullhorn"></i> Annonces Récentes
+            </h2>
+            <div class="panel-actions">
+              <button onclick="loadAnnouncementHistory()" class="btn-icon">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <table class="announcements-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Sections</th>
+                </tr>
+              </thead>
+              <tbody id="announcement-history">
+                <tr>
+                  <td>19 Mai 2025</td>
+                  <td><span class="badge badge-exam">Examen</span></td>
+                  <td>Chargement des annonces récentes...</td>
+                  <td>-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Global variables
+      let announcementHistory = [];
+
+      // Initialize when document is ready
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load sidebar
+        await loadNavbar();
+
+        // Initialize the teacher announcements module
+        const initSuccess = await window.TeacherAnnouncements.init();
+
+        if (!initSuccess) {
+          showError("Erreur d'authentification. Veuillez vous reconnecter.");
+          document.querySelectorAll("form").forEach((form) => {
+            form
+              .querySelectorAll("button, input, select, textarea")
+              .forEach((el) => {
+                el.disabled = true;
+              });
+          });
+          return;
+        }
+
+        // Initialize tabs
+        setupTabs();
+
+        // Load teacher sections and groups into select fields
+        populateSelectOptions();
+
+        // Set up form submissions
+        setupFormHandlers();
+
+        // Set up accessibility listeners
+        setupAccessibilityListeners();
+
+        // Load announcement history
+        loadAnnouncementHistory();
+      });
+
+      // Handle tabs switching
+      function setupTabs() {
+        const tabButtons = document.querySelectorAll(".tab-button");
+
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const tabId = this.getAttribute("data-tab");
+
+            // Hide all tab contents
+            document.querySelectorAll(".tab-content").forEach((tab) => {
+              tab.classList.remove("active");
+            });
+
+            // Deactivate all buttons
+            tabButtons.forEach((btn) => {
+              btn.classList.remove("active");
+            });
+
+            // Show selected tab and activate button
+            document.getElementById(tabId).classList.add("active");
+            this.classList.add("active");
+          });
+        });
+      } // Populate section and group select options
+      function populateSelectOptions() {
+        // Check if we have teacher data
+        if (!window.TeacherAnnouncements) {
+          console.error("TeacherAnnouncements module not initialized");
+          return;
+        }
+
+        // Make sure we've loaded sections and groups
+        if (!window.teacherSections || !window.teacherGroups) {
+          console.log(
+            "Loading teacher sections and groups for announcements..."
+          );
+          // First load teacher assignments
+          window.TeacherAnnouncements.loadTeacherAssignments().then(() => {
+            // Then use the SectionsGroupsHandler to initialize the dropdowns
+            if (window.SectionsGroupsHandler) {
+              window.SectionsGroupsHandler.initAnnouncementSectionsAndGroups();
+            } else {
+              console.error("SectionsGroupsHandler module not loaded");
+            }
+          });
+        } else {
+          // If data is already loaded, just initialize the dropdowns
+          if (window.SectionsGroupsHandler) {
+            window.SectionsGroupsHandler.initAnnouncementSectionsAndGroups();
+          } else {
+            console.error("SectionsGroupsHandler module not loaded");
+          }
+        }
+      }
+
+      // Set up form submission handlers
+      function setupFormHandlers() {
+        // Room Change Form
+        document
+          .getElementById("room-change-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const data = {
+              courseName: document.getElementById("room-course-name").value,
+              dateTime: document.getElementById("room-date-time").value,
+              oldRoom: document.getElementById("room-old").value,
+              newRoom: document.getElementById("room-new").value,
+              targetSectionIds: getSelectedValues("room-sections"),
+              targetGroupIds: getSelectedValues("room-groups"),
+              isNewRoomAccessible: document.getElementById(
+                "room-new-accessible"
+              ).checked,
+            };
+
+            if (data.targetSectionIds.length === 0) {
+              showError("Veuillez sélectionner au moins une section.");
+              return;
+            }
+
+            try {
+              const result =
+                await window.TeacherAnnouncements.createRoomChangeAnnouncement(
+                  data
+                );
+              if (result && result.successful > 0) {
+                showSuccess(
+                  `L'annonce de changement de salle a été envoyée à ${result.successful} étudiant(s).`
+                );
+                resetForm("room-change-form");
+                await loadAnnouncementHistory();
+              } else {
+                showError("Erreur lors de l'envoi de l'annonce.");
+              }
+            } catch (error) {
+              console.error("Error sending room change announcement:", error);
+              showError(
+                "Une erreur s'est produite lors de l'envoi de l'annonce."
+              );
+            }
+          });
+
+        // Test Announcement Form
+        document
+          .getElementById("test-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const data = {
+              courseName: document.getElementById("test-course-name").value,
+              testType: document.getElementById("test-type").value,
+              dateTime: document.getElementById("test-date-time").value,
+              room: document.getElementById("test-room").value,
+              details: document.getElementById("test-details").value,
+              targetSectionIds: getSelectedValues("test-sections"),
+              targetGroupIds: getSelectedValues("test-groups"),
+              isRoomAccessible: document.getElementById("test-room-accessible")
+                .checked,
+              allowsExtraTime: document.getElementById("test-allows-extra-time")
+                .checked,
+            };
+
+            if (data.targetSectionIds.length === 0) {
+              showError("Veuillez sélectionner au moins une section.");
+              return;
+            }
+
+            try {
+              const result =
+                await window.TeacherAnnouncements.createTestAnnouncement(data);
+              if (result && result.successful > 0) {
+                showSuccess(
+                  `L'annonce d'${data.testType.toLowerCase()} a été envoyée à ${
+                    result.successful
+                  } étudiant(s).`
+                );
+                resetForm("test-form");
+                await loadAnnouncementHistory();
+              } else {
+                showError("Erreur lors de l'envoi de l'annonce.");
+              }
+            } catch (error) {
+              console.error("Error sending test announcement:", error);
+              showError(
+                "Une erreur s'est produite lors de l'envoi de l'annonce."
+              );
+            }
+          });
+
+        // Course Material Form
+        document
+          .getElementById("material-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const data = {
+              courseName: document.getElementById("material-course-name").value,
+              materialType: document.getElementById("material-type").value,
+              title: document.getElementById("material-title").value,
+              link: document.getElementById("material-link").value,
+              details: document.getElementById("material-details").value,
+              targetSectionIds: getSelectedValues("material-sections"),
+              targetGroupIds: getSelectedValues("material-groups"),
+            };
+
+            if (data.targetSectionIds.length === 0) {
+              showError("Veuillez sélectionner au moins une section.");
+              return;
+            }
+
+            try {
+              const result =
+                await window.TeacherAnnouncements.createCourseMaterialAnnouncement(
+                  data
+                );
+              if (result && result.successful > 0) {
+                showSuccess(
+                  `L'annonce de nouveau support de cours a été envoyée à ${result.successful} étudiant(s).`
+                );
+                resetForm("material-form");
+                await loadAnnouncementHistory();
+              } else {
+                showError("Erreur lors de l'envoi de l'annonce.");
+              }
+            } catch (error) {
+              console.error(
+                "Error sending course material announcement:",
+                error
+              );
+              showError(
+                "Une erreur s'est produite lors de l'envoi de l'annonce."
+              );
+            }
+          });
+
+        // Custom Announcement Form
+        document
+          .getElementById("custom-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const data = {
+              title: document.getElementById("custom-title").value,
+              content: document.getElementById("custom-content").value,
+              type: document.getElementById("custom-type").value,
+              actionLabel:
+                document.getElementById("custom-action-label").value || null,
+              actionLink:
+                document.getElementById("custom-action-link").value || null,
+              targetSectionIds: getSelectedValues("custom-sections"),
+              targetGroupIds: getSelectedValues("custom-groups"),
+            };
+
+            if (data.targetSectionIds.length === 0) {
+              showError("Veuillez sélectionner au moins une section.");
+              return;
+            }
+
+            try {
+              const result =
+                await window.TeacherAnnouncements.createAnnouncement(data);
+              if (result && result.successful > 0) {
+                showSuccess(
+                  `L'annonce personnalisée a été envoyée à ${result.successful} étudiant(s).`
+                );
+                resetForm("custom-form");
+                await loadAnnouncementHistory();
+              } else {
+                showError("Erreur lors de l'envoi de l'annonce.");
+              }
+            } catch (error) {
+              console.error("Error sending custom announcement:", error);
+              showError(
+                "Une erreur s'est produite lors de l'envoi de l'annonce."
+              );
+            }
+          });
+      }
+
+      // Get selected values from a multi-select
+      function getSelectedValues(selectId) {
+        const select = document.getElementById(selectId);
+        return Array.from(select.selectedOptions).map((option) => option.value);
+      }
+
+      // Reset form fields
+      function resetForm(formId) {
+        document.getElementById(formId).reset();
+      }
+
+      // Show success message
+      function showSuccess(message) {
+        const alert = document.getElementById("alert-success");
+        document.getElementById("success-message").textContent = message;
+        alert.style.display = "block";
+
+        // Hide after 5 seconds
+        setTimeout(() => {
+          alert.style.display = "none";
+        }, 5000);
+      }
+
+      // Show error message
+      function showError(message) {
+        const alert = document.getElementById("alert-error");
+        document.getElementById("error-message").textContent = message;
+        alert.style.display = "block";
+
+        // Hide after 5 seconds
+        setTimeout(() => {
+          alert.style.display = "none";
+        }, 5000);
+      } // Check accessibility for sections and groups
+      function setupAccessibilityListeners() {
+        // Initialize Accessibility Checker
+        window.AccessibilityChecker.init();
+
+        // Set up listeners for section and group changes in room change form
+        document
+          .getElementById("room-sections")
+          .addEventListener("change", () => {
+            window.AccessibilityChecker.showAccessibilityOptionsIfNeeded(
+              "room-sections",
+              "room-groups",
+              "room-accessibility-container"
+            );
+          });
+
+        document
+          .getElementById("room-groups")
+          .addEventListener("change", () => {
+            window.AccessibilityChecker.showAccessibilityOptionsIfNeeded(
+              "room-sections",
+              "room-groups",
+              "room-accessibility-container"
+            );
+          });
+
+        // Set up listeners for section and group changes in test form
+        document
+          .getElementById("test-sections")
+          .addEventListener("change", () => {
+            window.AccessibilityChecker.showAccessibilityOptionsIfNeeded(
+              "test-sections",
+              "test-groups",
+              "test-accessibility-container"
+            );
+          });
+
+        document
+          .getElementById("test-groups")
+          .addEventListener("change", () => {
+            window.AccessibilityChecker.showAccessibilityOptionsIfNeeded(
+              "test-sections",
+              "test-groups",
+              "test-accessibility-container"
+            );
+          });
+
+        // Initially check for accessibility needs and show the banner if needed
+        checkForDisabilityBanner();
+      }
+
+      // Check for students with disabilities and show/hide banner
+      async function checkForDisabilityBanner() {
+        try {
+          const disabilityCheck =
+            await window.AccessibilityChecker.checkForStudentsWithDisabilities(
+              [],
+              []
+            );
+          const banner = document.getElementById("accessibility-banner");
+
+          if (banner) {
+            if (disabilityCheck.hasDisabledStudents) {
+              banner.style.display = "flex";
+
+              // Update count
+              const bannerContent = banner.querySelector(
+                ".accessibility-banner-content p"
+              );
+              if (bannerContent) {
+                bannerContent.innerHTML = `
+                  ${
+                    disabilityCheck.count
+                  } étudiant(s) en situation de handicap ${
+                  disabilityCheck.count > 1 ? "sont présents" : "est présent"
+                }
+                  dans vos sections. Veuillez vous assurer que vos annonces sont accessibles à tous.
+                  <a href="students-with-disabilities.html" class="btn-link">Voir la liste des étudiants concernés</a>
+                `;
+              }
+            } else {
+              banner.style.display = "none";
+            }
+          }
+        } catch (error) {
+          console.error("Error checking for disability banner:", error);
+        }
+      }
+
+      // Load announcement history from the API
+      async function loadAnnouncementHistory() {
+        const historyContainer = document.getElementById(
+          "announcement-history"
+        );
+        historyContainer.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center">Chargement des annonces récentes...</td>
+          </tr>
+        `;
+
+        try {
+          // Get authentication token
+          const authToken =
+            sessionStorage.getItem("enseignant_token") ||
+            localStorage.getItem("enseignant_token");
+
+          if (!authToken) {
+            historyContainer.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center">Erreur d'authentification. Veuillez vous reconnecter.</td>
+              </tr>
+            `;
+            return;
+          }
+
+          // Get current teacher ID
+          const teacherId = currentTeacher ? currentTeacher.id : null;
+          if (!teacherId) {
+            historyContainer.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center">Impossible d'identifier l'enseignant actuel.</td>
+              </tr>
+            `;
+            return;
+          } // Fetch notifications created by this teacher
+          let response;
+          try {
+            response = await fetch(
+              `http://localhost:3000/api/notifications/from-teacher/${teacherId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+              }
+            );
+
+            if (!response.ok) {
+              // If the API endpoint doesn't exist yet or returns 404, use fallback
+              if (response.status === 404) {
+                console.warn(
+                  "API endpoint not found, falling back to main notifications endpoint"
+                );
+                response = await fetch(
+                  `http://localhost:3000/api/notifications`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${authToken}`,
+                    },
+                  }
+                );
+
+                if (!response.ok) {
+                  throw new Error(
+                    `Erreur lors de la récupération des notifications (fallback): ${response.status}`
+                  );
+                }
+              } else {
+                throw new Error(
+                  `Erreur lors de la récupération des notifications: ${response.status}`
+                );
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching notifications:", error);
+            throw new Error(
+              `Erreur lors de la récupération des notifications: ${error.message}`
+            );
+          }
+
+          const notifications = await response.json(); // Group notifications by title and content to avoid duplicates
+          // (since one announcement creates multiple notifications, one per student)
+          const groupedNotifications = {};
+
+          // Keep track of unique students per announcement to avoid double counting
+          const studentTracker = {};
+          notifications.forEach((notification) => {
+            // Create a unique key for each distinct announcement
+            const key = `${notification.title}-${
+              notification.type
+            }-${notification.createdAt.substring(0, 10)}`;
+
+            // Create tracker for this announcement if it doesn't exist
+            if (!studentTracker[key]) {
+              studentTracker[key] = new Set();
+            }
+
+            // Add student ID to tracker (if available)
+            if (notification.studentId) {
+              studentTracker[key].add(notification.studentId);
+            } else {
+              // If no studentId is available, use the notification ID as a fallback
+              // This ensures we at least count unique notifications
+              studentTracker[key].add(`notification-${notification.id}`);
+            }
+
+            if (!groupedNotifications[key]) {
+              groupedNotifications[key] = {
+                id: notification.id,
+                title: notification.title,
+                type: notification.type,
+                date: new Date(notification.createdAt).toLocaleDateString(
+                  "fr-FR"
+                ),
+                recipients: studentTracker[key].size || 1, // Count unique students
+                status: notification.status || "sent",
+                createdAt: notification.createdAt, // Keep for sorting
+              };
+            } else {
+              // Update recipient count with unique student count
+              groupedNotifications[key].recipients = studentTracker[key].size;
+            }
+          });
+
+          // Convert to array and sort by date (newest first)
+          announcementHistory = Object.values(groupedNotifications).sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          ); // Prepare HTML for the tbody
+          let tableHTML = "";
+
+          // Add rows
+          announcementHistory.forEach((announcement) => {
+            const badgeClass = `badge-${announcement.type}`;
+            let typeText = "";
+
+            switch (announcement.type) {
+              case "cours":
+                typeText = "Cours";
+                break;
+              case "examen":
+                typeText = "Examen";
+                break;
+              case "emploi_du_temps":
+                typeText = "EDT";
+                break;
+              default:
+                typeText = "Autre";
+            } // Create a row that matches the structure in the dashboard
+            tableHTML += `
+              <tr>
+                <td>${announcement.date}</td>
+                <td><span class="badge ${badgeClass}">${typeText}</span></td>
+                <td>${announcement.title}</td>
+                <td>${Math.ceil(announcement.recipients / 2)} étudiant${
+              announcement.recipients > 1 ? "s" : ""
+            }</td>
+              </tr>
+            `;
+          }); // Update the container
+          if (announcementHistory.length > 0) {
+            historyContainer.innerHTML = tableHTML;
+          } else {
+            historyContainer.innerHTML = `
+              <tr>
+                <td colspan="4" class="text-center">Aucune annonce récente trouvée.</td>
+              </tr>
+            `;
+          }
+        } catch (error) {
+          console.error("Error loading announcement history:", error);
+          historyContainer.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center">Erreur lors du chargement des annonces récentes.</td>
+            </tr>
+          `;
+        }
+      }
+
+      // Load sidebar
+      async function loadNavbar() {
+        try {
+          const nav = await fetch("enseignant-nav.html").then((r) => r.text());
+          document.getElementById("navbar-container").innerHTML = nav;
+
+          // Set active link
+          document.querySelectorAll(".nav-link").forEach((link) => {
+            link.classList.remove("active");
+            if (link.textContent.includes("Annonces")) {
+              link.classList.add("active");
+            }
+          });
+
+          // Update teacher info in the navbar
+          updateTeacherNavInfo();
+        } catch (e) {
+          console.error("Error loading navbar:", e);
+        }
+      }
+
+      // Update teacher info in the navbar
+      function updateTeacherNavInfo() {
+        const teacher = localStorage.getItem("enseignantData")
+          ? JSON.parse(localStorage.getItem("enseignantData"))
+          : JSON.parse(sessionStorage.getItem("enseignantData"));
+        if (!teacher) {
+          sessionStorage.removeItem("enseignantData");
+          sessionStorage.removeItem("enseignant_token");
+          sessionStorage.removeItem("enseignantUserData");
+          sessionStorage.removeItem("teacherSections");
+          localStorage.removeItem("enseignantData");
+          localStorage.removeItem("enseignant_token");
+          window.location.href = "enseignant-login.html";
+          return;
+        }
+        const avatar = document.getElementById("userAvatar");
+        const fullName = document.getElementById("userFullName");
+        const userId = document.getElementById("userId");
+        const userDepartment = document.getElementById("userDepartment");
+
+        if (avatar && teacher.firstName && teacher.lastName) {
+          avatar.textContent = (
+            teacher.firstName.charAt(0) + teacher.lastName.charAt(0)
+          ).toUpperCase();
+        }
+
+        if (fullName && teacher.firstName && teacher.lastName) {
+          fullName.textContent = `${teacher.firstName} ${teacher.lastName}`;
+        }
+
+        if (userId && teacher.id) {
+          userId.textContent = `ENS${String(teacher.id).padStart(3, "0")}`;
+        }
+
+        if (userDepartment && teacher.departmentName) {
+          userDepartment.textContent = teacher.departmentName;
+        }
+      }
+    </script>
+  </body>
+</html>
