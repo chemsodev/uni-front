@@ -72,7 +72,7 @@ async function createChangeRequestNotification(
   };
 
   try {
-    const response = await fetch("http://localhost:3000/api/notifications", {
+    const response = await fetch("https://unicersityback.onrender.com/api/notifications", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -131,7 +131,7 @@ async function processOfflineNotifications() {
 
   for (const item of offlineNotifications) {
     try {
-      const response = await fetch("http://localhost:3000/api/notifications", {
+      const response = await fetch("https://unicersityback.onrender.com/api/notifications", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -164,7 +164,7 @@ async function processOfflineNotifications() {
 async function updateNotificationBadge() {
   try {
     const response = await fetch(
-      "http://localhost:3000/api/notifications/unread-count",
+      "https://unicersityback.onrender.com/api/notifications/unread-count",
       {
         headers: {
           Authorization: `Bearer ${authToken}`,

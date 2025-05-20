@@ -34,7 +34,7 @@ async function debugGroupAvailability() {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/api/sections/${sectionId}/groupes`,
+      `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`,
       {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -121,7 +121,7 @@ async function fetchStudentData() {
     throw new Error("No user ID available");
   }
 
-  const res = await fetch(`http://localhost:3000/api/etudiants/${userId}`, {
+  const res = await fetch(`https://unicersityback.onrender.com/api/etudiants/${userId}`, {
     headers: { Authorization: `Bearer ${authToken}` },
   });
 

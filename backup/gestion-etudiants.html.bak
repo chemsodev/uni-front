@@ -666,7 +666,7 @@
           }
         }        async function loadTeacherData() {
           try {
-            const res = await fetch("http://localhost:3000/api/auth/verify", {
+            const res = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${authToken}`,
@@ -679,7 +679,7 @@
 
               // Also fetch the teacher's sections right away
               try {
-                const sectionsRes = await fetch("http://localhost:3000/api/enseignants/my-sections", {
+                const sectionsRes = await fetch("https://unicersityback.onrender.com/api/enseignants/my-sections", {
                   method: "GET",
                   headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -724,7 +724,7 @@
             }
 
             // Base endpoint using the enseignant ID to get their section students
-            let endpoint = `http://localhost:3000/api/enseignants/${currentTeacherId}/sections`;
+            let endpoint = `https://unicersityback.onrender.com/api/enseignants/${currentTeacherId}/sections`;
 
             // If a section is selected, use that specific section
             if (sectionFilter) {
@@ -732,7 +732,7 @@
             } else {
               // If no specific section is selected, use the first available section
               const sections = await fetch(
-                `http://localhost:3000/api/enseignants/my-sections`,
+                `https://unicersityback.onrender.com/api/enseignants/my-sections`,
                 {
                   headers: { Authorization: `Bearer ${authToken}` }
                 }
@@ -804,7 +804,7 @@
                 ) {
                   // Load teacher's sections for the filter
                   const teacherSections = await fetch(
-                    `http://localhost:3000/api/enseignants/my-sections`,
+                    `https://unicersityback.onrender.com/api/enseignants/my-sections`,
                     {
                       headers: { Authorization: `Bearer ${authToken}` }
                     }
@@ -1526,7 +1526,7 @@
             let response;
 
             // Construct the proper endpoint for the teacher's context
-            const baseEndpoint = `http://localhost:3000/api/enseignants/${currentTeacherId}`;
+            const baseEndpoint = `https://unicersityback.onrender.com/api/enseignants/${currentTeacherId}`;
 
             if (delegateType === "section") {
               response = await fetch(
@@ -1603,7 +1603,7 @@
               throw new Error("Étudiant non trouvé");
             }
 
-            const baseEndpoint = `http://localhost:3000/api/enseignants/${currentTeacherId}`;
+            const baseEndpoint = `https://unicersityback.onrender.com/api/enseignants/${currentTeacherId}`;
             let hasSucceeded = false;
 
             // Get the current section ID from the filter or the first section if filter is not set

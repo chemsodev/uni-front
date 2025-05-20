@@ -297,7 +297,7 @@
               const timeoutId = setTimeout(() => controller.abort(), 15000); // Increase timeout to 15 seconds
 
               const response = await fetch(
-                "http://localhost:3000/api/enseignants/group-change-requests",
+                "https://unicersityback.onrender.com/api/enseignants/group-change-requests",
                 {
                   headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -809,7 +809,7 @@
           if (isBackendAvailable) {
             try {
               const response = await fetch(
-                `http://localhost:3000/api/enseignants/group-change-requests/${currentRequestId}`,
+                `https://unicersityback.onrender.com/api/enseignants/group-change-requests/${currentRequestId}`,
                 {
                   method: "PATCH",
                   headers: {

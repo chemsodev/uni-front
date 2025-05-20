@@ -73,7 +73,7 @@ async function loadStudentData() {
     }
 
     // If not, fetch from the API
-    const response = await fetch("http://localhost:3000/api/etudiants/me", {
+    const response = await fetch("https://unicersityback.onrender.com/api/etudiants/me", {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -152,7 +152,7 @@ async function loadNavbar() {
 // Verify auth token
 async function verifyToken() {
   try {
-    const res = await fetch("http://localhost:3000/api/auth/verify", {
+    const res = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -197,7 +197,7 @@ async function refreshToken() {
       return false;
     }
 
-    const response = await fetch("http://localhost:3000/api/auth/refresh", {
+    const response = await fetch("https://unicersityback.onrender.com/api/auth/refresh", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -239,7 +239,7 @@ async function refreshToken() {
 // Fetch notifications from backend
 async function loadNotifications() {
   try {
-    const response = await fetch("http://localhost:3000/api/notifications", {
+    const response = await fetch("https://unicersityback.onrender.com/api/notifications", {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -269,7 +269,7 @@ async function loadNotifications() {
 async function updateUnreadBadge() {
   try {
     const response = await fetch(
-      "http://localhost:3000/api/notifications/unread-count",
+      "https://unicersityback.onrender.com/api/notifications/unread-count",
       {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -528,7 +528,7 @@ function createNotificationElement(notification) {
 async function markAsRead(id, button) {
   try {
     const response = await fetch(
-      `http://localhost:3000/api/notifications/${id}/mark-read`,
+      `https://unicersityback.onrender.com/api/notifications/${id}/mark-read`,
       {
         method: "PATCH",
         headers: {
@@ -570,7 +570,7 @@ async function markAsRead(id, button) {
 async function markAllAsRead() {
   try {
     const response = await fetch(
-      "http://localhost:3000/api/notifications/mark-all-read",
+      "https://unicersityback.onrender.com/api/notifications/mark-all-read",
       {
         method: "PATCH",
         headers: {
@@ -609,7 +609,7 @@ async function deleteNotification(id) {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/api/notifications/${id}`,
+      `https://unicersityback.onrender.com/api/notifications/${id}`,
       {
         method: "DELETE",
         headers: {
@@ -643,7 +643,7 @@ async function deleteAllRead() {
 
   try {
     const response = await fetch(
-      "http://localhost:3000/api/notifications/read/all",
+      "https://unicersityback.onrender.com/api/notifications/read/all",
       {
         method: "DELETE",
         headers: {
@@ -750,7 +750,7 @@ function savePreferences() {
 async function savePreferencesToServer(preferences) {
   try {
     const response = await fetch(
-      "http://localhost:3000/api/notifications/preferences",
+      "https://unicersityback.onrender.com/api/notifications/preferences",
       {
         method: "PUT",
         headers: {

@@ -145,7 +145,7 @@ async function loadTeacherAssignments() {
   try {
     // Fetch teacher's assigned sections
     const sectionsResponse = await fetch(
-      "http://localhost:3000/api/enseignants/my-sections",
+      "https://unicersityback.onrender.com/api/enseignants/my-sections",
       {
         headers: {
           Authorization: `Bearer ${teacherAuthToken}`,
@@ -231,7 +231,7 @@ async function checkForStudentsWithDisabilities(sectionIds, groupIds) {
     for (const sectionId of sectionIds) {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students?page=1&limit=100`,
+          `https://unicersityback.onrender.com/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students?page=1&limit=100`,
           {
             headers: {
               Authorization: `Bearer ${teacherAuthToken}`,
@@ -346,7 +346,7 @@ async function createAnnouncement(announcement) {
       for (const sectionId of targetSectionIds) {
         try {
           const studentsResponse = await fetch(
-            `http://localhost:3000/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students`,
+            `https://unicersityback.onrender.com/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students`,
             {
               headers: {
                 Authorization: `Bearer ${teacherAuthToken}`,
@@ -391,7 +391,7 @@ async function createAnnouncement(announcement) {
           if (selectedSection) {
             // Create a "section-wide" notification but mark it with the group ID
             notificationsPromises.push(
-              fetch("http://localhost:3000/api/notifications", {
+              fetch("https://unicersityback.onrender.com/api/notifications", {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${teacherAuthToken}`,
@@ -457,7 +457,7 @@ async function createStudentNotification(notification) {
         }`.trim()
       : "Enseignant";
 
-    const response = await fetch("http://localhost:3000/api/notifications", {
+    const response = await fetch("https://unicersityback.onrender.com/api/notifications", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${teacherAuthToken}`,
@@ -700,7 +700,7 @@ async function loadAnnouncementHistory() {
     let response;
     try {
       response = await fetch(
-        `http://localhost:3000/api/notifications/from-teacher/${teacherId}`,
+        `https://unicersityback.onrender.com/api/notifications/from-teacher/${teacherId}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -714,7 +714,7 @@ async function loadAnnouncementHistory() {
           console.warn(
             "API endpoint not found, falling back to main notifications endpoint"
           );
-          response = await fetch(`http://localhost:3000/api/notifications`, {
+          response = await fetch(`https://unicersityback.onrender.com/api/notifications`, {
             headers: {
               Authorization: `Bearer ${authToken}`,
             },

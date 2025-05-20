@@ -56,7 +56,7 @@
         if (!token) return;
 
         // Silent token verification
-        fetch('http://localhost:3000/api/auth/verify', {
+        fetch('https://unicersityback.onrender.com/api/auth/verify', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -115,7 +115,7 @@
 
             try {
                 // Corrected fetch URL with proper parameter formatting
-                const response = await fetch(`http://localhost:3000/api/auth/administrateur/login?requestedRole=${requestedRole}`, {
+                const response = await fetch(`https://unicersityback.onrender.com/api/auth/administrateur/login?requestedRole=${requestedRole}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ email, password })
