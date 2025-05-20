@@ -5,6 +5,32 @@ let isBackendAvailable = true;
 let requestsLoaded = false; // Flag to track if requests have been loaded
 let tokenRefreshAttempted = false; // Flag to prevent infinite refresh loops
 
+// Fallback data for when backend is unavailable
+function getFallbackGroups(type) {
+  switch (type) {
+    case "section":
+      return [
+        { id: "s1", name: "Section A" },
+        { id: "s2", name: "Section B" },
+        { id: "s3", name: "Section C" }
+      ];
+    case "td":
+      return [
+        { id: "td1", name: "TD 1" },
+        { id: "td2", name: "TD 2" },
+        { id: "td3", name: "TD 3" }
+      ];
+    case "tp":
+      return [
+        { id: "tp1", name: "TP 1" },
+        { id: "tp2", name: "TP 2" },
+        { id: "tp3", name: "TP 3" }
+      ];
+    default:
+      return [];
+  }
+}
+
 // TAB MANAGEMENT
 function openTab(evt, tabName) {
   evt.preventDefault();
@@ -421,9 +447,9 @@ async function loadUserData() {
     });
 
     // Load options
-    await loadAvailableOptions("section", studentData.sections?.[0]?.id);
-    await loadAvailableOptions("td", studentData.tdGroupe?.id);
-    await loadAvailableOptions("tp", studentData.tpGroupe?.id);
+    await loadAvailableOptions("section", studentData.sections?.[0]?.id, studentData);
+    await loadAvailableOptions("td", studentData.tdGroupe?.id, studentData);
+    await loadAvailableOptions("tp", studentData.tpGroupe?.id, studentData);
   } catch (e) {
     console.error("Error loading user data:", e);
     loadFallbackData();
@@ -467,7 +493,7 @@ async function fetchStudentData() {
   return data;
 }
 
-async function loadAvailableOptions(type, currentId) {
+async function loadAvailableOptions(type, currentId, studentData) {
   const select = document.getElementById(`requested-${type}`);
   if (!select) return;
 
@@ -479,62 +505,28 @@ async function loadAvailableOptions(type, currentId) {
 
   try {
     const groups = isBackendAvailable
-      ? await fetchGroups(type, currentId)
+      ? await fetchGroups(type, currentId, studentData)
       : getFallbackGroups(type);
 
     // Reset select after loading
-    select.innerHTML = `<option value="">Sélectionnez...</option>`; // Filter out invalid options first
+    select.innerHTML = `<option value="">Sélectionnez...</option>`;
+
+    // Filter out invalid options first
     const validGroups = groups.filter((group) => {
       // Filter out the current group - can't switch to same group
       const groupIdStr = String(group.id || "");
       const currentIdStr = String(currentId || "");
-
-      console.log(`Comparing IDs for ${group.name}:`, {
-        groupId: group.id,
-        currentId: currentId,
-        groupIdStr,
-        currentIdStr,
-        areEqual: groupIdStr === currentIdStr,
-      });
-
-      if (groupIdStr === currentIdStr) {
-        console.log(
-          `Filtered out current group: ${group.name} (ID match: ${groupIdStr})`
-        );
-        return false;
-      }
-
-      // Allow groups that are at capacity or slightly over (up to 10% over)
-      // This is needed because some groups might already be slightly over capacity
-      const capacityThreshold = group.capacity
-        ? Math.ceil(group.capacity * 1.1)
-        : Number.MAX_SAFE_INTEGER;
-
-      if (
-        group.capacity &&
-        group.currentOccupancy &&
-        group.currentOccupancy >= capacityThreshold
-      ) {
-        console.log(
-          `Filtering out full group: ${group.name} (${group.currentOccupancy}/${group.capacity})`
-        );
-        return false;
-      }
-
-      return true;
+      return groupIdStr !== currentIdStr;
     });
 
-    console.log(
-      `Showing ${validGroups.length} valid options for ${type} from ${groups.length} total`
-    );
+    if (validGroups.length > 0) {
+      // Update the select with valid options
+      validGroups.forEach((group) => {
+        const option = document.createElement("option");
+        option.value = group.id;
 
-    // Update the select with valid options
-    validGroups.forEach((group) => {
-      // Add the type to the name if it's not already there
-      let displayName = group.name;
+        let displayName = group.name;
 
-      // Add capacity information if available
-      if (group.capacity && group.currentOccupancy) {
         // Add the type to the name if it's not already there
         if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
           displayName = `${displayName} (TP)`;
@@ -542,60 +534,40 @@ async function loadAvailableOptions(type, currentId) {
           displayName = `${displayName} (TD)`;
         }
 
-        // Add occupancy info
-        displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
-      } else {
-        // Just add the type if needed
-        if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
-          displayName = `${displayName} (TP)`;
-        } else if (type === "td" && !displayName.toLowerCase().includes("td")) {
-          displayName = `${displayName} (TD)`;
-        }
-      }
-
-      const option = new Option(displayName, group.id);
-      select.add(option);
-    });
-
-    // Re-enable the select
-    select.disabled = false; // If there are no options, show a message
-    if (validGroups.length === 0) {
-      select.innerHTML = `<option value="">Aucune option disponible</option>`;
-      select.disabled = true; // Show an error message with more details
-      const errorDivId = `${type}-form-error`;
-      const errorDiv = document.getElementById(errorDivId);
-      if (errorDiv) {
-        // Get more specific information based on whether it's a section or group
-        let message = "";
-
-        if (type === "section") {
-          message =
-            "Aucune section disponible pour changement. Vous êtes dans la seule section disponible pour votre spécialité/niveau.";
-        } else {
-          message = `Aucun groupe ${type.toUpperCase()} disponible pour changement. `;
-
-          // Check specific scenarios
-          const allGroupsOfType = select.getAttribute("data-all-groups")
-            ? JSON.parse(select.getAttribute("data-all-groups"))
-            : [];
-
-          if (allGroupsOfType.length <= 1) {
-            message += "Vous êtes dans le seul groupe disponible.";
-          } else {
-            const fullGroups = allGroupsOfType.filter(
-              (g) => g.capacity && g.currentOccupancy >= g.capacity
-            );
-
-            if (fullGroups.length === allGroupsOfType.length - 1) {
-              message += "Tous les autres groupes sont complets.";
-            } else {
-              message +=
-                "Les groupes peuvent être complets ou vous êtes déjà dans le seul groupe disponible.";
-            }
+        // Add capacity information to help with decision-making
+        if (group.capacity && group.currentOccupancy !== undefined) {
+          displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
+          
+          // Add visual indicator for full groups
+          if (group.currentOccupancy >= group.capacity) {
+            displayName += " (Complet)";
           }
         }
 
-        console.log("No groups available message:", message);
+        option.textContent = displayName;
+        select.appendChild(option);
+      });
+    } else {
+      // No valid options available - show a message
+      const errorDivId = `${type}-form-error`;
+      const errorDiv = document.getElementById(errorDivId);
+      if (errorDiv) {
+        // Construct appropriate message based on group type
+        let message = `Aucun groupe ${
+          type === "tp" ? "TP" : "TD"
+        } n'est disponible pour changement. `;
+
+        // Check if it's because there are no groups at all
+        const allGroupsOfType = select.getAttribute("data-all-groups")
+          ? JSON.parse(select.getAttribute("data-all-groups"))
+          : [];
+
+        if (allGroupsOfType.length <= 1) {
+          message += "Vous êtes dans le seul groupe disponible.";
+        } else {
+          message += "Vous êtes déjà dans le seul groupe disponible pour votre section.";
+        }
+
         errorDiv.textContent = message;
         errorDiv.style.display = "block";
       }
@@ -603,7 +575,6 @@ async function loadAvailableOptions(type, currentId) {
   } catch (e) {
     console.error(`Error loading ${type} groups:`, e);
 
-    // Show error message in a more visible way
     const errorDivId = `${type}-form-error`;
     const errorDiv = document.getElementById(errorDivId);
     if (errorDiv) {
@@ -616,60 +587,32 @@ async function loadAvailableOptions(type, currentId) {
     getFallbackGroups(type).forEach((group) => {
       select.add(new Option(group.name, group.id));
     });
-
-    // Re-enable the select
-    select.disabled = false;
   }
+
+  // Re-enable the select
+  select.disabled = false;
 }
 
-async function fetchGroups(type, currentId) {
-  if (!currentUser?.id) return [];
-
+async function fetchGroups(type, currentId, studentData) {
   try {
-    // First get student data to get section/filiere info
-    const studentRes = await fetch(
-      `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
-      {
-        headers: { Authorization: `Bearer ${authToken}` },
-        signal: AbortSignal.timeout(5000),
-      }
-    );
-
-    if (!studentRes.ok) throw new Error("Failed to fetch student data");
-    const studentData = await studentRes.json();
-    console.log("Student data for group fetch:", studentData);
-    console.log(`Fetching groups for type: ${type}, currentId: ${currentId}`);
-
-    // Log TP and TD groups directly
-    if (studentData.tpGroupe) {
-      console.log("TP Group found in student data:", studentData.tpGroupe);
-    }
-    if (studentData.tdGroupe) {
-      console.log("TD Group found in student data:", studentData.tdGroupe);
-    } // Use the working fallback approach directly instead of trying to use a non-existent endpoint
-    console.log(`Using direct approach to get available ${type} groups`);
-
-    // Continue with the fallback approach
-    let url;
+    // For type 'section' we handle it differently
     if (type === "section") {
-      // For section changes, find sections in the same specialty and level
-      const specialty = studentData.sections?.[0]?.specialty;
-      const level = studentData.sections?.[0]?.level;
-
-      if (!specialty || !level) {
-        console.warn(
-          "No specialty or level assigned for student, using fallback data"
-        );
+      if (!studentData || !studentData.sections || studentData.sections.length === 0) {
+        console.warn("No sections data available, using fallback data");
         return getFallbackGroups(type);
       }
 
-      // For sections, we'll request all sections with the same specialty and level
-      url = `https://unicersityback.onrender.com/api/sections?specialty=${specialty}&level=${level}`;
-      console.log(
-        `Finding available sections for specialty: ${specialty}, level: ${level}`
-      );
-
-      const res = await fetch(url, {
+      // Get student's section details
+      const studentSection = studentData.sections[0];
+      const specialty = studentSection?.specialty;
+      const level = studentSection?.level;
+      
+      // Use the findAll endpoint with query parameters
+      const queryParams = new URLSearchParams();
+      if (specialty) queryParams.append("specialty", specialty);
+      if (level) queryParams.append("level", level);
+      
+      const res = await fetch(`https://unicersityback.onrender.com/api/sections?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${authToken}` },
         signal: AbortSignal.timeout(5000),
       });
@@ -677,12 +620,9 @@ async function fetchGroups(type, currentId) {
       if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
       const allSections = await res.json();
 
-      // Filter out the current section and any full sections
+      // Only filter out the current section, ignore capacity
       return allSections.filter((section) => {
-        return (
-          section.id !== currentId &&
-          section.currentOccupancy < section.capacity
-        );
+        return section.id !== currentId;
       });
     } else {
       // For group changes (TD/TP), we need to get all groups in the same section
@@ -703,146 +643,71 @@ async function fetchGroups(type, currentId) {
 
         if (groupsRes.ok) {
           const allGroups = await groupsRes.json();
-          console.log(
-            `Fetched ${allGroups.length} groups for section ${sectionId}`
-          );
-          // Filter groups by type and availability
-          console.log(`All groups before filtering:`, allGroups);
-          const filteredGroups = allGroups.filter((group) => {
-            const isCorrectType = group.type === type;
+          console.log(`Fetched ${allGroups.length} groups for section ${sectionId}`);
+          
+          let availableGroups;
+          if (type === "tp") {
+            // For TP groups, filter based on group name containing TP or database type
+            availableGroups = allGroups.filter((group) => {
+              const isNamedTP = group.name.toLowerCase().includes("tp");
+              const isTypeTP = group.type === "tp";
+              const isNotCurrentGroup = group.id !== currentId;
 
-            // String comparison fix: convert IDs to strings for reliable comparison
-            const groupIdStr = String(group.id);
-            const currentIdStr = String(currentId);
-            const isNotCurrentGroup = groupIdStr !== currentIdStr;
-
-            // Allow groups that are at capacity or slightly over (up to 10% over)
-            // This is needed because some groups might already be slightly over capacity
-            const capacityThreshold = group.capacity
-              ? Math.ceil(group.capacity * 1.1)
-              : Number.MAX_SAFE_INTEGER;
-            const hasCapacity =
-              !group.capacity || group.currentOccupancy < capacityThreshold;
-
-            console.log(`Filtering group ${group.name}:`, {
-              id: group.id,
-              type: group.type,
-              currentId: currentId,
-              isCorrectType,
-              isNotCurrentGroup,
-              idComparison: `${groupIdStr} !== ${currentIdStr}`,
-              currentOccupancy: group.currentOccupancy,
-              capacity: group.capacity,
-              capacityThreshold: capacityThreshold,
-              hasCapacity,
+              // Only check type and current group
+              return (isNamedTP || isTypeTP) && isNotCurrentGroup;
             });
+          } else {
+            // For TD groups
+            availableGroups = allGroups.filter((group) => {
+              const isNamedTD = group.name.toLowerCase().includes("td");
+              const isTypeTD = group.type === "td";
+              const isNotCurrentGroup = group.id !== currentId;
 
-            return isCorrectType && isNotCurrentGroup && hasCapacity;
-          });
-          console.log(
-            `Found ${filteredGroups.length} available ${type} groups`,
-            filteredGroups
-          );
+              // Only check type and current group
+              return (isNamedTD || isTypeTD) && isNotCurrentGroup;
+            });
+          }
 
           // Save all groups data for error message use
-          const select = document.getElementById(`${type}-select`);
+          const select = document.getElementById(`requested-${type}`);
           if (select) {
             select.setAttribute("data-all-groups", JSON.stringify(allGroups));
           }
 
-          return filteredGroups;
+          return availableGroups;
         }
       } catch (groupsError) {
-        console.log(
-          "Error fetching groups from dedicated endpoint:",
-          groupsError
-        );
+        console.log("Error fetching groups from dedicated endpoint:", groupsError);
       }
 
       // Fall back to using groups from student data
       const currentGroups = studentData.sections?.[0]?.groupes || [];
 
-      console.log(`Found ${currentGroups.length} total groups in section`, {
-        sectionName: studentData.sections?.[0]?.name,
-        groups: currentGroups.map((g) => `${g.type} ${g.name}`),
-      });
-
-      // Need a more reliable way to filter groups due to data inconsistency
-      // For TP form, filter groups that most likely are TP groups
-      let availableGroups;
       if (type === "tp") {
         // For TP groups, filter based on group name containing TP or database type
-        availableGroups = currentGroups.filter((group) => {
+        return currentGroups.filter((group) => {
           const isNamedTP = group.name.toLowerCase().includes("tp");
           const isTypeTP = group.type === "tp";
           const isNotCurrentGroup = group.id !== currentId;
-          const hasCapacity =
-            !group.capacity || group.currentOccupancy < group.capacity;
-
-          // Log each group for debugging
-          console.log(`Filtering TP group: ${group.name}`, {
-            isNamedTP,
-            isTypeTP,
-            isValidTP: isNamedTP || isTypeTP,
-            isNotCurrentGroup,
-            hasCapacity,
-          });
-
-          // Include if either the name contains TP or type is tp, and meets other criteria
-          return (isNamedTP || isTypeTP) && isNotCurrentGroup && hasCapacity;
+          
+          // Only check type and current group
+          return (isNamedTP || isTypeTP) && isNotCurrentGroup;
         });
       } else {
-        // For TD groups, similar approach but for TD groups
-        availableGroups = currentGroups.filter((group) => {
+        // For TD groups
+        return currentGroups.filter((group) => {
           const isNamedTD = group.name.toLowerCase().includes("td");
           const isTypeTD = group.type === "td";
           const isNotCurrentGroup = group.id !== currentId;
-          const hasCapacity =
-            !group.capacity || group.currentOccupancy < group.capacity;
-
-          // Log each group for debugging
-          console.log(`Filtering TD group: ${group.name}`, {
-            isNamedTD,
-            isTypeTD,
-            isValidTD: isNamedTD || isTypeTD,
-            isNotCurrentGroup,
-            hasCapacity,
-          });
-
-          // Include if either the name contains TD or type is td, and meets other criteria
-          return (isNamedTD || isTypeTD) && isNotCurrentGroup && hasCapacity;
+          
+          // Only check type and current group
+          return (isNamedTD || isTypeTD) && isNotCurrentGroup;
         });
       }
-
-      console.log(
-        `Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`,
-        {
-          availableGroups: availableGroups.map((g) => ({
-            id: g.id,
-            name: g.name,
-            type: g.type,
-          })),
-        }
-      );
-
-      return availableGroups;
     }
   } catch (e) {
     console.error(`Error fetching ${type} groups:`, e);
     return getFallbackGroups(type);
-  }
-}
-
-function getFallbackGroups(type) {
-  if (type === "section") {
-    return ["A", "C", "D"].map((name, i) => ({
-      id: i + 1,
-      name: `Section ${name}`,
-    }));
-  } else if (type === "td") {
-    return [1, 2, 4, 5].map((id) => ({ id, name: `Groupe TD ${id}` }));
-  } else {
-    return [1, 3, 4].map((id) => ({ id, name: `Groupe TP ${id}` }));
   }
 }
 
@@ -2476,9 +2341,9 @@ async function loadUserData() {
     });
 
     // Load options
-    await loadAvailableOptions("section", studentData.sections?.[0]?.id);
-    await loadAvailableOptions("td", studentData.tdGroupe?.id);
-    await loadAvailableOptions("tp", studentData.tpGroupe?.id);
+    await loadAvailableOptions("section", studentData.sections?.[0]?.id, studentData);
+    await loadAvailableOptions("td", studentData.tdGroupe?.id, studentData);
+    await loadAvailableOptions("tp", studentData.tpGroupe?.id, studentData);
   } catch (e) {
     console.error("Error loading user data:", e);
     loadFallbackData();
@@ -2522,7 +2387,7 @@ async function fetchStudentData() {
   return data;
 }
 
-async function loadAvailableOptions(type, currentId) {
+async function loadAvailableOptions(type, currentId, studentData) {
   const select = document.getElementById(`requested-${type}`);
   if (!select) return;
 
@@ -2534,62 +2399,28 @@ async function loadAvailableOptions(type, currentId) {
 
   try {
     const groups = isBackendAvailable
-      ? await fetchGroups(type, currentId)
+      ? await fetchGroups(type, currentId, studentData)
       : getFallbackGroups(type);
 
     // Reset select after loading
-    select.innerHTML = `<option value="">Sélectionnez...</option>`; // Filter out invalid options first
+    select.innerHTML = `<option value="">Sélectionnez...</option>`;
+
+    // Filter out invalid options first
     const validGroups = groups.filter((group) => {
       // Filter out the current group - can't switch to same group
       const groupIdStr = String(group.id || "");
       const currentIdStr = String(currentId || "");
-
-      console.log(`Comparing IDs for ${group.name}:`, {
-        groupId: group.id,
-        currentId: currentId,
-        groupIdStr,
-        currentIdStr,
-        areEqual: groupIdStr === currentIdStr,
-      });
-
-      if (groupIdStr === currentIdStr) {
-        console.log(
-          `Filtered out current group: ${group.name} (ID match: ${groupIdStr})`
-        );
-        return false;
-      }
-
-      // Allow groups that are at capacity or slightly over (up to 10% over)
-      // This is needed because some groups might already be slightly over capacity
-      const capacityThreshold = group.capacity
-        ? Math.ceil(group.capacity * 1.1)
-        : Number.MAX_SAFE_INTEGER;
-
-      if (
-        group.capacity &&
-        group.currentOccupancy &&
-        group.currentOccupancy >= capacityThreshold
-      ) {
-        console.log(
-          `Filtering out full group: ${group.name} (${group.currentOccupancy}/${group.capacity})`
-        );
-        return false;
-      }
-
-      return true;
+      return groupIdStr !== currentIdStr;
     });
 
-    console.log(
-      `Showing ${validGroups.length} valid options for ${type} from ${groups.length} total`
-    );
+    if (validGroups.length > 0) {
+      // Update the select with valid options
+      validGroups.forEach((group) => {
+        const option = document.createElement("option");
+        option.value = group.id;
 
-    // Update the select with valid options
-    validGroups.forEach((group) => {
-      // Add the type to the name if it's not already there
-      let displayName = group.name;
+        let displayName = group.name;
 
-      // Add capacity information if available
-      if (group.capacity && group.currentOccupancy) {
         // Add the type to the name if it's not already there
         if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
           displayName = `${displayName} (TP)`;
@@ -2597,60 +2428,40 @@ async function loadAvailableOptions(type, currentId) {
           displayName = `${displayName} (TD)`;
         }
 
-        // Add occupancy info
-        displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
-      } else {
-        // Just add the type if needed
-        if (type === "tp" && !displayName.toLowerCase().includes("tp")) {
-          displayName = `${displayName} (TP)`;
-        } else if (type === "td" && !displayName.toLowerCase().includes("td")) {
-          displayName = `${displayName} (TD)`;
-        }
-      }
-
-      const option = new Option(displayName, group.id);
-      select.add(option);
-    });
-
-    // Re-enable the select
-    select.disabled = false; // If there are no options, show a message
-    if (validGroups.length === 0) {
-      select.innerHTML = `<option value="">Aucune option disponible</option>`;
-      select.disabled = true; // Show an error message with more details
-      const errorDivId = `${type}-form-error`;
-      const errorDiv = document.getElementById(errorDivId);
-      if (errorDiv) {
-        // Get more specific information based on whether it's a section or group
-        let message = "";
-
-        if (type === "section") {
-          message =
-            "Aucune section disponible pour changement. Vous êtes dans la seule section disponible pour votre spécialité/niveau.";
-        } else {
-          message = `Aucun groupe ${type.toUpperCase()} disponible pour changement. `;
-
-          // Check specific scenarios
-          const allGroupsOfType = select.getAttribute("data-all-groups")
-            ? JSON.parse(select.getAttribute("data-all-groups"))
-            : [];
-
-          if (allGroupsOfType.length <= 1) {
-            message += "Vous êtes dans le seul groupe disponible.";
-          } else {
-            const fullGroups = allGroupsOfType.filter(
-              (g) => g.capacity && g.currentOccupancy >= g.capacity
-            );
-
-            if (fullGroups.length === allGroupsOfType.length - 1) {
-              message += "Tous les autres groupes sont complets.";
-            } else {
-              message +=
-                "Les groupes peuvent être complets ou vous êtes déjà dans le seul groupe disponible.";
-            }
+        // Add capacity information to help with decision-making
+        if (group.capacity && group.currentOccupancy !== undefined) {
+          displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
+          
+          // Add visual indicator for full groups
+          if (group.currentOccupancy >= group.capacity) {
+            displayName += " (Complet)";
           }
         }
 
-        console.log("No groups available message:", message);
+        option.textContent = displayName;
+        select.appendChild(option);
+      });
+    } else {
+      // No valid options available - show a message
+      const errorDivId = `${type}-form-error`;
+      const errorDiv = document.getElementById(errorDivId);
+      if (errorDiv) {
+        // Construct appropriate message based on group type
+        let message = `Aucun groupe ${
+          type === "tp" ? "TP" : "TD"
+        } n'est disponible pour changement. `;
+
+        // Check if it's because there are no groups at all
+        const allGroupsOfType = select.getAttribute("data-all-groups")
+          ? JSON.parse(select.getAttribute("data-all-groups"))
+          : [];
+
+        if (allGroupsOfType.length <= 1) {
+          message += "Vous êtes dans le seul groupe disponible.";
+        } else {
+          message += "Vous êtes déjà dans le seul groupe disponible pour votre section.";
+        }
+
         errorDiv.textContent = message;
         errorDiv.style.display = "block";
       }
@@ -2658,7 +2469,6 @@ async function loadAvailableOptions(type, currentId) {
   } catch (e) {
     console.error(`Error loading ${type} groups:`, e);
 
-    // Show error message in a more visible way
     const errorDivId = `${type}-form-error`;
     const errorDiv = document.getElementById(errorDivId);
     if (errorDiv) {
@@ -2671,60 +2481,32 @@ async function loadAvailableOptions(type, currentId) {
     getFallbackGroups(type).forEach((group) => {
       select.add(new Option(group.name, group.id));
     });
-
-    // Re-enable the select
-    select.disabled = false;
   }
+
+  // Re-enable the select
+  select.disabled = false;
 }
 
-async function fetchGroups(type, currentId) {
-  if (!currentUser?.id) return [];
-
+async function fetchGroups(type, currentId, studentData) {
   try {
-    // First get student data to get section/filiere info
-    const studentRes = await fetch(
-      `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
-      {
-        headers: { Authorization: `Bearer ${authToken}` },
-        signal: AbortSignal.timeout(5000),
-      }
-    );
-
-    if (!studentRes.ok) throw new Error("Failed to fetch student data");
-    const studentData = await studentRes.json();
-    console.log("Student data for group fetch:", studentData);
-    console.log(`Fetching groups for type: ${type}, currentId: ${currentId}`);
-
-    // Log TP and TD groups directly
-    if (studentData.tpGroupe) {
-      console.log("TP Group found in student data:", studentData.tpGroupe);
-    }
-    if (studentData.tdGroupe) {
-      console.log("TD Group found in student data:", studentData.tdGroupe);
-    } // Use the working fallback approach directly instead of trying to use a non-existent endpoint
-    console.log(`Using direct approach to get available ${type} groups`);
-
-    // Continue with the fallback approach
-    let url;
+    // For type 'section' we handle it differently
     if (type === "section") {
-      // For section changes, find sections in the same specialty and level
-      const specialty = studentData.sections?.[0]?.specialty;
-      const level = studentData.sections?.[0]?.level;
-
-      if (!specialty || !level) {
-        console.warn(
-          "No specialty or level assigned for student, using fallback data"
-        );
+      if (!studentData || !studentData.sections || studentData.sections.length === 0) {
+        console.warn("No sections data available, using fallback data");
         return getFallbackGroups(type);
       }
 
-      // For sections, we'll request all sections with the same specialty and level
-      url = `https://unicersityback.onrender.com/api/sections?specialty=${specialty}&level=${level}`;
-      console.log(
-        `Finding available sections for specialty: ${specialty}, level: ${level}`
-      );
-
-      const res = await fetch(url, {
+      // Get student's section details
+      const studentSection = studentData.sections[0];
+      const specialty = studentSection?.specialty;
+      const level = studentSection?.level;
+      
+      // Use the findAll endpoint with query parameters
+      const queryParams = new URLSearchParams();
+      if (specialty) queryParams.append("specialty", specialty);
+      if (level) queryParams.append("level", level);
+      
+      const res = await fetch(`https://unicersityback.onrender.com/api/sections?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${authToken}` },
         signal: AbortSignal.timeout(5000),
       });
@@ -2732,12 +2514,9 @@ async function fetchGroups(type, currentId) {
       if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
       const allSections = await res.json();
 
-      // Filter out the current section and any full sections
+      // Only filter out the current section, ignore capacity
       return allSections.filter((section) => {
-        return (
-          section.id !== currentId &&
-          section.currentOccupancy < section.capacity
-        );
+        return section.id !== currentId;
       });
     } else {
       // For group changes (TD/TP), we need to get all groups in the same section
@@ -2758,129 +2537,67 @@ async function fetchGroups(type, currentId) {
 
         if (groupsRes.ok) {
           const allGroups = await groupsRes.json();
-          console.log(
-            `Fetched ${allGroups.length} groups for section ${sectionId}`
-          );
-          // Filter groups by type and availability
-          console.log(`All groups before filtering:`, allGroups);
-          const filteredGroups = allGroups.filter((group) => {
-            const isCorrectType = group.type === type;
+          console.log(`Fetched ${allGroups.length} groups for section ${sectionId}`);
+          
+          let availableGroups;
+          if (type === "tp") {
+            // For TP groups, filter based on group name containing TP or database type
+            availableGroups = allGroups.filter((group) => {
+              const isNamedTP = group.name.toLowerCase().includes("tp");
+              const isTypeTP = group.type === "tp";
+              const isNotCurrentGroup = group.id !== currentId;
 
-            // String comparison fix: convert IDs to strings for reliable comparison
-            const groupIdStr = String(group.id);
-            const currentIdStr = String(currentId);
-            const isNotCurrentGroup = groupIdStr !== currentIdStr;
-
-            // Allow groups that are at capacity or slightly over (up to 10% over)
-            // This is needed because some groups might already be slightly over capacity
-            const capacityThreshold = group.capacity
-              ? Math.ceil(group.capacity * 1.1)
-              : Number.MAX_SAFE_INTEGER;
-            const hasCapacity =
-              !group.capacity || group.currentOccupancy < capacityThreshold;
-
-            console.log(`Filtering group ${group.name}:`, {
-              id: group.id,
-              type: group.type,
-              currentId: currentId,
-              isCorrectType,
-              isNotCurrentGroup,
-              idComparison: `${groupIdStr} !== ${currentIdStr}`,
-              currentOccupancy: group.currentOccupancy,
-              capacity: group.capacity,
-              capacityThreshold: capacityThreshold,
-              hasCapacity,
+              // Only check type and current group
+              return (isNamedTP || isTypeTP) && isNotCurrentGroup;
             });
+          } else {
+            // For TD groups
+            availableGroups = allGroups.filter((group) => {
+              const isNamedTD = group.name.toLowerCase().includes("td");
+              const isTypeTD = group.type === "td";
+              const isNotCurrentGroup = group.id !== currentId;
 
-            return isCorrectType && isNotCurrentGroup && hasCapacity;
-          });
-          console.log(
-            `Found ${filteredGroups.length} available ${type} groups`,
-            filteredGroups
-          );
+              // Only check type and current group
+              return (isNamedTD || isTypeTD) && isNotCurrentGroup;
+            });
+          }
 
           // Save all groups data for error message use
-          const select = document.getElementById(`${type}-select`);
+          const select = document.getElementById(`requested-${type}`);
           if (select) {
             select.setAttribute("data-all-groups", JSON.stringify(allGroups));
           }
 
-          return filteredGroups;
+          return availableGroups;
         }
       } catch (groupsError) {
-        console.log(
-          "Error fetching groups from dedicated endpoint:",
-          groupsError
-        );
+        console.log("Error fetching groups from dedicated endpoint:", groupsError);
       }
 
       // Fall back to using groups from student data
       const currentGroups = studentData.sections?.[0]?.groupes || [];
 
-      console.log(`Found ${currentGroups.length} total groups in section`, {
-        sectionName: studentData.sections?.[0]?.name,
-        groups: currentGroups.map((g) => `${g.type} ${g.name}`),
-      });
-
-      // Need a more reliable way to filter groups due to data inconsistency
-      // For TP form, filter groups that most likely are TP groups
-      let availableGroups;
       if (type === "tp") {
         // For TP groups, filter based on group name containing TP or database type
-        availableGroups = currentGroups.filter((group) => {
+        return currentGroups.filter((group) => {
           const isNamedTP = group.name.toLowerCase().includes("tp");
           const isTypeTP = group.type === "tp";
           const isNotCurrentGroup = group.id !== currentId;
-          const hasCapacity =
-            !group.capacity || group.currentOccupancy < group.capacity;
-
-          // Log each group for debugging
-          console.log(`Filtering TP group: ${group.name}`, {
-            isNamedTP,
-            isTypeTP,
-            isValidTP: isNamedTP || isTypeTP,
-            isNotCurrentGroup,
-            hasCapacity,
-          });
-
-          // Include if either the name contains TP or type is tp, and meets other criteria
-          return (isNamedTP || isTypeTP) && isNotCurrentGroup && hasCapacity;
+          
+          // Only check type and current group
+          return (isNamedTP || isTypeTP) && isNotCurrentGroup;
         });
       } else {
-        // For TD groups, similar approach but for TD groups
-        availableGroups = currentGroups.filter((group) => {
+        // For TD groups
+        return currentGroups.filter((group) => {
           const isNamedTD = group.name.toLowerCase().includes("td");
           const isTypeTD = group.type === "td";
           const isNotCurrentGroup = group.id !== currentId;
-          const hasCapacity =
-            !group.capacity || group.currentOccupancy < group.capacity;
-
-          // Log each group for debugging
-          console.log(`Filtering TD group: ${group.name}`, {
-            isNamedTD,
-            isTypeTD,
-            isValidTD: isNamedTD || isTypeTD,
-            isNotCurrentGroup,
-            hasCapacity,
-          });
-
-          // Include if either the name contains TD or type is td, and meets other criteria
-          return (isNamedTD || isTypeTD) && isNotCurrentGroup && hasCapacity;
+          
+          // Only check type and current group
+          return (isNamedTD || isTypeTD) && isNotCurrentGroup;
         });
       }
-
-      console.log(
-        `Found ${availableGroups.length} ${type} groups in section ${studentData.sections?.[0]?.name}`,
-        {
-          availableGroups: availableGroups.map((g) => ({
-            id: g.id,
-            name: g.name,
-            type: g.type,
-          })),
-        }
-      );
-
-      return availableGroups;
     }
   } catch (e) {
     console.error(`Error fetching ${type} groups:`, e);

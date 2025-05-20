@@ -662,12 +662,22 @@
 
         sections.forEach((section) => {
           // Calculate total occupancy from all groups
-          const totalOccupancy = section.groupes
-            ? section.groupes.reduce(
-                (sum, groupe) => sum + (groupe.currentOccupancy || 0),
-                0
-              )
+            // Count TD and TP students separately, then sum (avoiding double counting)
+            const tdOccupancy = section.groupes
+            ? section.groupes
+              .filter((g) => g.type === "td")
+              .reduce((sum, g) => sum + (g.currentOccupancy || 0), 0)
             : 0;
+            const tpOccupancy = section.groupes
+            ? section.groupes
+              .filter((g) => g.type === "tp")
+              .reduce((sum, g) => sum + (g.currentOccupancy || 0), 0)
+            : 0;
+            // Estimate total students as average of TD and TP (rounded up)
+            const totalOccupancy =
+            tdOccupancy && tpOccupancy
+              ? Math.ceil((tdOccupancy + tpOccupancy) / 2)
+              : tdOccupancy || tpOccupancy || 0;
 
           // Group counts by type
           const tdGroups = section.groupes
