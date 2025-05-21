@@ -130,16 +130,9 @@
                     storage.setItem('admin_role', data.adminRole);
                     storage.setItem('admin_email', data.email);
                     storage.setItem('admin_id', data.userId);
-
-                    const rolePages = {
-                        'chef-de-departement': 'chef-de-departement.html',
-                        'chef-de-specialite': 'chef-de-specialite.html',
-                        'secretaire': 'secretaire-agent.html',
-                        'vice-doyen': 'vice-doyen.html',
-                        'doyen': 'doyen.html'
-                    };
                     
-                    window.location.href = rolePages[data.adminRole];
+                    // Redirect to the unified admin dashboard
+                    window.location.href = 'admin-dashboard.html';
                 } else {
                     showError('password-error', data.message || 'Email ou mot de passe incorrect');
                 }

@@ -4,7 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des demandes de modification de profil - Administration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;700&display=swap" rel="stylesheet">
     <link href="style/admin.css" rel="stylesheet">
+    <style>
+        .student-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .student-details span {
+            display: block;
+        }
+        
+        .student-name {
+            font-weight: 500;
+        }
+        
+        .student-email {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+        }
+        
+        .field-changes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .field-badge {
+            background-color: rgba(139, 92, 246, 0.1);
+            color: var(--primary-color);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #D97706;
+        }
+        
+        .status-approved {
+            background-color: #D1FAE5;
+            color: #059669;
+        }
+        
+        .status-rejected {
+            background-color: #FEE2E2;
+            color: #DC2626;
+        }
+        
+        .status-cancelled {
+            background-color: #E5E7EB;
+            color: #4B5563;
+        }
+        
+        .changed-field {
+            margin-bottom: 15px;
+        }
+        
+        .changed-field-header {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .changed-field-content {
+            display: flex;
+            justify-content: space-between;
+            background-color: #F9FAFB;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        .old-value, .new-value {
+            flex: 1;
+        }
+        
+        .old-value {
+            color: #DC2626;
+            text-decoration: line-through;
+            margin-right: 15px;
+        }
+        
+        .new-value {
+            color: #059669;
+        }
+        
+        .value-label {
+            font-size: 0.75rem;
+            color: #6B7280;
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+        
+        .card-footer {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+            margin-top: auto;
+        }
+        
+        .trend-positive {
+            color: var(--success-color);
+        }
+        
+        .trend-negative {
+            color: var(--danger-color);
+        }
+        
+        .admin-notes {
+            margin-top: 20px;
+        }
+        
+        .notes-header {
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -21,6 +202,85 @@
                 <!-- Status Messages -->
                 <div id="status-message" class="status-message" style="display: none;"></div>
                 
+                <!-- Dashboard Cards -->
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background-color: rgba(139, 92, 246, 0.1);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text" style="color: var(--primary-color);">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="card-title">Total des demandes</div>
+                            </div>
+                        </div>
+                        <div class="card-value" id="total-requests">0</div>
+                        <div class="card-footer">
+                            Toutes les demandes
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background-color: rgba(245, 158, 11, 0.1);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock" style="color: var(--warning-color);">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="card-title">En attente</div>
+                            </div>
+                        </div>
+                        <div class="card-value" id="pending-requests">0</div>
+                        <div class="card-footer">
+                            Demandes à traiter
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background-color: rgba(16, 185, 129, 0.1);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle" style="color: var(--success-color);">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="card-title">Approuvées</div>
+                            </div>
+                        </div>
+                        <div class="card-value" id="approved-requests">0</div>
+                        <div class="card-footer">
+                            Demandes acceptées
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background-color: rgba(239, 68, 68, 0.1);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle" style="color: var(--danger-color);">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="card-title">Rejetées</div>
+                            </div>
+                        </div>
+                        <div class="card-value" id="rejected-requests">0</div>
+                        <div class="card-footer">
+                            Demandes refusées
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Filters -->
                 <div class="filters">
                     <div class="filter-group">
@@ -30,12 +290,39 @@
                             <option value="pending" selected>En attente</option>
                             <option value="approved">Approuvées</option>
                             <option value="rejected">Rejetées</option>
+                            <option value="cancelled">Annulées</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group" id="department-filter-container" style="display: none;">
+                        <label for="department-filter">Département:</label>
+                        <select id="department-filter" class="filter-select">
+                            <option value="all">Tous</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group" id="speciality-filter-container" style="display: none;">
+                        <label for="speciality-filter">Spécialité:</label>
+                        <select id="speciality-filter" class="filter-select">
+                            <option value="all">Toutes</option>
+                            <!-- Will be populated dynamically -->
                         </select>
                     </div>
                     
                     <div class="filter-group">
                         <label for="search">Recherche:</label>
                         <input type="text" id="search" class="filter-input" placeholder="Nom, matricule...">
+                    </div>
+                    
+                    <div class="filter-group filter-action">
+                        <button id="clear-filters" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                            Réinitialiser
+                        </button>
                     </div>
                 </div>
                 
@@ -47,6 +334,7 @@
                                 <th>Date</th>
                                 <th>Étudiant</th>
                                 <th>Matricule</th>
+                                <th>Filière</th>
                                 <th>Champs modifiés</th>
                                 <th>Statut</th>
                                 <th>Actions</th>
@@ -54,8 +342,8 @@
                         </thead>
                         <tbody id="requests-table-body">
                             <!-- Requests will be loaded here -->
-                            <tr class="loading-row">
-                                <td colspan="6">Chargement des demandes...</td>
+                    <tr class="loading-row">
+                                <td colspan="7">Chargement des demandes...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -81,3 +369,1508 @@
                     <p><strong>Date:</strong> <span id="request-date"></span></p>
                     <p><strong>Étudiant:</strong> <span id="request-student"></span></p>
                     <p><strong>Matricule:</strong> <span id="request-matricule"></span></p>
+                    <p><strong>Email:</strong> <span id="request-email"></span></p>
+                    <p><strong>Département:</strong> <span id="request-department">Non spécifié</span></p>
+                    <p><strong>Spécialité:</strong> <span id="request-speciality">Non spécifiée</span></p>
+                    <p><strong>Statut:</strong> <span id="request-status"></span></p>
+                </div>
+                
+                <div class="request-changes" id="request-changes">
+                    <h3>Modifications demandées</h3>
+                    <!-- Changes will be loaded here -->
+                </div>
+                
+                <div class="admin-notes" id="admin-response-container" style="display: none;">
+                    <h3 class="notes-header">Réponse de l'administration</h3>
+                    <p id="admin-response"></p>
+                </div>
+                
+                <div class="admin-actions" id="admin-actions" style="display: none;">
+                    <h3>Traiter la demande</h3>
+                    <div class="form-group">
+                        <label for="admin-comment">Commentaire (optionnel):</label>
+                        <textarea id="admin-comment" class="form-input" rows="3" placeholder="Ajouter un commentaire..."></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button id="approve-btn" class="btn btn-success">Approuver</button>
+                        <button id="reject-btn" class="btn btn-danger">Rejeter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        const API_BASE_URL = 'https://unicersityback.onrender.com/api';
+        let authToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+        let adminRole = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
+        let adminId = localStorage.getItem('admin_id') || sessionStorage.getItem('admin_id');
+        let adminDepartment = localStorage.getItem('admin_department') || sessionStorage.getItem('admin_department');
+        let adminSpeciality = localStorage.getItem('admin_speciality') || sessionStorage.getItem('admin_speciality');
+        let allRequests = [];
+        let filteredRequests = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let currentRequest = null;
+        
+        // Role-based permission configuration
+        const rolePermissions = {
+            'secretaire': {
+                canView: true,
+                canApprove: true,
+                canReject: true,
+                filterByDepartment: false,
+                filterBySpeciality: false,
+                description: 'En tant que Secrétaire, vous pouvez traiter toutes les demandes de modification de profil.'
+            },
+            'chef-de-specialite': {
+                canView: true,
+                canApprove: true,
+                canReject: true,
+                filterByDepartment: false,
+                filterBySpeciality: true,
+                description: 'En tant que Chef de Spécialité, vous pouvez traiter les demandes de votre spécialité.'
+            },
+            'chef-de-departement': {
+                canView: true,
+                canApprove: true,
+                canReject: true,
+                filterByDepartment: true,
+                filterBySpeciality: false,
+                description: 'En tant que Chef de Département, vous pouvez traiter les demandes de votre département.'
+            },
+            'vice-doyen': {
+                canView: true,
+                canApprove: true,
+                canReject: true,
+                filterByDepartment: false,
+                filterBySpeciality: false,
+                description: 'En tant que Vice-Doyen, vous pouvez traiter toutes les demandes de modification de profil.'
+            },
+            'doyen': {
+                canView: true,
+                canApprove: true,
+                canReject: true,
+                filterByDepartment: false,
+                filterBySpeciality: false,
+                description: 'En tant que Doyen, vous pouvez traiter toutes les demandes de modification de profil.'
+            }
+        };
+        
+        // DOM Elements
+        const statusMessage = document.getElementById('status-message');
+        const requestsTableBody = document.getElementById('requests-table-body');
+        const paginationElement = document.getElementById('pagination');
+        const statusFilter = document.getElementById('status-filter');
+        const searchInput = document.getElementById('search');
+        
+        // Stats elements
+        const totalRequestsEl = document.getElementById('total-requests');
+        const pendingRequestsEl = document.getElementById('pending-requests');
+        const approvedRequestsEl = document.getElementById('approved-requests');
+        const rejectedRequestsEl = document.getElementById('rejected-requests');
+        
+        // Modal elements
+        const modal = document.getElementById('request-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const approveBtn = document.getElementById('approve-btn');
+        const rejectBtn = document.getElementById('reject-btn');
+        const adminActions = document.getElementById('admin-actions');
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Verify authentication
+                if (!authToken) {
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+                
+                // Verify role permissions - now includes all admin roles with appropriate permissions
+                const permittedRoles = ['secretaire', 'chef-de-specialite', 'chef-de-departement', 'vice-doyen', 'doyen'];
+                if (!permittedRoles.includes(adminRole)) {
+                    showMessage(`Accès non autorisé. Votre rôle (${adminRole}) n'a pas les permissions nécessaires.`, 'error');
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 3000);
+                    return;
+                }
+                
+                // Load the sidebar
+                await loadSidebar();
+                
+                // Display role-specific information
+                if (rolePermissions[adminRole]) {
+                    const infoBox = document.createElement('div');
+                    infoBox.className = 'role-info-box';
+                    infoBox.innerHTML = `
+                        <div class="role-info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="role-info-content">
+                            <strong>Permissions:</strong> ${rolePermissions[adminRole].description}
+                        </div>
+                        <button class="role-info-close">×</button>
+                    `;
+                    
+                    // Insert after the status message
+                    const contentContainer = document.querySelector('.content-container');
+                    contentContainer.insertBefore(infoBox, contentContainer.firstChild);
+                    
+                    // Add close button functionality
+                    infoBox.querySelector('.role-info-close').addEventListener('click', () => {
+                        infoBox.style.display = 'none';
+                    });
+                    
+                    // Add styling
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .role-info-box {
+                            display: flex;
+                            align-items: center;
+                            padding: 15px;
+                            background-color: #EFF6FF;
+                            border-left: 4px solid #3B82F6;
+                            border-radius: 6px;
+                            margin-bottom: 20px;
+                        }
+                        
+                        .role-info-icon {
+                            color: #3B82F6;
+                            margin-right: 15px;
+                        }
+                        
+                        .role-info-content {
+                            flex: 1;
+                        }
+                        
+                        .role-info-close {
+                            background: none;
+                            border: none;
+                            font-size: 18px;
+                            cursor: pointer;
+                            color: #6B7280;
+                        }
+                        
+                        .role-info-close:hover {
+                            color: #111827;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Load data
+                await loadRequests();
+                
+                // Set up event listeners
+                setupEventListeners();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showMessage(`Une erreur est survenue lors de l'initialisation de la page: ${error.message}`, 'error');
+            }
+        });
+        
+        async function loadSidebar() {
+            try {
+                const response = await fetch('admin-sidebar.html');
+                const html = await response.text();
+                document.getElementById('navbar-container').innerHTML = html;
+                
+                // Activate the current nav item
+                const activeNavItem = document.querySelector('a[href="admin-profile-requests.html"]');
+                if (activeNavItem) {
+                    activeNavItem.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error loading sidebar:', error);
+                showMessage('Impossible de charger la barre latérale.', 'error');
+            }
+        }
+        
+        async function setupEventListeners() {
+            // Filter events with debouncing for better performance
+            let filterTimeout;
+            
+            statusFilter.addEventListener('change', () => {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(filterRequests, 300);
+            });
+            
+            searchInput.addEventListener('input', () => {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(filterRequests, 300);
+            });
+            
+            // Initialize department and speciality filters if needed
+            await initializeFilters();
+            
+            // Set up clear filters button
+            const clearFiltersBtn = document.getElementById('clear-filters');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', () => {
+                    statusFilter.value = 'pending';
+                    searchInput.value = '';
+                    
+                    const departmentFilter = document.getElementById('department-filter');
+                    const specialityFilter = document.getElementById('speciality-filter');
+                    
+                    if (departmentFilter) departmentFilter.value = 'all';
+                    if (specialityFilter) specialityFilter.value = 'all';
+                    
+                    filterRequests();
+                });
+            }
+            
+            // Add refresh button functionality
+            const refreshBtn = document.createElement('button');
+            refreshBtn.className = 'btn btn-primary refresh-btn';
+            refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Actualiser`;
+            refreshBtn.style.marginLeft = '10px';
+            
+            const header = document.querySelector('.header');
+            header.appendChild(refreshBtn);
+            
+            refreshBtn.addEventListener('click', async () => {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-loader spinning"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Actualisation...`;
+                await loadRequests();
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Actualiser`;
+            });
+            
+            // Style for spinning animation and filters
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                .spinning {
+                    animation: spin 1s linear infinite;
+                }
+                .refresh-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+                .filters {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 15px;
+                    align-items: flex-end;
+                    margin-bottom: 20px;
+                }
+                .filter-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                }
+                .filter-action {
+                    align-self: flex-end;
+                }
+                .filter-select, .filter-input {
+                    min-width: 150px;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    border: 1px solid #e2e8f0;
+                }
+                @media (max-width: 768px) {
+                    .filters {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .filter-select, .filter-input {
+                        width: 100%;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Set up auto-refresh every 5 minutes
+            const autoRefreshInterval = 5 * 60 * 1000; // 5 minutes
+            const autoRefresh = setInterval(async () => {
+                await loadRequests();
+            }, autoRefreshInterval);
+            
+            // Clear interval when page is unloaded
+            window.addEventListener('beforeunload', () => {
+                clearInterval(autoRefresh);
+            });
+            
+            // Modal events
+            closeModalBtn.addEventListener('click', closeModal);
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Action buttons
+            approveBtn.addEventListener('click', () => handleRequestAction('approved'));
+            rejectBtn.addEventListener('click', () => handleRequestAction('rejected'));
+        }
+        
+        // New function to initialize department and speciality filters
+        async function initializeFilters() {
+            // Set up department filter if applicable
+            const departmentFilterContainer = document.getElementById('department-filter-container');
+            const departmentFilter = document.getElementById('department-filter');
+            
+            // Set up speciality filter if applicable
+            const specialityFilterContainer = document.getElementById('speciality-filter-container');
+            const specialityFilter = document.getElementById('speciality-filter');
+            
+            try {
+                // Only show these filters for users who need them
+                if (rolePermissions[adminRole]?.filterByDepartment) {
+                    departmentFilterContainer.style.display = 'block';
+                    
+                    // Fetch departments from API
+                    const response = await fetch(`${API_BASE_URL}/departments`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const departments = await response.json();
+                        
+                        // Populate department filter
+                        departments.forEach(dept => {
+                            const option = document.createElement('option');
+                            option.value = dept.id;
+                            option.textContent = dept.name;
+                            departmentFilter.appendChild(option);
+                        });
+                        
+                        // If admin has a specific department, select it by default
+                        if (adminDepartment) {
+                            departmentFilter.value = adminDepartment;
+                        }
+                        
+                        // Add event listener for department filter
+                        departmentFilter.addEventListener('change', () => {
+                            filterRequests();
+                        });
+                    }
+                }
+                
+                if (rolePermissions[adminRole]?.filterBySpeciality) {
+                    specialityFilterContainer.style.display = 'block';
+                    
+                    // Fetch specialities from API
+                    const response = await fetch(`${API_BASE_URL}/specialities`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const specialities = await response.json();
+                        
+                        // Populate speciality filter
+                        specialities.forEach(spec => {
+                            const option = document.createElement('option');
+                            option.value = spec.id;
+                            option.textContent = spec.name;
+                            specialityFilter.appendChild(option);
+                        });
+                        
+                        // If admin has a specific speciality, select it by default
+                        if (adminSpeciality) {
+                            specialityFilter.value = adminSpeciality;
+                        }
+                        
+                        // Add event listener for speciality filter
+                        specialityFilter.addEventListener('change', () => {
+                            filterRequests();
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error initializing filters:', error);
+                showMessage('Erreur lors de l\'initialisation des filtres.', 'warning');
+            }
+        }
+        
+        async function loadRequests() {
+            try {
+                showMessage('Chargement des demandes...', 'info');
+                
+                // Check if user has permission to view profile requests
+                const adminRolesWithAccess = ['secretaire', 'chef-de-specialite', 'chef-de-departement', 'vice-doyen', 'doyen'];
+                if (!adminRolesWithAccess.includes(adminRole)) {
+                    throw new Error('Vous n\'avez pas les permissions nécessaires pour accéder à cette ressource.');
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/profile-requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Session expirée. Veuillez vous reconnecter.');
+                    } else if (response.status === 403) {
+                        throw new Error('Accès non autorisé. Vous n\'avez pas les permissions nécessaires.');
+                    } else {
+                        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                    }
+                }
+                
+                allRequests = await response.json();
+                
+                // Apply role-based filtering if needed
+                if (adminRole === 'chef-de-specialite' && adminSpeciality) {
+                    allRequests = allRequests.filter(request => {
+                        return request.student && request.student.speciality && 
+                               request.student.speciality.id === adminSpeciality;
+                    });
+                } else if (adminRole === 'chef-de-departement' && adminDepartment) {
+                    allRequests = allRequests.filter(request => {
+                        return request.student && request.student.department && 
+                               request.student.department.id === adminDepartment;
+                    });
+                }
+                
+                // Update statistics
+                updateStats(allRequests);
+                
+                // Apply initial filtering
+                filterRequests();
+                
+                showMessage('', 'clear');
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                
+                if (error.message.includes('Session expirée')) {
+                    showMessage(error.message, 'error');
+                    setTimeout(() => {
+                        // Clear stored authentication data
+                        localStorage.removeItem('admin_token');
+                        sessionStorage.removeItem('admin_token');
+                        localStorage.removeItem('admin_role');
+                        sessionStorage.removeItem('admin_role');
+                        localStorage.removeItem('admin_email');
+                        sessionStorage.removeItem('admin_email');
+                        localStorage.removeItem('admin_id');
+                        sessionStorage.removeItem('admin_id');
+                        localStorage.removeItem('admin_department');
+                        sessionStorage.removeItem('admin_department');
+                        localStorage.removeItem('admin_speciality');
+                        sessionStorage.removeItem('admin_speciality');
+                        
+                        // Redirect to login page
+                        window.location.href = 'admin-login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                showMessage(`Erreur lors du chargement des demandes: ${error.message}`, 'error');
+                requestsTableBody.innerHTML = `<tr><td colspan="6" class="error-text">Impossible de charger les demandes. ${error.message}</td></tr>`;
+            }
+        }
+        
+        async function updateStats(requests) {
+            if (!requests || !Array.isArray(requests)) return;
+            
+            try {
+                // Count by status
+                const counts = {
+                    total: requests.length,
+                    pending: 0,
+                    approved: 0,
+                    rejected: 0
+                };
+                
+                requests.forEach(request => {
+                    if (request.status === 'pending') counts.pending++;
+                    if (request.status === 'approved') counts.approved++;
+                    if (request.status === 'rejected') counts.rejected++;
+                });
+                
+                // Update UI with animation for better UX
+                animateValue(totalRequestsEl, parseInt(totalRequestsEl.textContent) || 0, counts.total, 500);
+                animateValue(pendingRequestsEl, parseInt(pendingRequestsEl.textContent) || 0, counts.pending, 500);
+                animateValue(approvedRequestsEl, parseInt(approvedRequestsEl.textContent) || 0, counts.approved, 500);
+                animateValue(rejectedRequestsEl, parseInt(rejectedRequestsEl.textContent) || 0, counts.rejected, 500);
+                
+                // Alternatively, fetch statistics directly from the API for more accurate data
+                // This could be implemented if there's a dedicated endpoint
+                /* 
+                const statsResponse = await fetch(`${API_BASE_URL}/profile-requests/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (statsResponse.ok) {
+                    const apiStats = await statsResponse.json();
+                    animateValue(totalRequestsEl, parseInt(totalRequestsEl.textContent) || 0, apiStats.total, 500);
+                    animateValue(pendingRequestsEl, parseInt(pendingRequestsEl.textContent) || 0, apiStats.pending, 500);
+                    animateValue(approvedRequestsEl, parseInt(approvedRequestsEl.textContent) || 0, apiStats.approved, 500);
+                    animateValue(rejectedRequestsEl, parseInt(rejectedRequestsEl.textContent) || 0, apiStats.rejected, 500);
+                }
+                */
+            } catch (error) {
+                console.error('Error updating statistics:', error);
+                // Fallback to direct update without animation
+                totalRequestsEl.textContent = requests.length;
+                pendingRequestsEl.textContent = requests.filter(r => r.status === 'pending').length;
+                approvedRequestsEl.textContent = requests.filter(r => r.status === 'approved').length;
+                rejectedRequestsEl.textContent = requests.filter(r => r.status === 'rejected').length;
+            }
+        }
+        
+        // Helper function to animate number changes
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.textContent = value;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+        
+        function filterRequests() {
+            const statusValue = statusFilter.value;
+            const searchValue = searchInput.value.toLowerCase();
+            
+            // Get department and speciality filters if they exist
+            const departmentFilter = document.getElementById('department-filter');
+            const specialityFilter = document.getElementById('speciality-filter');
+            
+            const departmentValue = departmentFilter ? departmentFilter.value : 'all';
+            const specialityValue = specialityFilter ? specialityFilter.value : 'all';
+            
+            filteredRequests = allRequests.filter(request => {
+                // Status filter
+                if (statusValue !== 'all' && request.status !== statusValue) {
+                    return false;
+                }
+                
+                // Department filter
+                if (departmentValue !== 'all' && (!request.student?.department || request.student.department.id !== departmentValue)) {
+                    return false;
+                }
+                
+                // Speciality filter
+                if (specialityValue !== 'all' && (!request.student?.speciality || request.student.speciality.id !== specialityValue)) {
+                    return false;
+                }
+                
+                // Search filter
+                const studentName = `${request.student?.firstName || ''} ${request.student?.lastName || ''}`.toLowerCase();
+                const matricule = request.student?.matricule?.toLowerCase() || '';
+                const email = request.student?.email?.toLowerCase() || '';
+                
+                if (searchValue && !studentName.includes(searchValue) && 
+                    !matricule.includes(searchValue) && !email.includes(searchValue)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Reset to first page and render
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        }
+        
+        function renderTable() {
+            if (filteredRequests.length === 0) {
+                requestsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-text">
+                            <div style="padding: 20px; text-align: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px; color: var(--gray-color);">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <p>Aucune demande trouvée</p>
+                                <p style="font-size: 0.8rem; color: var(--gray-color);">Ajustez vos filtres pour voir plus de résultats</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredRequests.length);
+            const pageRequests = filteredRequests.slice(startIndex, endIndex);
+            
+            // Build table rows
+            requestsTableBody.innerHTML = pageRequests.map(request => {
+                // Format date
+                const requestDate = new Date(request.createdAt);
+                const formattedDate = requestDate.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                // Get student info - handle different property structures
+                const student = request.student || {};
+                const firstName = student.firstName || student.prenom || '';
+                const lastName = student.lastName || student.nom || '';
+                const studentName = `${firstName} ${lastName}`.trim() || 'Non disponible';
+                const matricule = student.matricule || 'N/A';
+                const email = student.email || '';
+                
+                // Get department and speciality information
+                const departmentName = student.department?.name || student.departement?.name || 'N/A';
+                const specialityName = student.speciality?.name || student.specialite?.name || 'N/A';
+                const filiereText = `${departmentName} - ${specialityName !== 'N/A' ? specialityName : ''}`.trim();
+                
+                // Get changed fields
+                const changedFields = getChangedFields(request);
+                
+                // Status badge
+                const statusText = getStatusText(request.status);
+                const statusClass = `status-badge status-${request.status}`;
+                
+                // Determine the timestamp for "recent" visual indicator
+                const isRecent = (Date.now() - new Date(request.createdAt).getTime()) < (24 * 60 * 60 * 1000); // 24 hours
+                const recentClass = isRecent && request.status === 'pending' ? 'recent-row' : '';
+                
+                return `
+                    <tr class="${recentClass}">
+                        <td>${formattedDate}</td>
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">${getInitials(studentName)}</div>
+                                <div class="student-details">
+                                    <span class="student-name">${studentName}</span>
+                                    <span class="student-email">${email || 'Email non disponible'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${matricule}</td>
+                        <td>${filiereText}</td>
+                        <td>
+                            <div class="field-changes">
+                                ${changedFields.length > 0 
+                                    ? changedFields.map(field => `<span class="field-badge">${field}</span>`).join('') 
+                                    : '<span class="no-changes">Aucun champ</span>'}
+                            </div>
+                        </td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm view-details" data-id="${request.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye" style="margin-right: 5px;">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                Détails
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Add event listeners to detail buttons
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', function() {
+                    const requestId = this.getAttribute('data-id');
+                    openRequestDetails(requestId);
+                });
+            });
+            
+            // Add styling for recent rows
+            const style = document.createElement('style');
+            if (!document.querySelector('style#recent-row-style')) {
+                style.id = 'recent-row-style';
+                style.textContent = `
+                    .recent-row {
+                        background-color: rgba(139, 92, 246, 0.05);
+                        animation: highlightFade 2s ease-out;
+                    }
+                    @keyframes highlightFade {
+                        from { background-color: rgba(139, 92, 246, 0.2); }
+                        to { background-color: rgba(139, 92, 246, 0.05); }
+                    }
+                    .no-changes {
+                        color: var(--gray-color);
+                        font-size: 0.8rem;
+                        font-style: italic;
+                    }
+                    .btn-sm {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        function getChangedFields(request) {
+            if (!request) return [];
+            
+            const fields = [];
+            
+            // Define a mapping of field names to their display names
+            const fieldMapping = {
+                // Direct properties
+                'adresseEmailPersonnelle': 'Email Personnel',
+                'numeroTelephonePrincipal': 'Téléphone',
+                'numeroTelephoneSecondaire': 'Téléphone Secondaire',
+                'adressePostale': 'Adresse',
+                'codePostal': 'Code Postal',
+                'ville': 'Ville',
+                'contactEnCasDurgence': 'Contact d\'urgence',
+                
+                // Changes object properties
+                'personalEmail': 'Email Personnel',
+                'phone': 'Téléphone',
+                'secondaryPhone': 'Téléphone Secondaire',
+                'address': 'Adresse',
+                'postalCode': 'Code Postal',
+                'city': 'Ville',
+                'emergencyContact': 'Contact d\'urgence',
+            };
+            
+            // Check direct properties
+            Object.keys(fieldMapping).forEach(key => {
+                // Check only direct property keys (not changes object)
+                if (key in request && request[key] && !key.includes('.')) {
+                    fields.push(fieldMapping[key]);
+                }
+            });
+            
+            // Check changes object if it exists
+            if (request.changes && typeof request.changes === 'object') {
+                Object.keys(request.changes).forEach(key => {
+                    if (request.changes[key] && fieldMapping[key]) {
+                        fields.push(fieldMapping[key]);
+                    }
+                });
+            }
+            
+            // Remove duplicates
+            return [...new Set(fields)];
+        }
+        
+        function getStatusText(status) {
+            switch (status) {
+                case 'pending': return 'En attente';
+                case 'approved': return 'Approuvée';
+                case 'rejected': return 'Rejetée';
+                case 'cancelled': return 'Annulée';
+                default: return status;
+            }
+        }
+        
+        function getInitials(name) {
+            return name.split(' ')
+                .map(part => part.charAt(0))
+                .join('')
+                .toUpperCase()
+                .substring(0, 2) || 'ET';
+        }
+        
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                paginationElement.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = `<div class="pagination-info">Affichage de ${Math.min(filteredRequests.length, (currentPage - 1) * itemsPerPage + 1)}-${Math.min(filteredRequests.length, currentPage * itemsPerPage)} sur ${filteredRequests.length} demandes</div>`;
+            
+            // Previous button
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                    ${currentPage === 1 ? 'disabled' : `data-page="${currentPage - 1}"`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Précédent
+                </button>
+            `;
+            
+            // Determine page range to show
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // Adjust start if end is maxed out
+            if (endPage === totalPages) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // First page
+            if (startPage > 1) {
+                paginationHTML += `
+                    <button class="pagination-btn" data-page="1">1</button>
+                `;
+                
+                if (startPage > 2) {
+                    paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+                }
+            }
+            
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="pagination-btn ${currentPage === i ? 'active' : ''}" data-page="${i}">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Last page
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+                }
+                
+                paginationHTML += `
+                    <button class="pagination-btn" data-page="${totalPages}">${totalPages}</button>
+                `;
+            }
+            
+            // Next button
+            paginationHTML += `
+                <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                    ${currentPage === totalPages ? 'disabled' : `data-page="${currentPage + 1}"`}>
+                    Suivant
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            `;
+            
+            // Page size selector
+            paginationHTML += `
+                <div class="page-size-selector">
+                    <span>Afficher</span>
+                    <select id="page-size-selector">
+                        <option value="10" ${itemsPerPage === 10 ? 'selected' : ''}>10</option>
+                        <option value="25" ${itemsPerPage === 25 ? 'selected' : ''}>25</option>
+                        <option value="50" ${itemsPerPage === 50 ? 'selected' : ''}>50</option>
+                        <option value="100" ${itemsPerPage === 100 ? 'selected' : ''}>100</option>
+                    </select>
+                    <span>par page</span>
+                </div>
+            `;
+            
+            paginationElement.innerHTML = paginationHTML;
+            
+            // Add event listeners to pagination buttons
+            document.querySelectorAll('.pagination-btn:not(.disabled)').forEach(button => {
+                button.addEventListener('click', function() {
+                    const page = parseInt(this.getAttribute('data-page'));
+                    if (page && page !== currentPage) {
+                        currentPage = page;
+                        renderTable();
+                        renderPagination();
+                        // Scroll to top of table
+                        document.querySelector('.table-container').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Add event listener to page size selector
+            const pageSizeSelector = document.getElementById('page-size-selector');
+            if (pageSizeSelector) {
+                pageSizeSelector.addEventListener('change', function() {
+                    itemsPerPage = parseInt(this.value);
+                    currentPage = 1; // Reset to first page
+                    renderTable();
+                    renderPagination();
+                });
+            }
+            
+            // Add styling for pagination
+            const style = document.createElement('style');
+            if (!document.querySelector('style#pagination-style')) {
+                style.id = 'pagination-style';
+                style.textContent = `
+                    .pagination {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        margin-top: 20px;
+                        justify-content: center;
+                    }
+                    
+                    .pagination-info {
+                        margin-right: auto;
+                        font-size: 0.9rem;
+                        color: var(--gray-color);
+                    }
+                    
+                    .pagination-btn {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        padding: 6px 12px;
+                        border: 1px solid #e2e8f0;
+                        background-color: white;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        transition: all 0.2s;
+                    }
+                    
+                    .pagination-btn:hover:not(.disabled):not(.active) {
+                        background-color: #f7fafc;
+                        border-color: #cbd5e0;
+                    }
+                    
+                    .pagination-btn.active {
+                        background-color: var(--primary-color);
+                        color: white;
+                        border-color: var(--primary-color);
+                    }
+                    
+                    .pagination-btn.disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                    }
+                    
+                    .pagination-ellipsis {
+                        padding: 0 8px;
+                    }
+                    
+                    .page-size-selector {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        margin-left: auto;
+                        font-size: 0.9rem;
+                    }
+                    
+                    .page-size-selector select {
+                        padding: 5px;
+                        border-radius: 4px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    
+                    @media (max-width: 768px) {
+                        .pagination {
+                            flex-direction: column;
+                            align-items: center;
+                        }
+                        
+                        .pagination-info, .page-size-selector {
+                            margin: 10px 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        async function openRequestDetails(requestId) {
+            try {
+                showMessage('Chargement des détails...', 'info');
+                
+                // Fetch request details
+                const response = await fetch(`${API_BASE_URL}/profile-requests/${requestId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Session expirée. Veuillez vous reconnecter.');
+                    } else if (response.status === 403) {
+                        throw new Error('Accès non autorisé. Vous n\'avez pas les permissions nécessaires.');
+                    } else if (response.status === 404) {
+                        throw new Error('Demande non trouvée. Elle a peut-être été supprimée.');
+                    } else {
+                        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                    }
+                }
+                
+                currentRequest = await response.json();
+                
+                // Populate modal
+                populateRequestModal(currentRequest);
+                
+                // Show the modal
+                modal.style.display = 'block';
+                
+                showMessage('', 'clear');
+            } catch (error) {
+                console.error('Error fetching request details:', error);
+                
+                if (error.message.includes('Session expirée')) {
+                    showMessage(error.message, 'error');
+                    setTimeout(() => {
+                        window.location.href = 'admin-login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                showMessage(`Erreur: ${error.message}`, 'error');
+            }
+        }
+        
+        function populateRequestModal(request) {
+            // Basic info
+            document.getElementById('request-id').textContent = request.id || 'N/A';
+            
+            // Format date correctly
+            let createdDate = new Date();
+            try {
+                createdDate = new Date(request.createdAt);
+            } catch (e) {
+                console.warn('Failed to parse date:', e);
+            }
+            
+            document.getElementById('request-date').textContent = createdDate.toLocaleString('fr-FR');
+            
+            // Student info - handle different property structures
+            const student = request.student || {};
+            const firstName = student.firstName || student.prenom || '';
+            const lastName = student.lastName || student.nom || '';
+            const studentName = `${firstName} ${lastName}`.trim() || 'Non disponible';
+            const matricule = student.matricule || 'N/A';
+            const email = student.email || 'N/A';
+            
+            // Department and speciality information
+            const departmentName = student.department?.name || student.departement?.name || 'N/A';
+            const specialityName = student.speciality?.name || student.specialite?.name || 'N/A';
+            
+            document.getElementById('request-student').textContent = studentName;
+            document.getElementById('request-matricule').textContent = matricule;
+            document.getElementById('request-email').textContent = email;
+            document.getElementById('request-status').textContent = getStatusText(request.status);
+            
+            // Add department and speciality to modal if they exist in the DOM
+            const departmentEl = document.getElementById('request-department');
+            const specialityEl = document.getElementById('request-speciality');
+            
+            if (departmentEl && departmentName) departmentEl.textContent = departmentName;
+            if (specialityEl && specialityName) specialityEl.textContent = specialityName;
+            
+            // Changes
+            const changesContainer = document.getElementById('request-changes');
+            changesContainer.innerHTML = '<h3>Modifications demandées</h3>';
+            
+            const changesHTML = [];
+            
+            // Define fields to check - both in direct properties and in changes object
+            const fieldMappings = [
+                { 
+                    key: 'personalEmail', 
+                    directKey: 'adresseEmailPersonnelle', 
+                    label: 'Email Personnel',
+                    studentKey: 'personalEmail'
+                },
+                { 
+                    key: 'phone', 
+                    directKey: 'numeroTelephonePrincipal', 
+                    label: 'Téléphone Principal',
+                    studentKey: 'phone'
+                },
+                { 
+                    key: 'secondaryPhone', 
+                    directKey: 'numeroTelephoneSecondaire', 
+                    label: 'Téléphone Secondaire',
+                    studentKey: 'secondaryPhone'
+                },
+                { 
+                    key: 'address', 
+                    directKey: 'adressePostale', 
+                    label: 'Adresse',
+                    studentKey: 'address'
+                },
+                { 
+                    key: 'postalCode', 
+                    directKey: 'codePostal', 
+                    label: 'Code Postal',
+                    studentKey: 'postalCode'
+                },
+                { 
+                    key: 'city', 
+                    directKey: 'ville', 
+                    label: 'Ville',
+                    studentKey: 'city'
+                },
+                { 
+                    key: 'emergencyContact', 
+                    directKey: 'contactEnCasDurgence', 
+                    label: 'Contact d\'urgence',
+                    studentKey: 'emergencyContact'
+                }
+            ];
+            
+            // Check each field
+            for (const field of fieldMappings) {
+                // Get the new value from either changes object or direct property
+                const newValue = request.changes?.[field.key] || request[field.directKey];
+                if (newValue) {
+                    // Get old value from student object
+                    const oldValue = student[field.studentKey] || 'Non renseigné';
+                    changesHTML.push(createChangeField(field.label, oldValue, newValue));
+                }
+            }
+            
+            if (changesHTML.length === 0) {
+                changesContainer.innerHTML += '<p>Aucune modification demandée</p>';
+            } else {
+                changesContainer.innerHTML += changesHTML.join('');
+            }
+            
+            // Admin response
+            const adminResponseContainer = document.getElementById('admin-response-container');
+            if (request.adminComment) {
+                document.getElementById('admin-response').textContent = request.adminComment;
+                adminResponseContainer.style.display = 'block';
+            } else {
+                adminResponseContainer.style.display = 'none';
+            }
+            
+            // Show admin actions based on role permissions and request status
+            const canEdit = rolePermissions[adminRole] && 
+                           (rolePermissions[adminRole].canApprove || rolePermissions[adminRole].canReject);
+            
+            // Check if this request belongs to admin's department/speciality if needed
+            let hasRequestAccess = true;
+            
+            if (adminRole === 'chef-de-departement' && adminDepartment) {
+                hasRequestAccess = student.department?.id === adminDepartment;
+            } else if (adminRole === 'chef-de-specialite' && adminSpeciality) {
+                hasRequestAccess = student.speciality?.id === adminSpeciality;
+            }
+            
+            // Only show actions for pending requests that the admin has access to
+            adminActions.style.display = (request.status === 'pending' && canEdit && hasRequestAccess) ? 'block' : 'none';
+            
+            // Disable/enable buttons based on permissions
+            if (approveBtn) {
+                approveBtn.disabled = !rolePermissions[adminRole]?.canApprove;
+                approveBtn.title = rolePermissions[adminRole]?.canApprove ? '' : 'Vous n\'avez pas les permissions nécessaires';
+            }
+            
+            if (rejectBtn) {
+                rejectBtn.disabled = !rolePermissions[adminRole]?.canReject;
+                rejectBtn.title = rolePermissions[adminRole]?.canReject ? '' : 'Vous n\'avez pas les permissions nécessaires';
+            }
+            
+            // If the user doesn't have department/speciality access, show message
+            if (request.status === 'pending' && canEdit && !hasRequestAccess) {
+                const noAccessMsg = document.createElement('div');
+                noAccessMsg.className = 'no-access-message';
+                noAccessMsg.textContent = adminRole === 'chef-de-departement' 
+                    ? 'Cette demande appartient à un autre département. Vous ne pouvez pas la traiter.'
+                    : 'Cette demande appartient à une autre spécialité. Vous ne pouvez pas la traiter.';
+                
+                if (adminActions.nextElementSibling !== noAccessMsg) {
+                    adminActions.parentNode.insertBefore(noAccessMsg, adminActions.nextElementSibling);
+                }
+                
+                // Add styling
+                if (!document.querySelector('style#no-access-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'no-access-style';
+                    style.textContent = `
+                        .no-access-message {
+                            background-color: #FEF2F2;
+                            color: #B91C1C;
+                            padding: 12px;
+                            border-radius: 6px;
+                            margin-top: 15px;
+                            border-left: 4px solid #B91C1C;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            } else {
+                // Remove any existing no-access message
+                const noAccessMsg = document.querySelector('.no-access-message');
+                if (noAccessMsg) {
+                    noAccessMsg.remove();
+                }
+            }
+        }
+        
+        function createChangeField(label, oldValue, newValue) {
+            return `
+                <div class="changed-field">
+                    <div class="changed-field-header">${label}</div>
+                    <div class="changed-field-content">
+                        <div class="old-value">
+                            <span class="value-label">Valeur actuelle</span>
+                            ${oldValue}
+                        </div>
+                        <div class="new-value">
+                            <span class="value-label">Nouvelle valeur</span>
+                            ${newValue}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function handleRequestAction(status) {
+            if (!currentRequest) return;
+            
+            try {
+                // Check if user has permission to perform this action
+                if (!rolePermissions[adminRole] || 
+                    (status === 'approved' && !rolePermissions[adminRole].canApprove) || 
+                    (status === 'rejected' && !rolePermissions[adminRole].canReject)) {
+                    throw new Error(`Vous n'avez pas les permissions nécessaires pour ${status === 'approved' ? 'approuver' : 'rejeter'} cette demande.`);
+                }
+                
+                // Check if request belongs to admin's department/speciality if needed
+                if (adminRole === 'chef-de-departement' && adminDepartment && 
+                    currentRequest.student?.department?.id !== adminDepartment) {
+                    throw new Error('Vous ne pouvez traiter que les demandes de votre département.');
+                }
+                
+                if (adminRole === 'chef-de-specialite' && adminSpeciality && 
+                    currentRequest.student?.speciality?.id !== adminSpeciality) {
+                    throw new Error('Vous ne pouvez traiter que les demandes de votre spécialité.');
+                }
+                
+                // First, check if the request is still in pending status
+                const checkResponse = await fetch(`${API_BASE_URL}/profile-requests/${currentRequest.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!checkResponse.ok) {
+                    throw new Error(`Impossible de vérifier l'état actuel de la demande.`);
+                }
+                
+                const checkResult = await checkResponse.json();
+                
+                if (checkResult.status !== 'pending') {
+                    throw new Error(`Cette demande a déjà été ${getStatusText(checkResult.status).toLowerCase()}. Veuillez rafraîchir la page.`);
+                }
+                
+                // Get comment from modal
+                const comment = document.getElementById('admin-comment').value;
+                
+                // Show loading state
+                const actionBtn = status === 'approved' ? approveBtn : rejectBtn;
+                const originalBtnText = actionBtn.textContent;
+                actionBtn.disabled = true;
+                actionBtn.textContent = 'Traitement...';
+                
+                // Send request to update status
+                const response = await fetch(`${API_BASE_URL}/profile-requests/${currentRequest.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: status,
+                        adminComment: comment
+                    })
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Session expirée. Veuillez vous reconnecter.');
+                    } else if (response.status === 403) {
+                        throw new Error('Accès non autorisé. Vous n\'avez pas les permissions nécessaires.');
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || `Erreur ${response.status}: ${response.statusText}`);
+                    }
+                }
+                
+                // Update the request in memory
+                const updatedRequest = await response.json();
+                
+                // Update the request in the requests array
+                const index = allRequests.findIndex(r => r.id === updatedRequest.id);
+                if (index !== -1) {
+                    allRequests[index] = updatedRequest;
+                }
+                
+                // Update the table
+                filterRequests();
+                
+                // Update stats
+                updateStats(allRequests);
+                
+                // Close the modal
+                closeModal();
+                
+                // Show success message
+                const actionText = status === 'approved' ? 'approuvée' : 'rejetée';
+                showMessage(`La demande a été ${actionText} avec succès.`, 'success');
+            } catch (error) {
+                console.error('Error updating request:', error);
+                
+                if (error.message.includes('Session expirée')) {
+                    showMessage(error.message, 'error');
+                    setTimeout(() => {
+                        window.location.href = 'admin-login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                showMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                // Reset button state if needed
+                if (status === 'approved') {
+                    approveBtn.disabled = false;
+                    approveBtn.textContent = 'Approuver';
+                } else {
+                    rejectBtn.disabled = false;
+                    rejectBtn.textContent = 'Rejeter';
+                }
+            }
+        }
+        
+        function closeModal() {
+            modal.style.display = 'none';
+            document.getElementById('admin-comment').value = '';
+            currentRequest = null;
+        }
+        
+        function showMessage(message, type = 'info') {
+            if (type === 'clear') {
+                statusMessage.style.display = 'none';
+                return;
+            }
+            
+            // Clear any existing timeout
+            if (window.messageTimeout) {
+                clearTimeout(window.messageTimeout);
+            }
+            
+            // Set message
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            
+            // Add appropriate styling based on message type
+            switch (type) {
+                case 'success':
+                    statusMessage.classList.add('success');
+                    statusMessage.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        ${message}
+                        <button class="dismiss-btn">×</button>
+                    `;
+                    break;
+                case 'error':
+                    statusMessage.classList.add('error');
+                    statusMessage.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-circle">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        ${message}
+                        <button class="dismiss-btn">×</button>
+                    `;
+                    break;
+                case 'warning':
+                    statusMessage.classList.add('warning');
+                    statusMessage.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        ${message}
+                        <button class="dismiss-btn">×</button>
+                    `;
+                    break;
+                default:
+                    statusMessage.classList.add('info');
+                    statusMessage.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        ${message}
+                        <button class="dismiss-btn">×</button>
+                    `;
+            }
+            
+            // Show the message
+            statusMessage.style.display = 'flex';
+            
+            // Add dismiss button event listener
+            const dismissBtn = statusMessage.querySelector('.dismiss-btn');
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    statusMessage.style.display = 'none';
+                });
+            }
+            
+            // Auto-hide success and info messages after delay
+            if (type === 'success') {
+                window.messageTimeout = setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000); // 5 seconds
+            } else if (type === 'info') {
+                window.messageTimeout = setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000); // 3 seconds
+            }
+            
+            // Add styling for status messages if not already added
+            if (!document.querySelector('style#message-style')) {
+                const style = document.createElement('style');
+                style.id = 'message-style';
+                style.textContent = `
+                    .status-message {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 12px 16px;
+                        border-radius: 6px;
+                        margin-bottom: 20px;
+                        position: relative;
+                    }
+                    
+                    .dismiss-btn {
+                        background: none;
+                        border: none;
+                        font-size: 18px;
+                        cursor: pointer;
+                        color: inherit;
+                        opacity: 0.7;
+                        padding: 0;
+                        margin-left: auto;
+                    }
+                    
+                    .dismiss-btn:hover {
+                        opacity: 1;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

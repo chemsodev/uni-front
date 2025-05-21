@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Enseignants - Administration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;700&display=swap" rel="stylesheet">
+    <link href="style/admin.css" rel="stylesheet">
+    <style>
+        .teacher-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .teacher-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .teacher-details span {
+            display: block;
+        }
+        
+        .teacher-name {
+            font-weight: 600;
+        }
+        
+        .teacher-email {
+            color: var(--gray-color);
+            font-size: 0.8rem;
+        }
+        
+        .specialty-badge {
+            background-color: #f0f4ff;
+            color: #3b82f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .teacher-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .teacher-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar - will be loaded via JavaScript -->
+        <div id="sidebar-container"></div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Gestion des Enseignants</h1>
+                <div class="header-actions">
+                    <button class="header-btn" id="add-teacher-btn">
+                        <svg class="header-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 5v14M5 12h14"></path>
+                        </svg>
+                        Ajouter un enseignant
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-container">
+                <!-- Status Messages -->
+                <div id="status-message" class="status-message" style="display: none;"></div>
+                
+                <!-- Summary Cards -->
+                <div class="cards-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-title">Total des enseignants</div>
+                            <div class="stat-card-icon icon-purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card-value" id="total-teachers">--</div>
+                        <div class="stat-card-description">Enseignants enregistrés</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-title">Sections affectées</div>
+                            <div class="stat-card-icon icon-blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card-value" id="total-sections">--</div>
+                        <div class="stat-card-description">Sections avec enseignants</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-title">Nouvelles activités</div>
+                            <div class="stat-card-icon icon-green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card-value" id="recent-activities">--</div>
+                        <div class="stat-card-description">7 derniers jours</div>
+                    </div>
+                </div>
+                
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="specialty-filter">Spécialité:</label>
+                        <select id="specialty-filter" class="filter-select">
+                            <option value="all">Toutes</option>
+                            <!-- Options will be added via JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="status-filter">Statut:</label>
+                        <select id="status-filter" class="filter-select">
+                            <option value="all">Tous</option>
+                            <option value="active">Actifs</option>
+                            <option value="inactive">Inactifs</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="search">Recherche:</label>
+                        <input type="text" id="search" class="filter-input" placeholder="Nom, email...">
+                    </div>
+                </div>
+                
+                <!-- Teachers Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Enseignant</th>
+                                <th>ID</th>
+                                <th>Spécialité</th>
+                                <th>Contact</th>
+                                <th>Sections</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachers-table-body">
+                            <tr class="loading-row">
+                                <td colspan="6">Chargement des enseignants...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Teacher Modal -->
+    <div id="teacher-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Ajouter un enseignant</h2>
+            
+            <form id="teacher-form" class="form teacher-form">
+                <input type="hidden" id="teacher-id">
+                
+                <div class="form-group">
+                    <label for="teacher-firstName">Prénom:</label>
+                    <input type="text" id="teacher-firstName" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacher-lastName">Nom:</label>
+                    <input type="text" id="teacher-lastName" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacher-email">Email:</label>
+                    <input type="email" id="teacher-email" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacher-id-number">ID Enseignant:</label>
+                    <input type="text" id="teacher-id-number" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacher-specialty">Spécialité:</label>
+                    <select id="teacher-specialty" class="form-input" required>
+                        <option value="">Sélectionner une spécialité</option>
+                        <option value="Informatique">Informatique</option>
+                        <option value="Mathématiques">Mathématiques</option>
+                        <option value="Physique">Physique</option>
+                        <option value="Chimie">Chimie</option>
+                        <option value="Biologie">Biologie</option>
+                        <option value="Géologie">Géologie</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacher-phone">Téléphone:</label>
+                    <input type="tel" id="teacher-phone" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacher-password">Mot de passe (laissez vide pour ne pas changer):</label>
+                    <input type="password" id="teacher-password" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacher-active">Statut:</label>
+                    <select id="teacher-active" class="form-input">
+                        <option value="true">Actif</option>
+                        <option value="false">Inactif</option>
+                    </select>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-cancel" id="cancel-btn">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="confirm-delete-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Confirmation de suppression</h2>
+            <p>Êtes-vous sûr de vouloir supprimer cet enseignant? Cette action est irréversible.</p>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button class="header-btn" style="background-color: var(--gray-color);" id="cancel-delete-btn">Annuler</button>
+                <button class="header-btn" style="background-color: var(--danger-color);" id="confirm-delete-btn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        const API_BASE_URL = 'https://unicersityback.onrender.com/api';
+        let authToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+        let adminRole = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
+        let allTeachers = [];
+        let filteredTeachers = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        
+        // DOM Elements
+        const statusMessage = document.getElementById('status-message');
+        const teachersTableBody = document.getElementById('teachers-table-body');
+        const paginationElement = document.getElementById('pagination');
+        const specialtyFilter = document.getElementById('specialty-filter');
+        const statusFilter = document.getElementById('status-filter');
+        const searchInput = document.getElementById('search');
+        const totalTeachersEl = document.getElementById('total-teachers');
+        const totalSectionsEl = document.getElementById('total-sections');
+        const recentActivitiesEl = document.getElementById('recent-activities');
+        
+        // Modal elements
+        const teacherModal = document.getElementById('teacher-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const teacherForm = document.getElementById('teacher-form');
+        const teacherIdInput = document.getElementById('teacher-id');
+        const teacherFirstNameInput = document.getElementById('teacher-firstName');
+        const teacherLastNameInput = document.getElementById('teacher-lastName');
+        const teacherEmailInput = document.getElementById('teacher-email');
+        const teacherIdNumberInput = document.getElementById('teacher-id-number');
+        const teacherSpecialtyInput = document.getElementById('teacher-specialty');
+        const teacherPhoneInput = document.getElementById('teacher-phone');
+        const teacherPasswordInput = document.getElementById('teacher-password');
+        const teacherActiveInput = document.getElementById('teacher-active');
+        const saveBtn = document.getElementById('save-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const closeModalBtn = document.querySelector('.close-modal');
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Verify authentication
+                if (!authToken || !adminRole) {
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+                
+                // Load the sidebar
+                await loadSidebar();
+                
+                // Load teachers data
+                await loadTeachers();
+                
+                // Setup event listeners
+                setupEventListeners();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showMessage('Une erreur est survenue lors de l\'initialisation de la page.', 'error');
+            }
+        });
+        
+        async function loadSidebar() {
+            try {
+                // Load the sidebar HTML
+                const response = await fetch('admin-sidebar.html');
+                const html = await response.text();
+                
+                // Insert the sidebar HTML into the container
+                document.getElementById('sidebar-container').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading sidebar:', error);
+                showMessage('Impossible de charger la barre latérale.', 'error');
+            }
+        }
+        
+        async function loadTeachers() {
+            try {
+                showMessage('Chargement des enseignants...', 'info');
+                
+                // Fetch teachers from API
+                const response = await fetch(`${API_BASE_URL}/enseignants`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                allTeachers = await response.json();
+                
+                // Update stats
+                updateStats();
+                
+                // Load unique specialties for filter
+                loadSpecialties();
+                
+                // Apply initial filtering
+                filterTeachers();
+                
+                showMessage('', 'clear');
+            } catch (error) {
+                console.error('Error loading teachers:', error);
+                showMessage('Erreur lors du chargement des enseignants. Veuillez réessayer.', 'error');
+                teachersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="error-message">
+                            Impossible de charger les enseignants. 
+                            <button class="retry-btn" onclick="loadTeachers()">Réessayer</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function updateStats() {
+            // Update total teachers count
+            totalTeachersEl.textContent = allTeachers.length;
+            
+            // Count unique sections
+            const uniqueSections = new Set();
+            allTeachers.forEach(teacher => {
+                if (teacher.sections) {
+                    teacher.sections.forEach(section => {
+                        uniqueSections.add(section.id);
+                    });
+                }
+            });
+            
+            totalSectionsEl.textContent = uniqueSections.size;
+            
+            // Placeholder for recent activities stats (could be replaced with real data)
+            recentActivitiesEl.textContent = Math.floor(Math.random() * 20 + 5);
+        }
+        
+        function loadSpecialties() {
+            // Get unique specialties from teachers
+            const specialties = [...new Set(allTeachers.map(teacher => teacher.specialite).filter(Boolean))];
+            
+            // Clear existing options (except "All")
+            while (specialtyFilter.options.length > 1) {
+                specialtyFilter.remove(1);
+            }
+            
+            // Add specialty options
+            specialties.forEach(specialty => {
+                const option = document.createElement('option');
+                option.value = specialty;
+                option.textContent = specialty;
+                specialtyFilter.appendChild(option);
+            });
+        }
+        
+        function setupEventListeners() {
+            // Filter changes
+            specialtyFilter.addEventListener('change', () => filterTeachers());
+            statusFilter.addEventListener('change', () => filterTeachers());
+            searchInput.addEventListener('input', () => filterTeachers());
+            
+            // Add teacher button
+            document.getElementById('add-teacher-btn').addEventListener('click', openAddTeacherModal);
+            
+            // Modal close button
+            closeModalBtn.addEventListener('click', closeModal);
+            
+            // Cancel button
+            cancelBtn.addEventListener('click', closeModal);
+            
+            // Form submission
+            teacherForm.addEventListener('submit', handleFormSubmit);
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === teacherModal) {
+                    closeModal();
+                }
+            });
+        }
+        
+        function filterTeachers() {
+            const specialty = specialtyFilter.value;
+            const status = statusFilter.value;
+            const search = searchInput.value.toLowerCase();
+            
+            filteredTeachers = allTeachers.filter(teacher => {
+                // Specialty filter
+                if (specialty !== 'all' && teacher.specialite !== specialty) {
+                    return false;
+                }
+                
+                // Status filter
+                if (status !== 'all') {
+                    const isActive = teacher.active !== false; // Default to active if not specified
+                    if ((status === 'active' && !isActive) || (status === 'inactive' && isActive)) {
+                        return false;
+                    }
+                }
+                
+                // Search filter
+                if (search) {
+                    const fullName = `${teacher.prenom || ''} ${teacher.nom || ''}`.toLowerCase();
+                    return fullName.includes(search) || 
+                           (teacher.email && teacher.email.toLowerCase().includes(search)) || 
+                           (teacher.id_enseignant && teacher.id_enseignant.toLowerCase().includes(search));
+                }
+                
+                return true;
+            });
+            
+            // Render the first page
+            currentPage = 1;
+            renderTeachers();
+        }
+        
+        function renderTeachers() {
+            // Calculate pagination
+            const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredTeachers.length);
+            const currentTeachers = filteredTeachers.slice(startIndex, endIndex);
+            
+            // Clear table
+            teachersTableBody.innerHTML = '';
+            
+            // Check if no teachers match filters
+            if (currentTeachers.length === 0) {
+                teachersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-data">Aucun enseignant ne correspond aux critères sélectionnés.</td>
+                    </tr>
+                `;
+                paginationElement.innerHTML = '';
+                return;
+            }
+            
+            // Render teachers
+            currentTeachers.forEach(teacher => {
+                const teacherInitials = ((teacher.prenom || ' ')[0] + (teacher.nom || ' ')[0]).toUpperCase();
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="teacher-info">
+                            <div class="teacher-avatar">${teacherInitials}</div>
+                            <div class="teacher-details">
+                                <span class="teacher-name">${teacher.prenom || ''} ${teacher.nom || ''}</span>
+                                <span class="teacher-email">${teacher.email || 'Pas d\'email'}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${teacher.id_enseignant || 'N/A'}</td>
+                    <td>
+                        ${teacher.specialite ? `<span class="specialty-badge">${teacher.specialite}</span>` : 'Non spécifiée'}
+                    </td>
+                    <td>${teacher.phone || 'Non spécifié'}</td>
+                    <td>${teacher.sections ? teacher.sections.length : 0} sections</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="action-btn edit-btn" data-id="${teacher.id}" title="Modifier">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="action-btn delete-btn" data-id="${teacher.id}" title="Supprimer">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                // Add to table
+                teachersTableBody.appendChild(row);
+                
+                // Add event listeners to action buttons
+                row.querySelector('.edit-btn').addEventListener('click', () => openEditTeacherModal(teacher));
+                row.querySelector('.delete-btn').addEventListener('click', () => confirmDeleteTeacher(teacher));
+            });
+            
+            // Render pagination
+            renderPagination(totalPages);
+        }
+        
+        function renderPagination(totalPages) {
+            if (totalPages <= 1) {
+                paginationElement.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `
+                <button class="pagination-btn previous ${currentPage === 1 ? 'disabled' : ''}" 
+                    ${currentPage === 1 ? 'disabled' : ''}>
+                    &laquo; Précédent
+                </button>
+            `;
+            
+            // Page buttons
+            for (let i = 1; i <= totalPages; i++) {
+                paginationHTML += `
+                    <button class="pagination-btn page-num ${i === currentPage ? 'active' : ''}" data-page="${i}">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Next button
+            paginationHTML += `
+                <button class="pagination-btn next ${currentPage === totalPages ? 'disabled' : ''}" 
+                    ${currentPage === totalPages ? 'disabled' : ''}>
+                    Suivant &raquo;
+                </button>
+            `;
+            
+            paginationElement.innerHTML = paginationHTML;
+            
+            // Add event listeners to pagination buttons
+            document.querySelectorAll('.pagination-btn.page-num').forEach(button => {
+                button.addEventListener('click', () => {
+                    currentPage = parseInt(button.dataset.page);
+                    renderTeachers();
+                });
+            });
+            
+            document.querySelector('.pagination-btn.previous').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTeachers();
+                }
+            });
+            
+            document.querySelector('.pagination-btn.next').addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTeachers();
+                }
+            });
+        }
+        
+        function openAddTeacherModal() {
+            modalTitle.textContent = 'Ajouter un enseignant';
+            teacherIdInput.value = '';
+            teacherPasswordInput.required = true; // Password required for new teachers
+            teacherForm.reset();
+            teacherActiveInput.value = 'true'; // Default to active
+            
+            // Show modal
+            teacherModal.style.display = 'block';
+        }
+        
+        function openEditTeacherModal(teacher) {
+            modalTitle.textContent = 'Modifier l\'enseignant';
+            
+            // Populate form fields
+            teacherIdInput.value = teacher.id;
+            teacherFirstNameInput.value = teacher.prenom || '';
+            teacherLastNameInput.value = teacher.nom || '';
+            teacherEmailInput.value = teacher.email || '';
+            teacherIdNumberInput.value = teacher.id_enseignant || '';
+            teacherSpecialtyInput.value = teacher.specialite || '';
+            teacherPhoneInput.value = teacher.phone || '';
+            teacherPasswordInput.required = false; // Password optional for edits
+            teacherActiveInput.value = teacher.active === false ? 'false' : 'true';
+            
+            // Show modal
+            teacherModal.style.display = 'block';
+        }
+        
+        function closeModal() {
+            teacherModal.style.display = 'none';
+            teacherForm.reset();
+        }
+        
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            // Get form data
+            const teacherId = teacherIdInput.value;
+            const teacherData = {
+                prenom: teacherFirstNameInput.value,
+                nom: teacherLastNameInput.value,
+                email: teacherEmailInput.value,
+                id_enseignant: teacherIdNumberInput.value,
+                specialite: teacherSpecialtyInput.value,
+                phone: teacherPhoneInput.value,
+                active: teacherActiveInput.value === 'true'
+            };
+            
+            // Only include password if provided
+            if (teacherPasswordInput.value) {
+                teacherData.password = teacherPasswordInput.value;
+            }
+            
+            try {
+                let response;
+                
+                if (teacherId) {
+                    // Update existing teacher
+                    response = await fetch(`${API_BASE_URL}/enseignants/${teacherId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(teacherData)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    // Update teacher in array
+                    const updatedTeacher = await response.json();
+                    const index = allTeachers.findIndex(t => t.id === teacherId);
+                    if (index !== -1) {
+                        allTeachers[index] = updatedTeacher;
+                    }
+                    
+                    showMessage('Enseignant modifié avec succès!', 'success');
+                } else {
+                    // Create new teacher
+                    response = await fetch(`${API_BASE_URL}/enseignants`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(teacherData)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    // Add teacher to array
+                    const newTeacher = await response.json();
+                    allTeachers.push(newTeacher);
+                    
+                    showMessage('Enseignant ajouté avec succès!', 'success');
+                }
+                
+                // Close modal and reload data
+                closeModal();
+                updateStats();
+                filterTeachers();
+                loadSpecialties();
+            } catch (error) {
+                console.error('Error saving teacher:', error);
+                showMessage(`Erreur lors de l'enregistrement de l'enseignant: ${error.message}`, 'error');
+            }
+        }
+        
+        async function confirmDeleteTeacher(teacher) {
+            // Ask for confirmation
+            const confirmDelete = confirm(`Êtes-vous sûr de vouloir supprimer l'enseignant "${teacher.prenom} ${teacher.nom}"? Cette action est irréversible.`);
+            
+            if (confirmDelete) {
+                try {
+                    // Call API to delete teacher
+                    const response = await fetch(`${API_BASE_URL}/enseignants/${teacher.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    // Remove teacher from array
+                    allTeachers = allTeachers.filter(t => t.id !== teacher.id);
+                    
+                    // Update display
+                    updateStats();
+                    filterTeachers();
+                    loadSpecialties();
+                    
+                    showMessage('Enseignant supprimé avec succès!', 'success');
+                } catch (error) {
+                    console.error('Error deleting teacher:', error);
+                    showMessage(`Erreur lors de la suppression de l'enseignant: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        function showMessage(message, type = 'info') {
+            if (type === 'clear') {
+                statusMessage.style.display = 'none';
+                return;
+            }
+            
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            
+            switch (type) {
+                case 'success':
+                    statusMessage.classList.add('success');
+                    break;
+                case 'error':
+                    statusMessage.classList.add('error');
+                    break;
+                case 'warning':
+                    statusMessage.classList.add('warning');
+                    break;
+                default:
+                    statusMessage.classList.add('info');
+            }
+            
+            statusMessage.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
