@@ -1,461 +1,479 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document Viewer</title>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background-color: #f8f9fa;
-    }
-    
-    .header {
-      padding: 10px 20px;
-      background-color: #3B82F6;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .header h1 {
-      margin: 0;
-      font-size: 1.2rem;
-    }
-    
-    .header-actions {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .header button {
-      background-color: transparent;
-      border: 1px solid white;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .header button:hover {
-      background-color: rgba(255,255,255,0.2);
-    }
-    
-    .content {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      overflow: auto;
-    }
-    
-    .document-container {
-      max-width: 100%;
-      max-height: 100%;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      background-color: white;
-      padding: 10px;
-      border-radius: 4px;
-      overflow: auto;
-    }
-    
-    .document-container img {
-      max-width: 100%;
-      max-height: calc(100vh - 150px);
-      display: block;
-      cursor: zoom-in;
-    }
-    
-    .document-container iframe {
-      width: 100%;
-      height: calc(100vh - 150px);
-      border: none;
-    }
-
-    .document-container audio,
-    .document-container video {
-      max-width: 100%;
-      display: block;
-      margin: 0 auto;
-    }
-    
-    .loading {
-      text-align: center;
-      color: #666;
-      padding: 20px;
-    }
-    
-    .loading-spinner {
-      border: 4px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 4px solid #3B82F6;
-      width: 30px;
-      height: 30px;
-      margin: 0 auto 15px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .error {
-      background-color: #f8d7da;
-      color: #721c24;
-      padding: 15px;
-      border-radius: 4px;
-      margin: 20px;
-      text-align: center;
-    }
-
-    .download-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 20px;
-      background-color: #3B82F6;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      margin: 20px auto;
-      font-weight: 500;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .download-button:hover {
-      background-color: #2563eb;
-    }
-
-    .document-info {
-      text-align: center;
-      color: #666;
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1 id="document-title">Chargement du document...</h1>
-    <div class="header-actions">
-      <button id="download-btn">Télécharger</button>
-      <button onclick="window.close()">Fermer</button>
-    </div>
-  </div>
-  
-  <div class="content">
-    <div id="loading" class="loading">
-      <div class="loading-spinner"></div>
-      <p>Chargement du document...</p>
-    </div>
-    
-    <div id="error" class="error" style="display: none;">
-      Une erreur s'est produite lors du chargement du document.
-    </div>
-    
-    <div id="document-container" class="document-container" style="display: none;">
-      <!-- The document will be inserted here -->
-    </div>
-  </div>
-
-  <script>
-    // Get URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const requestId = urlParams.get('id');
-    const authToken = urlParams.get('token');
-    const context = urlParams.get('context') || 'student'; // Default to student context if not specified
-    const API_BASE_URL = "https://unicersityback.onrender.com/api";
-    
-    let documentUrl = null;
-    let documentBlob = null;
-    let documentName = null;
-    
-    // Load document on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      if (!requestId || !authToken) {
-        showError("Paramètres manquants dans l'URL");
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document Viewer</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #f8f9fa;
       }
-      
-      // Set up download button
-      document.getElementById('download-btn').addEventListener('click', downloadDocument);
-      
-      loadDocument();
-    });
-    
-    // Load and display the document
-    async function loadDocument() {
-      try {
-        // Fetch document metadata first to get name and type
-        console.log("Fetching document metadata...");
-        let metadataUrl;
-        let documentUrl;
-        
-        // Determine URLs based on context
-        if (context === 'teacher') {
-          metadataUrl = `${API_BASE_URL}/enseignants/group-change-requests/${requestId}`;
-          documentUrl = `${API_BASE_URL}/enseignants/group-change-requests/${requestId}/document?token=${encodeURIComponent(authToken)}`;
-        } else {
-          // Default to student context
-          metadataUrl = `${API_BASE_URL}/change-requests/${requestId}`;
-          documentUrl = `${API_BASE_URL}/change-requests/${requestId}/document`;
+
+      .header {
+        padding: 10px 20px;
+        background-color: #3b82f6;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .header button {
+        background-color: transparent;
+        border: 1px solid white;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .header button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .content {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow: auto;
+      }
+
+      .document-container {
+        max-width: 100%;
+        max-height: 100%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        padding: 10px;
+        border-radius: 4px;
+        overflow: auto;
+      }
+
+      .document-container img {
+        max-width: 100%;
+        max-height: calc(100vh - 150px);
+        display: block;
+        cursor: zoom-in;
+      }
+
+      .document-container iframe {
+        width: 100%;
+        height: calc(100vh - 150px);
+        border: none;
+      }
+
+      .document-container audio,
+      .document-container video {
+        max-width: 100%;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .loading {
+        text-align: center;
+        color: #666;
+        padding: 20px;
+      }
+
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 4px solid #3b82f6;
+        width: 30px;
+        height: 30px;
+        margin: 0 auto 15px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        
-        const metadataResponse = await fetch(metadataUrl, {
-          headers: {
-            'Authorization': `Bearer ${authToken}`
-          }
-        }).catch(error => {
-          console.error("Error fetching metadata:", error);
-          // If metadata fetch fails, try loading document directly
-          return null;
-        });
-        
-        let metadata = null;
-        
-        if (metadataResponse && metadataResponse.ok) {
-          metadata = await metadataResponse.json();
-          console.log("Document metadata:", {
-            id: metadata.id,
-            hasDocumentData: !!metadata.documentData,
-            documentName: metadata.documentName,
-            documentMimeType: metadata.documentMimeType
-          });
-          
-          // Save document name for download
-          documentName = metadata.documentName || `document-${requestId}`;
-          
-          // Update document title
-          document.title = documentName;
-          document.getElementById('document-title').textContent = documentName;
-        } else {
-          console.warn("Could not fetch metadata, proceeding with document fetch only");
+        100% {
+          transform: rotate(360deg);
         }
-        
-        // Fetch the actual document
-        console.log("Fetching document data...");
-        const response = await fetch(documentUrl, {
-          headers: {
-            'Authorization': `Bearer ${authToken}`
-          }
-        });
-        
-        console.log("Document response:", {
-          status: response.status,
-          statusText: response.statusText,
-          headers: {
-            'Content-Type': response.headers.get('Content-Type'),
-            'Content-Length': response.headers.get('Content-Length')
-          }
-        });
-        
-        // Check for 204 No Content status for requests without documents
-        if (response.status === 204) {
-          // No document found
-          console.log("No document data received (204 No Content)");
-          displayNoDocumentMessage();
+      }
+
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 20px;
+        text-align: center;
+      }
+
+      .download-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
+        background-color: #3b82f6;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        margin: 20px auto;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+
+      .download-button:hover {
+        background-color: #2563eb;
+      }
+
+      .document-info {
+        text-align: center;
+        color: #666;
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1 id="document-title">Chargement du document...</h1>
+      <div class="header-actions">
+        <button id="download-btn">Télécharger</button>
+        <button onclick="window.close()">Fermer</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Chargement du document...</p>
+      </div>
+
+      <div id="error" class="error" style="display: none">
+        Une erreur s'est produite lors du chargement du document.
+      </div>
+
+      <div
+        id="document-container"
+        class="document-container"
+        style="display: none"
+      >
+        <!-- The document will be inserted here -->
+      </div>
+    </div>
+
+    <script>
+      // Get URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestId = urlParams.get("id");
+      const authToken = urlParams.get("token");
+      const context = urlParams.get("context") || "student"; // Default to student context if not specified
+      const API_BASE_URL = "https://uni-front-zeta.vercel.app/api";
+
+      let documentUrl = null;
+      let documentBlob = null;
+      let documentName = null;
+
+      // Load document on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        if (!requestId || !authToken) {
+          showError("Paramètres manquants dans l'URL");
           return;
         }
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch document: ${response.status}`);
-        }
-        
-        documentBlob = await response.blob();
-        console.log("Document blob received:", {
-          size: documentBlob.size,
-          type: documentBlob.type
-        });
-        
-        if (!documentName && response.headers.get('Content-Disposition')) {
-          // Try to extract filename from Content-Disposition header
-          const filenameMatch = response.headers.get('Content-Disposition').match(/filename="(.+?)"/);
-          if (filenameMatch && filenameMatch[1]) {
-            documentName = filenameMatch[1];
-            document.title = documentName;
-            document.getElementById('document-title').textContent = documentName;
+
+        // Set up download button
+        document
+          .getElementById("download-btn")
+          .addEventListener("click", downloadDocument);
+
+        loadDocument();
+      });
+
+      // Load and display the document
+      async function loadDocument() {
+        try {
+          // Fetch document metadata first to get name and type
+          console.log("Fetching document metadata...");
+          let metadataUrl;
+          let documentUrl;
+
+          // Determine URLs based on context
+          if (context === "teacher") {
+            metadataUrl = `${API_BASE_URL}/enseignants/group-change-requests/${requestId}`;
+            documentUrl = `${API_BASE_URL}/enseignants/group-change-requests/${requestId}/document?token=${encodeURIComponent(
+              authToken
+            )}`;
           } else {
-            documentName = `document-${requestId}`;
+            // Default to student context
+            metadataUrl = `${API_BASE_URL}/change-requests/${requestId}`;
+            documentUrl = `${API_BASE_URL}/change-requests/${requestId}/document`;
           }
+
+          const metadataResponse = await fetch(metadataUrl, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }).catch((error) => {
+            console.error("Error fetching metadata:", error);
+            // If metadata fetch fails, try loading document directly
+            return null;
+          });
+
+          let metadata = null;
+
+          if (metadataResponse && metadataResponse.ok) {
+            metadata = await metadataResponse.json();
+            console.log("Document metadata:", {
+              id: metadata.id,
+              hasDocumentData: !!metadata.documentData,
+              documentName: metadata.documentName,
+              documentMimeType: metadata.documentMimeType,
+            });
+
+            // Save document name for download
+            documentName = metadata.documentName || `document-${requestId}`;
+
+            // Update document title
+            document.title = documentName;
+            document.getElementById("document-title").textContent =
+              documentName;
+          } else {
+            console.warn(
+              "Could not fetch metadata, proceeding with document fetch only"
+            );
+          }
+
+          // Fetch the actual document
+          console.log("Fetching document data...");
+          const response = await fetch(documentUrl, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+
+          console.log("Document response:", {
+            status: response.status,
+            statusText: response.statusText,
+            headers: {
+              "Content-Type": response.headers.get("Content-Type"),
+              "Content-Length": response.headers.get("Content-Length"),
+            },
+          });
+
+          // Check for 204 No Content status for requests without documents
+          if (response.status === 204) {
+            // No document found
+            console.log("No document data received (204 No Content)");
+            displayNoDocumentMessage();
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch document: ${response.status}`);
+          }
+
+          documentBlob = await response.blob();
+          console.log("Document blob received:", {
+            size: documentBlob.size,
+            type: documentBlob.type,
+          });
+
+          if (!documentName && response.headers.get("Content-Disposition")) {
+            // Try to extract filename from Content-Disposition header
+            const filenameMatch = response.headers
+              .get("Content-Disposition")
+              .match(/filename="(.+?)"/);
+            if (filenameMatch && filenameMatch[1]) {
+              documentName = filenameMatch[1];
+              document.title = documentName;
+              document.getElementById("document-title").textContent =
+                documentName;
+            } else {
+              documentName = `document-${requestId}`;
+            }
+          }
+
+          documentUrl = URL.createObjectURL(documentBlob);
+
+          const container = document.getElementById("document-container");
+
+          // Determine how to display based on file type
+          const mimeType = metadata?.documentMimeType || documentBlob.type;
+
+          if (mimeType.startsWith("image/")) {
+            displayImage(container, documentUrl, documentName);
+          } else if (mimeType === "application/pdf") {
+            displayPdf(container, documentUrl, documentName);
+          } else if (mimeType.startsWith("video/")) {
+            displayVideo(container, documentUrl, documentName);
+          } else if (mimeType.startsWith("audio/")) {
+            displayAudio(container, documentUrl, documentName);
+          } else if (mimeType === "text/plain" || mimeType === "text/html") {
+            await displayTextContent(container, documentBlob, documentName);
+          } else {
+            // For other types, create a download link
+            displayDownloadLink(container, documentUrl, documentName);
+          }
+
+          // Hide loading, show document
+          document.getElementById("loading").style.display = "none";
+          container.style.display = "block";
+        } catch (error) {
+          console.error("Error loading document:", error);
+          showError(error.message);
         }
-        
-        documentUrl = URL.createObjectURL(documentBlob);
-        
-        const container = document.getElementById('document-container');
-        
-        // Determine how to display based on file type
-        const mimeType = metadata?.documentMimeType || documentBlob.type;
-        
-        if (mimeType.startsWith('image/')) {
-          displayImage(container, documentUrl, documentName);
-        } else if (mimeType === 'application/pdf') {
-          displayPdf(container, documentUrl, documentName);
-        } else if (mimeType.startsWith('video/')) {
-          displayVideo(container, documentUrl, documentName);
-        } else if (mimeType.startsWith('audio/')) {
-          displayAudio(container, documentUrl, documentName);
-        } else if (mimeType === 'text/plain' || mimeType === 'text/html') {
-          await displayTextContent(container, documentBlob, documentName);
-        } else {
-          // For other types, create a download link
-          displayDownloadLink(container, documentUrl, documentName);
-        }
-        
-        // Hide loading, show document
-        document.getElementById('loading').style.display = 'none';
-        container.style.display = 'block';
-        
-      } catch (error) {
-        console.error("Error loading document:", error);
-        showError(error.message);
       }
-    }
-    
-    function displayImage(container, url, title) {
-      container.innerHTML = '';
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = title || "Image";
-      img.title = "Cliquez pour agrandir";
-      img.onclick = toggleFullscreen;
-      container.appendChild(img);
-      
-      // Add file info
-      addDocumentInfo(container, 'Image');
-    }
-    
-    function displayPdf(container, url, title) {
-      container.innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.title = title || "PDF Document";
-      container.appendChild(iframe);
-      
-      // Add file info
-      addDocumentInfo(container, 'PDF');
-    }
-    
-    function displayVideo(container, url, title) {
-      container.innerHTML = '';
-      const video = document.createElement('video');
-      video.src = url;
-      video.controls = true;
-      video.autoplay = false;
-      video.style.maxWidth = '100%';
-      container.appendChild(video);
-      
-      // Add file info
-      addDocumentInfo(container, 'Vidéo');
-    }
-    
-    function displayAudio(container, url, title) {
-      container.innerHTML = '';
-      const audio = document.createElement('audio');
-      audio.src = url;
-      audio.controls = true;
-      audio.style.width = '100%';
-      container.appendChild(audio);
-      
-      // Add file info
-      addDocumentInfo(container, 'Audio');
-    }
-    
-    async function displayTextContent(container, blob, title) {
-      container.innerHTML = '';
-      try {
-        const text = await blob.text();
-        const pre = document.createElement('pre');
-        pre.style.whiteSpace = 'pre-wrap';
-        pre.style.width = '100%';
-        pre.style.overflow = 'auto';
-        pre.style.padding = '10px';
-        pre.textContent = text;
-        container.appendChild(pre);
-        
+
+      function displayImage(container, url, title) {
+        container.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = title || "Image";
+        img.title = "Cliquez pour agrandir";
+        img.onclick = toggleFullscreen;
+        container.appendChild(img);
+
         // Add file info
-        addDocumentInfo(container, 'Texte');
-      } catch (e) {
-        console.error('Error displaying text content:', e);
-        displayDownloadLink(container, URL.createObjectURL(blob), title);
+        addDocumentInfo(container, "Image");
       }
-    }
-    
-    function displayDownloadLink(container, url, filename) {
-      container.innerHTML = `
+
+      function displayPdf(container, url, title) {
+        container.innerHTML = "";
+        const iframe = document.createElement("iframe");
+        iframe.src = url;
+        iframe.title = title || "PDF Document";
+        container.appendChild(iframe);
+
+        // Add file info
+        addDocumentInfo(container, "PDF");
+      }
+
+      function displayVideo(container, url, title) {
+        container.innerHTML = "";
+        const video = document.createElement("video");
+        video.src = url;
+        video.controls = true;
+        video.autoplay = false;
+        video.style.maxWidth = "100%";
+        container.appendChild(video);
+
+        // Add file info
+        addDocumentInfo(container, "Vidéo");
+      }
+
+      function displayAudio(container, url, title) {
+        container.innerHTML = "";
+        const audio = document.createElement("audio");
+        audio.src = url;
+        audio.controls = true;
+        audio.style.width = "100%";
+        container.appendChild(audio);
+
+        // Add file info
+        addDocumentInfo(container, "Audio");
+      }
+
+      async function displayTextContent(container, blob, title) {
+        container.innerHTML = "";
+        try {
+          const text = await blob.text();
+          const pre = document.createElement("pre");
+          pre.style.whiteSpace = "pre-wrap";
+          pre.style.width = "100%";
+          pre.style.overflow = "auto";
+          pre.style.padding = "10px";
+          pre.textContent = text;
+          container.appendChild(pre);
+
+          // Add file info
+          addDocumentInfo(container, "Texte");
+        } catch (e) {
+          console.error("Error displaying text content:", e);
+          displayDownloadLink(container, URL.createObjectURL(blob), title);
+        }
+      }
+
+      function displayDownloadLink(container, url, filename) {
+        container.innerHTML = `
         <div style="text-align: center; padding: 20px;">
           <p>Ce type de fichier ne peut pas être affiché directement.</p>
           <a href="${url}" download="${filename}" class="download-button">
-            Télécharger: ${filename || 'document'}
+            Télécharger: ${filename || "document"}
           </a>
         </div>
       `;
-    }
-    
-    function addDocumentInfo(container, type) {
-      const info = document.createElement('div');
-      info.className = 'document-info';
-      info.textContent = `Type: ${type} • Nom: ${documentName}`;
-      container.appendChild(info);
-    }
-    
-    function showError(message) {
-      const errorElement = document.getElementById('error');
-      errorElement.textContent = `Erreur: ${message}`;
-      errorElement.style.display = 'block';
-      document.getElementById('loading').style.display = 'none';
-    }
-    
-    function toggleFullscreen(event) {
-      if (event.target.requestFullscreen) {
-        event.target.requestFullscreen();
-      } else if (event.target.webkitRequestFullscreen) {
-        event.target.webkitRequestFullscreen();
-      } else if (event.target.msRequestFullscreen) {
-        event.target.msRequestFullscreen();
       }
-    }
-    
-    function downloadDocument() {
-      if (documentUrl && documentName) {
-        const a = document.createElement('a');
-        a.href = documentUrl;
-        a.download = documentName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+
+      function addDocumentInfo(container, type) {
+        const info = document.createElement("div");
+        info.className = "document-info";
+        info.textContent = `Type: ${type} • Nom: ${documentName}`;
+        container.appendChild(info);
       }
-    }
-    
-    function displayNoDocumentMessage() {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('document-container').style.display = 'block';
-      document.getElementById('document-container').innerHTML = `
+
+      function showError(message) {
+        const errorElement = document.getElementById("error");
+        errorElement.textContent = `Erreur: ${message}`;
+        errorElement.style.display = "block";
+        document.getElementById("loading").style.display = "none";
+      }
+
+      function toggleFullscreen(event) {
+        if (event.target.requestFullscreen) {
+          event.target.requestFullscreen();
+        } else if (event.target.webkitRequestFullscreen) {
+          event.target.webkitRequestFullscreen();
+        } else if (event.target.msRequestFullscreen) {
+          event.target.msRequestFullscreen();
+        }
+      }
+
+      function downloadDocument() {
+        if (documentUrl && documentName) {
+          const a = document.createElement("a");
+          a.href = documentUrl;
+          a.download = documentName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      }
+
+      function displayNoDocumentMessage() {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("document-container").style.display = "block";
+        document.getElementById("document-container").innerHTML = `
         <div style="text-align: center; padding: 20px;">
           <h3>Aucun document disponible</h3>
           <p>Cette demande n'a pas de document joint.</p>
         </div>
       `;
-      document.getElementById('document-title').textContent = "Aucun document";
-      document.getElementById('download-btn').style.display = 'none';
-    }
-    
-    // Clean up on page unload
-    window.addEventListener('beforeunload', function() {
-      if (documentUrl) {
-        URL.revokeObjectURL(documentUrl);
+        document.getElementById("document-title").textContent =
+          "Aucun document";
+        document.getElementById("download-btn").style.display = "none";
       }
-    });
-  </script>
-</body>
-</html> 
+
+      // Clean up on page unload
+      window.addEventListener("beforeunload", function () {
+        if (documentUrl) {
+          URL.revokeObjectURL(documentUrl);
+        }
+      });
+    </script>
+  </body>
+</html>

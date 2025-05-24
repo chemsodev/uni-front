@@ -297,7 +297,7 @@
               const timeoutId = setTimeout(() => controller.abort(), 15000); // Increase timeout to 15 seconds
 
               const response = await fetch(
-                "https://unicersityback.onrender.com/api/enseignants/group-change-requests",
+                "https://uni-front-zeta.vercel.app/api/enseignants/group-change-requests",
                 {
                   headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -809,7 +809,7 @@
           if (isBackendAvailable) {
             try {
               const response = await fetch(
-                `https://unicersityback.onrender.com/api/enseignants/group-change-requests/${currentRequestId}`,
+                `https://uni-front-zeta.vercel.app/api/enseignants/group-change-requests/${currentRequestId}`,
                 {
                   method: "PATCH",
                   headers: {

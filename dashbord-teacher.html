@@ -193,7 +193,7 @@
       let isBackendAvailable = true;
       let allSections = [];
       let allStudents = {};
-      const apiUrl = "https://unicersityback.onrender.com";
+      const apiUrl = "https://uni-front-zeta.vercel.app";
       const stats = {
         students: 0,
         sections: 0,
@@ -556,7 +556,7 @@
           }
 
           const response = await fetch(
-            "https://unicersityback.onrender.com/api/enseignants/group-change-requests",
+            "https://uni-front-zeta.vercel.app/api/enseignants/group-change-requests",
             {
               headers: { Authorization: `Bearer ${authToken}` },
               signal: AbortSignal.timeout(5000),
@@ -619,7 +619,7 @@
           }
 
           const response = await fetch(
-            `https://unicersityback.onrender.com/api/enseignants/${teacherId}/sections/${sectionId}/students`,
+            `https://uni-front-zeta.vercel.app/api/enseignants/${teacherId}/sections/${sectionId}/students`,
             {
               headers: { Authorization: `Bearer ${authToken}` },
               signal: AbortSignal.timeout(5000),
@@ -662,19 +662,19 @@
 
         sections.forEach((section) => {
           // Calculate total occupancy from all groups
-            // Count TD and TP students separately, then sum (avoiding double counting)
-            const tdOccupancy = section.groupes
+          // Count TD and TP students separately, then sum (avoiding double counting)
+          const tdOccupancy = section.groupes
             ? section.groupes
-              .filter((g) => g.type === "td")
-              .reduce((sum, g) => sum + (g.currentOccupancy || 0), 0)
+                .filter((g) => g.type === "td")
+                .reduce((sum, g) => sum + (g.currentOccupancy || 0), 0)
             : 0;
-            const tpOccupancy = section.groupes
+          const tpOccupancy = section.groupes
             ? section.groupes
-              .filter((g) => g.type === "tp")
-              .reduce((sum, g) => sum + (g.currentOccupancy || 0), 0)
+                .filter((g) => g.type === "tp")
+                .reduce((sum, g) => sum + (g.currentOccupancy || 0), 0)
             : 0;
-            // Estimate total students as average of TD and TP (rounded up)
-            const totalOccupancy =
+          // Estimate total students as average of TD and TP (rounded up)
+          const totalOccupancy =
             tdOccupancy && tpOccupancy
               ? Math.ceil((tdOccupancy + tpOccupancy) / 2)
               : tdOccupancy || tpOccupancy || 0;
@@ -1283,7 +1283,7 @@
           let response;
           try {
             response = await fetch(
-              `https://unicersityback.onrender.com/api/notifications/from-teacher/${teacherId}`,
+              `https://uni-front-zeta.vercel.app/api/notifications/from-teacher/${teacherId}`,
               {
                 headers: {
                   Authorization: `Bearer ${authToken}`,
@@ -1298,7 +1298,7 @@
                   "API endpoint not found, falling back to main notifications endpoint"
                 );
                 response = await fetch(
-                  `https://unicersityback.onrender.com/api/notifications`,
+                  `https://uni-front-zeta.vercel.app/api/notifications`,
                   {
                     headers: {
                       Authorization: `Bearer ${authToken}`,

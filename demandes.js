@@ -12,19 +12,19 @@ function getFallbackGroups(type) {
       return [
         { id: "s1", name: "Section A" },
         { id: "s2", name: "Section B" },
-        { id: "s3", name: "Section C" }
+        { id: "s3", name: "Section C" },
       ];
     case "td":
       return [
         { id: "td1", name: "TD 1" },
         { id: "td2", name: "TD 2" },
-        { id: "td3", name: "TD 3" }
+        { id: "td3", name: "TD 3" },
       ];
     case "tp":
       return [
         { id: "tp1", name: "TP 1" },
         { id: "tp2", name: "TP 2" },
-        { id: "tp3", name: "TP 3" }
+        { id: "tp3", name: "TP 3" },
       ];
     default:
       return [];
@@ -349,13 +349,16 @@ function setupTabNavigation() {
 async function checkBackendConnectivity() {
   try {
     // Try loading student data instead of using a non-existent health endpoint
-    const response = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-      method: "GET",
-      signal: AbortSignal.timeout(3000),
-    });
+    const response = await fetch(
+      "https://uni-front-zeta.vercel.app/api/auth/verify",
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        method: "GET",
+        signal: AbortSignal.timeout(3000),
+      }
+    );
 
     isBackendAvailable = response.ok;
     return response.ok;
@@ -447,7 +450,11 @@ async function loadUserData() {
     });
 
     // Load options
-    await loadAvailableOptions("section", studentData.sections?.[0]?.id, studentData);
+    await loadAvailableOptions(
+      "section",
+      studentData.sections?.[0]?.id,
+      studentData
+    );
     await loadAvailableOptions("td", studentData.tdGroupe?.id, studentData);
     await loadAvailableOptions("tp", studentData.tpGroupe?.id, studentData);
   } catch (e) {
@@ -458,7 +465,7 @@ async function loadUserData() {
 
 async function fetchStudentData() {
   const res = await fetch(
-    `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
+    `https://uni-front-zeta.vercel.app/api/etudiants/${currentUser.id}`,
     {
       headers: { Authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5000),
@@ -537,7 +544,7 @@ async function loadAvailableOptions(type, currentId, studentData) {
         // Add capacity information to help with decision-making
         if (group.capacity && group.currentOccupancy !== undefined) {
           displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
-          
+
           // Add visual indicator for full groups
           if (group.currentOccupancy >= group.capacity) {
             displayName += " (Complet)";
@@ -565,7 +572,8 @@ async function loadAvailableOptions(type, currentId, studentData) {
         if (allGroupsOfType.length <= 1) {
           message += "Vous êtes dans le seul groupe disponible.";
         } else {
-          message += "Vous êtes déjà dans le seul groupe disponible pour votre section.";
+          message +=
+            "Vous êtes déjà dans le seul groupe disponible pour votre section.";
         }
 
         errorDiv.textContent = message;
@@ -597,7 +605,11 @@ async function fetchGroups(type, currentId, studentData) {
   try {
     // For type 'section' we handle it differently
     if (type === "section") {
-      if (!studentData || !studentData.sections || studentData.sections.length === 0) {
+      if (
+        !studentData ||
+        !studentData.sections ||
+        studentData.sections.length === 0
+      ) {
         console.warn("No sections data available, using fallback data");
         return getFallbackGroups(type);
       }
@@ -606,16 +618,19 @@ async function fetchGroups(type, currentId, studentData) {
       const studentSection = studentData.sections[0];
       const specialty = studentSection?.specialty;
       const level = studentSection?.level;
-      
+
       // Use the findAll endpoint with query parameters
       const queryParams = new URLSearchParams();
       if (specialty) queryParams.append("specialty", specialty);
       if (level) queryParams.append("level", level);
-      
-      const res = await fetch(`https://unicersityback.onrender.com/api/sections?${queryParams.toString()}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-        signal: AbortSignal.timeout(5000),
-      });
+
+      const res = await fetch(
+        `https://uni-front-zeta.vercel.app/api/sections?${queryParams.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
 
       if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
       const allSections = await res.json();
@@ -633,7 +648,7 @@ async function fetchGroups(type, currentId, studentData) {
       }
 
       // Try to fetch all groups for this section from a dedicated endpoint
-      const groupsUrl = `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`;
+      const groupsUrl = `https://uni-front-zeta.vercel.app/api/sections/${sectionId}/groupes`;
 
       try {
         const groupsRes = await fetch(groupsUrl, {
@@ -643,8 +658,10 @@ async function fetchGroups(type, currentId, studentData) {
 
         if (groupsRes.ok) {
           const allGroups = await groupsRes.json();
-          console.log(`Fetched ${allGroups.length} groups for section ${sectionId}`);
-          
+          console.log(
+            `Fetched ${allGroups.length} groups for section ${sectionId}`
+          );
+
           let availableGroups;
           if (type === "tp") {
             // For TP groups, filter based on group name containing TP or database type
@@ -677,7 +694,10 @@ async function fetchGroups(type, currentId, studentData) {
           return availableGroups;
         }
       } catch (groupsError) {
-        console.log("Error fetching groups from dedicated endpoint:", groupsError);
+        console.log(
+          "Error fetching groups from dedicated endpoint:",
+          groupsError
+        );
       }
 
       // Fall back to using groups from student data
@@ -689,7 +709,7 @@ async function fetchGroups(type, currentId, studentData) {
           const isNamedTP = group.name.toLowerCase().includes("tp");
           const isTypeTP = group.type === "tp";
           const isNotCurrentGroup = group.id !== currentId;
-          
+
           // Only check type and current group
           return (isNamedTP || isTypeTP) && isNotCurrentGroup;
         });
@@ -699,7 +719,7 @@ async function fetchGroups(type, currentId, studentData) {
           const isNamedTD = group.name.toLowerCase().includes("td");
           const isTypeTD = group.type === "td";
           const isNotCurrentGroup = group.id !== currentId;
-          
+
           // Only check type and current group
           return (isNamedTD || isTypeTD) && isNotCurrentGroup;
         });
@@ -731,7 +751,7 @@ async function checkStudentGroupAssignments() {
 
     // Get student data
     const studentRes = await fetch(
-      `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
+      `https://uni-front-zeta.vercel.app/api/etudiants/${currentUser.id}`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -765,7 +785,7 @@ async function checkStudentGroupAssignments() {
     html += `<p>Section ID: ${sectionId}</p>`;
 
     const sectionRes = await fetch(
-      `https://unicersityback.onrender.com/api/sections/${sectionId}`,
+      `https://uni-front-zeta.vercel.app/api/sections/${sectionId}`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -787,7 +807,7 @@ async function checkStudentGroupAssignments() {
     // Get all available sections for the same specialty and level
     try {
       const availableSectionsRes = await fetch(
-        `https://unicersityback.onrender.com/api/sections?specialty=${sectionData.specialty}&level=${sectionData.level}`,
+        `https://uni-front-zeta.vercel.app/api/sections?specialty=${sectionData.specialty}&level=${sectionData.level}`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }
@@ -845,7 +865,7 @@ async function checkStudentGroupAssignments() {
 
     // Get groups for this section
     const groupsRes = await fetch(
-      `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`,
+      `https://uni-front-zeta.vercel.app/api/sections/${sectionId}/groupes`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -1212,7 +1232,7 @@ async function submitRequest(type, prefix, e) {
 
         // Submit request with multipart form data for file upload
         response = await fetch(
-          "https://unicersityback.onrender.com/api/change-requests/section-with-document",
+          "https://uni-front-zeta.vercel.app/api/change-requests/section-with-document",
           {
             method: "POST",
             headers: {
@@ -1225,7 +1245,7 @@ async function submitRequest(type, prefix, e) {
       } else {
         // No document, use regular JSON request
         response = await fetch(
-          "https://unicersityback.onrender.com/api/change-requests/section",
+          "https://uni-front-zeta.vercel.app/api/change-requests/section",
           {
             method: "POST",
             headers: {
@@ -1258,7 +1278,7 @@ async function submitRequest(type, prefix, e) {
 
       // Submit request for group change with file
       response = await fetch(
-        "https://unicersityback.onrender.com/api/change-requests/group",
+        "https://uni-front-zeta.vercel.app/api/change-requests/group",
         {
           method: "POST",
           headers: {
@@ -1400,13 +1420,16 @@ async function loadUserRequests() {
 
     // Check if the token is still valid
     try {
-      const tokenCheck = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-        signal: AbortSignal.timeout(5000),
-      });
+      const tokenCheck = await fetch(
+        "https://uni-front-zeta.vercel.app/api/auth/verify",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
 
       if (!tokenCheck.ok) {
         console.error("Token validation failed:", tokenCheck.status);
@@ -1547,7 +1570,7 @@ async function fetchRequests(endpoint) {
     // Normalize the endpoint to avoid double URLs
     const apiEndpoint = endpoint.includes("http://")
       ? `${endpoint}/my-requests`
-      : `https://unicersityback.onrender.com/api/${endpoint}/my-requests`;
+      : `https://uni-front-zeta.vercel.app/api/${endpoint}/my-requests`;
 
     console.log(`Fetching requests from ${apiEndpoint}`);
 
@@ -1844,14 +1867,17 @@ async function loadNavbar() {
 // AUTH
 async function verifyToken() {
   try {
-    const res = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(5000),
-    });
+    const res = await fetch(
+      "https://uni-front-zeta.vercel.app/api/auth/verify",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
 
     if (!res.ok) {
       console.warn(`Token verification failed with status: ${res.status}`);
@@ -1939,14 +1965,17 @@ async function refreshToken() {
 
     console.log("Attempting to refresh token...");
 
-    const response = await fetch("https://unicersityback.onrender.com/api/auth/refresh", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refreshToken: refreshTokenValue }),
-      signal: AbortSignal.timeout(5000),
-    });
+    const response = await fetch(
+      "https://uni-front-zeta.vercel.app/api/auth/refresh",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
+        signal: AbortSignal.timeout(5000),
+      }
+    );
 
     if (!response.ok) {
       console.warn("Token refresh failed:", response.status);
@@ -2243,13 +2272,16 @@ function setupTabNavigation() {
 async function checkBackendConnectivity() {
   try {
     // Try loading student data instead of using a non-existent health endpoint
-    const response = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-      method: "GET",
-      signal: AbortSignal.timeout(3000),
-    });
+    const response = await fetch(
+      "https://uni-front-zeta.vercel.app/api/auth/verify",
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        method: "GET",
+        signal: AbortSignal.timeout(3000),
+      }
+    );
 
     isBackendAvailable = response.ok;
     return response.ok;
@@ -2341,7 +2373,11 @@ async function loadUserData() {
     });
 
     // Load options
-    await loadAvailableOptions("section", studentData.sections?.[0]?.id, studentData);
+    await loadAvailableOptions(
+      "section",
+      studentData.sections?.[0]?.id,
+      studentData
+    );
     await loadAvailableOptions("td", studentData.tdGroupe?.id, studentData);
     await loadAvailableOptions("tp", studentData.tpGroupe?.id, studentData);
   } catch (e) {
@@ -2352,7 +2388,7 @@ async function loadUserData() {
 
 async function fetchStudentData() {
   const res = await fetch(
-    `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
+    `https://uni-front-zeta.vercel.app/api/etudiants/${currentUser.id}`,
     {
       headers: { Authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5000),
@@ -2431,7 +2467,7 @@ async function loadAvailableOptions(type, currentId, studentData) {
         // Add capacity information to help with decision-making
         if (group.capacity && group.currentOccupancy !== undefined) {
           displayName += ` - ${group.currentOccupancy}/${group.capacity}`;
-          
+
           // Add visual indicator for full groups
           if (group.currentOccupancy >= group.capacity) {
             displayName += " (Complet)";
@@ -2459,7 +2495,8 @@ async function loadAvailableOptions(type, currentId, studentData) {
         if (allGroupsOfType.length <= 1) {
           message += "Vous êtes dans le seul groupe disponible.";
         } else {
-          message += "Vous êtes déjà dans le seul groupe disponible pour votre section.";
+          message +=
+            "Vous êtes déjà dans le seul groupe disponible pour votre section.";
         }
 
         errorDiv.textContent = message;
@@ -2491,7 +2528,11 @@ async function fetchGroups(type, currentId, studentData) {
   try {
     // For type 'section' we handle it differently
     if (type === "section") {
-      if (!studentData || !studentData.sections || studentData.sections.length === 0) {
+      if (
+        !studentData ||
+        !studentData.sections ||
+        studentData.sections.length === 0
+      ) {
         console.warn("No sections data available, using fallback data");
         return getFallbackGroups(type);
       }
@@ -2500,16 +2541,19 @@ async function fetchGroups(type, currentId, studentData) {
       const studentSection = studentData.sections[0];
       const specialty = studentSection?.specialty;
       const level = studentSection?.level;
-      
+
       // Use the findAll endpoint with query parameters
       const queryParams = new URLSearchParams();
       if (specialty) queryParams.append("specialty", specialty);
       if (level) queryParams.append("level", level);
-      
-      const res = await fetch(`https://unicersityback.onrender.com/api/sections?${queryParams.toString()}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-        signal: AbortSignal.timeout(5000),
-      });
+
+      const res = await fetch(
+        `https://uni-front-zeta.vercel.app/api/sections?${queryParams.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
 
       if (!res.ok) throw new Error(`Failed to fetch ${type} groups`);
       const allSections = await res.json();
@@ -2527,7 +2571,7 @@ async function fetchGroups(type, currentId, studentData) {
       }
 
       // Try to fetch all groups for this section from a dedicated endpoint
-      const groupsUrl = `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`;
+      const groupsUrl = `https://uni-front-zeta.vercel.app/api/sections/${sectionId}/groupes`;
 
       try {
         const groupsRes = await fetch(groupsUrl, {
@@ -2537,8 +2581,10 @@ async function fetchGroups(type, currentId, studentData) {
 
         if (groupsRes.ok) {
           const allGroups = await groupsRes.json();
-          console.log(`Fetched ${allGroups.length} groups for section ${sectionId}`);
-          
+          console.log(
+            `Fetched ${allGroups.length} groups for section ${sectionId}`
+          );
+
           let availableGroups;
           if (type === "tp") {
             // For TP groups, filter based on group name containing TP or database type
@@ -2571,7 +2617,10 @@ async function fetchGroups(type, currentId, studentData) {
           return availableGroups;
         }
       } catch (groupsError) {
-        console.log("Error fetching groups from dedicated endpoint:", groupsError);
+        console.log(
+          "Error fetching groups from dedicated endpoint:",
+          groupsError
+        );
       }
 
       // Fall back to using groups from student data
@@ -2583,7 +2632,7 @@ async function fetchGroups(type, currentId, studentData) {
           const isNamedTP = group.name.toLowerCase().includes("tp");
           const isTypeTP = group.type === "tp";
           const isNotCurrentGroup = group.id !== currentId;
-          
+
           // Only check type and current group
           return (isNamedTP || isTypeTP) && isNotCurrentGroup;
         });
@@ -2593,7 +2642,7 @@ async function fetchGroups(type, currentId, studentData) {
           const isNamedTD = group.name.toLowerCase().includes("td");
           const isTypeTD = group.type === "td";
           const isNotCurrentGroup = group.id !== currentId;
-          
+
           // Only check type and current group
           return (isNamedTD || isTypeTD) && isNotCurrentGroup;
         });

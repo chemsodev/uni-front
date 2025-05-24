@@ -1,158 +1,229 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Connexion Espace Administration</title>
-    <link href="style/admin-login.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div class="login-container">
-    <h2 class="login-title">Connexion Espace Administration</h2>
-    
-    <form id="loginForm">
+    <link href="style/admin-login.css" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="js/admin-auth.js"></script>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2 class="login-title">Connexion Espace Administration</h2>
+
+      <form id="loginForm">
         <div class="form-group">
-            <label class="form-label" for="email">Adresse Email Professionnel</label>
-            <input type="email" id="email" name="email" class="form-input" placeholder="admin@univ.edu" required>
-            <div id="email-error" class="error-message"></div>
+          <label class="form-label" for="email"
+            >Adresse Email Professionnel</label
+          >
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="admin@univ.edu"
+            required
+          />
+          <div id="email-error" class="error-message"></div>
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="password">Mot de passe</label>
-            <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
-            <div id="password-error" class="error-message"></div>
+          <label class="form-label" for="password">Mot de passe</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="••••••••"
+            required
+          />
+          <div id="password-error" class="error-message"></div>
         </div>
 
         <div class="remember-me">
-            <input type="checkbox" id="remember" name="remember">
-            <label for="remember">Se souvenir de moi</label>
+          <input type="checkbox" id="remember" name="remember" />
+          <label for="remember">Se souvenir de moi</label>
         </div>
 
-        <a href="mdps-oublier-admin.html" class="forgot-password">Mot de passe oublié?</a>
+        <a href="mdps-oublier-admin.html" class="forgot-password"
+          >Mot de passe oublié?</a
+        >
 
-        <button type="button" class="login-button" onclick="handleLogin()">Se connecter</button>
-    </form>
+        <button type="button" class="login-button" onclick="handleLogin()">
+          Se connecter
+        </button>
+      </form>
 
-    <div class="divider">
+      <div class="divider">
         <span class="divider-text">OU</span>
+      </div>
+
+      <a href="index.html" class="back-button">Retour à la page de sélection</a>
     </div>
 
-    <a href="index.html" class="back-button">Retour à la page de sélection</a>
-</div>
-
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener("DOMContentLoaded", function () {
         const urlParams = new URLSearchParams(window.location.search);
-        const requestedRole = urlParams.get('requestedRole');
-        
+        const requestedRole = urlParams.get("requestedRole");
+
         // Silent redirect if missing role parameter
         if (!requestedRole) {
-            window.location.href = 'index.html';
-            return;
+          window.location.href = "index.html";
+          return;
         }
 
         // Check for existing token
-        const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
+        const token =
+          sessionStorage.getItem("admin_token") ||
+          localStorage.getItem("admin_token");
         if (!token) return;
 
-        // Silent token verification
-        fetch('https://unicersityback.onrender.com/api/auth/verify', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` }
+        // Silent token verification using the API_BASE_URL from admin-auth.js
+        fetch(`${API_BASE_URL}/auth/verify`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
         })
-        .then(response => {
-            if (!response.ok) throw new Error('Invalid token');
+          .then((response) => {
+            if (!response.ok) {
+              // If verification fails (e.g. 401), treat as unauthenticated
+              // Assuming response.json() might contain error details
+              return response
+                .json()
+                .then((err) =>
+                  Promise.reject(err || new Error("Verification failed"))
+                );
+            }
             return response.json();
-        })
-        .then(data => {
-            // Silent role validation
-            if (data.userType === requestedRole) {
-                const rolePages = {
-                    'chef-de-departement': 'chef-de-departement.html',
-                    'chef-de-specialite': 'chef-de-specialite.html',
-                    'secretaire': 'secretaire-agent.html',
-                    'vice-doyen': 'vice-doyen.html',
-                    'doyen': 'doyen.html'
-                };
-                window.location.href = rolePages[requestedRole];
-            }
-        })
-        .catch(error => {
-            // Silent token cleanup
-            console.error('Token verification failed:', error);
-            sessionStorage.removeItem('admin_token');
-            localStorage.removeItem('admin_token');
-            localStorage.removeItem('admin_role');
-            sessionStorage.removeItem('admin_role');
-        });
-    });
-
-        // Modified handleLogin function with corrected fetch URL
-        async function handleLogin() {
-            clearErrors();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const rememberMe = document.getElementById('remember').checked;
-            const urlParams = new URLSearchParams(window.location.search);
-            const requestedRole = urlParams.get('requestedRole');
-
-            if (!requestedRole) {
-                alert('Paramètre de rôle manquant dans l\'URL');
-                return;
-            }
-
-            // Validation remains the same
-            if (!email) {
-                showError('email-error', 'Veuillez entrer votre email');
-                return;
-            }
-            
-            if (!password) {
-                showError('password-error', 'Veuillez entrer votre mot de passe');
-                return;
-            }
-
-            try {
-                // Corrected fetch URL with proper parameter formatting
-                const response = await fetch(`https://unicersityback.onrender.com/api/auth/administrateur/login?requestedRole=${requestedRole}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ email, password })
-                });
-
-                // Rest of the login logic remains the same
-                const data = await response.json();
-                
-                if (response.ok) {
-                    const storage = rememberMe ? localStorage : sessionStorage;
-                    storage.setItem('admin_token', data.access_token);
-                    storage.setItem('admin_role', data.adminRole);
-                    storage.setItem('admin_email', data.email);
-                    storage.setItem('admin_id', data.userId);
-                    
-                    // Redirect to the unified admin dashboard
-                    window.location.href = 'admin-dashboard.html';
-                } else {
-                    showError('password-error', data.message || 'Email ou mot de passe incorrect');
+          })
+          .then((data) => {
+            if (data && data.success && data.user) {
+              // Assuming 'success' field and 'user' object
+              // Token is valid, check if the role matches the requested role
+              if (data.adminRole === requestedRole) {
+                // Store/confirm user details from verified token
+                const storage = localStorage.getItem("admin_token")
+                  ? localStorage
+                  : sessionStorage;
+                storage.setItem("admin_role", data.adminRole);
+                storage.setItem("admin_email", data.email);
+                if (data.userId) {
+                  storage.setItem("admin_id", data.userId);
                 }
-            } catch (error) {
-                console.error('Erreur:', error);
-                showError('password-error', 'Erreur de connexion au serveur');
+                // Redirect to dashboard as user is already logged in and verified for this role
+                window.location.href = "admin-dashboard.html";
+              } else {
+                // Valid token but for a different role than requested for this login page instance
+                console.warn(
+                  `Token valid but for role ${data.adminRole}, not ${requestedRole}. Clearing token.`
+                );
+                clearAdminAuth(); // Force login for the correct role
+              }
+            } else {
+              // Token verification failed or data structure is not as expected
+              console.warn(
+                "Token verification returned unsuccessful or data malformed."
+              );
+              clearAdminAuth(); // Clear invalid token
             }
+          })
+          .catch((error) => {
+            console.warn("Token verification failed or no token:", error);
+            clearAdminAuth();
+          });
+      });
+
+      // Modified handleLogin function with corrected fetch URL
+      async function handleLogin() {
+        clearErrors();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const rememberMe = document.getElementById("remember").checked;
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedRole = urlParams.get("requestedRole");
+
+        if (!requestedRole) {
+          alert("Paramètre de rôle manquant dans l'URL");
+          return;
         }
 
-        // Existing helper functions remain the same
-        function clearErrors() {
-            document.getElementById('email-error').textContent = '';
-            document.getElementById('password-error').textContent = '';
+        // Validation remains the same
+        if (!email) {
+          showError("email-error", "L'adresse email est requise.");
+          return;
         }
 
-        function showError(elementId, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.style.color = 'red';
+        if (!password) {
+          showError("password-error", "Le mot de passe est requis.");
+          return;
         }
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/auth/administrateur/login`,
+            {
+              // API_BASE_URL from admin-auth.js
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              // Assuming the backend expects role for login, adjust if not
+              body: JSON.stringify({ email, password, role: requestedRole }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (response.ok && data.access_token) {
+            // Successfully logged in
+            const storage = rememberMe ? localStorage : sessionStorage;
+            storage.setItem("admin_token", data.access_token);
+            storage.setItem("admin_role", data.adminRole);
+            storage.setItem("admin_email", data.email);
+            if (data.userId) {
+              storage.setItem("admin_id", data.userId);
+            }
+
+            // Optional: Strict role check if backend doesn't fully enforce it based on 'requestedRole'
+            if (data.adminRole !== requestedRole) {
+              showError(
+                "password-error",
+                `Accès non autorisé pour le rôle ${requestedRole}. Rôle obtenu: ${data.adminRole}`
+              );
+              clearAdminAuth(); // Clear any stored token if role mismatch
+              return;
+            }
+            window.location.href = "admin-dashboard.html"; // Or role-specific dashboard
+          } else {
+            // Login failed, display error message from backend if available
+            showError(
+              "password-error",
+              data.message || "Email ou mot de passe incorrect."
+            );
+          }
+        } catch (error) {
+          console.error("Login attempt failed:", error);
+          showError(
+            "password-error",
+            "Erreur de connexion. Veuillez réessayer ou contacter le support."
+          );
+        }
+      }
+
+      // Existing helper functions remain the same
+      function clearErrors() {
+        document.getElementById("email-error").textContent = "";
+        document.getElementById("password-error").textContent = "";
+      }
+
+      function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.style.color = "red";
+      }
     </script>
-</body>
+  </body>
 </html>

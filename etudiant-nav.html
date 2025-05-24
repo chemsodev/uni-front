@@ -197,9 +197,12 @@
 
       // If no cached data, fetch from server
       if (!userData) {
-        const res = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
+        const res = await fetch(
+          "https://uni-front-zeta.vercel.app/api/auth/verify",
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
 
         if (!res.ok) {
           throw new Error("Invalid token");
@@ -209,7 +212,7 @@
 
         // Now fetch student details
         const studentRes = await fetch(
-          `https://unicersityback.onrender.com/api/etudiants/${tokenData.userId}`,
+          `https://uni-front-zeta.vercel.app/api/etudiants/${tokenData.userId}`,
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }

@@ -1440,7 +1440,7 @@
           let response;
           try {
             response = await fetch(
-              `https://unicersityback.onrender.com/api/notifications/from-teacher/${teacherId}`,
+              `https://uni-front-zeta.vercel.app/api/notifications/from-teacher/${teacherId}`,
               {
                 headers: {
                   Authorization: `Bearer ${authToken}`,
@@ -1455,7 +1455,7 @@
                   "API endpoint not found, falling back to main notifications endpoint"
                 );
                 response = await fetch(
-                  `https://unicersityback.onrender.com/api/notifications`,
+                  `https://uni-front-zeta.vercel.app/api/notifications`,
                   {
                     headers: {
                       Authorization: `Bearer ${authToken}`,

@@ -233,7 +233,7 @@
       let authToken = null;
       let isBackendAvailable = true;
       let currentRequest = null;
-      const API_BASE_URL = "https://unicersityback.onrender.com/api";
+      const API_BASE_URL = "https://uni-front-zeta.vercel.app/api";
 
       // --- INITIALIZATION ---
       document.addEventListener("DOMContentLoaded", async function () {
@@ -440,7 +440,7 @@
 
       function getStatusLabel(status) {
         const statusLower = (status || "").toLowerCase();
-        
+
         switch (statusLower) {
           case "pending":
             return '<span class="request-status status-pending">En attente</span>';
@@ -475,17 +475,20 @@
         }
 
         try {
-          const response = await fetch(`${API_BASE_URL}/profile-requests/${currentRequest.id}/cancel`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              status: "cancelled",
-              adminComment: "Demande annulée par l'étudiant"
-            }),
-          });
+          const response = await fetch(
+            `${API_BASE_URL}/profile-requests/${currentRequest.id}/cancel`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                status: "cancelled",
+                adminComment: "Demande annulée par l'étudiant",
+              }),
+            }
+          );
 
           if (!response.ok) {
             throw new Error(`Failed to cancel request (${response.status})`);

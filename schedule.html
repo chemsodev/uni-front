@@ -36,7 +36,8 @@
         gap: 10px;
       }
 
-      .schedule-actions a, .schedule-actions button {
+      .schedule-actions a,
+      .schedule-actions button {
         padding: 8px 15px;
         border-radius: 5px;
         text-decoration: none;
@@ -49,13 +50,13 @@
       }
 
       .download-btn {
-        background-color: #3B82F6;
+        background-color: #3b82f6;
         color: white;
         border: none;
       }
 
       .download-btn:hover {
-        background-color: #2563EB;
+        background-color: #2563eb;
       }
 
       .print-btn {
@@ -95,20 +96,22 @@
         padding: 30px;
         color: #64748b;
       }
-      
+
       .loading-spinner {
         display: inline-block;
         width: 20px;
         height: 20px;
         border: 3px solid rgba(59, 130, 246, 0.3);
         border-radius: 50%;
-        border-top-color: #3B82F6;
+        border-top-color: #3b82f6;
         animation: spin 1s ease-in-out infinite;
         margin-right: 10px;
       }
 
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .empty-state {
@@ -116,17 +119,17 @@
         padding: 40px 20px;
         color: #64748b;
       }
-      
+
       .empty-state-icon {
         font-size: 3rem;
         margin-bottom: 10px;
-        color: #CBD5E1;
+        color: #cbd5e1;
       }
-      
+
       .error-container {
-        background-color: #FEF2F2;
-        color: #B91C1C;
-        border-left: 4px solid #DC2626;
+        background-color: #fef2f2;
+        color: #b91c1c;
+        border-left: 4px solid #dc2626;
         padding: 10px 15px;
         margin: 15px 0;
         border-radius: 0 3px 3px 0;
@@ -143,10 +146,16 @@
           <h1 class="page-title">Emploi du temps</h1>
           <div class="header-actions">
             <button id="refresh-btn" title="Actualiser">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 3a5 5 0 0 0-5 5h1a4 4 0 0 1 4-4V3z"/>
-                <path d="M8 13a5 5 0 0 0 5-5h-1a4 4 0 0 1-4 4v1z"/>
-                <path d="M5 8a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path d="M8 3a5 5 0 0 0-5 5h1a4 4 0 0 1 4-4V3z" />
+                <path d="M8 13a5 5 0 0 0 5-5h-1a4 4 0 0 1-4 4v1z" />
+                <path d="M5 8a3 3 0 1 0 6 0 3 3 0 0 0-6 0z" />
               </svg>
               Actualiser
             </button>
@@ -156,7 +165,8 @@
         <div class="schedule-container">
           <div id="scheduleContent">
             <div class="loading">
-              <span class="loading-spinner"></span> Chargement de l'emploi du temps...
+              <span class="loading-spinner"></span> Chargement de l'emploi du
+              temps...
             </div>
           </div>
         </div>
@@ -165,8 +175,8 @@
 
     <script>
       // Global constants
-      const API_BASE_URL = "https://unicersityback.onrender.com/api";
-      
+      const API_BASE_URL = "https://uni-front-zeta.vercel.app/api";
+
       document.addEventListener("DOMContentLoaded", function () {
         // Retrieve auth token and student data
         const authToken =
@@ -183,9 +193,9 @@
 
         // Load schedule document
         loadSchedule();
-        
+
         // Setup refresh button
-        document.getElementById('refresh-btn').addEventListener('click', () => {
+        document.getElementById("refresh-btn").addEventListener("click", () => {
           loadSchedule(true);
         });
       });
@@ -220,19 +230,23 @@
         const userId = document.getElementById("userId");
 
         if (avatar) {
-          const initials = ((studentData.firstName || studentData.prenom || "")[0] || "") + 
-                           ((studentData.lastName || studentData.nom || "")[0] || "");
+          const initials =
+            ((studentData.firstName || studentData.prenom || "")[0] || "") +
+            ((studentData.lastName || studentData.nom || "")[0] || "");
           avatar.textContent = initials.toUpperCase() || "ET";
         }
 
         if (fullName) {
-          fullName.textContent = 
-            (studentData.firstName || studentData.prenom || "") + " " + 
-            (studentData.lastName || studentData.nom || "") || "Étudiant";
+          fullName.textContent =
+            (studentData.firstName || studentData.prenom || "") +
+              " " +
+              (studentData.lastName || studentData.nom || "") || "Étudiant";
         }
 
         if (userId) {
-          userId.textContent = `Matricule: ${studentData.matricule || studentData.id || ""}`;
+          userId.textContent = `Matricule: ${
+            studentData.matricule || studentData.id || ""
+          }`;
         }
       }
 
@@ -243,52 +257,72 @@
             <span class="loading-spinner"></span> Chargement de l'emploi du temps...
           </div>
         `;
-        
+
         try {
-          const authToken = sessionStorage.getItem("etudiant_token") || localStorage.getItem("etudiant_token");
-          
+          const authToken =
+            sessionStorage.getItem("etudiant_token") ||
+            localStorage.getItem("etudiant_token");
+
           // Use URL parameters for cache busting instead of Cache-Control header
-          const cacheParam = forceRefresh ? `?_nocache=${Date.now()}` : '';
-          
+          const cacheParam = forceRefresh ? `?_nocache=${Date.now()}` : "";
+
           // Get timetable data from API
-          const response = await fetch(`${API_BASE_URL}/etudiants/timetable${cacheParam}`, {
-            headers: {
-              Authorization: `Bearer ${authToken}`
+          const response = await fetch(
+            `${API_BASE_URL}/etudiants/timetable${cacheParam}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
             }
-          });
-          
+          );
+
           if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
+            throw new Error(
+              `API request failed with status ${response.status}`
+            );
           }
-          
+
           const timetableData = await response.json();
-          console.log('Timetable data:', timetableData);
-          
+          console.log("Timetable data:", timetableData);
+
           // Handle case where no schedule is available
           if (!timetableData.id || timetableData.message) {
             scheduleContent.innerHTML = `
               <div class="empty-state">
                 <div class="empty-state-icon">📅</div>
-                <p>${timetableData.message || "Aucun emploi du temps n'est disponible pour le moment."}</p>
+                <p>${
+                  timetableData.message ||
+                  "Aucun emploi du temps n'est disponible pour le moment."
+                }</p>
                 <p>Veuillez vérifier ultérieurement ou contacter l'administration.</p>
               </div>
             `;
             return;
           }
-          
+
           // Determine document type from MIME type or extension
-          const isImage = timetableData.documentName && 
-            (timetableData.documentName.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i) ||
-             (timetableData.documentMimeType && timetableData.documentMimeType.startsWith('image/')));
-          
-          const isPdf = timetableData.documentName && 
+          const isImage =
+            timetableData.documentName &&
+            (timetableData.documentName.match(
+              /\.(jpg|jpeg|png|gif|webp|bmp)$/i
+            ) ||
+              (timetableData.documentMimeType &&
+                timetableData.documentMimeType.startsWith("image/")));
+
+          const isPdf =
+            timetableData.documentName &&
             (timetableData.documentName.match(/\.pdf$/i) ||
-             (timetableData.documentMimeType && timetableData.documentMimeType === 'application/pdf'));
-          
+              (timetableData.documentMimeType &&
+                timetableData.documentMimeType === "application/pdf"));
+
           // Format dates
-          const createdDate = new Date(timetableData.createdAt).toLocaleString('fr-FR');
-          const updatedDate = new Date(timetableData.updatedAt).toLocaleString('fr-FR');
-          
+          const createdDate = new Date(timetableData.createdAt).toLocaleString(
+            "fr-FR"
+          );
+          const updatedDate = new Date(timetableData.updatedAt).toLocaleString(
+            "fr-FR"
+          );
+
           // Determine viewer type based on document type
           let viewerHtml;
           if (isImage) {
@@ -303,21 +337,33 @@
               </div>
             `;
           }
-          
+
           // Render the schedule with document
           scheduleContent.innerHTML = `
             <div class="schedule-header">
               <div>
-                <h2 class="schedule-title">${timetableData.title || 'Emploi du temps'}</h2>
+                <h2 class="schedule-title">${
+                  timetableData.title || "Emploi du temps"
+                }</h2>
                 <div class="schedule-meta">
-                  ${timetableData.description || ''}
-                  ${timetableData.academicYear ? `<div>Année académique: ${timetableData.academicYear}</div>` : ''}
-                  ${timetableData.semester ? `<div>Semestre: ${timetableData.semester}</div>` : ''}
+                  ${timetableData.description || ""}
+                  ${
+                    timetableData.academicYear
+                      ? `<div>Année académique: ${timetableData.academicYear}</div>`
+                      : ""
+                  }
+                  ${
+                    timetableData.semester
+                      ? `<div>Semestre: ${timetableData.semester}</div>`
+                      : ""
+                  }
                   <div>Mis à jour le: ${updatedDate}</div>
                 </div>
               </div>
               <div class="schedule-actions">
-                <a href="${timetableData.documentUrl}" download="${timetableData.documentName || 'emploi-du-temps'}" class="download-btn">
+                <a href="${timetableData.documentUrl}" download="${
+            timetableData.documentName || "emploi-du-temps"
+          }" class="download-btn">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
                     <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
@@ -333,13 +379,13 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="document-viewer">
               ${viewerHtml}
             </div>
           `;
         } catch (error) {
-          console.error('Error loading schedule:', error);
+          console.error("Error loading schedule:", error);
           scheduleContent.innerHTML = `
             <div class="error-container">
               <p><strong>Erreur:</strong> Impossible de charger l'emploi du temps.</p>
@@ -352,16 +398,18 @@
           `;
         }
       }
-      
+
       // Function to print schedule
       function printSchedule() {
-        const documentUrl = document.querySelector('.download-btn')?.getAttribute('href');
+        const documentUrl = document
+          .querySelector(".download-btn")
+          ?.getAttribute("href");
         if (documentUrl) {
-          const printWindow = window.open(documentUrl, '_blank');
+          const printWindow = window.open(documentUrl, "_blank");
           if (printWindow) {
             setTimeout(() => {
               printWindow.print();
-        }, 1000);
+            }, 1000);
           }
         }
       }

@@ -157,7 +157,7 @@
 
     <script>
       // Global variables
-      const API_BASE_URL = "https://unicersityback.onrender.com/api";
+      const API_BASE_URL = "https://uni-front-zeta.vercel.app/api";
       let authToken = null;
       let currentUser = null;
       let isBackendAvailable = true;
@@ -834,9 +834,12 @@
         const section = document.getElementById("ongoing-demandes-section");
         section.innerHTML = "";
         try {
-          const res = await fetch(`${API_BASE_URL}/change-requests/my-requests`, {
-            headers: getAuthHeaders(),
-          });
+          const res = await fetch(
+            `${API_BASE_URL}/change-requests/my-requests`,
+            {
+              headers: getAuthHeaders(),
+            }
+          );
           if (!res.ok)
             throw new Error("Erreur lors du chargement des demandes");
           const demandes = await res.json();
@@ -854,12 +857,14 @@
                 d.createdAt
               )}</div>
               <div class='demande-change'>Changement: <span>${
-                d.currentSection?.name || d.currentGroupe?.name || '-'
+                d.currentSection?.name || d.currentGroupe?.name || "-"
               } → ${
-                d.requestedSection?.name || d.requestedGroupe?.name || '-'
-              }</span></div>
+              d.requestedSection?.name || d.requestedGroupe?.name || "-"
+            }</span></div>
               <div class='demande-status'>Statut: <span class='status-chip status-pending'>En cours</span></div>
-              <div class='demande-actions'><a href="demande-details.html?id=${d.id}" class='action-btn'>Voir détails</a></div>
+              <div class='demande-actions'><a href="demande-details.html?id=${
+                d.id
+              }" class='action-btn'>Voir détails</a></div>
             </div>`;
           });
           html += `</div>`;
@@ -873,7 +878,7 @@
       // Helper for type label
       function getRequestTypeLabel(type) {
         const typeStr = String(type).toLowerCase();
-        
+
         switch (typeStr) {
           case "section":
             return "Changement de Section";

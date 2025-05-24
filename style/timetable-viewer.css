@@ -1,0 +1,279 @@
+/* Timetable Viewer Styles */
+.timetable-viewer-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.timetable-viewer-content {
+  background-color: #fff;
+  margin: 50px auto;
+  padding: 0;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 900px;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.timetable-viewer-header {
+  padding: 20px;
+  border-bottom: 1px solid #eaeaea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timetable-viewer-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-color);
+}
+
+.timetable-viewer-close {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s;
+}
+
+.timetable-viewer-close:hover {
+  color: #333;
+}
+
+.timetable-viewer-body {
+  padding: 0;
+}
+
+.timetable-viewer-tabs {
+  display: flex;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.timetable-viewer-tab {
+  padding: 15px 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.timetable-viewer-tab:hover {
+  background-color: #f9f9f9;
+  color: var(--primary-color);
+}
+
+.timetable-viewer-tab.active {
+  border-bottom-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.timetable-viewer-tab .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.timetable-list-container {
+  padding: 20px;
+  min-height: 300px;
+}
+
+.timetable-list {
+  display: grid;
+  gap: 15px;
+}
+
+.timetable-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+  transition: all 0.2s ease;
+}
+
+.timetable-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #ddd;
+}
+
+.timetable-info {
+  flex: 1;
+}
+
+.timetable-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--text-color);
+}
+
+.timetable-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.timetable-date,
+.timetable-academic-year {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.timetable-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.timetable-action-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid #eaeaea;
+  background: transparent;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s ease;
+}
+
+.timetable-action-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.timetable-action-btn.view {
+  color: var(--primary-color);
+}
+
+.timetable-action-btn.download {
+  color: #0ea5e9;
+}
+
+.timetable-action-btn.delete {
+  color: #ef4444;
+}
+
+.timetable-action-btn:hover.view {
+  background-color: rgba(var(--primary-rgb), 0.1);
+  border-color: var(--primary-color);
+}
+
+.timetable-action-btn:hover.download {
+  background-color: rgba(14, 165, 233, 0.1);
+  border-color: #0ea5e9;
+}
+
+.timetable-action-btn:hover.delete {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+.empty-timetable-list {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.empty-timetable-icon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+.empty-timetable-message {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Statistics Dashboard Container */
+.section-analytics-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.section-analytics-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+.section-analytics-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #555;
+}
+
+.section-analytics-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+.section-analytics-chart {
+  height: 250px;
+}
+
+.section-growth-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.875rem;
+}
+
+.section-growth-positive {
+  color: #10b981;
+}
+
+.section-growth-negative {
+  color: #ef4444;
+}
+
+.section-growth-neutral {
+  color: #6b7280;
+}
+
+/* Schedule Statistics Card */
+.schedule-stats-card {
+  border-left: 4px solid var(--primary-color);
+  padding-left: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .timetable-viewer-content {
+    width: 95%;
+    margin: 20px auto;
+  }
+
+  .timetable-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .timetable-actions {
+    margin-top: 15px;
+    align-self: flex-end;
+  }
+
+  .section-analytics-dashboard {
+    grid-template-columns: 1fr;
+  }
+}

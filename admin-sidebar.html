@@ -1,321 +1,474 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Admin Sidebar</title>
+    <script src="js/admin-auth.js"></script>
     <style>
+      .sidebar {
+        width: 280px;
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 10;
+      }
+
+      .logo-container {
+        margin-bottom: 2rem;
+      }
+
+      .logo {
+        font-family: "Sora", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+      }
+
+      .user-info {
+        background-color: rgba(139, 92, 246, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .user-role {
+        font-size: 0.85rem;
+        color: var(--gray-color);
+      }
+
+      .menu-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--gray-color);
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+      }
+
+      .menu {
+        list-style-type: none;
+        padding: 0;
+        margin-bottom: 2rem;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .menu-item:hover {
+        background-color: rgba(139, 92, 246, 0.1);
+        color: var(--primary-color);
+      }
+
+      .menu-item.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .menu-icon {
+        width: 18px;
+        height: 18px;
+        margin-right: 0.75rem;
+        stroke-width: 2;
+      }
+
+      .logout-btn {
+        margin-top: auto;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logout-btn:hover {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      .logout-icon {
+        width: 18px;
+        height: 18px;
+        margin-right: 0.75rem;
+        stroke-width: 2;
+      }
+
+      @media (max-width: 1024px) {
         .sidebar {
-            width: 280px;
-            background-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 10;
-        }
-        
-        .logo-container {
-            margin-bottom: 2rem;
-        }
-        
-        .logo {
-            font-family: 'Sora', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-        }
-        
-        .user-info {
-            background-color: rgba(139, 92, 246, 0.1);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        .user-role {
-            font-size: 0.85rem;
-            color: var(--gray-color);
-        }
-        
-        .menu-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--gray-color);
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .menu {
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 2rem;
-        }
-        
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        
-        .menu-item:hover {
-            background-color: rgba(139, 92, 246, 0.1);
-            color: var(--primary-color);
-        }
-        
-        .menu-item.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .menu-icon {
-            width: 18px;
-            height: 18px;
-            margin-right: 0.75rem;
-            stroke-width: 2;
-        }
-        
-        .logout-btn {
-            margin-top: auto;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--danger-color);
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .logout-btn:hover {
-            background-color: var(--danger-color);
-            color: white;
-        }
-        
-        .logout-icon {
-            width: 18px;
-            height: 18px;
-            margin-right: 0.75rem;
-            stroke-width: 2;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
         }
 
-        @media (max-width: 1024px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
+        .sidebar.active {
+          transform: translateX(0);
         }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div
+      id="sidebar-error-banner"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        z-index: 1000;
+        background: #ef4444;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        font-weight: bold;
+      "
+    >
+      Erreur : Impossible de charger la barre latérale. Le contenu principal est
+      désactivé.
+    </div>
     <div class="sidebar" id="sidebar">
-        <div class="logo-container">
-            <div class="logo">Administration</div>
-        </div>
-        
-        <div class="user-info">
-            <div class="user-name" id="admin-name">Nom d'administrateur</div>
-            <div class="user-role" id="admin-role">Rôle d'administration</div>
-        </div>
-        
-        <div class="menu-title">Gestion</div>
-        <ul class="menu">
-            <li id="nav-enseignants" class="menu-item" onclick="window.location.href='admin-gestion-enseignants.html'">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                Gestion des Enseignants
-            </li>
-            <li id="nav-sections" class="menu-item" onclick="window.location.href='admin-gestion-sections.html'">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-                Gestion des Sections
-            </li>
-            <li id="nav-demandes-section" class="menu-item" onclick="window.location.href='admin-demandes-section.html'">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                    <line x1="4" y1="22" x2="4" y2="15"></line>
-                </svg>
-                Demandes de Changement
-            </li>            <li id="nav-demandes-profil" class="menu-item" onclick="window.location.href='admin-profile-requests.html'">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                Demandes de Profil
-            </li>
-        </ul>
-        
-        <div class="logout-btn" id="logout-btn">
-            <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Déconnexion
-        </div>
-    </div>    <script>
-        // Handle logout button
-        document.getElementById('logout-btn').addEventListener('click', function() {
-            localStorage.removeItem('admin_token');
-            sessionStorage.removeItem('admin_token');
-            localStorage.removeItem('admin_role');
-            sessionStorage.removeItem('admin_role');
-            localStorage.removeItem('admin_email');
-            sessionStorage.removeItem('admin_email');
-            localStorage.removeItem('admin_id');
-            sessionStorage.removeItem('admin_id');
-            window.location.href = 'admin-login.html';
+      <div class="logo-container">
+        <div class="logo">Administration</div>
+      </div>
+
+      <div class="user-info">
+        <div class="user-name" id="admin-name">Nom d'administrateur</div>
+        <div class="user-role" id="admin-role">Rôle d'administration</div>
+      </div>
+
+      <div class="menu-title">Gestion</div>
+      <ul class="menu">
+        <li
+          id="nav-enseignants"
+          class="menu-item"
+          onclick="window.location.href='admin-gestion-enseignants.html'"
+        >
+          <svg
+            class="menu-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Gestion des Enseignants
+        </li>
+        <li
+          id="nav-sections"
+          class="menu-item"
+          onclick="window.location.href='admin-gestion-sections.html'"
+        >
+          <svg
+            class="menu-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          Gestion des Sections
+        </li>
+        <li
+          id="nav-demandes-section"
+          class="menu-item"
+          onclick="window.location.href='admin-demandes-section.html'"
+        >
+          <svg
+            class="menu-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
+            ></path>
+            <line x1="4" y1="22" x2="4" y2="15"></line>
+          </svg>
+          Demandes de Changement
+        </li>
+        <li
+          id="nav-demandes-profil"
+          class="menu-item"
+          onclick="window.location.href='admin-profile-requests.html'"
+        >
+          <svg
+            class="menu-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Demandes de Profil
+        </li>
+      </ul>
+
+      <div class="logout-btn" id="logout-btn">
+        <svg
+          class="logout-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Déconnexion
+      </div>
+    </div>
+    <script>
+      // Handle logout button
+      document
+        .getElementById("logout-btn")
+        .addEventListener("click", function () {
+          // Use the centralized clearAdminAuth helper function
+          clearAdminAuth();
+          // Redirect to login page
+          redirectToLogin();
         });
 
-        // Update admin info
-        function updateAdminInfo() {
-            const adminName = document.getElementById('admin-name');
-            const adminRole = document.getElementById('admin-role');
-            
-            // Get admin info from storage
-            const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
-            const role = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
-            const email = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
-            
-            if (email) {
-                adminName.textContent = email;
-            }
-            
-            // Map role to display text
-            const roleMap = {
-                'secretaire': 'Secrétaire',
-                'chef-de-departement': 'Chef de Département',
-                'chef-de-specialite': 'Chef de Spécialité',
-                'vice-doyen': 'Vice-Doyen',
-                'doyen': 'Doyen'
-            };
-            
-            if (role && roleMap[role]) {
-                adminRole.textContent = roleMap[role];
-            }
+      // Update admin info
+      function updateAdminInfo() {
+        const adminName = document.getElementById("admin-name");
+        const adminRole = document.getElementById("admin-role");
+
+        // Get admin info from storage
+        const token =
+          localStorage.getItem("admin_token") ||
+          sessionStorage.getItem("admin_token");
+        const role =
+          localStorage.getItem("admin_role") ||
+          sessionStorage.getItem("admin_role");
+        const email =
+          localStorage.getItem("admin_email") ||
+          sessionStorage.getItem("admin_email");
+
+        if (email) {
+          adminName.textContent = email;
         }
-        
-        // Role-based access control
-        function applyRoleBasedAccess() {
-            const role = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
-            
-            // Define role permissions
-            const rolePermissions = {
-                'secretaire': ['nav-enseignants', 'nav-demandes-profil'],
-                'chef-de-specialite': ['nav-sections', 'nav-demandes-section', 'nav-enseignants'],
-                'chef-de-departement': ['nav-sections', 'nav-demandes-section', 'nav-enseignants'],
-                'vice-doyen': ['nav-sections', 'nav-demandes-section', 'nav-demandes-profil', 'nav-enseignants'],
-                'doyen': ['nav-sections', 'nav-demandes-section', 'nav-demandes-profil', 'nav-enseignants']
-            };
-            
-            // Hide all menu items first
-            const menuItems = document.querySelectorAll('.menu-item');
-            menuItems.forEach(item => {
-                item.style.display = 'none';
-            });
-            
-            // Show only permitted items
-            if (role && rolePermissions[role]) {
-                rolePermissions[role].forEach(itemId => {
-                    const item = document.getElementById(itemId);
-                    if (item) {
-                        item.style.display = 'flex';
-                    }
-                });
-            }
+
+        // Map role to display text
+        const roleMap = {
+          secretaire: "Secrétaire",
+          "chef-de-departement": "Chef de Département",
+          "chef-de-specialite": "Chef de Spécialité",
+          "vice-doyen": "Vice-Doyen",
+          doyen: "Doyen",
+        };
+
+        if (role && roleMap[role]) {
+          adminRole.textContent = roleMap[role];
         }
-        
-        // Set the active menu item
-        function setActiveMenuItem() {
-            const currentPage = window.location.pathname.split('/').pop();
-            
-            switch (currentPage) {
-                case 'admin-gestion-enseignants.html':
-                    document.getElementById('nav-enseignants').classList.add('active');
-                    break;
-                case 'admin-gestion-sections.html':
-                    document.getElementById('nav-sections').classList.add('active');
-                    break;
-                case 'admin-demandes-section.html':
-                    document.getElementById('nav-demandes-section').classList.add('active');
-                    break;
-                case 'admin-profile-requests.html':
-                    document.getElementById('nav-demandes-profil').classList.add('active');
-                    break;
-                case 'admin-dashboard.html':
-                    // No need to highlight anything for dashboard
-                    break;
-                default:
-                    break;
-            }
-        }
-        
-        // Verify user authentication and authorization
-        function verifyAccess() {
-            const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
-            const role = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
-            
-            if (!token || !role) {
-                window.location.href = 'admin-login.html';
-                return false;
-            }
-            
-            // Check page-specific permissions
-            const currentPage = window.location.pathname.split('/').pop();
-            const rolePermissions = {
-                'secretaire': ['admin-dashboard.html', 'admin-gestion-enseignants.html', 'admin-profile-requests.html'],
-                'chef-de-specialite': ['admin-dashboard.html', 'admin-gestion-sections.html', 'admin-demandes-section.html', 'admin-gestion-enseignants.html'],
-                'chef-de-departement': ['admin-dashboard.html', 'admin-gestion-sections.html', 'admin-demandes-section.html', 'admin-gestion-enseignants.html'],
-                'vice-doyen': ['admin-dashboard.html', 'admin-gestion-sections.html', 'admin-demandes-section.html', 'admin-profile-requests.html', 'admin-gestion-enseignants.html'],
-                'doyen': ['admin-dashboard.html', 'admin-gestion-sections.html', 'admin-demandes-section.html', 'admin-profile-requests.html', 'admin-gestion-enseignants.html']
-            };
-            
-            if (currentPage !== 'admin-dashboard.html' && 
-                (!rolePermissions[role] || !rolePermissions[role].includes(currentPage))) {
-                window.location.href = 'admin-dashboard.html';
-                return false;
-            }
-            
-            return true;
-        }
-        
-        // Run initializations
-        document.addEventListener('DOMContentLoaded', function() {
-            if (verifyAccess()) {
-                updateAdminInfo();
-                applyRoleBasedAccess();
-                setActiveMenuItem();
-            }
+      }
+
+      // Role-based access control
+      function applyRoleBasedAccess() {
+        const role =
+          localStorage.getItem("admin_role") ||
+          sessionStorage.getItem("admin_role");
+
+        // Define role permissions
+        const rolePermissions = {
+          secretaire: ["nav-enseignants", "nav-demandes-profil"],
+          "chef-de-specialite": [
+            "nav-sections",
+            "nav-demandes-section",
+            "nav-enseignants",
+          ],
+          "chef-de-departement": [
+            "nav-sections",
+            "nav-demandes-section",
+            "nav-enseignants",
+          ],
+          "vice-doyen": [
+            "nav-sections",
+            "nav-demandes-section",
+            "nav-demandes-profil",
+            "nav-enseignants",
+          ],
+          doyen: [
+            "nav-sections",
+            "nav-demandes-section",
+            "nav-demandes-profil",
+            "nav-enseignants",
+          ],
+        };
+
+        // Hide all menu items first
+        const menuItems = document.querySelectorAll(".menu-item");
+        menuItems.forEach((item) => {
+          item.style.display = "none";
         });
+
+        // Show only permitted items
+        if (role && rolePermissions[role]) {
+          rolePermissions[role].forEach((itemId) => {
+            const item = document.getElementById(itemId);
+            if (item) {
+              item.style.display = "flex";
+            }
+          });
+        }
+      }
+
+      // Set the active menu item
+      function setActiveMenuItem() {
+        const currentPage = window.location.pathname.split("/").pop();
+
+        switch (currentPage) {
+          case "admin-gestion-enseignants.html":
+            document.getElementById("nav-enseignants").classList.add("active");
+            break;
+          case "admin-gestion-sections.html":
+            document.getElementById("nav-sections").classList.add("active");
+            break;
+          case "admin-demandes-section.html":
+            document
+              .getElementById("nav-demandes-section")
+              .classList.add("active");
+            break;
+          case "admin-profile-requests.html":
+            document
+              .getElementById("nav-demandes-profil")
+              .classList.add("active");
+            break;
+          case "admin-dashboard.html":
+            // No need to highlight anything for dashboard
+            break;
+          default:
+            break;
+        }
+      }
+
+      // Verify user authentication and authorization
+      function verifyAccess() {
+        const token =
+          localStorage.getItem("admin_token") ||
+          sessionStorage.getItem("admin_token");
+        const role =
+          localStorage.getItem("admin_role") ||
+          sessionStorage.getItem("admin_role");
+
+        if (!token || !role) {
+          window.location.href = "admin-login.html";
+          return false;
+        }
+
+        // Check page-specific permissions
+        const currentPage = window.location.pathname.split("/").pop();
+        const rolePermissions = {
+          secretaire: [
+            "admin-dashboard.html",
+            "admin-gestion-enseignants.html",
+            "admin-profile-requests.html",
+          ],
+          "chef-de-specialite": [
+            "admin-dashboard.html",
+            "admin-gestion-sections.html",
+            "admin-demandes-section.html",
+            "admin-gestion-enseignants.html",
+          ],
+          "chef-de-departement": [
+            "admin-dashboard.html",
+            "admin-gestion-sections.html",
+            "admin-demandes-section.html",
+            "admin-gestion-enseignants.html",
+          ],
+          "vice-doyen": [
+            "admin-dashboard.html",
+            "admin-gestion-sections.html",
+            "admin-demandes-section.html",
+            "admin-profile-requests.html",
+            "admin-gestion-enseignants.html",
+          ],
+          doyen: [
+            "admin-dashboard.html",
+            "admin-gestion-sections.html",
+            "admin-demandes-section.html",
+            "admin-profile-requests.html",
+            "admin-gestion-enseignants.html",
+          ],
+        };
+
+        if (
+          currentPage !== "admin-dashboard.html" &&
+          (!rolePermissions[role] ||
+            !rolePermissions[role].includes(currentPage))
+        ) {
+          window.location.href = "admin-dashboard.html";
+          return false;
+        }
+
+        return true;
+      }
+
+      // Patch: Listen for sidebar load errors from parent page
+      function showSidebarErrorBanner() {
+        var banner = document.getElementById("sidebar-error-banner");
+        if (banner) banner.style.display = "block";
+        // Visually disable main content in parent
+        if (window.parent && window.parent.document) {
+          var mainContent =
+            window.parent.document.querySelector(".main-content");
+          if (mainContent) {
+            mainContent.style.pointerEvents = "none";
+            mainContent.style.opacity = "0.5";
+            mainContent.style.filter = "grayscale(1)";
+          }
+        }
+      }
+      // Listen for a custom event from parent
+      window.addEventListener("message", function (event) {
+        if (event.data && event.data.type === "SIDEBAR_LOAD_ERROR") {
+          showSidebarErrorBanner();
+        }
+      });
+      // Optionally, expose for direct call
+      window.showSidebarErrorBanner = showSidebarErrorBanner;
+
+      // Run initializations
+      document.addEventListener("DOMContentLoaded", function () {
+        if (verifyAccess()) {
+          updateAdminInfo();
+          applyRoleBasedAccess();
+          setActiveMenuItem();
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

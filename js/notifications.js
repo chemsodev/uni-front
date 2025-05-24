@@ -73,11 +73,14 @@ async function loadStudentData() {
     }
 
     // If not, fetch from the API
-    const response = await fetch("https://unicersityback.onrender.com/api/etudiants/me", {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
+    const response = await fetch(
+      "https://uni-front-zeta.vercel.app/api/etudiants/me",
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -152,14 +155,17 @@ async function loadNavbar() {
 // Verify auth token
 async function verifyToken() {
   try {
-    const res = await fetch("https://unicersityback.onrender.com/api/auth/verify", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(5000),
-    });
+    const res = await fetch(
+      "https://uni-front-zeta.vercel.app/api/auth/verify",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
 
     if (!res.ok) {
       console.warn(`Token verification failed with status: ${res.status}`);
@@ -197,13 +203,16 @@ async function refreshToken() {
       return false;
     }
 
-    const response = await fetch("https://unicersityback.onrender.com/api/auth/refresh", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refreshToken: refreshTokenValue }),
-    });
+    const response = await fetch(
+      "https://uni-front-zeta.vercel.app/api/auth/refresh",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      }
+    );
 
     if (!response.ok) {
       console.warn("Token refresh failed");
@@ -239,11 +248,14 @@ async function refreshToken() {
 // Fetch notifications from backend
 async function loadNotifications() {
   try {
-    const response = await fetch("https://unicersityback.onrender.com/api/notifications", {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
+    const response = await fetch(
+      "https://uni-front-zeta.vercel.app/api/notifications",
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -269,7 +281,7 @@ async function loadNotifications() {
 async function updateUnreadBadge() {
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/unread-count",
+      "https://uni-front-zeta.vercel.app/api/notifications/unread-count",
       {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -528,7 +540,7 @@ function createNotificationElement(notification) {
 async function markAsRead(id, button) {
   try {
     const response = await fetch(
-      `https://unicersityback.onrender.com/api/notifications/${id}/mark-read`,
+      `https://uni-front-zeta.vercel.app/api/notifications/${id}/mark-read`,
       {
         method: "PATCH",
         headers: {
@@ -570,7 +582,7 @@ async function markAsRead(id, button) {
 async function markAllAsRead() {
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/mark-all-read",
+      "https://uni-front-zeta.vercel.app/api/notifications/mark-all-read",
       {
         method: "PATCH",
         headers: {
@@ -609,7 +621,7 @@ async function deleteNotification(id) {
 
   try {
     const response = await fetch(
-      `https://unicersityback.onrender.com/api/notifications/${id}`,
+      `https://uni-front-zeta.vercel.app/api/notifications/${id}`,
       {
         method: "DELETE",
         headers: {
@@ -643,7 +655,7 @@ async function deleteAllRead() {
 
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/read/all",
+      "https://uni-front-zeta.vercel.app/api/notifications/read/all",
       {
         method: "DELETE",
         headers: {
@@ -750,7 +762,7 @@ function savePreferences() {
 async function savePreferencesToServer(preferences) {
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/preferences",
+      "https://uni-front-zeta.vercel.app/api/notifications/preferences",
       {
         method: "PUT",
         headers: {

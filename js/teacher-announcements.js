@@ -145,7 +145,7 @@ async function loadTeacherAssignments() {
   try {
     // Fetch teacher's assigned sections
     const sectionsResponse = await fetch(
-      "https://unicersityback.onrender.com/api/enseignants/my-sections",
+      "https://uni-front-zeta.vercel.app/api/enseignants/my-sections",
       {
         headers: {
           Authorization: `Bearer ${teacherAuthToken}`,
@@ -231,7 +231,7 @@ async function checkForStudentsWithDisabilities(sectionIds, groupIds) {
     for (const sectionId of sectionIds) {
       try {
         const response = await fetch(
-          `https://unicersityback.onrender.com/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students?page=1&limit=100`,
+          `https://uni-front-zeta.vercel.app/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students?page=1&limit=100`,
           {
             headers: {
               Authorization: `Bearer ${teacherAuthToken}`,
@@ -346,7 +346,7 @@ async function createAnnouncement(announcement) {
       for (const sectionId of targetSectionIds) {
         try {
           const studentsResponse = await fetch(
-            `https://unicersityback.onrender.com/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students`,
+            `https://uni-front-zeta.vercel.app/api/enseignants/${currentTeacher.id}/sections/${sectionId}/students`,
             {
               headers: {
                 Authorization: `Bearer ${teacherAuthToken}`,
@@ -391,7 +391,7 @@ async function createAnnouncement(announcement) {
           if (selectedSection) {
             // Create a "section-wide" notification but mark it with the group ID
             notificationsPromises.push(
-              fetch("https://unicersityback.onrender.com/api/notifications", {
+              fetch("https://uni-front-zeta.vercel.app/api/notifications", {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${teacherAuthToken}`,
@@ -457,28 +457,31 @@ async function createStudentNotification(notification) {
         }`.trim()
       : "Enseignant";
 
-    const response = await fetch("https://unicersityback.onrender.com/api/notifications", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${teacherAuthToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: notification.title,
-        content: notification.content,
-        type: notification.type,
-        userId: notification.userId,
-        createdBy: notification.createdBy || currentTeacher?.id,
-        actionLink: notification.actionLink || null,
-        actionLabel: notification.actionLabel || null,
-        metadata: {
-          senderName: teacherName,
-          senderId: currentTeacher?.id,
-          importance: notification.importance || "normal",
-          groupId: Date.now().toString(), // Group notifications by creation batch
+    const response = await fetch(
+      "https://uni-front-zeta.vercel.app/api/notifications",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${teacherAuthToken}`,
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          title: notification.title,
+          content: notification.content,
+          type: notification.type,
+          userId: notification.userId,
+          createdBy: notification.createdBy || currentTeacher?.id,
+          actionLink: notification.actionLink || null,
+          actionLabel: notification.actionLabel || null,
+          metadata: {
+            senderName: teacherName,
+            senderId: currentTeacher?.id,
+            importance: notification.importance || "normal",
+            groupId: Date.now().toString(), // Group notifications by creation batch
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to create notification: ${response.status}`);
@@ -700,7 +703,7 @@ async function loadAnnouncementHistory() {
     let response;
     try {
       response = await fetch(
-        `https://unicersityback.onrender.com/api/notifications/from-teacher/${teacherId}`,
+        `https://uni-front-zeta.vercel.app/api/notifications/from-teacher/${teacherId}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -714,11 +717,14 @@ async function loadAnnouncementHistory() {
           console.warn(
             "API endpoint not found, falling back to main notifications endpoint"
           );
-          response = await fetch(`https://unicersityback.onrender.com/api/notifications`, {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          });
+          response = await fetch(
+            `https://uni-front-zeta.vercel.app/api/notifications`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
 
           if (!response.ok) {
             throw new Error(

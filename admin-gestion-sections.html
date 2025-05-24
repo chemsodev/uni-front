@@ -1,1104 +1,2832 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestion des Sections - Administration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;700&display=swap" rel="stylesheet">
-    <link href="style/admin.css" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="style/admin.css" rel="stylesheet" />
+    <link href="style/section-statistics.css" rel="stylesheet" />
+    <link href="style/timetable-viewer.css" rel="stylesheet" />
+    <!-- Add reference to chart.js for statistics visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add reference to admin auth helper -->
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-pages-validation.js"></script>
+    <script src="js/admin-mocks.js"></script>
+    <script src="js/admin-api-utils.js"></script>
+    <script src="js/admin-api-fetchers.js"></script>
+    <script src="js/admin-api-loader.js"></script>
+
+    <!-- Add Google Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+
     <style>
-        .section-info {
-            display: flex;
-            align-items: center;
-        }
-        
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: 600;
-            margin-right: 10px;
-        }
-        
-        .section-details span {
-            display: block;
-        }
-        
-        .section-name {
-            font-weight: 600;
-        }
-        
-        .section-code {
-            color: var(--gray-color);
-            font-size: 0.85rem;
-        }
-        
-        .level-badge {
-            background-color: #f0f4ff;
-            color: #3b82f6;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-block;
-            white-space: nowrap;
-        }
-        
-        .capacity-badge {
-            margin-left: 8px;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .capacity-normal {
-            background-color: #ecfdf5;
-            color: #10b981;
-        }
-        
-        .capacity-warning {
-            background-color: #fffbeb;
-            color: #d97706;
-        }
-        
-        .capacity-full {
-            background-color: #fee2e2;
-            color: #ef4444;
-        }
-        
+      .section-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        margin-right: 10px;
+      }
+
+      .section-details span {
+        display: block;
+      }
+
+      .section-name {
+        font-weight: 600;
+      }
+
+      .section-code {
+        color: var(--gray-color);
+        font-size: 0.85rem;
+      }
+
+      .level-badge {
+        background-color: #f0f4ff;
+        color: #3b82f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      .capacity-badge {
+        margin-left: 8px;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .capacity-normal {
+        background-color: #ecfdf5;
+        color: #10b981;
+      }
+
+      .capacity-warning {
+        background-color: #fffbeb;
+        color: #d97706;
+      }
+
+      .capacity-full {
+        background-color: #fee2e2;
+        color: #ef4444;
+      }
+
+      .responsables-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .responsable-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+
+      .responsable-role {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
+
+      .responsable-name {
+        color: #666;
+      }
+
+      .no-responsables {
+        color: #666;
+        font-style: italic;
+        font-size: 0.9rem;
+      }
+
+      .section-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      @media (max-width: 768px) {
         .section-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+          grid-template-columns: 1fr;
         }
-        
-        @media (max-width: 768px) {
-            .section-form {
-                grid-template-columns: 1fr;
-            }
+      }
+
+      /* Timetable upload related styles */
+      .table-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .timetable-modal .modal-content {
+        max-width: 500px;
+      }
+
+      .file-upload-container {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .file-upload-container:hover,
+      .file-upload-container.dragover {
+        border-color: var(--primary-color);
+        background-color: rgba(var(--primary-rgb), 0.05);
+      }
+
+      .file-upload-icon {
+        font-size: 48px;
+        color: #ccc;
+        margin-bottom: 10px;
+      }
+
+      .file-upload-text {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+      }
+
+      .file-upload-input {
+        display: none;
+      }
+
+      .file-upload-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #f0f4ff;
+        color: var(--primary-color);
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .file-upload-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .selected-file {
+        display: flex;
+        align-items: center;
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #f0f4ff;
+        border-radius: 4px;
+        display: none;
+      }
+
+      .selected-file-icon {
+        font-size: 24px;
+        margin-right: 10px;
+        color: var(--primary-color);
+      }
+
+      .selected-file-name {
+        flex-grow: 1;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .selected-file-remove {
+        color: #ef4444;
+        cursor: pointer;
+        font-size: 18px;
+      }
+
+      .upload-timetable-btn,
+      .upload-exam-btn,
+      .view-timetables-btn {
+        color: #10b981;
+      }
+
+      /* Statistics styles */
+      .statistics-container {
+        margin-top: 20px;
+      }
+
+      .statistics-card {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .statistics-card h3 {
+        margin-top: 0;
+        font-size: 1.25rem;
+        color: var(--primary-color);
+      }
+
+      .statistics-card p {
+        margin: 5px 0;
+        color: #333;
+      }
+
+      .statistics-card .chart-container {
+        position: relative;
+        height: 300px;
+      }
+      .statistics-card .chartjs-render-monitor {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      /* Teacher Assignment Modal Styles */
+      .section-info-display {
+        background-color: #f0f4ff;
+        padding: 10px;
+        border-radius: 4px;
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .current-assignments {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        background-color: #f9f9f9;
+      }
+      .assignment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .assignment-item:last-child {
+        border-bottom: none;
+      }
+
+      .assignment-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        gap: 4px;
+      }
+
+      .assignment-role {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 14px;
+      }
+
+      .assignment-teacher {
+        font-size: 14px;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .assignment-group {
+        font-size: 12px;
+        color: #6b7280;
+        font-style: italic;
+      }
+      .remove-assignment-btn {
+        background-color: #fee2e2;
+        color: #ef4444;
+        border: none;
+        padding: 6px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .remove-assignment-btn:hover {
+        background-color: #fecaca;
+      }
+
+      .teacher-action-btn {
+        background-color: #10b981;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-left: 5px;
+      }
+      .teacher-action-btn:hover {
+        background-color: #059669;
+      } /* Enhanced Teachers/Responsables column styles */
+      .teachers-info {
+        max-width: 250px;
+        min-width: 180px;
+        padding: 4px;
+      }
+
+      .teachers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-height: 120px;
+        overflow-y: auto;
+      }
+
+      .teacher-assignment {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        margin: 1px 0;
+        min-height: 24px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        font-weight: 500;
+        color: #374151;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .teacher-assignment:hover {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-color: #94a3b8;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .teacher-assignment.unassigned {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #d97706;
+        border: 1px dashed #f59e0b;
+        font-style: italic;
+        font-weight: 400;
+      }
+
+      .teacher-assignment.unassigned:hover {
+        background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
+        border-color: #d97706;
+      }
+
+      /* Role-specific styling */
+      .teacher-assignment[title*="Responsable de Filière"] {
+        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+        border-color: #8b5cf6;
+        color: #5b21b6;
+      }
+
+      .teacher-assignment[title*="Responsable de Section"] {
+        background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+        border-color: #3b82f6;
+        color: #1d4ed8;
+      }
+
+      .teacher-assignment[title*="Responsable TD"] {
+        background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+        border-color: #10b981;
+        color: #047857;
+      }
+
+      .teacher-assignment[title*="Responsable TP"] {
+        background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+        border-color: #ef4444;
+        color: #dc2626;
+      }
+
+      .loading-teachers {
+        color: #6b7280;
+        font-style: italic;
+        font-size: 0.85rem;
+        padding: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #f9fafb;
+        border-radius: 4px;
+        border: 1px solid #e5e7eb;
+      }
+
+      .loading-teachers::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border: 2px solid #e5e7eb;
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .no-teachers {
+        color: #9ca3af;
+        font-style: italic;
+        font-size: 0.85rem;
+        padding: 8px;
+        text-align: center;
+        background-color: #f9fafb;
+        border: 1px dashed #d1d5db;
+        border-radius: 4px;
+        font-weight: 400;
+      }
+
+      .error-teachers {
+        color: #ef4444;
+        font-size: 0.85rem;
+        padding: 8px;
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+
+      /* Responsive adjustments for responsables column */
+      @media (max-width: 1200px) {
+        .teachers-info {
+          max-width: 200px;
+          min-width: 150px;
         }
 
-        /* Timetable upload related styles */
-        .table-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
+        .teacher-assignment {
+          font-size: 0.75rem;
+          padding: 3px 6px;
         }
-        
-        .timetable-modal .modal-content {
-            max-width: 500px;
-        }
-        
-        .file-upload-container {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .file-upload-container:hover, 
-        .file-upload-container.dragover {
-            border-color: var(--primary-color);
-            background-color: rgba(var(--primary-rgb), 0.05);
-        }
-        
-        .file-upload-icon {
-            font-size: 48px;
-            color: #ccc;
-            margin-bottom: 10px;
-        }
-        
-        .file-upload-text {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        
-        .file-upload-input {
-            display: none;
-        }
-        
-        .file-upload-btn {
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: #f0f4ff;
-            color: var(--primary-color);
-            border-radius: 4px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .file-upload-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .selected-file {
-            display: flex;
-            align-items: center;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #f0f4ff;
-            border-radius: 4px;
-            display: none;
-        }
-        
-        .selected-file-icon {
-            font-size: 24px;
-            margin-right: 10px;
-            color: var(--primary-color);
-        }
-        
-        .selected-file-name {
-            flex-grow: 1;
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .selected-file-remove {
-            color: #ef4444;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        .upload-timetable-btn, .upload-exam-btn, .view-timetables-btn {
-            color: #10b981;
+      }
+
+      @media (max-width: 768px) {
+        .teachers-info {
+          max-width: 150px;
+          min-width: 120px;
         }
 
-        /* Timetable view modal styles */
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #eaeaea;
-            margin-bottom: 20px;
+        .teachers-list {
+          gap: 2px;
+          max-height: 80px;
         }
-        
-        .tab-btn {
-            padding: 10px 20px;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.2s ease;
+        .teacher-assignment {
+          font-size: 0.7rem;
+          padding: 2px 4px;
+          min-height: 20px;
         }
-        
-        .tab-btn.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
+      } /* Enhanced Responsables Display */
+      .responsables-organized {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        max-width: 240px;
+        min-width: 200px;
+        border-radius: 8px;
+        padding: 6px;
+        background-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+
+      .responsables-organized ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
+      }
+
+      .responsables-organized li {
+        padding: 0;
+        margin: 0;
+      }
+
+      .role-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+        border-left: 3px solid var(--primary-color);
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .role-group:hover {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        transform: translateX(2px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Role-specific styling with enhanced colors */
+      .role-group[title*="Filière"] {
+        border-left-color: #8b5cf6;
+        background-color: rgba(139, 92, 246, 0.08);
+      }
+      .role-group[title*="Filière"]:hover {
+        background-color: rgba(139, 92, 246, 0.12);
+      }
+
+      .role-group[title*="Section"] {
+        border-left-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.08);
+      }
+      .role-group[title*="Section"]:hover {
+        background-color: rgba(59, 130, 246, 0.12);
+      }
+
+      .role-group[title*="TD"] {
+        border-left-color: #10b981;
+        background-color: rgba(16, 185, 129, 0.08);
+      }
+      .role-group[title*="TD"]:hover {
+        background-color: rgba(16, 185, 129, 0.12);
+      }
+
+      .role-group[title*="TP"] {
+        border-left-color: #f59e0b;
+        background-color: rgba(245, 158, 11, 0.08);
+      }
+      .role-group[title*="TP"]:hover {
+        background-color: rgba(245, 158, 11, 0.12);
+      }
+
+      .role-header {
+        font-size: 16px;
+        min-width: 24px;
+        text-align: center;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .teacher-name {
+        font-size: 0.82rem;
+        color: var(--text-color);
+        font-weight: 500;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .teacher-name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        position: relative;
+        cursor: default;
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
+      .teacher-name:hover,
+      .teacher-assignments li:hover .teacher-name {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        transform: translateY(-1px);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+      }
+
+      .teacher-name:after {
+        content: attr(title);
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      .teacher-name:hover:after {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .teacher-name.unassigned {
+        color: #dc3545;
+        font-style: italic;
+        font-weight: 400;
+        position: relative;
+        padding-left: 2px;
+        opacity: 0.8;
+        background: repeating-linear-gradient(
+          45deg,
+          rgba(220, 53, 69, 0.05),
+          rgba(220, 53, 69, 0.05) 10px,
+          rgba(220, 53, 69, 0.1) 10px,
+          rgba(220, 53, 69, 0.1) 20px
+        );
+        border-radius: 4px;
+        padding: 2px 6px;
+      }
+
+      /* Compact view for smaller screens */
+      /* New styles for teacher assignments container and loading state */
+      .teacher-assignments {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 2px;
+        overflow: hidden;
+      }
+
+      .teacher-assignments ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 3px;
+      }
+
+      .teacher-assignments li {
+        padding: 2px 0;
+        margin: 0;
+      }
+
+      .assignment-separator {
+        color: rgba(0, 0, 0, 0.4);
+        margin: 0 2px;
+      }
+
+      .responsables-loading {
+        font-size: 0.8rem;
+        color: #666;
+        padding: 8px;
+        text-align: center;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 5px;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.6;
         }
-        
-        .tab-content {
-            display: none;
+        50% {
+          opacity: 1;
         }
-        
-        .tab-content.active {
-            display: block;
+        100% {
+          opacity: 0.6;
         }
-        
-        .timetables-list {
-            max-height: 400px;
-            overflow-y: auto;
+      }
+
+      .responsables-organized.error .role-group {
+        opacity: 0.85;
+      }
+
+      .teacher-name.unassigned.error {
+        color: #856404;
+        background: repeating-linear-gradient(
+          45deg,
+          rgba(255, 193, 7, 0.1),
+          rgba(255, 193, 7, 0.1) 10px,
+          rgba(255, 193, 7, 0.2) 10px,
+          rgba(255, 193, 7, 0.2) 20px
+        );
+      }
+
+      /* Role-specific header colors */
+      .role-filiere .role-header {
+        color: #8b5cf6;
+      }
+
+      .role-section .role-header {
+        color: #3b82f6;
+      }
+
+      .role-td .role-header {
+        color: #10b981;
+      }
+
+      .role-tp .role-header {
+        color: #f59e0b;
+      }
+
+      @media (max-width: 1200px) {
+        .responsables-organized {
+          max-width: 200px;
+          min-width: 180px;
+          padding: 4px;
         }
-        
-        .no-timetables {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-style: italic;
+
+        .role-group {
+          padding: 2px 4px;
+          gap: 4px;
         }
-        
-        .timetable-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #eaeaea;
-            margin-bottom: 10px;
-            transition: all 0.2s ease;
+
+        .teacher-name {
+          font-size: 0.75rem;
         }
-        
-        .timetable-item:hover {
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+        .role-header {
+          font-size: 12px;
+          min-width: 18px;
         }
-        
-        .timetable-info {
-            display: flex;
-            align-items: center;
-            flex: 1;
+      }
+      @media (max-width: 576px) {
+        .responsables-organized {
+          max-width: 100%;
+          min-width: 100%;
         }
-        
-        .timetable-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f4ff;
-            color: var(--primary-color);
-            border-radius: 8px;
-            margin-right: 15px;
+
+        .role-group {
+          flex-wrap: nowrap;
         }
-        
-        .timetable-details {
-            flex: 1;
+
+        .teacher-assignments {
+          max-width: calc(100% - 25px);
         }
-        
-        .timetable-title {
-            font-size: 1rem;
-            margin: 0 0 5px 0;
+
+        .teacher-assignments ul {
+          gap: 1px;
         }
-        
-        .timetable-description {
-            font-size: 0.85rem;
-            color: #666;
-            margin: 0 0 5px 0;
+
+        .teacher-assignments li {
+          padding: 1px 0;
         }
-        
-        .timetable-meta {
-            display: flex;
-            gap: 15px;
-            font-size: 0.75rem;
-            color: #888;
+      }
+      @media (max-width: 768px) {
+        .responsables-organized {
+          max-width: 150px;
+          min-width: 120px;
         }
-        
-        .timetable-actions {
-            display: flex;
-            gap: 10px;
+
+        .role-group {
+          padding: 1px 3px;
+          gap: 3px;
         }
-        
-        .timetable-download-btn {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f4ff;
-            color: var(--primary-color);
-            border-radius: 8px;
-            transition: all 0.2s ease;
+
+        .teacher-name {
+          font-size: 0.7rem;
         }
-        
-        .timetable-download-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
+
+        .teacher-assignments ul {
+          gap: 1px;
         }
+
+        .teacher-assignments li {
+          padding: 1px 0;
+        }
+
+        .role-header {
+          font-size: 11px;
+          min-width: 16px;
+        }
+      }
+
+      .error-message {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+
+      .form-input.error {
+        border-color: #ef4444;
+      }
+
+      .form-input.error + .error-message {
+        display: block;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+      }
+
+      .form-input.error:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+      }
+
+      .form-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+      }
+
+      .btn-cancel {
+        background-color: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+      }
+
+      .btn-cancel:hover {
+        background-color: #e5e7eb;
+      }
+
+      .notification {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .notification.success {
+        background-color: #10b981;
+      }
+
+      .notification.error {
+        background-color: #ef4444;
+      }
+
+      .notification.info {
+        background-color: #3b82f6;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Action buttons styling */
+      .table-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .action-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .edit-btn {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .edit-btn:hover {
+        background-color: #2563eb;
+      }
+
+      .teacher-action-btn {
+        background-color: #10b981;
+        color: white;
+      }
+
+      .teacher-action-btn:hover {
+        background-color: #059669;
+      }
+
+      .delete-btn {
+        background-color: #ef4444;
+        color: white;
+      }
+
+      .delete-btn:hover {
+        background-color: #dc2626;
+      }
+
+      .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar - will be loaded via JavaScript -->
-        <div id="sidebar-container"></div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">Gestion des Sections</h1>
-                <div class="header-actions">
-                    <button class="header-btn" id="add-section-btn">
-                        <svg class="header-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M12 5v14M5 12h14"></path>
-                        </svg>
-                        Ajouter une section
-                    </button>
-                </div>
-            </div>
-            
-            <div class="content-container">
-                <!-- Status Messages -->
-                <div id="status-message" class="status-message" style="display: none;"></div>
-                
-                <!-- Filters -->
-                <div class="filters">
-                    <div class="filter-group">
-                        <label for="specialty-filter">Spécialité:</label>
-                        <select id="specialty-filter" class="filter-select">
-                            <option value="all">Toutes</option>
-                            <!-- Options will be loaded dynamically -->
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label for="level-filter">Niveau:</label>
-                        <select id="level-filter" class="filter-select">
-                            <option value="all">Tous</option>
-                            <option value="L1">L1</option>
-                            <option value="L2">L2</option>
-                            <option value="L3">L3</option>
-                            <option value="M1">M1</option>
-                            <option value="M2">M2</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label for="capacity-filter">Capacité:</label>
-                        <select id="capacity-filter" class="filter-select">
-                            <option value="all">Toutes</option>
-                            <option value="available">Places disponibles</option>
-                            <option value="limited">Places limitées</option>
-                            <option value="full">Complètes</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label for="search">Recherche:</label>
-                        <input type="text" id="search" class="filter-input" placeholder="Rechercher...">
-                    </div>
-                </div>
+      <!-- Sidebar - will be loaded via JavaScript -->
+      <div id="sidebar-container"></div>
 
-                <!-- Sections Table -->
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Section</th>
-                                <th>Niveau</th>
-                                <th>Spécialité</th>
-                                <th>Capacité</th>
-                                <th>Étudiants</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sections-table-body">
-                            <!-- Sections will be loaded here -->
-                            <tr class="loading-row">
-                                <td colspan="6">Chargement des sections...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Pagination -->
-                <div class="pagination" id="pagination">
-                    <!-- Pagination will be added here -->
-                </div>
-            </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Gestion des Sections</h1>
+          <div class="header-actions">
+            <button class="header-btn" id="show-statistics-btn">
+              <svg
+                class="header-btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M18 20V10M12 20V4M6 20v-6"></path>
+              </svg>
+              Statistiques
+            </button>
+            <button class="header-btn" id="add-section-btn">
+              <svg
+                class="header-btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              Ajouter une section
+            </button>
+          </div>
         </div>
+
+        <div class="content-container">
+          <!-- Status Messages -->
+          <div
+            id="status-message"
+            class="status-message"
+            style="display: none"
+          ></div>
+
+          <!-- Filters -->
+          <div class="filters">
+            <div class="filter-group">
+              <label for="specialty-filter">Spécialité:</label>
+              <select id="specialty-filter" class="filter-select">
+                <option value="all">Toutes</option>
+                <!-- Options will be loaded dynamically -->
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="level-filter">Niveau:</label>
+              <select id="level-filter" class="filter-select">
+                <option value="all">Tous</option>
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+                <option value="L3">L3</option>
+                <option value="M1">M1</option>
+                <option value="M2">M2</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="capacity-filter">Capacité:</label>
+              <select id="capacity-filter" class="filter-select">
+                <option value="all">Toutes</option>
+                <option value="available">Places disponibles</option>
+                <option value="limited">Places limitées</option>
+                <option value="full">Complètes</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="search">Recherche:</label>
+              <input
+                type="text"
+                id="search"
+                class="filter-input"
+                placeholder="Rechercher..."
+              />
+            </div>
+          </div>
+
+          <!-- Sections Table -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Section</th>
+                  <th>Niveau</th>
+                  <th>Spécialité</th>
+                  <th>Étudiants</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sections-table-body">
+                <!-- Sections will be loaded here -->
+                <tr class="loading-row">
+                  <td colspan="5">Chargement des sections...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" id="pagination">
+            <!-- Pagination will be added here -->
+          </div>
+
+          <!-- Statistics Container -->
+          <div
+            id="statistics-container"
+            class="statistics-container"
+            style="display: none"
+          >
+            <!-- Statistics will be loaded here -->
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Add/Edit Section Modal -->
     <div id="section-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 id="modal-title">Ajouter une section</h2>
-            
-            <form id="section-form" class="form section-form">
-                <input type="hidden" id="section-id">
-                
-                <div class="form-group">
-                    <label for="section-name">Nom de la section:</label>
-                    <input type="text" id="section-name" class="form-input" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="section-code">Code:</label>
-                    <input type="text" id="section-code" class="form-input" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="section-specialty">Spécialité:</label>
-                    <select id="section-specialty" class="form-input" required>
-                        <option value="">Sélectionner une spécialité</option>
-                        <option value="Informatique">Informatique</option>
-                        <option value="Mathématiques">Mathématiques</option>
-                        <option value="Physique">Physique</option>
-                        <option value="Chimie">Chimie</option>
-                        <option value="Biologie">Biologie</option>
-                        <option value="Géologie">Géologie</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="section-level">Niveau:</label>
-                    <select id="section-level" class="form-input" required>
-                        <option value="">Sélectionner un niveau</option>
-                        <option value="L1">L1</option>
-                        <option value="L2">L2</option>
-                        <option value="L3">L3</option>
-                        <option value="M1">M1</option>
-                        <option value="M2">M2</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="section-capacity">Capacité:</label>
-                    <input type="number" id="section-capacity" class="form-input" min="1" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="section-description">Description (optionnel):</label>
-                    <textarea id="section-description" class="form-input" rows="3"></textarea>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-cancel" id="cancel-btn">Annuler</button>
-                    <button type="submit" class="btn btn-primary" id="save-btn">Enregistrer</button>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2 id="modal-title">Ajouter une section</h2>
+        <form id="section-form" class="form section-form">
+          <input type="hidden" id="section-id" />
+          <div class="form-group">
+            <label for="section-name">Nom de la section:</label>
+            <input
+              type="text"
+              id="section-name"
+              class="form-input"
+              required
+              pattern="[A-Za-z0-9\s-]+"
+              title="Le nom doit contenir uniquement des lettres, chiffres, espaces et tirets"
+              minlength="3"
+              maxlength="50"
+            />
+            <div class="error-message" id="section-name-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="section-code">Code:</label>
+            <input
+              type="text"
+              id="section-code"
+              class="form-input"
+              required
+              pattern="[A-Z0-9]+"
+              title="Le code doit contenir uniquement des lettres majuscules et des chiffres"
+              minlength="2"
+              maxlength="10"
+            />
+            <div class="error-message" id="section-code-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="section-department">Département:</label>
+            <select id="section-department" class="form-input" required>
+              <option value="">Sélectionner un département</option>
+              <!-- Departments will be loaded dynamically -->
+            </select>
+            <div class="error-message" id="section-department-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="section-specialty">Spécialité:</label>
+            <input
+              type="text"
+              id="section-specialty"
+              class="form-input"
+              required
+              pattern="[A-Za-z\s-]+"
+              title="La spécialité doit contenir uniquement des lettres, espaces et tirets"
+              minlength="3"
+              maxlength="50"
+              placeholder="Ex: Informatique, Mathématiques, etc."
+            />
+            <div class="error-message" id="section-specialty-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="section-level">Niveau:</label>
+            <select id="section-level" class="form-input" required>
+              <option value="">Sélectionner un niveau</option>
+              <option value="L1">L1</option>
+              <option value="L2">L2</option>
+              <option value="L3">L3</option>
+              <option value="M1">M1</option>
+              <option value="M2">M2</option>
+            </select>
+            <div class="error-message" id="section-level-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="section-capacity">Capacité:</label>
+            <input
+              type="number"
+              id="section-capacity"
+              class="form-input"
+              required
+              min="1"
+              max="500"
+              title="La capacité doit être comprise entre 1 et 500"
+            />
+            <div class="error-message" id="section-capacity-error"></div>
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="btn btn-cancel"
+              id="cancel-section-btn"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" id="save-section-btn">
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-    
+
     <!-- Timetable Upload Modal -->
     <div id="timetable-modal" class="modal timetable-modal">
-        <div class="modal-content">
-            <span class="close-modal" id="close-timetable-modal">&times;</span>
-            <h2 id="timetable-modal-title">Télécharger l'emploi du temps</h2>
-            
-            <form id="timetable-form" class="form">
-                <input type="hidden" id="timetable-section-id">
-                <input type="hidden" id="timetable-type" value="regular">
-                
-                <div class="form-group">
-                    <label for="timetable-title">Titre:</label>
-                    <input type="text" id="timetable-title" class="form-input" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="timetable-description">Description (optionnel):</label>
-                    <textarea id="timetable-description" class="form-input" rows="2"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="timetable-semester">Semestre:</label>
-                    <select id="timetable-semester" class="form-input" required>
-                        <option value="S1">Semestre 1</option>
-                        <option value="S2">Semestre 2</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="timetable-academic-year">Année académique:</label>
-                    <input type="text" id="timetable-academic-year" class="form-input" value="2024-2025" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Fichier:</label>
-                    <div class="file-upload-container" id="file-upload-container">
-                        <div class="file-upload-icon">
-                            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
-                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                                <path d="M12 12v9"></path>
-                                <path d="m16 16-4-4-4 4"></path>
-                            </svg>
-                        </div>
-                        <p class="file-upload-text">Glissez-déposez votre fichier ici ou</p>
-                        <label class="file-upload-btn">
-                            Parcourir...
-                            <input type="file" id="timetable-file" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
-                        </label>
-                    </div>
-                    
-                    <div class="selected-file" id="selected-file">
-                        <div class="selected-file-icon">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
-                                <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path>
-                            </svg>
-                        </div>
-                        <span class="selected-file-name" id="selected-file-name">filename.pdf</span>
-                        <div class="selected-file-remove" id="selected-file-remove">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-cancel" id="cancel-timetable-btn">Annuler</button>
-                    <button type="submit" class="btn btn-primary" id="save-timetable-btn">Enregistrer</button>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close-modal" id="close-timetable-modal">&times;</span>
+        <h2 id="timetable-modal-title">Télécharger l'emploi du temps</h2>
+
+        <form id="timetable-form" class="form">
+          <input type="hidden" id="timetable-section-id" />
+          <input type="hidden" id="timetable-type" value="regular" />
+
+          <div class="form-group">
+            <label for="timetable-title">Titre:</label>
+            <input
+              type="text"
+              id="timetable-title"
+              class="form-input"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="timetable-description">Description (optionnel):</label>
+            <textarea
+              id="timetable-description"
+              class="form-input"
+              rows="2"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="timetable-semester">Semestre:</label>
+            <select id="timetable-semester" class="form-input" required>
+              <option value="S1">Semestre 1</option>
+              <option value="S2">Semestre 2</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="timetable-academic-year">Année académique:</label>
+            <input
+              type="text"
+              id="timetable-academic-year"
+              class="form-input"
+              value="2024-2025"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Fichier:</label>
+            <div class="file-upload-container" id="file-upload-container">
+              <div class="file-upload-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="48"
+                  height="48"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1"
+                >
+                  <path
+                    d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"
+                  ></path>
+                  <path d="M12 12v9"></path>
+                  <path d="m16 16-4-4-4 4"></path>
+                </svg>
+              </div>
+              <p class="file-upload-text">
+                Glissez-déposez votre fichier ici ou
+              </p>
+              <label class="file-upload-btn">
+                Parcourir...
+                <input
+                  type="file"
+                  id="timetable-file"
+                  class="file-upload-input"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                />
+              </label>
+            </div>
+
+            <div class="selected-file" id="selected-file">
+              <div class="selected-file-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
+                  <path
+                    d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <span class="selected-file-name" id="selected-file-name"
+                >filename.pdf</span
+              >
+              <div class="selected-file-remove" id="selected-file-remove">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="btn btn-cancel"
+              id="cancel-timetable-btn"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="save-timetable-btn"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-    
+
     <!-- Timetables View Modal (will be implemented) -->
     <div id="view-timetables-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" id="close-view-timetables-modal">&times;</span>
-            <h2 id="view-timetables-modal-title">Emplois du temps</h2>
-            
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="regular-timetables">Emplois du temps</button>
-                <button class="tab-btn" data-tab="exam-timetables">Emplois des examens</button>
-            </div>
-            
-            <div class="tab-content active" id="regular-timetables">
-                <div id="regular-timetables-list" class="timetables-list">
-                    <!-- Regular timetables will be listed here -->
-                    <div class="no-timetables">Aucun emploi du temps disponible</div>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="exam-timetables">
-                <div id="exam-timetables-list" class="timetables-list">
-                    <!-- Exam timetables will be listed here -->
-                    <div class="no-timetables">Aucun emploi des examens disponible</div>
-                </div>
-            </div>
+      <div class="modal-content">
+        <span class="close-modal" id="close-view-timetables-modal"
+          >&times;</span
+        >
+        <h2 id="view-timetables-modal-title">Emplois du temps</h2>
+
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="regular-timetables">
+            Emplois du temps
+          </button>
+          <button class="tab-btn" data-tab="exam-timetables">
+            Emplois des examens
+          </button>
         </div>
+
+        <div class="tab-content active" id="regular-timetables">
+          <div id="regular-timetables-list" class="timetables-list">
+            <!-- Regular timetables will be listed here -->
+            <div class="no-timetables">Aucun emploi du temps disponible</div>
+          </div>
+        </div>
+        <div class="tab-content" id="exam-timetables">
+          <div id="exam-timetables-list" class="timetables-list">
+            <!-- Exam timetables will be listed here -->
+            <div class="no-timetables">Aucun emploi des examens disponible</div>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
+    <!-- Teacher Assignment Modal -->
+    <div id="teacher-assignment-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" id="close-teacher-assignment-modal"
+          >&times;</span
+        >
+        <h2 id="teacher-assignment-modal-title">Assigner des responsables</h2>
+
+        <form id="teacher-assignment-form" class="form">
+          <input type="hidden" id="assignment-section-id" />
+
+          <div class="form-group">
+            <label>Section:</label>
+            <div id="assignment-section-info" class="section-info-display">
+              <!-- Section info will be displayed here -->
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="teacher-role">Rôle:</label>
+            <select id="teacher-role" class="form-input" required>
+              <option value="">Sélectionner un rôle</option>
+              <option value="filiere">Responsable de Filière</option>
+              <option value="section">Responsable de Section</option>
+              <option value="td">Responsable TD</option>
+              <option value="tp">Responsable TP</option>
+            </select>
+          </div>
+
+          <div
+            class="form-group"
+            id="group-selection-container"
+            style="display: none"
+          >
+            <label for="group-select">Groupe:</label>
+            <select id="group-select" class="form-input">
+              <option value="">Sélectionner un groupe</option>
+              <!-- Groups will be loaded dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="teacher-select">Responsable:</label>
+            <select id="teacher-select" class="form-input" required>
+              <option value="">Sélectionner un responsable</option>
+              <!-- Teachers will be loaded dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Responsables actuellement assignés:</label>
+            <div id="current-assignments" class="current-assignments">
+              <!-- Current assignments will be displayed here -->
+            </div>
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="btn btn-cancel"
+              id="cancel-teacher-assignment-btn"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="save-teacher-assignment-btn"
+            >
+              Assigner
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
-        // Global variables
-        const API_BASE_URL = 'https://unicersityback.onrender.com/api';
-        let authToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
-        let adminRole = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
-        let allSections = [];
-        let filteredSections = [];
-        let currentPage = 1;
-        let itemsPerPage = 10;
-        
-        // DOM Elements
-        const statusMessage = document.getElementById('status-message');
-        const sectionsTableBody = document.getElementById('sections-table-body');
-        const paginationElement = document.getElementById('pagination');
-        const specialtyFilter = document.getElementById('specialty-filter');
-        const levelFilter = document.getElementById('level-filter');
-        const capacityFilter = document.getElementById('capacity-filter');
-        const searchInput = document.getElementById('search');
-        
-        // Modal elements
-        const sectionModal = document.getElementById('section-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const sectionForm = document.getElementById('section-form');
-        const sectionIdInput = document.getElementById('section-id');
-        const sectionNameInput = document.getElementById('section-name');
-        const sectionCodeInput = document.getElementById('section-code');
-        const sectionSpecialtyInput = document.getElementById('section-specialty');
-        const sectionLevelInput = document.getElementById('section-level');
-        const sectionCapacityInput = document.getElementById('section-capacity');
-        const sectionDescriptionInput = document.getElementById('section-description');
-        const saveBtn = document.getElementById('save-btn');
-        const cancelBtn = document.getElementById('cancel-btn');
-        const closeModalBtn = document.querySelector('.close-modal');
-        
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', async function() {
+      // Global variables
+      let allSections = [];
+      let filteredSections = [];
+      let currentPage = 1;
+      let itemsPerPage = 10;
+      let authToken =
+        localStorage.getItem("admin_token") ||
+        sessionStorage.getItem("admin_token");
+      let adminRole =
+        localStorage.getItem("admin_role") ||
+        sessionStorage.getItem("admin_role");
+
+      // DOM Elements
+      let statusMessage = document.getElementById("status-message");
+      let sectionsTableBody = document.getElementById("sections-table-body");
+      let paginationElement = document.getElementById("pagination");
+      let specialtyFilter = document.getElementById("specialty-filter");
+      let levelFilter = document.getElementById("level-filter");
+      let capacityFilter = document.getElementById("capacity-filter");
+      let searchInput = document.getElementById("search");
+      let sectionModal = document.getElementById("section-modal");
+      let modalTitle = document.getElementById("modal-title");
+      let sectionForm = document.getElementById("section-form");
+      let sectionIdInput = document.getElementById("section-id");
+      let sectionNameInput = document.getElementById("section-name");
+      let sectionCodeInput = document.getElementById("section-code");
+      let sectionDepartmentInput =
+        document.getElementById("section-department");
+      let sectionSpecialtyInput = document.getElementById("section-specialty");
+      let sectionLevelInput = document.getElementById("section-level");
+      let sectionCapacityInput = document.getElementById("section-capacity");
+      let closeModalBtn = document.querySelector(".close-modal");
+      let cancelBtn = document.getElementById("cancel-section-btn");
+
+      // Event listeners
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          // Initialize DOM elements first
+          initializeDOMElements();
+
+          // Verify authentication using the admin-auth.js helper
+          const isAuthenticated = await verifyAdminToken();
+          if (!isAuthenticated) {
+            console.error("Authentication failed");
+            return;
+          }
+
+          // Load the sidebar
+          await loadSidebar();
+
+          // Test API connectivity first
+          console.log("Testing API connectivity before loading data...");
+          await testAPIConnectivity();
+
+          // Load sections data
+          await loadSections();
+
+          // Load departments data
+          await loadDepartments();
+
+          // Setup event listeners
+          setupEventListeners();
+        } catch (error) {
+          console.error("Initialization error:", error);
+          showMessage(
+            "Une erreur est survenue lors de l'initialisation de la page.",
+            "error"
+          );
+        }
+      });
+
+      function initializeDOMElements() {
+        // Initialize all DOM elements
+        statusMessage = document.getElementById("status-message");
+        sectionsTableBody = document.getElementById("sections-table-body");
+        paginationElement = document.getElementById("pagination");
+        specialtyFilter = document.getElementById("specialty-filter");
+        levelFilter = document.getElementById("level-filter");
+        capacityFilter = document.getElementById("capacity-filter");
+        searchInput = document.getElementById("search");
+        sectionModal = document.getElementById("section-modal");
+        modalTitle = document.getElementById("modal-title");
+        sectionForm = document.getElementById("section-form");
+        sectionIdInput = document.getElementById("section-id");
+        sectionNameInput = document.getElementById("section-name");
+        sectionCodeInput = document.getElementById("section-code");
+        sectionDepartmentInput = document.getElementById("section-department");
+        sectionSpecialtyInput = document.getElementById("section-specialty");
+        sectionLevelInput = document.getElementById("section-level");
+        sectionCapacityInput = document.getElementById("section-capacity");
+        closeModalBtn = document.querySelector(".close-modal");
+        cancelBtn = document.getElementById("cancel-section-btn");
+      }
+
+      async function loadSidebar() {
+        try {
+          // Load the sidebar HTML
+          const response = await fetch("admin-sidebar.html");
+          const html = await response.text();
+
+          // Insert the sidebar HTML into the container
+          document.getElementById("sidebar-container").innerHTML = html;
+        } catch (error) {
+          console.error("Error loading sidebar:", error);
+          showMessage("Impossible de charger la barre latérale.", "error");
+        }
+      } // Test API connectivity with better error handling
+      async function testAPIConnectivity() {
+        try {
+          console.log("Testing API connectivity...");
+          const response = await fetch(`${API_BASE_URL}/departments`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            mode: "cors",
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          console.log("API connectivity test response:", response.status);
+          return response;
+        } catch (error) {
+          console.error("API connectivity test failed:", error);
+          createNotification(
+            "Impossible de se connecter au serveur. Vérifiez votre connexion internet et que le serveur est en cours d'exécution.",
+            "error"
+          );
+          return null;
+        }
+      }
+
+      async function loadSections() {
+        try {
+          createNotification("Chargement des sections...", "info");
+
+          // First try to use the admin API
+          let data;
+          if (window.adminAPI && window.adminAPI.getSections) {
             try {
-                // Verify authentication
-                if (!authToken || !adminRole) {
-                    window.location.href = 'admin-login.html';
-                    return;
-                }
-                
-                // Load the sidebar
-                await loadSidebar();
-                
-                // Load sections data
-                await loadSections();
-                
-                // Setup event listeners
-                setupEventListeners();
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showMessage('Une erreur est survenue lors de l\'initialisation de la page.', 'error');
+              data = await window.adminAPI.getSections();
+            } catch (apiError) {
+              console.warn(
+                "Error using adminAPI.getSections, falling back to direct API call:",
+                apiError
+              );
+              data = null;
             }
+          }
+
+          // If admin API failed, try direct API call
+          if (!data) {
+            try {
+              const response = await fetch(`${API_BASE_URL}/sections`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${authToken}`,
+                },
+                mode: "cors",
+                credentials: "include",
+              });
+
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              data = await response.json();
+            } catch (fetchError) {
+              console.error("Error in direct API call:", fetchError);
+              throw fetchError;
+            }
+          }
+
+          // Ensure proper handling of the data structure
+          allSections = Array.isArray(data.sections)
+            ? data.sections
+            : Array.isArray(data)
+            ? data
+            : [];
+
+          // If still no data, try mock data as last resort
+          if (allSections.length === 0 && window.adminMocks) {
+            console.warn("No data received, using mock data");
+            allSections = window.adminMocks.getMockSections();
+          }
+
+          // If no sections were loaded, set to empty array
+          if (!allSections || allSections.length === 0) {
+            allSections = [];
+            console.warn("No sections data received from any source.");
+          }
+
+          // Load unique specialties for filter
+          loadSpecialties();
+
+          // Apply initial filtering
+          filterSections();
+
+          createNotification("", "clear");
+        } catch (error) {
+          console.error("Error loading sections:", error);
+          allSections = [];
+          createNotification(
+            "Erreur lors du chargement des sections. Veuillez réessayer.",
+            "error"
+          );
+          sectionsTableBody.innerHTML = `
+            <tr>
+              <td colspan="5" class="error-message">
+                Impossible de charger les sections.
+                <button class="retry-btn" onclick="loadSections()">Réessayer</button>
+              </td>
+            </tr>
+          `;
+        }
+      }
+
+      function loadSpecialties() {
+        // Get unique specialties from sections
+        const specialties = [
+          ...new Set(
+            allSections
+              .filter(
+                (section) =>
+                  section && (section.specialty || section.specialite)
+              )
+              .map((section) => section.specialty || section.specialite)
+          ),
+        ];
+
+        // Clear existing options (except "All")
+        while (specialtyFilter.options.length > 1) {
+          specialtyFilter.remove(1);
+        }
+
+        // Add specialty options
+        specialties.forEach((specialty) => {
+          if (specialty) {
+            const option = document.createElement("option");
+            option.value = specialty;
+            option.textContent = specialty;
+            specialtyFilter.appendChild(option);
+          }
         });
-        
-        async function loadSidebar() {
+      }
+
+      // Load departments data
+      async function loadDepartments() {
+        try {
+          // First try to use the admin API
+          let departments;
+          if (window.adminAPI && window.adminAPI.getDepartments) {
             try {
-                // Load the sidebar HTML
-                const response = await fetch('admin-sidebar.html');
-                const html = await response.text();
-                
-                // Insert the sidebar HTML into the container
-                document.getElementById('sidebar-container').innerHTML = html;
-            } catch (error) {
-                console.error('Error loading sidebar:', error);
-                showMessage('Impossible de charger la barre latérale.', 'error');
+              departments = await window.adminAPI.getDepartments();
+            } catch (apiError) {
+              console.warn(
+                "Error using adminAPI.getDepartments, falling back to direct API call:",
+                apiError
+              );
+              departments = null;
             }
-        }
-        
-        async function loadSections() {
+          }
+
+          // If admin API failed, try direct API call
+          if (!departments) {
             try {
-                showMessage('Chargement des sections...', 'info');
-                
-                // Fetch sections from API
-                const response = await fetch(`${API_BASE_URL}/sections`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-                
-                allSections = await response.json();
-                
-                // Load unique specialties for filter
-                loadSpecialties();
-                
-                // Apply initial filtering
-                filterSections();
-                
-                showMessage('', 'clear');
-            } catch (error) {
-                console.error('Error loading sections:', error);
-                showMessage('Erreur lors du chargement des sections. Veuillez réessayer.', 'error');
-                sectionsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="error-message">
-                            Impossible de charger les sections. 
-                            <button class="retry-btn" onclick="loadSections()">Réessayer</button>
-                        </td>
-                    </tr>
-                `;
+              const response = await fetch(`${API_BASE_URL}/departments`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${authToken}`,
+                },
+                mode: "cors",
+                credentials: "include",
+              });
+
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const data = await response.json();
+              departments = Array.isArray(data) ? data : data.data || [];
+            } catch (fetchError) {
+              console.error("Error in direct API call:", fetchError);
+              throw fetchError;
             }
+          }
+
+          // If still no data, try mock data as last resort
+          if (!departments && window.adminMocks) {
+            console.warn("No departments data received, using mock data");
+            departments = window.adminMocks.getMockDepartments();
+          }
+
+          const departmentSelect =
+            document.getElementById("section-department");
+
+          // Clear existing options except the first one
+          while (departmentSelect.children.length > 1) {
+            departmentSelect.removeChild(departmentSelect.lastChild);
+          }
+
+          // Add department options
+          if (Array.isArray(departments)) {
+            departments.forEach((department) => {
+              if (department && department.id && department.name) {
+                const option = document.createElement("option");
+                option.value = department.id;
+                option.textContent = department.name;
+                departmentSelect.appendChild(option);
+              }
+            });
+          }
+        } catch (error) {
+          console.error("Error loading departments:", error);
+          createNotification(
+            "Erreur lors du chargement des départements",
+            "error"
+          );
         }
-        
-        function loadSpecialties() {
-            // Get unique specialties from sections
-            const specialties = [...new Set(allSections.map(section => section.specialite))];
-            
-            // Clear existing options (except "All")
-            while (specialtyFilter.options.length > 1) {
-                specialtyFilter.remove(1);
+      }
+
+      function setupEventListeners() {
+        // Filter changes
+        if (specialtyFilter) {
+          specialtyFilter.addEventListener("change", () => filterSections());
+        }
+        if (levelFilter) {
+          levelFilter.addEventListener("change", () => filterSections());
+        }
+        if (capacityFilter) {
+          capacityFilter.addEventListener("change", () => filterSections());
+        }
+        if (searchInput) {
+          searchInput.addEventListener("input", () => filterSections());
+        }
+
+        // Add section button
+        const addSectionBtn = document.getElementById("add-section-btn");
+        if (addSectionBtn) {
+          addSectionBtn.addEventListener("click", openAddSectionModal);
+        }
+
+        // Modal close button
+        if (closeModalBtn) {
+          closeModalBtn.addEventListener("click", closeModal);
+        }
+
+        // Cancel button
+        if (cancelBtn) {
+          cancelBtn.addEventListener("click", closeModal);
+        }
+
+        // Form submission
+        if (sectionForm) {
+          sectionForm.addEventListener("submit", handleFormSubmit);
+        }
+
+        // Teacher assignment modal event listeners
+        const teacherAssignmentModal = document.getElementById(
+          "teacher-assignment-modal"
+        );
+        const teacherAssignmentForm = document.getElementById(
+          "teacher-assignment-form"
+        );
+        const closeTeacherAssignmentModal = document.getElementById(
+          "close-teacher-assignment-modal"
+        );
+        const cancelTeacherAssignmentBtn = document.getElementById(
+          "cancel-teacher-assignment-btn"
+        );
+
+        if (teacherAssignmentForm) {
+          teacherAssignmentForm.addEventListener(
+            "submit",
+            handleTeacherAssignment
+          );
+        }
+
+        if (closeTeacherAssignmentModal) {
+          closeTeacherAssignmentModal.addEventListener("click", () => {
+            if (teacherAssignmentModal) {
+              teacherAssignmentModal.style.display = "none";
             }
-            
-            // Add specialty options
-            specialties.forEach(specialty => {
-                if (specialty) {
-                    const option = document.createElement('option');
-                    option.value = specialty;
-                    option.textContent = specialty;
-                    specialtyFilter.appendChild(option);
-                }
-            });
+          });
         }
-        
-        function setupEventListeners() {
-            // Filter changes
-            specialtyFilter.addEventListener('change', () => filterSections());
-            levelFilter.addEventListener('change', () => filterSections());
-            capacityFilter.addEventListener('change', () => filterSections());
-            searchInput.addEventListener('input', () => filterSections());
-            
-            // Add section button
-            document.getElementById('add-section-btn').addEventListener('click', openAddSectionModal);
-            
-            // Modal close button
-            closeModalBtn.addEventListener('click', closeModal);
-            
-            // Cancel button
-            cancelBtn.addEventListener('click', closeModal);
-            
-            // Form submission
-            sectionForm.addEventListener('submit', handleFormSubmit);
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === sectionModal) {
-                    closeModal();
-                }
-            });
-        }
-        
-        function filterSections() {
-            const specialty = specialtyFilter.value;
-            const level = levelFilter.value;
-            const capacity = capacityFilter.value;
-            const search = searchInput.value.toLowerCase();
-            
-            filteredSections = allSections.filter(section => {
-                // Specialty filter
-                if (specialty !== 'all' && section.specialite !== specialty) {
-                    return false;
-                }
-                
-                // Level filter
-                if (level !== 'all' && section.niveau !== level) {
-                    return false;
-                }
-                
-                // Capacity filter
-                if (capacity !== 'all') {
-                    const capacityPercent = (section.etudiantsCount / section.capacite) * 100;
-                    
-                    if (capacity === 'available' && capacityPercent >= 80) {
-                        return false;
-                    } else if (capacity === 'limited' && (capacityPercent < 80 || capacityPercent >= 100)) {
-                        return false;
-                    } else if (capacity === 'full' && capacityPercent < 100) {
-                        return false;
-                    }
-                }
-                
-                // Search filter
-                if (search && !section.nom?.toLowerCase().includes(search) && 
-                    !section.code?.toLowerCase().includes(search) && 
-                    !section.specialite?.toLowerCase().includes(search)) {
-                    return false;
-                }
-                
-                return true;
-            });
-            
-            // Render the first page
-            currentPage = 1;
-            renderSections();
-        }
-        
-        function renderSections() {
-            // Calculate pagination
-            const totalPages = Math.ceil(filteredSections.length / itemsPerPage);
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, filteredSections.length);
-            const currentSections = filteredSections.slice(startIndex, endIndex);
-            
-            // Clear table
-            sectionsTableBody.innerHTML = '';
-            
-            // Check if no sections match filters
-            if (currentSections.length === 0) {
-                sectionsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="no-data">Aucune section ne correspond aux critères sélectionnés.</td>
-                    </tr>
-                `;
-                paginationElement.innerHTML = '';
-                return;
+
+        if (cancelTeacherAssignmentBtn) {
+          cancelTeacherAssignmentBtn.addEventListener("click", () => {
+            if (teacherAssignmentModal) {
+              teacherAssignmentModal.style.display = "none";
             }
-            
-            // Render sections
-            currentSections.forEach(section => {
-                const capacityPercent = section.etudiantsCount ? (section.etudiantsCount / section.capacite) * 100 : 0;
-                let capacityClass = 'capacity-normal';
-                if (capacityPercent >= 80 && capacityPercent < 100) {
-                    capacityClass = 'capacity-warning';
-                } else if (capacityPercent >= 100) {
-                    capacityClass = 'capacity-full';
-                }
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <div class="section-info">
-                            <div class="section-icon">${section.level?.charAt(0) || 'S'}</div>
-                            <div class="section-details">
-                                <span class="section-name">${section.name || 'Section sans nom'}</span>
-                                <span class="section-code">${section.code || 'N/A'}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="level-badge">${section.level || 'N/A'}</span>
-                    </td>
-                    <td>${section.specialty || 'Non spécifiée'}</td>
-                    <td>
-                        <span class="capacity-badge ${capacityClass}">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                            ${section.etudiantsCount || 2}/${250 || 0}
-                        </span>
-                    </td>
-                    <td>${section.etudiantsCount || 0}</td>                    <td>
-                        <div class="table-actions">
-                            <button class="action-btn edit-btn" data-id="${section.id}" title="Modifier">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                            </button>
-                            <button class="action-btn upload-timetable-btn" data-id="${section.id}" data-name="${section.name}" data-specialty="${section.specialty}" data-level="${section.level}" title="Télécharger l'emploi du temps">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 22v-8m0 0l-4 4m4-4l4 4M6 2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path>
-                                </svg>
-                            </button>
-                            <button class="action-btn upload-exam-btn" data-id="${section.id}" data-name="${section.name}" data-specialty="${section.specialty}" data-level="${section.level}" title="Télécharger l'emploi des examens">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 3v2m0 4v2m0 4v2M9 3h6m4 11v6M9 21h6m-4-10h4"></path>
-                                </svg>
-                            </button>
-                            <button class="action-btn view-timetables-btn" data-id="${section.id}" data-name="${section.name}" title="Voir les emplois du temps">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                            </button>
-                            <button class="action-btn delete-btn" data-id="${section.id}" title="Supprimer">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                  // Add event listeners to the buttons
-                sectionsTableBody.appendChild(row);
-                
-                // Add event listeners to action buttons
-                row.querySelector('.edit-btn').addEventListener('click', () => openEditSectionModal(section));
-                row.querySelector('.upload-timetable-btn').addEventListener('click', (event) => {
-                    event.stopPropagation(); // Prevent event bubbling
-                    // Handled by timetable-manager.js
-                });
-                row.querySelector('.upload-exam-btn').addEventListener('click', (event) => {
-                    event.stopPropagation(); // Prevent event bubbling
-                    // Handled by timetable-manager.js
-                });
-                row.querySelector('.view-timetables-btn').addEventListener('click', (event) => {
-                    event.stopPropagation(); // Prevent event bubbling
-                    viewSectionTimetables(section.id, section.name);
-                });
-                row.querySelector('.delete-btn').addEventListener('click', () => confirmDeleteSection(section));
-            });
-            
-            // Render pagination
-            renderPagination(totalPages);
+          });
         }
-        
-        function renderPagination(totalPages) {
-            if (totalPages <= 1) {
-                paginationElement.innerHTML = '';
-                return;
+
+        // Close teacher assignment modal when clicking outside
+        if (teacherAssignmentModal) {
+          window.addEventListener("click", function (event) {
+            if (event.target === teacherAssignmentModal) {
+              teacherAssignmentModal.style.display = "none";
             }
-            
-            let paginationHTML = '';
-            
-            // Previous button
-            paginationHTML += `
-                <button class="pagination-btn previous ${currentPage === 1 ? 'disabled' : ''}" 
-                    ${currentPage === 1 ? 'disabled' : ''}>
+          });
+        }
+
+        // Close modal when clicking outside
+        if (sectionModal) {
+          window.addEventListener("click", function (event) {
+            if (event.target === sectionModal) {
+              closeModal();
+            }
+          });
+        }
+
+        // Role selection change handler
+        const teacherRoleSelect = document.getElementById("teacher-role");
+        if (teacherRoleSelect) {
+          teacherRoleSelect.addEventListener(
+            "change",
+            handleRoleSelectionChange
+          );
+        }
+      }
+
+      function filterSections() {
+        const specialty = specialtyFilter.value;
+        const level = levelFilter.value;
+        const capacity = capacityFilter.value;
+        const search = searchInput.value.toLowerCase();
+
+        filteredSections = allSections.filter((section) => {
+          // Specialty filter
+          if (specialty !== "all" && section.specialite !== specialty) {
+            return false;
+          }
+
+          // Level filter
+          if (level !== "all" && section.niveau !== level) {
+            return false;
+          }
+
+          // Capacity filter
+          if (capacity !== "all") {
+            const capacityPercent =
+              (section.etudiantsCount / section.capacite) * 100;
+
+            if (capacity === "available" && capacityPercent >= 80) {
+              return false;
+            } else if (
+              capacity === "limited" &&
+              (capacityPercent < 80 || capacityPercent >= 100)
+            ) {
+              return false;
+            } else if (capacity === "full" && capacityPercent < 100) {
+              return false;
+            }
+          }
+
+          // Search filter
+          if (
+            search &&
+            !section.nom?.toLowerCase().includes(search) &&
+            !section.code?.toLowerCase().includes(search) &&
+            !section.specialite?.toLowerCase().includes(search)
+          ) {
+            return false;
+          }
+
+          return true;
+        });
+
+        // Render the first page
+        currentPage = 1;
+        renderSections();
+      }
+
+      function renderSections() {
+        // Calculate pagination
+        const totalPages = Math.ceil(filteredSections.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(
+          startIndex + itemsPerPage,
+          filteredSections.length
+        );
+        const currentSections = filteredSections.slice(startIndex, endIndex);
+
+        // Clear table
+        sectionsTableBody.innerHTML = "";
+
+        // Show 'no data' if nothing fetched at all
+        if (!allSections || allSections.length === 0) {
+          sectionsTableBody.innerHTML = `
+            <tr>
+              <td colspan="5" class="no-data">Aucune section disponible.</td>
+            </tr>
+          `;
+          paginationElement.innerHTML = "";
+          return;
+        }
+
+        // Show 'no match' if filters result in empty
+        if (currentSections.length === 0) {
+          sectionsTableBody.innerHTML = `
+            <tr>
+              <td colspan="5" class="no-data">Aucune section ne correspond aux critères sélectionnés.</td>
+            </tr>
+          `;
+          paginationElement.innerHTML = "";
+          return;
+        }
+
+        // Render sections
+        currentSections.forEach((section) => {
+          // Calculate student count, defaulting to 0 if not available
+          const etudiantsCount =
+            section.etudiantsCount || section.studentsCount || 0;
+          const capacity = section.capacity || section.capacite || 0;
+          const studentCountDisplay = etudiantsCount > 0 ? etudiantsCount : "-";
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>
+              <div class="section-info">
+                <div class="section-icon">${
+                  section.level?.charAt(0) || section.niveau?.charAt(0) || "S"
+                }</div>
+                <div class="section-details">
+                  <span class="section-name">${
+                    section.name || section.nom || "Section sans nom"
+                  }</span>
+                  <span class="section-code">${section.code || "N/A"}</span>
+                </div>
+              </div>
+            </td>
+            <td><span class="level-badge">${
+              section.level || section.niveau || "N/A"
+            }</span></td>
+            <td>${
+              section.specialty || section.specialite || "Non spécifiée"
+            }</td>
+            <td>${studentCountDisplay}</td>
+            <td>
+              <div class="table-actions">
+                <button class="action-btn edit-btn" data-id="${
+                  section.id
+                }" title="Modifier">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="action-btn teacher-action-btn" data-id="${
+                  section.id
+                }" title="Assigner responsables">
+                  <span class="material-icons">person_add</span>
+                </button>
+                <button class="action-btn delete-btn" data-id="${
+                  section.id
+                }" title="Supprimer">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </td>
+          `;
+
+          // Add event listeners to the buttons
+          sectionsTableBody.appendChild(row);
+          row
+            .querySelector(".edit-btn")
+            .addEventListener("click", () => openEditSectionModal(section));
+          row
+            .querySelector(".teacher-action-btn")
+            .addEventListener("click", () =>
+              openTeacherAssignmentModal(section)
+            );
+          row
+            .querySelector(".delete-btn")
+            .addEventListener("click", () => confirmDeleteSection(section));
+        });
+
+        // Render pagination
+        renderPagination(totalPages);
+      }
+
+      function renderPagination(totalPages) {
+        if (totalPages <= 1) {
+          paginationElement.innerHTML = "";
+          return;
+        }
+
+        let paginationHTML = "";
+
+        // Previous button
+        paginationHTML += `
+                <button class="pagination-btn previous ${
+                  currentPage === 1 ? "disabled" : ""
+                }"
+                    ${currentPage === 1 ? "disabled" : ""}>
                     &laquo; Précédent
                 </button>
             `;
-            
-            // Page buttons
-            for (let i = 1; i <= totalPages; i++) {
-                paginationHTML += `
-                    <button class="pagination-btn page-num ${i === currentPage ? 'active' : ''}" data-page="${i}">
+
+        // Page buttons
+        for (let i = 1; i <= totalPages; i++) {
+          paginationHTML += `
+                    <button class="pagination-btn page-num ${
+                      i === currentPage ? "active" : ""
+                    }" data-page="${i}">
                         ${i}
                     </button>
                 `;
-            }
-            
-            // Next button
-            paginationHTML += `
-                <button class="pagination-btn next ${currentPage === totalPages ? 'disabled' : ''}" 
-                    ${currentPage === totalPages ? 'disabled' : ''}>
+        }
+
+        // Next button
+        paginationHTML += `
+                <button class="pagination-btn next ${
+                  currentPage === totalPages ? "disabled" : ""
+                }"
+                    ${currentPage === totalPages ? "disabled" : ""}>
                     Suivant &raquo;
                 </button>
             `;
-            
-            paginationElement.innerHTML = paginationHTML;
-            
-            // Add event listeners to pagination buttons
-            document.querySelectorAll('.pagination-btn.page-num').forEach(button => {
-                button.addEventListener('click', () => {
-                    currentPage = parseInt(button.dataset.page);
-                    renderSections();
-                });
+
+        paginationElement.innerHTML = paginationHTML;
+
+        // Add event listeners to pagination buttons
+        document
+          .querySelectorAll(".pagination-btn.page-num")
+          .forEach((button) => {
+            button.addEventListener("click", () => {
+              currentPage = parseInt(button.dataset.page);
+              renderSections();
             });
-            
-            document.querySelector('.pagination-btn.previous').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderSections();
-                }
+          });
+
+        document
+          .querySelector(".pagination-btn.previous")
+          .addEventListener("click", () => {
+            if (currentPage > 1) {
+              currentPage--;
+              renderSections();
+            }
+          });
+
+        document
+          .querySelector(".pagination-btn.next")
+          .addEventListener("click", () => {
+            if (currentPage < totalPages) {
+              currentPage++;
+              renderSections();
+            }
+          });
+      }
+      function resetSectionForm() {
+        sectionForm.reset();
+      }
+
+      function openAddSectionModal() {
+        modalTitle.textContent = "Ajouter une section";
+        sectionIdInput.value = "";
+        resetSectionForm();
+
+        // Show modal
+        sectionModal.style.display = "block";
+      }
+      function openEditSectionModal(section) {
+        modalTitle.textContent = "Modifier la section"; // Populate form fields
+        sectionIdInput.value = section.id;
+        sectionNameInput.value = section.name || section.nom || "";
+        sectionCodeInput.value = section.code || "";
+        sectionDepartmentInput.value = section.departmentId || "";
+        sectionSpecialtyInput.value =
+          section.specialty || section.specialite || "";
+        sectionLevelInput.value = section.level || section.niveau || "";
+        sectionCapacityInput.value = section.capacity || section.capacite || "";
+
+        // Show modal
+        sectionModal.style.display = "block";
+      }
+      function closeModal() {
+        sectionModal.style.display = "none";
+        resetSectionForm();
+      }
+      async function handleFormSubmit(event) {
+        event.preventDefault();
+
+        // Validate all inputs
+        const inputs = event.target.querySelectorAll("input, select");
+        let isValid = true;
+
+        inputs.forEach((input) => {
+          if (!validateInput(input)) {
+            isValid = false;
+          }
+        });
+
+        if (!isValid) {
+          showNotification(
+            "Veuillez corriger les erreurs dans le formulaire",
+            "error"
+          );
+          return;
+        }
+
+        try {
+          const formData = {
+            name: document.getElementById("section-name").value.trim(),
+            code: document
+              .getElementById("section-code")
+              .value.trim()
+              .toUpperCase(),
+            departmentId: document.getElementById("section-department").value,
+            specialty: document
+              .getElementById("section-specialty")
+              .value.trim(),
+            level: document.getElementById("section-level").value,
+            capacity: parseInt(
+              document.getElementById("section-capacity").value
+            ),
+          };
+
+          const sectionId = document.getElementById("section-id").value;
+          let response;
+
+          if (sectionId) {
+            response = await window.sectionAPI.updateSection(
+              sectionId,
+              formData
+            );
+          } else {
+            response = await window.sectionAPI.createSection(formData);
+          }
+
+          // Close modal and refresh sections list
+          closeModal();
+          await loadSections();
+
+          // Show success message
+          showNotification("Section enregistrée avec succès", "success");
+        } catch (error) {
+          console.error("Error saving section:", error);
+          showNotification(error.message || "Une erreur est survenue", "error");
+        }
+      }
+      async function confirmDeleteSection(section) {
+        // Ask for confirmation
+        const confirmDelete = confirm(
+          `Êtes-vous sûr de vouloir supprimer la section "${
+            section.nom || section.name
+          }"? Cette action est irréversible.`
+        );
+
+        if (confirmDelete) {
+          try {
+            // Use enhanced adminAPI if available
+            let success = false;
+            if (window.adminAPI && window.adminAPI.deleteSection) {
+              try {
+                success = await window.adminAPI.deleteSection(section.id);
+              } catch (apiError) {
+                console.error("Error using adminAPI.deleteSection:", apiError);
+                // Continue to fallback
+              }
+            }
+
+            // Fallback to direct API call if adminAPI failed
+            if (!success) {
+              await apiCall(`sections/${section.id}`, "DELETE");
+            }
+
+            // Remove section from array
+            allSections = allSections.filter((s) => s.id !== section.id);
+
+            // Update display
+            filterSections();
+            loadSpecialties();
+
+            showMessage("Section supprimée avec succès!", "success");
+          } catch (error) {
+            console.error("Error deleting section:", error);
+            showMessage(
+              `Erreur lors de la suppression de la section: ${error.message}`,
+              "error"
+            );
+          }
+        }
+      }
+
+      // Teacher Assignment Functions
+      async function openTeacherAssignmentModal(section) {
+        const modal = document.getElementById("teacher-assignment-modal");
+        const sectionInfo = document.getElementById("assignment-section-info");
+        const sectionIdInput = document.getElementById("assignment-section-id");
+        const teacherSelect = document.getElementById("teacher-select");
+        const currentAssignments = document.getElementById(
+          "current-assignments"
+        );
+
+        // Set section information
+        sectionIdInput.value = section.id;
+        sectionInfo.innerHTML = `
+          <strong>${
+            section.name || section.nom || "Section sans nom"
+          }</strong><br>
+          <small>Code: ${section.code || "N/A"} | Niveau: ${
+          section.level || section.niveau || "N/A"
+        } | Spécialité: ${
+          section.specialty || section.specialite || "Non spécifiée"
+        }</small>
+        `;
+
+        // Load teachers and current assignments
+        await Promise.all([
+          loadTeachersForAssignment(),
+          loadCurrentAssignments(section.id),
+        ]);
+
+        // Reset role selection and hide group container
+        document.getElementById("teacher-role").value = "";
+        document.getElementById("group-selection-container").style.display =
+          "none";
+
+        // Show modal
+        modal.style.display = "block";
+      }
+
+      async function loadTeachersForAssignment() {
+        const teacherSelect = document.getElementById("teacher-select");
+
+        try {
+          // Clear previous options except the first one
+          while (teacherSelect.options.length > 1) {
+            teacherSelect.remove(1);
+          }
+
+          // Use admin API to get teachers
+          const teachers =
+            (await window.adminAPI?.getTeachers?.()) ||
+            (await apiCall("enseignants", "GET"));
+
+          if (Array.isArray(teachers)) {
+            teachers.forEach((teacher) => {
+              const option = document.createElement("option");
+              option.value = teacher.id;
+              option.textContent = `${
+                teacher.firstName || teacher.prenom || ""
+              } ${teacher.lastName || teacher.nom || ""}`.trim();
+              teacherSelect.appendChild(option);
             });
-            
-            document.querySelector('.pagination-btn.next').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderSections();
-                }
-            });
+          }
+        } catch (error) {
+          console.error("Error loading teachers:", error);
+          showMessage("Erreur lors du chargement des responsables", "error");
         }
-        
-        function openAddSectionModal() {
-            modalTitle.textContent = 'Ajouter une section';
-            sectionIdInput.value = '';
-            sectionForm.reset();
-            
-            // Show modal
-            sectionModal.style.display = 'block';
-        }
-        
-        function openEditSectionModal(section) {
-            modalTitle.textContent = 'Modifier la section';
-            
-            // Populate form fields
-            sectionIdInput.value = section.id;
-            sectionNameInput.value = section.nom || '';
-            sectionCodeInput.value = section.code || '';
-            sectionSpecialtyInput.value = section.specialite || '';
-            sectionLevelInput.value = section.niveau || '';
-            sectionCapacityInput.value = section.capacite || '';
-            sectionDescriptionInput.value = section.description || '';
-            
-            // Show modal
-            sectionModal.style.display = 'block';
-        }
-        
-        function closeModal() {
-            sectionModal.style.display = 'none';
-            sectionForm.reset();
-        }
-        
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            
-            // Get form data
-            const sectionId = sectionIdInput.value;
-            const sectionData = {
-                nom: sectionNameInput.value,
-                code: sectionCodeInput.value,
-                specialite: sectionSpecialtyInput.value,
-                niveau: sectionLevelInput.value,
-                capacite: parseInt(sectionCapacityInput.value),
-                description: sectionDescriptionInput.value
+      }
+
+      async function loadCurrentAssignments(sectionId) {
+        const currentAssignments = document.getElementById(
+          "current-assignments"
+        );
+
+        try {
+          const assignments = await apiCall(
+            `sections/${sectionId}/responsables`,
+            "GET"
+          );
+
+          if (Array.isArray(assignments) && assignments.length > 0) {
+            // Group assignments by role
+            const groupedAssignments = {
+              filiere: assignments.filter((a) => a.role === "filiere"),
+              section: assignments.filter((a) => a.role === "section"),
+              td: assignments.filter((a) => a.role === "td"),
+              tp: assignments.filter((a) => a.role === "tp"),
             };
-            
-            try {
-                let response;
-                
-                if (sectionId) {
-                    // Update existing section
-                    response = await fetch(`${API_BASE_URL}/sections/${sectionId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(sectionData)
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Error ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    // Update section in array
-                    const updatedSection = await response.json();
-                    const index = allSections.findIndex(s => s.id === sectionId);
-                    if (index !== -1) {
-                        allSections[index] = updatedSection;
-                    }
-                    
-                    showMessage('Section modifiée avec succès!', 'success');
-                } else {
-                    // Create new section
-                    response = await fetch(`${API_BASE_URL}/sections`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(sectionData)
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Error ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    // Add section to array
-                    const newSection = await response.json();
-                    allSections.push(newSection);
-                    
-                    showMessage('Section ajoutée avec succès!', 'success');
+
+            let html = '<div class="assignments-container">';
+
+            // Display each role group
+            Object.entries(groupedAssignments).forEach(
+              ([role, roleAssignments]) => {
+                if (roleAssignments.length > 0) {
+                  html += `<div class="role-assignments">
+                  <h4>${getRoleDisplayName(role)}</h4>
+                  <ul>`;
+
+                  roleAssignments.forEach((assignment) => {
+                    const teacherName = assignment.enseignant
+                      ? `${
+                          assignment.enseignant.firstName ||
+                          assignment.enseignant.prenom ||
+                          ""
+                        } ${
+                          assignment.enseignant.lastName ||
+                          assignment.enseignant.nom ||
+                          ""
+                        }`.trim()
+                      : "Non assigné";
+
+                    const groupInfo = assignment.group
+                      ? ` - Groupe: ${
+                          assignment.group.name || assignment.group
+                        }`
+                      : "";
+
+                    html += `
+                    <li class="assignment-item">
+                      <div class="assignment-info">
+                        <span class="assignment-teacher">${teacherName}${groupInfo}</span>
+                      </div>
+                      <button class="remove-assignment-btn" onclick="removeAssignment('${sectionId}', '${assignment.id}')">
+                        <span class="material-icons">close</span>
+                      </button>
+                    </li>`;
+                  });
+
+                  html += "</ul></div>";
                 }
-                
-                // Close modal and reload data
-                closeModal();
-                filterSections();
-                loadSpecialties();
-            } catch (error) {
-                console.error('Error saving section:', error);
-                showMessage(`Erreur lors de l'enregistrement de la section: ${error.message}`, 'error');
-            }
+              }
+            );
+
+            html += "</div>";
+            currentAssignments.innerHTML = html;
+          } else {
+            currentAssignments.innerHTML =
+              '<p class="no-assignments">Aucun responsable assigné</p>';
+          }
+        } catch (error) {
+          console.error("Error loading current assignments:", error);
+          currentAssignments.innerHTML =
+            '<p class="error">Erreur lors du chargement des assignations</p>';
         }
-        
-        async function confirmDeleteSection(section) {
-            // Ask for confirmation
-            const confirmDelete = confirm(`Êtes-vous sûr de vouloir supprimer la section "${section.nom}"? Cette action est irréversible.`);
-            
-            if (confirmDelete) {
-                try {
-                    // Call API to delete section
-                    const response = await fetch(`${API_BASE_URL}/sections/${section.id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Error ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    // Remove section from array
-                    allSections = allSections.filter(s => s.id !== section.id);
-                    
-                    // Update display
-                    filterSections();
-                    loadSpecialties();
-                    
-                    showMessage('Section supprimée avec succès!', 'success');
-                } catch (error) {
-                    console.error('Error deleting section:', error);
-                    showMessage(`Erreur lors de la suppression de la section: ${error.message}`, 'error');
-                }
-            }
+      }
+
+      function getRoleDisplayName(role) {
+        const roleNames = {
+          filiere: "Responsable de Filière",
+          section: "Responsable de Section",
+          td: "Responsable TD",
+          tp: "Responsable TP",
+          // Legacy role mappings for backward compatibility
+          CHEF_DEPARTEMENT: "Chef de Département",
+          RESPONSABLE_SECTION: "Responsable de Section",
+          RESPONSABLE_MODULE: "Responsable de Module",
+          RESPONSABLE_TD: "Responsable TD",
+          RESPONSABLE_TP: "Responsable TP",
+          ENSEIGNANT: "Enseignant",
+        };
+        return roleNames[role] || role;
+      }
+
+      async function handleTeacherAssignment(event) {
+        event.preventDefault();
+
+        const sectionId = document.getElementById(
+          "assignment-section-id"
+        ).value;
+        const teacherId = document.getElementById("teacher-select").value;
+        const role = document.getElementById("teacher-role").value;
+        const groupId = document.getElementById("group-select").value;
+
+        // Validate inputs
+        if (!teacherId || !role) {
+          showNotification(
+            "Veuillez sélectionner un responsable et un rôle",
+            "error"
+          );
+          return;
         }
-        
-        function showMessage(message, type = 'info') {
-            if (type === 'clear') {
-                statusMessage.style.display = 'none';
-                return;
-            }
-            
-            statusMessage.textContent = message;
-            statusMessage.className = 'status-message';
-            
-            switch (type) {
-                case 'success':
-                    statusMessage.classList.add('success');
-                    break;
-                case 'error':
-                    statusMessage.classList.add('error');
-                    break;
-                case 'warning':
-                    statusMessage.classList.add('warning');
-                    break;
-                default:
-                    statusMessage.classList.add('info');
-            }
-            
-            statusMessage.style.display = 'block';
-            
-            // Auto-hide success messages after 5 seconds
-            if (type === 'success') {
-                setTimeout(() => {
-                    statusMessage.style.display = 'none';
-                }, 5000);            }
+
+        // Check if group is required for TD/TP roles
+        if ((role === "td" || role === "tp") && !groupId) {
+          showNotification(
+            "Veuillez sélectionner un groupe pour ce rôle",
+            "error"
+          );
+          return;
         }
+
+        try {
+          const assignmentData = {
+            enseignantId: parseInt(teacherId),
+            role: role,
+          };
+
+          // Handle group assignment for TD/TP roles
+          if (groupId && (role === "td" || role === "tp")) {
+            if (groupId.startsWith("default_")) {
+              const groupName = groupId.replace("default_", "").toUpperCase();
+              const groupType = role.toUpperCase();
+
+              try {
+                const newGroup = await apiCall(
+                  `sections/${sectionId}/groupes`,
+                  "POST",
+                  {
+                    name: groupName,
+                    type: groupType,
+                    capacity: role === "td" ? 30 : 15,
+                  }
+                );
+                assignmentData.groupId = newGroup.id;
+              } catch (groupError) {
+                console.warn(
+                  "Could not create group, using group name:",
+                  groupError
+                );
+                assignmentData.groupName = groupName;
+              }
+            } else {
+              assignmentData.groupId = parseInt(groupId);
+            }
+          }
+
+          await apiCall(
+            `sections/${sectionId}/responsables`,
+            "POST",
+            assignmentData
+          );
+
+          // Close modal and refresh data
+          const modal = document.getElementById("teacher-assignment-modal");
+          if (modal) {
+            modal.style.display = "none";
+          }
+
+          // Reset form
+          document.getElementById("teacher-role").value = "";
+          document.getElementById("teacher-select").value = "";
+          document.getElementById("group-select").value = "";
+          document.getElementById("group-selection-container").style.display =
+            "none";
+
+          // Show success message
+          showNotification("Responsable assigné avec succès", "success");
+
+          // Reload sections to update the view
+          await loadSections();
+        } catch (error) {
+          console.error("Error assigning teacher:", error);
+          let errorMessage = "Erreur lors de l'assignation du responsable";
+          if (error.message && error.message.includes("already assigned")) {
+            errorMessage =
+              "Ce responsable est déjà assigné à ce rôle pour cette section";
+          } else if (error.message && error.message.includes("not found")) {
+            errorMessage = "Responsable ou section introuvable";
+          }
+          showNotification(errorMessage, "error");
+        }
+      }
+
+      async function removeAssignment(sectionId, assignmentId) {
+        if (!confirm("Êtes-vous sûr de vouloir retirer cette assignation ?")) {
+          return;
+        }
+
+        try {
+          await apiCall(
+            `sections/${sectionId}/responsables/${assignmentId}`,
+            "DELETE"
+          );
+          showNotification("Assignation retirée avec succès", "success");
+          await loadCurrentAssignments(sectionId);
+        } catch (error) {
+          console.error("Error removing assignment:", error);
+          showNotification(
+            "Erreur lors de la suppression de l'assignation",
+            "error"
+          );
+        }
+      }
+
+      function handleRoleSelectionChange() {
+        const roleSelect = document.getElementById("teacher-role");
+        const groupContainer = document.getElementById(
+          "group-selection-container"
+        );
+        const groupSelect = document.getElementById("group-select");
+
+        const selectedRole = roleSelect.value;
+
+        // Show group selection for TD/TP roles
+        if (selectedRole === "td" || selectedRole === "tp") {
+          groupContainer.style.display = "block";
+          groupSelect.required = true;
+
+          // Load groups for the current section
+          const sectionId = document.getElementById(
+            "assignment-section-id"
+          ).value;
+          if (sectionId) {
+            loadGroupsForSection(sectionId, selectedRole);
+          }
+        } else {
+          groupContainer.style.display = "none";
+          groupSelect.required = false;
+          // Clear group selection
+          while (groupSelect.options.length > 1) {
+            groupSelect.remove(1);
+          }
+        }
+      }
+
+      async function loadGroupsForSection(sectionId, roleType) {
+        const groupSelect = document.getElementById("group-select");
+
+        try {
+          // Clear existing options except the first one
+          while (groupSelect.options.length > 1) {
+            groupSelect.remove(1);
+          }
+
+          // Get groups from API
+          const groups = await apiCall(`sections/${sectionId}/groupes`, "GET");
+
+          if (Array.isArray(groups)) {
+            // Filter groups based on role type
+            const filteredGroups = groups.filter((group) => {
+              if (roleType === "td") {
+                return group.type === "TD" || group.type === "td";
+              } else if (roleType === "tp") {
+                return group.type === "TP" || group.type === "tp";
+              }
+              return true;
+            });
+
+            filteredGroups.forEach((group) => {
+              const option = document.createElement("option");
+              option.value = group.id;
+              option.textContent = `${group.name || group.nom} (${
+                group.type || "Groupe"
+              })`;
+              groupSelect.appendChild(option);
+            });
+
+            // If no groups found, create default ones
+            if (filteredGroups.length === 0) {
+              const defaultGroups =
+                roleType === "td"
+                  ? ["TD1", "TD2", "TD3"]
+                  : ["TP1", "TP2", "TP3", "TP4"];
+
+              defaultGroups.forEach((groupName) => {
+                const option = document.createElement("option");
+                option.value = `default_${groupName.toLowerCase()}`;
+                option.textContent = groupName;
+                groupSelect.appendChild(option);
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error loading groups:", error);
+
+          // Fallback: create default groups
+          const defaultGroups =
+            roleType === "td"
+              ? ["TD1", "TD2", "TD3"]
+              : ["TP1", "TP2", "TP3", "TP4"];
+
+          defaultGroups.forEach((groupName) => {
+            const option = document.createElement("option");
+            option.value = `default_${groupName.toLowerCase()}`;
+            option.textContent = groupName;
+            groupSelect.appendChild(option);
+          });
+        }
+      }
+
+      // Form validation and error handling
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("section-form");
+        const inputs = form.querySelectorAll("input, select");
+
+        // Add input validation
+        inputs.forEach((input) => {
+          input.addEventListener("input", function () {
+            validateInput(this);
+          });
+
+          input.addEventListener("blur", function () {
+            validateInput(this);
+          });
+        });
+
+        // Form submission
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Validate all inputs
+          let isValid = true;
+          inputs.forEach((input) => {
+            if (!validateInput(input)) {
+              isValid = false;
+            }
+          });
+
+          if (!isValid) {
+            showNotification(
+              "Veuillez corriger les erreurs dans le formulaire",
+              "error"
+            );
+            return;
+          }
+
+          try {
+            const formData = {
+              name: document.getElementById("section-name").value,
+              code: document.getElementById("section-code").value,
+              departmentId: document.getElementById("section-department").value,
+              specialty: document.getElementById("section-specialty").value,
+              level: document.getElementById("section-level").value,
+              capacity: parseInt(
+                document.getElementById("section-capacity").value
+              ),
+            };
+
+            const sectionId = document.getElementById("section-id").value;
+            let response;
+
+            if (sectionId) {
+              response = await window.sectionAPI.updateSection(
+                sectionId,
+                formData
+              );
+            } else {
+              response = await window.sectionAPI.createSection(formData);
+            }
+
+            // Close modal and refresh sections list
+            closeModal();
+            await loadSections();
+
+            // Show success message
+            showNotification("Section enregistrée avec succès", "success");
+          } catch (error) {
+            showNotification(
+              error.message || "Une erreur est survenue",
+              "error"
+            );
+          }
+        });
+      });
+
+      function validateInput(input) {
+        const errorElement = document.getElementById(`${input.id}-error`);
+        let isValid = true;
+        let errorMessage = "";
+
+        // Required field validation
+        if (input.required && !input.value.trim()) {
+          isValid = false;
+          errorMessage = "Ce champ est requis";
+        }
+
+        // Pattern validation
+        if (
+          isValid &&
+          input.pattern &&
+          !new RegExp(input.pattern).test(input.value)
+        ) {
+          isValid = false;
+          errorMessage = input.title || "Format invalide";
+        }
+
+        // Min/max length validation
+        if (
+          isValid &&
+          input.minLength &&
+          input.value.length < input.minLength
+        ) {
+          isValid = false;
+          errorMessage = `Minimum ${input.minLength} caractères`;
+        }
+
+        if (
+          isValid &&
+          input.maxLength &&
+          input.value.length > input.maxLength
+        ) {
+          isValid = false;
+          errorMessage = `Maximum ${input.maxLength} caractères`;
+        }
+
+        // Min/max value validation for number inputs
+        if (isValid && input.type === "number") {
+          const value = parseInt(input.value);
+          if (input.min && value < parseInt(input.min)) {
+            isValid = false;
+            errorMessage = `La valeur minimale est ${input.min}`;
+          }
+          if (input.max && value > parseInt(input.max)) {
+            isValid = false;
+            errorMessage = `La valeur maximale est ${input.max}`;
+          }
+        }
+
+        // Update UI
+        input.classList.toggle("error", !isValid);
+        if (errorElement) {
+          errorElement.textContent = errorMessage;
+          errorElement.style.display = isValid ? "none" : "block";
+        }
+
+        return isValid;
+      }
+
+      // Create a base notification function that doesn't depend on other notification functions
+      function createNotification(message, type = "info") {
+        // Remove any existing notifications first
+        const existingNotifications =
+          document.querySelectorAll(".notification");
+        existingNotifications.forEach((notification) => notification.remove());
+
+        // Create new notification
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        // Add to document
+        document.body.appendChild(notification);
+
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 3000);
+      }
+
+      // Update showNotification to use the base function
+      function showNotification(message, type = "info") {
+        createNotification(message, type);
+      }
+
+      // Update showMessage to use the base function
+      function showMessage(message, type = "info") {
+        createNotification(message, type);
+      }
     </script>
-    
+
+    <!-- Include the admin section utils -->
+    <script src="js/admin-section-utils.js"></script>
     <!-- Include the timetable manager script -->
     <script src="js/timetable-manager.js"></script>
-</body>
+    <!-- Include the enhanced timetable viewer script -->
+    <script src="js/enhanced-timetable-viewer.js"></script>
+    <!-- Include the admin sections script -->
+    <script src="js/admin-sections.js"></script>
+    <!-- Include the section statistics script -->
+    <script src="js/section-statistics.js"></script>
+    <!-- Include the section analytics script -->
+    <script src="js/section-analytics.js"></script>
+    <!-- Include the improved renderSections function directly -->
+    <script src="js/sections-fix.js"></script>
+  </body>
 </html>

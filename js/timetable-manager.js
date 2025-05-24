@@ -3,403 +3,487 @@
  * Handles uploading and managing timetable documents for sections
  */
 
-// Use existing API_BASE_URL if it exists, otherwise set default
-var API_BASE_URL = window.API_BASE_URL || 'https://unicersityback.onrender.com/api';
+// We'll use the apiCall function from admin-auth.js instead of defining the API_BASE_URL here
 
 // Function to initialize the timetable upload functionality
 function initializeTimetableUpload() {
-    // Add event listeners to timetable upload buttons
-    document.addEventListener('click', function(event) {
-        // Check for upload timetable button clicks
-        if (event.target.closest('.upload-timetable-btn')) {
-            const button = event.target.closest('.upload-timetable-btn');
-            const sectionId = button.getAttribute('data-id');
-            const sectionName = button.getAttribute('data-name');
-            const specialty = button.getAttribute('data-specialty');
-            const level = button.getAttribute('data-level');
-            
-            openTimetableModal({
-                id: sectionId,
-                name: sectionName,
-                specialty: specialty,
-                level: level
-            }, 'regular');
-        }
-        
-        // Check for upload exam button clicks
-        if (event.target.closest('.upload-exam-btn')) {
-            const button = event.target.closest('.upload-exam-btn');
-            const sectionId = button.getAttribute('data-id');
-            const sectionName = button.getAttribute('data-name');
-            const specialty = button.getAttribute('data-specialty');
-            const level = button.getAttribute('data-level');
-            
-            openTimetableModal({
-                id: sectionId,
-                name: sectionName,
-                specialty: specialty,
-                level: level
-            }, 'exam');
-        }
-    });
-    
-    // Set up timetable modal event listeners
-    setupTimetableModalListeners();
+  // Add event listeners to timetable upload buttons
+  document.addEventListener("click", function (event) {
+    // Check for upload timetable button clicks
+    if (event.target.closest(".upload-timetable-btn")) {
+      const button = event.target.closest(".upload-timetable-btn");
+      const sectionId = button.getAttribute("data-id");
+      const sectionName = button.getAttribute("data-name");
+      const specialty = button.getAttribute("data-specialty");
+      const level = button.getAttribute("data-level");
+
+      openTimetableModal(
+        {
+          id: sectionId,
+          name: sectionName,
+          specialty: specialty,
+          level: level,
+        },
+        "regular"
+      );
+    }
+
+    // Check for upload exam button clicks
+    if (event.target.closest(".upload-exam-btn")) {
+      const button = event.target.closest(".upload-exam-btn");
+      const sectionId = button.getAttribute("data-id");
+      const sectionName = button.getAttribute("data-name");
+      const specialty = button.getAttribute("data-specialty");
+      const level = button.getAttribute("data-level");
+
+      openTimetableModal(
+        {
+          id: sectionId,
+          name: sectionName,
+          specialty: specialty,
+          level: level,
+        },
+        "exam"
+      );
+    }
+
+    // Check for view timetables button clicks
+    if (event.target.closest(".view-timetables-btn")) {
+      const button = event.target.closest(".view-timetables-btn");
+      const sectionId = button.getAttribute("data-id");
+      const sectionName = button.getAttribute("data-name");
+
+      openTimetableViewer(sectionId, sectionName);
+    }
+  });
+
+  // Set up timetable modal event listeners
+  setupTimetableModalListeners();
 }
 
 // Function to open the timetable upload modal
 function openTimetableModal(section, type) {
-    const timetableModal = document.getElementById('timetable-modal');
-    const timetableModalTitle = document.getElementById('timetable-modal-title');
-    const timetableSectionIdInput = document.getElementById('timetable-section-id');
-    const timetableTypeInput = document.getElementById('timetable-type');
-    const timetableTitleInput = document.getElementById('timetable-title');
-    const timetableAcademicYearInput = document.getElementById('timetable-academic-year');
-    
-    // Set modal title based on type
-    if (type === 'exam') {
-        timetableModalTitle.textContent = `Télécharger l'emploi des examens - Section ${section.name} (${section.level})`;
-        timetableTitleInput.value = `Emploi des examens - ${section.specialty} ${section.level} - Section ${section.name}`;
-    } else {
-        timetableModalTitle.textContent = `Télécharger l'emploi du temps - Section ${section.name} (${section.level})`;
-        timetableTitleInput.value = `Emploi du temps - ${section.specialty} ${section.level} - Section ${section.name}`;
-    }
-    
-    // Reset form and set default values
-    document.getElementById('timetable-form').reset();
-    timetableSectionIdInput.value = section.id;
-    timetableTypeInput.value = type;
-    timetableTitleInput.value = timetableTitleInput.value; // Re-apply the title we just set
-    
-    // Set academic year to current year
-    const currentYear = new Date().getFullYear();
-    timetableAcademicYearInput.value = `${currentYear}-${currentYear + 1}`;
-    
-    // Clear file selection
-    document.getElementById('timetable-file').value = '';
-    document.getElementById('selected-file').style.display = 'none';
-    
-    // Show modal
-    timetableModal.style.display = 'block';
+  const timetableModal = document.getElementById("timetable-modal");
+  const timetableModalTitle = document.getElementById("timetable-modal-title");
+  const timetableSectionIdInput = document.getElementById(
+    "timetable-section-id"
+  );
+  const timetableTypeInput = document.getElementById("timetable-type");
+  const timetableTitleInput = document.getElementById("timetable-title");
+  const timetableAcademicYearInput = document.getElementById(
+    "timetable-academic-year"
+  );
+
+  // Set modal title based on type
+  if (type === "exam") {
+    timetableModalTitle.textContent = `Télécharger l'emploi des examens - Section ${section.name} (${section.level})`;
+    timetableTitleInput.value = `Emploi des examens - ${section.specialty} ${section.level} - Section ${section.name}`;
+  } else {
+    timetableModalTitle.textContent = `Télécharger l'emploi du temps - Section ${section.name} (${section.level})`;
+    timetableTitleInput.value = `Emploi du temps - ${section.specialty} ${section.level} - Section ${section.name}`;
+  }
+
+  // Reset form and set default values
+  document.getElementById("timetable-form").reset();
+  timetableSectionIdInput.value = section.id;
+  timetableTypeInput.value = type;
+  timetableTitleInput.value = timetableTitleInput.value; // Re-apply the title we just set
+
+  // Set academic year to current year
+  const currentYear = new Date().getFullYear();
+  timetableAcademicYearInput.value = `${currentYear}-${currentYear + 1}`;
+
+  // Clear file selection
+  document.getElementById("timetable-file").value = "";
+  document.getElementById("selected-file").style.display = "none";
+
+  // Show modal
+  timetableModal.style.display = "block";
 }
 
 // Function to set up timetable modal event listeners
 function setupTimetableModalListeners() {
-    const timetableModal = document.getElementById('timetable-modal');
-    const timetableForm = document.getElementById('timetable-form');
-    const timetableFileInput = document.getElementById('timetable-file');
-    const fileUploadContainer = document.getElementById('file-upload-container');
-    const selectedFileContainer = document.getElementById('selected-file');
-    const selectedFileName = document.getElementById('selected-file-name');
-    const selectedFileRemove = document.getElementById('selected-file-remove');
-    
-    // Modal close buttons
-    document.getElementById('close-timetable-modal').addEventListener('click', () => {
-        timetableModal.style.display = 'none';
-    });
-    
-    document.getElementById('cancel-timetable-btn').addEventListener('click', () => {
-        timetableModal.style.display = 'none';
-    });
-    
-    // File upload handling
-    timetableFileInput.addEventListener('change', () => {
-        const file = timetableFileInput.files[0];
-        
-        if (file) {
-            selectedFileName.textContent = file.name;
-            selectedFileContainer.style.display = 'flex';
-        } else {
-            selectedFileContainer.style.display = 'none';
-        }
-    });
-    
-    selectedFileRemove.addEventListener('click', () => {
-        timetableFileInput.value = '';
-        selectedFileContainer.style.display = 'none';
-    });
-    
-    // Drag and drop for file upload
-    fileUploadContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        fileUploadContainer.classList.add('dragover');
-    });
-    
-    fileUploadContainer.addEventListener('dragleave', () => {
-        fileUploadContainer.classList.remove('dragover');
-    });
-    
-    fileUploadContainer.addEventListener('drop', (e) => {
-        e.preventDefault();
-        fileUploadContainer.classList.remove('dragover');
-        
-        if (e.dataTransfer.files.length) {
-            timetableFileInput.files = e.dataTransfer.files;
-            const file = timetableFileInput.files[0];
-            if (file) {
-                selectedFileName.textContent = file.name;
-                selectedFileContainer.style.display = 'flex';
-            }
-        }
-    });
-    
-    // Form submission
-    timetableForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        
-        const file = timetableFileInput.files[0];
-        
-        if (!file) {
-            showMessage('Veuillez sélectionner un fichier à télécharger.', 'error');
-            return;
-        }
-        
-        // Get authentication token
-        const authToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
-        if (!authToken) {
-            showMessage('Vous n\'êtes pas authentifié. Veuillez vous reconnecter.', 'error');
-            return;
-        }
-        
-        // Create FormData object
-        const formData = new FormData();
-        formData.append('document', file);
-        formData.append('title', document.getElementById('timetable-title').value);
-        formData.append('description', document.getElementById('timetable-description').value);
-        formData.append('scheduleType', document.getElementById('timetable-type').value);
-        formData.append('sectionId', document.getElementById('timetable-section-id').value);
-        formData.append('semester', document.getElementById('timetable-semester').value);
-        formData.append('academicYear', document.getElementById('timetable-academic-year').value);
-        
-        try {
-            showMessage('Téléchargement de l\'emploi du temps...', 'info');
-            
-            // Upload the file
-            const response = await fetch(`${API_BASE_URL}/schedules/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: formData
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            
-            // Close modal
-            timetableModal.style.display = 'none';
-            
-            showMessage('Emploi du temps téléchargé avec succès!', 'success');
-        } catch (error) {
-            console.error('Error uploading timetable:', error);
-            showMessage(`Erreur lors du téléchargement de l'emploi du temps: ${error.message}`, 'error');
-        }
-    });
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        if (event.target === timetableModal) {
-            timetableModal.style.display = 'none';
-        }
-    });
-}
+  const timetableModal = document.getElementById("timetable-modal");
+  const timetableForm = document.getElementById("timetable-form");
+  const timetableFileInput = document.getElementById("timetable-file");
+  const fileUploadContainer = document.getElementById("file-upload-container");
+  const selectedFileContainer = document.getElementById("selected-file");
+  const selectedFileName = document.getElementById("selected-file-name");
+  const selectedFileRemove = document.getElementById("selected-file-remove");
 
-// Function to view timetables for a section
-async function viewSectionTimetables(sectionId, sectionName) {
+  // Close modal when clicking outside or on close button
+  document.addEventListener("click", function (event) {
+    if (
+      event.target.classList.contains("modal") ||
+      event.target.classList.contains("close-modal")
+    ) {
+      timetableModal.style.display = "none";
+    }
+  });
+
+  // Handle file selection
+  timetableFileInput.addEventListener("change", function () {
+    if (timetableFileInput.files.length > 0) {
+      const file = timetableFileInput.files[0];
+      selectedFileName.textContent = file.name;
+      selectedFileContainer.style.display = "flex";
+    } else {
+      selectedFileContainer.style.display = "none";
+    }
+  });
+
+  // Handle remove file button
+  selectedFileRemove.addEventListener("click", function () {
+    timetableFileInput.value = "";
+    selectedFileContainer.style.display = "none";
+  });
+
+  // Handle file drag and drop
+  fileUploadContainer.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fileUploadContainer.classList.add("dragover");
+  });
+
+  fileUploadContainer.addEventListener("dragleave", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fileUploadContainer.classList.remove("dragover");
+  });
+
+  fileUploadContainer.addEventListener("drop", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fileUploadContainer.classList.remove("dragover");
+
+    if (e.dataTransfer.files.length > 0) {
+      timetableFileInput.files = e.dataTransfer.files;
+      const file = e.dataTransfer.files[0];
+      selectedFileName.textContent = file.name;
+      selectedFileContainer.style.display = "flex";
+    }
+  });
+
+  // Handle form submission
+  timetableForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    if (!timetableFileInput.files.length) {
+      showNotification("Veuillez sélectionner un fichier.", "error");
+      return;
+    }
+
+    const submitButton = timetableForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.innerHTML = "En cours...";
+
+    const formData = new FormData(timetableForm);
+
     try {
-        showMessage('Chargement des emplois du temps...', 'info');
-        
-        // Get authentication token
-        const authToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
-        if (!authToken) {
-            showMessage('Vous n\'êtes pas authentifié. Veuillez vous reconnecter.', 'error');
-            return;
+      const sectionId = document.getElementById("timetable-section-id").value;
+      const response = await fetch(
+        `${API_URL}/sections/schedules/${sectionId}/upload`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${getAuthToken()}`,
+          },
+          body: formData,
         }
-        
-        // Fetch regular timetables for the section
-        const response = await fetch(`${API_BASE_URL}/schedules/section/${sectionId}/type/regular`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        
-        const timetables = await response.json();
-        
-        // Fetch exam timetables for the section
-        const examResponse = await fetch(`${API_BASE_URL}/schedules/section/${sectionId}/type/exam`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-        
-        if (!examResponse.ok) {
-            throw new Error(`Error ${examResponse.status}: ${examResponse.statusText}`);
-        }
-        
-        const examTimetables = await examResponse.json();
-        
-        // Display the timetables in a modal
-        displayTimetablesModal(sectionName, timetables, examTimetables);
-        
-        showMessage('', 'clear');
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      showNotification(
+        "L'emploi du temps a été téléchargé avec succès!",
+        "success"
+      );
+      timetableModal.style.display = "none";
+
+      // Refresh the section list to update timetable status
+      if (typeof loadSections === "function") {
+        loadSections();
+      }
     } catch (error) {
-        console.error('Error loading timetables:', error);
-        showMessage(`Erreur lors du chargement des emplois du temps: ${error.message}`, 'error');
+      console.error("Error uploading timetable:", error);
+      showNotification(
+        "Une erreur s'est produite lors du téléchargement de l'emploi du temps.",
+        "error"
+      );
+    } finally {
+      submitButton.disabled = false;
+      submitButton.innerHTML = "Télécharger";
     }
+  });
 }
 
-// Function to display timetables in a modal
-function displayTimetablesModal(sectionName, regularTimetables, examTimetables) {
-    const modal = document.getElementById('view-timetables-modal');
-    const modalTitle = document.getElementById('view-timetables-modal-title');
-    const regularTimetablesList = document.getElementById('regular-timetables-list');
-    const examTimetablesList = document.getElementById('exam-timetables-list');
-    
-    // Set modal title
-    modalTitle.textContent = `Emplois du temps - Section ${sectionName}`;
-    
-    // Clear previous content
-    regularTimetablesList.innerHTML = '';
-    examTimetablesList.innerHTML = '';
-    
-    // Add regular timetables
-    if (regularTimetables && regularTimetables.length > 0) {
-        regularTimetables.forEach(timetable => {
-            const timetableItem = createTimetableItem(timetable);
-            regularTimetablesList.appendChild(timetableItem);
-        });
-    } else {
-        regularTimetablesList.innerHTML = '<div class="no-timetables">Aucun emploi du temps disponible</div>';
-    }
-    
-    // Add exam timetables
-    if (examTimetables && examTimetables.length > 0) {
-        examTimetables.forEach(timetable => {
-            const timetableItem = createTimetableItem(timetable);
-            examTimetablesList.appendChild(timetableItem);
-        });
-    } else {
-        examTimetablesList.innerHTML = '<div class="no-timetables">Aucun emploi des examens disponible</div>';
-    }
-    
-    // Set up tab switching
-    setupTabs();
-    
-    // Show modal
-    modal.style.display = 'block';
-    
-    // Add event listener to close modal button
-    document.getElementById('close-view-timetables-modal').addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-}
-
-// Function to create a timetable item for the list
-function createTimetableItem(timetable) {
-    const item = document.createElement('div');
-    item.className = 'timetable-item';
-    
-    const date = new Date(timetable.createdAt);
-    const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-    
-    item.innerHTML = `
-        <div class="timetable-info">
-            <div class="timetable-icon">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
-                    <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path>
-                </svg>
-            </div>
-            <div class="timetable-details">
-                <h3 class="timetable-title">${timetable.title}</h3>
-                <p class="timetable-description">${timetable.description || 'Aucune description'}</p>
-                <div class="timetable-meta">
-                    <span class="timetable-date">Ajouté le ${formattedDate}</span>
-                    <span class="timetable-semester">${timetable.semester || ''}</span>
-                    <span class="timetable-academic-year">${timetable.academicYear || ''}</span>
-                </div>
-            </div>
+// Function to open the timetable viewer
+async function openTimetableViewer(sectionId, sectionName) {
+  // Create or get timetable viewer modal
+  let timetableViewerModal = document.getElementById("timetable-viewer-modal");
+  if (!timetableViewerModal) {
+    // Create the modal if it doesn't exist
+    timetableViewerModal = document.createElement("div");
+    timetableViewerModal.id = "timetable-viewer-modal";
+    timetableViewerModal.className = "modal";
+    timetableViewerModal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="timetable-viewer-title">Emplois du temps - Section</h2>
+          <span class="close-modal">&times;</span>
         </div>
-        <div class="timetable-actions">
-            <a href="${API_BASE_URL}/schedules/${timetable.id}/document" target="_blank" class="timetable-download-btn" title="Télécharger">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-            </a>
+        <div class="modal-body">
+          <div class="timetable-viewer-tabs">
+            <button class="timetable-tab active" data-tab="regular">
+              <span class="material-icons">calendar_today</span>
+              Emplois du temps
+            </button>
+            <button class="timetable-tab" data-tab="exam">
+              <span class="material-icons">event_note</span>
+              Emplois des examens
+            </button>
+          </div>
+          <div class="timetable-content-container" id="timetable-list-container">
+            <div class="loading-spinner">Chargement...</div>
+          </div>
         </div>
+      </div>
     `;
-    
-    return item;
-}
+    document.body.appendChild(timetableViewerModal);
 
-// Function to setup tabs in the view timetables modal
-function setupTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove active class from all buttons and contents
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked button and corresponding content
-            button.classList.add('active');
-            const tabId = button.dataset.tab;
-            document.getElementById(tabId).classList.add('active');
-        });
+    // Add event listeners for tabs
+    const tabs = timetableViewerModal.querySelectorAll(".timetable-tab");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", function () {
+        tabs.forEach((t) => t.classList.remove("active"));
+        this.classList.add("active");
+        const type = this.getAttribute("data-tab");
+        loadTimetablesForSection(sectionId, type);
+      });
     });
+
+    // Add event listener to close the modal
+    timetableViewerModal
+      .querySelector(".close-modal")
+      .addEventListener("click", function () {
+        timetableViewerModal.style.display = "none";
+      });
+
+    // Close when clicking outside modal
+    timetableViewerModal.addEventListener("click", function (event) {
+      if (event.target === timetableViewerModal) {
+        timetableViewerModal.style.display = "none";
+      }
+    });
+  }
+
+  // Update the modal title
+  document.getElementById(
+    "timetable-viewer-title"
+  ).textContent = `Emplois du temps - Section ${sectionName}`;
+
+  // Show the modal
+  timetableViewerModal.style.display = "block";
+
+  // Load timetables for the section (default to regular)
+  loadTimetablesForSection(sectionId, "regular");
 }
 
-// Function to show status messages
-function showMessage(message, type = 'info') {
-    const statusMessage = document.getElementById('status-message');
-    
-    if (type === 'clear') {
-        statusMessage.style.display = 'none';
-        return;
+// Function to load timetables for a section by type
+async function loadTimetablesForSection(sectionId, type) {
+  const container = document.getElementById("timetable-list-container");
+  container.innerHTML =
+    '<div class="loading-spinner">Chargement des emplois du temps...</div>';
+
+  try {
+    // Use the section API if available, otherwise fallback to direct API call
+    let timetables;
+    if (window.sectionAPI && window.sectionAPI.getSectionSchedules) {
+      timetables = await window.sectionAPI.getSectionSchedules(sectionId, type);
+    } else {
+      // Fallback to using apiCall function from admin-auth.js
+      timetables = await apiCall(
+        `sections/schedules/${sectionId}?type=${type}`
+      );
     }
-    
-    statusMessage.textContent = message;
-    statusMessage.className = 'status-message';
-    
-    switch (type) {
-        case 'success':
-            statusMessage.classList.add('success');
-            break;
-        case 'error':
-            statusMessage.classList.add('error');
-            break;
-        case 'warning':
-            statusMessage.classList.add('warning');
-            break;
-        default:
-            statusMessage.classList.add('info');
+
+    if (!timetables || timetables.length === 0) {
+      container.innerHTML = `
+        <div class="no-timetables">
+          <div class="empty-state-icon">
+            <span class="material-icons">calendar_today</span>
+          </div>
+          <p>Aucun emploi du temps disponible pour cette section.</p>
+        </div>
+      `;
+      return;
     }
-    
-    statusMessage.style.display = 'block';
-    
-    // Auto-hide success messages after 5 seconds
-    if (type === 'success') {
-        setTimeout(() => {
-            statusMessage.style.display = 'none';
-        }, 5000);
-    }
+
+    // Sort timetables by creation date (newest first)
+    timetables.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Render timetable list
+    let html = `<div class="timetable-list">`;
+
+    timetables.forEach((timetable) => {
+      const createdDate = new Date(timetable.createdAt).toLocaleDateString(
+        "fr-FR"
+      );
+      const createdTime = new Date(timetable.createdAt).toLocaleTimeString(
+        "fr-FR"
+      );
+
+      html += `
+        <div class="timetable-item">
+          <div class="timetable-info">
+            <div class="timetable-title">${
+              timetable.title || "Emploi du temps sans titre"
+            }</div>
+            <div class="timetable-meta">
+              <span class="timetable-date">Téléchargé le ${createdDate} à ${createdTime}</span>
+              <span class="timetable-academic-year">${
+                timetable.academicYear || ""
+              }</span>
+            </div>
+          </div>
+          <div class="timetable-actions">
+            <button class="btn btn-sm btn-outline view-document-btn" data-url="${
+              timetable.documentUrl
+            }" title="Voir le document">
+              <span class="material-icons">visibility</span>
+            </button>
+            <button class="btn btn-sm btn-outline download-document-btn" data-url="${
+              timetable.documentUrl
+            }" title="Télécharger">
+              <span class="material-icons">download</span>
+            </button>
+            <button class="btn btn-sm btn-outline delete-timetable-btn" data-id="${
+              timetable.id
+            }" data-section-id="${sectionId}" title="Supprimer">
+              <span class="material-icons">delete</span>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+
+    // Add event listeners for document actions
+    container.querySelectorAll(".view-document-btn").forEach((button) => {
+      button.addEventListener("click", function () {
+        const url = this.getAttribute("data-url");
+        window.open(url, "_blank");
+      });
+    });
+
+    container.querySelectorAll(".download-document-btn").forEach((button) => {
+      button.addEventListener("click", function () {
+        const url = this.getAttribute("data-url");
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    });
+
+    container.querySelectorAll(".delete-timetable-btn").forEach((button) => {
+      button.addEventListener("click", function () {
+        if (confirm("Voulez-vous vraiment supprimer cet emploi du temps ?")) {
+          const timetableId = this.getAttribute("data-id");
+          const sectionId = this.getAttribute("data-section-id");
+          deleteTimetable(sectionId, timetableId);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Error loading timetables:", error);
+    container.innerHTML = `
+      <div class="error-message">
+        <span class="material-icons">error</span>
+        Une erreur s'est produite lors du chargement des emplois du temps.
+      </div>
+    `;
+  }
 }
 
-// Initialize the timetable functionality when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeTimetableUpload);
+// Function to delete a timetable
+async function deleteTimetable(sectionId, timetableId) {
+  try {
+    const response = await fetch(
+      `${API_URL}/sections/schedules/${sectionId}/${timetableId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    // Reload the current tab
+    const activeTab = document.querySelector(".timetable-tab.active");
+    if (activeTab) {
+      const type = activeTab.getAttribute("data-tab");
+      loadTimetablesForSection(sectionId, type);
+    }
+
+    showNotification(
+      "L'emploi du temps a été supprimé avec succès.",
+      "success"
+    );
+  } catch (error) {
+    console.error("Error deleting timetable:", error);
+    showNotification(
+      "Une erreur s'est produite lors de la suppression de l'emploi du temps.",
+      "error"
+    );
+  }
+}
+
+// Function to get schedule statistics for a section
+async function getScheduleStatistics(sectionId) {
+  try {
+    // Use the section API if available
+    if (window.sectionAPI && window.sectionAPI.getSectionScheduleStatistics) {
+      return await window.sectionAPI.getSectionScheduleStatistics(sectionId);
+    }
+
+    // Fallback to direct API call
+    const response = await fetch(
+      `${API_URL}/sections/schedules/${sectionId}/stats`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error getting schedule statistics:", error);
+    throw error;
+  }
+}
+
+// Initialize when the document is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  initializeTimetableUpload();
+});

@@ -1,817 +1,770 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Demandes de Changement de Section - Administration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;700&display=swap" rel="stylesheet">
-    <link href="style/admin.css" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="style/admin.css" rel="stylesheet" />
+    <link href="style/section-statistics.css" rel="stylesheet" />
+    <!-- Add reference to admin auth helper -->    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-pages-validation.js"></script>
+    <script src="js/admin-mocks.js"></script>
+    <script src="js/admin-api-utils.js"></script>
+    <script src="js/admin-api-fetchers.js"></script>
+    <script src="js/admin-api-loader.js"></script>
+    <script src="js/admin-demandes-section.js"></script>
+    <script src="js/section-statistics.js"></script>
+    <!-- Chart.js for statistics visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Added reference to our new script -->
     <style>
-        .student-info {
-            display: flex;
-            align-items: center;
-        }
-        
-        .student-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            margin-right: 10px;
-        }
-        
-        .student-details span {
-            display: block;
-        }
-        
-        .student-name {
-            font-weight: 600;
-        }
-        
-        .student-matricule {
-            color: var(--gray-color);
-            font-size: 0.85rem;
-        }
-        
-        .section-badge {
-            display: inline-flex;
-            align-items: center;
-            background-color: #f0f4ff;
-            color: #3b82f6;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            gap: 0.25rem;
-        }
-        
-        .section-badge svg {
-            width: 12px;
-            height: 12px;
-        }
-        
-        .section-change-arrow {
-            color: var(--gray-color);
-            margin: 0 0.5rem;
-        }
-        
-        .section-change-container {
-            display: flex;
-            align-items: center;
-        }
-        
-        .request-details {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            font-size: 0.875rem;
-        }
-        
-        .request-details h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            color: var(--dark-color);
-        }
-        
-        .request-details p {
-            margin-bottom: 0.5rem;
-            color: var(--gray-color);
-        }
-        
-        .request-details-label {
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-        
-        .notes-field {
-            min-height: 100px;
-            resize: vertical;
-        }
+      .student-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 10px;
+      }
+
+      .student-details span {
+        display: block;
+      }
+
+      .student-name {
+        font-weight: 600;
+      }
+
+      .student-matricule {
+        color: var(--gray-color);
+        font-size: 0.85rem;
+      }
+
+      .section-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: #f0f4ff;
+        color: #3b82f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        gap: 0.25rem;
+      }
+
+      .section-badge svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .section-change-arrow {
+        color: var(--gray-color);
+        margin: 0 0.5rem;
+      }
+
+      .section-change-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .request-details {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        font-size: 0.875rem;
+      }
+
+      .request-details h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        color: var(--dark-color);
+      }
+
+      .request-details p {
+        margin-bottom: 0.5rem;
+        color: var(--gray-color);
+      }
+
+      .request-details-label {
+        font-weight: 600;
+        color: var(--dark-color);
+      }
+
+      .notes-field {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .request-status {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .status-pending {
+        background-color: #fef3c7;
+        color: #d97706;
+      }
+
+      .status-approved {
+        background-color: #d1fae5;
+        color: #059669;
+      }
+
+      .status-rejected {
+        background-color: #fee2e2;
+        color: #dc2626;
+      }
+
+      .document-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        text-decoration: none;
+        margin-top: 0.5rem;
+      }
+
+      .document-link:hover {
+        text-decoration: underline;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-        <!-- Sidebar - will be loaded via JavaScript -->
-        <div id="sidebar-container"></div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">Demandes de Changement de Section</h1>
-            </div>
-            
-            <div class="content-container">
-                <!-- Status Messages -->
-                <div id="status-message" class="status-message" style="display: none;"></div>
-                
-                <!-- Dashboard Cards -->
-                <div class="cards-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">Total des demandes</div>
-                            <div class="stat-card-icon icon-purple">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="3" y1="9" x2="21" y2="9"></line>
-                                    <line x1="9" y1="21" x2="9" y2="9"></line>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-card-value" id="total-requests">--</div>
-                        <div class="stat-card-description">Toutes les demandes</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">En attente</div>
-                            <div class="stat-card-icon icon-yellow">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-card-value" id="pending-requests">--</div>
-                        <div class="stat-card-description">Demandes non traitées</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">Approuvées</div>
-                            <div class="stat-card-icon icon-green">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-card-value" id="approved-requests">--</div>
-                        <div class="stat-card-description">Demandes acceptées</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">Rejetées</div>
-                            <div class="stat-card-icon icon-red">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="15" y1="9" x2="9" y2="15"></line>
-                                    <line x1="9" y1="9" x2="15" y2="15"></line>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-card-value" id="rejected-requests">--</div>
-                        <div class="stat-card-description">Demandes refusées</div>
-                    </div>
-                </div>
-                
-                <!-- Filters -->
-                <div class="filters">
-                    <div class="filter-group">
-                        <label for="status-filter">Statut:</label>
-                        <select id="status-filter" class="filter-select">
-                            <option value="all">Tous</option>
-                            <option value="pending" selected>En attente</option>
-                            <option value="approved">Approuvées</option>
-                            <option value="rejected">Rejetées</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label for="search">Recherche:</label>
-                        <input type="text" id="search" class="filter-input" placeholder="Nom, matricule...">
-                    </div>
-                </div>
-                
-                <!-- Requests Table -->
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Étudiant</th>
-                                <th>Section actuelle</th>
-                                <th>Section demandée</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requests-table-body">
-                            <!-- Requests will be loaded here -->
-                            <tr class="loading-row">
-                                <td colspan="6">Chargement des demandes...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Pagination -->
-                <div class="pagination" id="pagination">
-                    <!-- Pagination will be added here -->
-                </div>
-            </div>
+      <!-- Sidebar - will be loaded via JavaScript -->
+      <div id="sidebar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Demandes de Changement de Section</h1>
         </div>
+
+        <div class="content-container">
+          <!-- Status Messages -->
+          <div
+            id="status-message"
+            class="status-message"
+            style="display: none"
+          ></div>
+
+          <!-- Dashboard Cards -->
+          <div class="cards-grid">
+            <!-- Total Requests Card -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <svg
+                  class="stat-card-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
+              <div class="stat-card-value" id="total-requests">--</div>
+              <div class="stat-card-description">Toutes les demandes</div>
+            </div>
+
+            <!-- Pending Requests Card -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <svg
+                  class="stat-card-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+              <div class="stat-card-value" id="pending-requests">--</div>
+              <div class="stat-card-description">En attente</div>
+            </div>
+
+            <!-- Approved Requests Card -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <svg
+                  class="stat-card-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+              <div class="stat-card-value" id="approved-requests">--</div>
+              <div class="stat-card-description">Approuvées</div>
+            </div>
+
+            <!-- Rejected Requests Card -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <svg
+                  class="stat-card-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+              </div>
+              <div class="stat-card-value" id="rejected-requests">--</div>
+              <div class="stat-card-description">Rejetées</div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filters">
+            <div class="filter-item">
+              <label for="status-filter">Statut</label>
+              <select id="status-filter" class="filter-select">
+                <option value="all">Tous</option>
+                <option value="pending">En attente</option>
+                <option value="approved">Approuvée</option>
+                <option value="rejected">Rejetée</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label for="search">Recherche</label>
+              <input
+                type="text"
+                id="search"
+                class="filter-input"
+                placeholder="Nom, matricule..."
+              />
+            </div>
+          </div>
+
+          <!-- Requests Table -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Étudiant</th>
+                  <th>Section Actuelle</th>
+                  <th>Section Demandée</th>
+                  <th>Date de Demande</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="requests-table-body">
+                <tr>
+                  <td colspan="6" class="text-center">
+                    Chargement des demandes...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" id="pagination">
+            <!-- Pagination will be generated here -->
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Request Details Modal -->
     <div id="request-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>Détails de la demande</h2>
-            
-            <div class="request-details">
-                <div class="student-info">
-                    <div id="student-avatar" class="student-avatar">--</div>
-                    <div>
-                        <h3 id="student-name">Nom de l'étudiant</h3>
-                        <p id="student-matricule">Matricule: --</p>
-                        <p id="student-email">Email: --</p>
-                    </div>
-                </div>
-                
-                <div class="request-info">
-                    <div class="info-row">
-                        <div class="info-label">Date de la demande:</div>
-                        <div id="request-date" class="info-value">--</div>
-                    </div>
-                    
-                    <div class="info-row">
-                        <div class="info-label">Statut:</div>
-                        <div id="request-status" class="info-value">--</div>
-                    </div>
-                </div>
-                
-                <div class="section-change">
-                    <h3>Changement demandé</h3>
-                    <div class="section-change-container">
-                        <div>
-                            <div class="change-label">Section actuelle:</div>
-                            <div id="current-section" class="change-value">--</div>
-                        </div>
-                        
-                        <div class="section-change-arrow">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor">
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                <polyline points="12 5 19 12 12 19"></polyline>
-                            </svg>
-                        </div>
-                        
-                        <div>
-                            <div class="change-label">Section demandée:</div>
-                            <div id="requested-section" class="change-value">--</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="request-reason">
-                    <h3>Justification</h3>
-                    <p id="request-reason-text">--</p>
-                </div>
-                
-                <div id="admin-response-container" class="admin-response" style="display: none;">
-                    <h3>Réponse de l'administration</h3>
-                    <p id="admin-response-text">--</p>
-                </div>
-                
-                <div id="action-buttons" class="action-buttons">
-                    <div class="form-group">
-                        <label for="admin-comment">Commentaire (optionnel):</label>
-                        <textarea id="admin-comment" class="notes-field" placeholder="Ajouter un commentaire..."></textarea>
-                    </div>
-                    <button id="approve-btn" class="btn btn-success">Approuver</button>
-                    <button id="reject-btn" class="btn btn-danger">Rejeter</button>
-                </div>
-            </div>
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2 class="modal-title">Détails de la Demande</h2>
+
+        <div class="student-info">
+          <div id="student-avatar" class="student-avatar">EA</div>
+          <div class="student-details">
+            <span id="student-name" class="student-name">Etudiant</span>
+            <span id="student-matricule" class="student-matricule"
+              >MAT123456</span
+            >
+          </div>
         </div>
+
+        <div class="details-container" style="margin-top: 1.5rem">
+          <div class="detail-row">
+            <div class="detail-label">Email:</div>
+            <div id="student-email" class="detail-value">
+              etudiant@example.com
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">Date de Demande:</div>
+            <div id="request-date" class="detail-value">01/01/2023</div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">Statut:</div>
+            <div
+              id="request-status"
+              class="detail-value request-status status-pending"
+            >
+              En attente
+            </div>
+          </div>
+
+          <div class="section-change-container" style="margin: 1.5rem 0">
+            <div>
+              <div class="detail-label">Section Actuelle:</div>
+              <div id="current-section" class="section-badge">Section A</div>
+            </div>
+
+            <div class="section-change-arrow">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </div>
+
+            <div>
+              <div class="detail-label">Section Demandée:</div>
+              <div id="requested-section" class="section-badge">Section B</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="request-details">
+          <h3>Justification</h3>
+          <p id="request-reason-text">
+            La raison de demande sera affichée ici.
+          </p>
+
+          <div id="document-container" style="margin-top: 1rem; display: none">
+            <h3>Document Justificatif</h3>
+            <a
+              id="document-link"
+              href="#"
+              class="document-link"
+              target="_blank"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span id="document-name">document.pdf</span>
+            </a>
+          </div>
+        </div>
+
+        <div
+          id="admin-response-container"
+          class="request-details"
+          style="display: none"
+        >
+          <h3>Réponse Administrative</h3>
+          <p id="admin-response-text"></p>
+        </div>
+
+        <div
+          id="action-buttons"
+          class="modal-actions"
+          style="margin-top: 1.5rem"
+        >
+          <textarea
+            id="admin-comment"
+            class="notes-field"
+            placeholder="Ajouter un commentaire (optionnel)"
+          ></textarea>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem">
+            <button id="approve-btn" class="btn btn-success">
+              Approuver la demande
+            </button>
+            <button id="reject-btn" class="btn btn-danger">
+              Rejeter la demande
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <script>
-        // Global variables
-        const API_BASE_URL = 'https://unicersityback.onrender.com/api';
-        let authToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
-        let adminRole = localStorage.getItem('admin_role') || sessionStorage.getItem('admin_role');
-        let allRequests = [];
-        let filteredRequests = [];
-        let currentPage = 1;
-        let itemsPerPage = 10;
-        let currentRequest = null;
-        
-        // DOM Elements
-        const statusMessage = document.getElementById('status-message');
-        const requestsTableBody = document.getElementById('requests-table-body');
-        const paginationElement = document.getElementById('pagination');
-        const statusFilter = document.getElementById('status-filter');
-        const searchInput = document.getElementById('search');
-        
-        // Stats elements
-        const totalRequestsEl = document.getElementById('total-requests');
-        const pendingRequestsEl = document.getElementById('pending-requests');
-        const approvedRequestsEl = document.getElementById('approved-requests');
-        const rejectedRequestsEl = document.getElementById('rejected-requests');
-        
-        // Modal elements
-        const requestModal = document.getElementById('request-modal');
-        const closeModalBtn = document.querySelector('.close-modal');
-        const studentAvatar = document.getElementById('student-avatar');
-        const studentName = document.getElementById('student-name');
-        const studentMatricule = document.getElementById('student-matricule');
-        const studentEmail = document.getElementById('student-email');
-        const requestDate = document.getElementById('request-date');
-        const requestStatus = document.getElementById('request-status');
-        const currentSection = document.getElementById('current-section');
-        const requestedSection = document.getElementById('requested-section');
-        const requestReasonText = document.getElementById('request-reason-text');
-        const adminResponseContainer = document.getElementById('admin-response-container');
-        const adminResponseText = document.getElementById('admin-response-text');
-        const actionButtons = document.getElementById('action-buttons');
-        const adminComment = document.getElementById('admin-comment');
-        const approveBtn = document.getElementById('approve-btn');
-        const rejectBtn = document.getElementById('reject-btn');
-        
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', async function() {
-            try {
-                // Verify authentication
-                if (!authToken || !adminRole) {
-                    window.location.href = 'admin-login.html';
-                    return;
-                }
-                
-                // Load the sidebar
-                await loadSidebar();
-                
-                // Load requests data
-                await loadRequests();
-                
-                // Setup event listeners
-                setupEventListeners();
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showMessage('Une erreur est survenue lors de l\'initialisation de la page.', 'error');
-            }
+      // Global variables
+      let allRequests = [];
+      // Using existing filteredRequests from admin-demandes-section.js
+      let currentPage = 1;
+      let itemsPerPage = 10;
+      let currentRequest = null;
+      let authToken =
+        sessionStorage.getItem("admin_token") ||
+        localStorage.getItem("admin_token");
+      let adminRole =
+        sessionStorage.getItem("admin_role") ||
+        localStorage.getItem("admin_role");
+
+      // DOM Elements
+      const statusMessage = document.getElementById("status-message");
+      const requestsTableBody = document.getElementById("requests-table-body");
+      const paginationElement = document.getElementById("pagination");
+      const statusFilter = document.getElementById("status-filter");
+      // Stats elements
+      const totalRequestsEl = document.getElementById("total-requests");
+      const pendingRequestsEl = document.getElementById("pending-requests");
+      const approvedRequestsEl = document.getElementById("approved-requests");
+      const rejectedRequestsEl = document.getElementById("rejected-requests");
+
+      // Modal elements
+      const requestModal = document.getElementById("request-modal");
+      const closeModalBtn = document.querySelector(".close-modal");
+      const studentAvatar = document.getElementById("student-avatar");
+      const studentName = document.getElementById("student-name");
+      const studentMatricule = document.getElementById("student-matricule");
+      const studentEmail = document.getElementById("student-email");
+      const requestDate = document.getElementById("request-date");
+      const requestStatus = document.getElementById("request-status");
+      const currentSection = document.getElementById("current-section");
+      const requestedSection = document.getElementById("requested-section");
+      const requestReasonText = document.getElementById("request-reason-text");
+      const documentContainer = document.getElementById("document-container");
+
+      // Event listeners
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          // Verify admin token first
+          await verifyAdminToken();
+
+          // Load sidebar and data
+          await loadSidebar();
+          await loadRequests();
+          setupEventListeners();
+          updateStats(); // Initial stats calculation
+        } catch (error) {
+          console.error("Error initializing page:", error);
+          showMessage("Erreur lors du chargement de la page", "error");
+        }
+      });
+      async function loadRequests() {
+        if (!requestsTableBody) {
+          console.error("requestsTableBody element not found.");
+          if (statusMessage)
+            statusMessage.textContent = "Erreur: Table non trouvée.";
+          return;
+        }
+        requestsTableBody.innerHTML =
+          '<tr><td colspan="6" class="loading">Chargement des demandes...</td></tr>';
+        try {          // Use the fetchSectionChangeRequests from admin-api-fetchers.js
+          const data = await fetchSectionChangeRequests();
+          // Make sure to extract the requests array properly based on API response
+          allRequests = Array.isArray(data.requests) ? data.requests :
+                      (Array.isArray(data) ? data : []);
+          // Create a copy for filtered requests
+          filteredRequests = [...allRequests];
+          if (allRequests.length === 0) {
+            requestsTableBody.innerHTML =
+              '<tr><td colspan="6" class="no-data">Aucune demande de changement de section trouvée.</td></tr>';
+          } else {
+            renderTable();
+          }
+          updateStats();
+        } catch (error) {
+          console.error("Error loading requests:", error);
+          requestsTableBody.innerHTML = `<tr><td colspan="6" class="status-message error">Erreur de chargement des demandes: ${
+            error.message || "Veuillez réessayer."
+          }</td></tr>`;
+          if (statusMessage)
+            showMessage(`Erreur de chargement: ${error.message}`, "error");
+        }
+      }
+
+      function setupEventListeners() {
+        if (statusFilter) {
+          statusFilter.addEventListener("change", () => {
+            filterAndRender();
+          });
+        }
+        if (closeModalBtn) {
+          closeModalBtn.addEventListener("click", closeModal);
+        }
+        window.addEventListener("click", (event) => {
+          if (event.target === requestModal) {
+            closeModal();
+          }
         });
-        
-        async function loadSidebar() {
-            try {
-                // Load the sidebar HTML
-                const response = await fetch('admin-sidebar.html');
-                const html = await response.text();
-                
-                // Insert the sidebar HTML into the container
-                document.getElementById('sidebar-container').innerHTML = html;
-            } catch (error) {
-                console.error('Error loading sidebar:', error);
-                showMessage('Impossible de charger la barre latérale.', 'error');
-            }
+        // Add other listeners like search if a search input is added
+      }
+
+      function filterAndRender() {
+        const status = statusFilter ? statusFilter.value : "all";
+        // Add search filter logic if a search input exists
+        // const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+
+        filteredRequests = allRequests.filter((request) => {
+          const matchesStatus = status === "all" || request.status === status;
+          // const matchesSearch = searchTerm === "" ||
+          //                       request.student?.name?.toLowerCase().includes(searchTerm) ||
+          //                       request.student?.matricule?.toLowerCase().includes(searchTerm) ||
+          //                       request.currentSection?.name?.toLowerCase().includes(searchTerm) ||
+          //                       request.requestedSection?.name?.toLowerCase().includes(searchTerm);
+          // return matchesStatus && matchesSearch;
+          return matchesStatus;
+        });
+        currentPage = 1;
+        renderTable();
+        updateStats();
+      }
+
+      function renderTable() {
+        if (!requestsTableBody) return;
+        requestsTableBody.innerHTML = ""; // Clear previous rows
+
+        if (filteredRequests.length === 0) {
+          requestsTableBody.innerHTML =
+            '<tr><td colspan="6" class="no-data">Aucune demande ne correspond aux filtres.</td></tr>';
+          updatePagination();
+          return;
         }
-        
-        async function loadRequests() {
-            try {
-                showMessage('Chargement des demandes...', 'info');
-                
-                // Fetch section change requests from API
-                const response = await fetch(`${API_BASE_URL}/change-requests`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-                
-                allRequests = await response.json();
-                
-                // Update statistics
-                updateStats();
-                
-                // Apply initial filtering based on status filter (default: pending)
-                filterRequests();
-                
-                showMessage('', 'clear');
-            } catch (error) {
-                console.error('Error loading requests:', error);
-                showMessage('Erreur lors du chargement des demandes. Veuillez réessayer.', 'error');
-                requestsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="error-message">
-                            Impossible de charger les demandes. 
-                            <button class="retry-btn" onclick="loadRequests()">Réessayer</button>
-                        </td>
-                    </tr>
-                `;
-            }
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedRequests = filteredRequests.slice(startIndex, endIndex);
+
+        paginatedRequests.forEach((request) => {
+          const row = document.createElement("tr");
+          // Adjust according to the actual data structure from your backend
+          row.innerHTML = `
+            <td>
+              <div class="student-info">
+                <img src="${
+                  request.student?.avatar || "placeholder_avatar.png"
+                }" alt="Avatar" class="student-avatar">
+                <div class="student-details">
+                  <span class="student-name">${
+                    request.student?.name || "N/A"
+                  }</span>
+                  <span class="student-matricule">Mat: ${
+                    request.student?.matricule || "N/A"
+                  }</span>
+                </div>
+              </div>
+            </td>
+            <td><span class="section-badge">${
+              request.currentSection?.name || "N/A"
+            }</span></td>
+            <td><span class="section-badge">${
+              request.requestedSection?.name || "N/A"
+            }</span></td>
+            <td>${new Date(request.dateSubmitted).toLocaleDateString()}</td>
+            <td><span class="request-status status-${
+              request.status?.toLowerCase() || "pending"
+            }">${request.status || "En attente"}</span></td>
+            <td>
+              <button class="btn btn-primary btn-sm" onclick="openModal('${
+                request.id
+              }')">Détails</button>
+              <!-- Add approve/reject buttons if direct actions are needed here -->
+            </td>
+          `;
+          requestsTableBody.appendChild(row);
+        });
+        updatePagination();
+      }
+
+      function updatePagination() {
+        if (!paginationElement) return;
+        paginationElement.innerHTML = "";
+        const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+
+        if (totalPages <= 1) return;
+
+        for (let i = 1; i <= totalPages; i++) {
+          const button = document.createElement("button");
+          button.textContent = i;
+          button.classList.add("pagination-btn");
+          if (i === currentPage) {
+            button.classList.add("active");
+          }
+          button.addEventListener("click", () => {
+            currentPage = i;
+            renderTable();
+          });
+          paginationElement.appendChild(button);
         }
-        
-        function updateStats() {
-            // Count requests by status
-            let pendingCount = 0;
-            let approvedCount = 0;
-            let rejectedCount = 0;
-            
-            allRequests.forEach(request => {
-                if (request.status === 'pending') pendingCount++;
-                else if (request.status === 'approved') approvedCount++;
-                else if (request.status === 'rejected') rejectedCount++;
+      }
+
+      function updateStats() {
+        if (totalRequestsEl) totalRequestsEl.textContent = allRequests.length;
+        if (pendingRequestsEl)
+          pendingRequestsEl.textContent = allRequests.filter(
+            (r) => r.status === "pending"
+          ).length;
+        if (approvedRequestsEl)
+          approvedRequestsEl.textContent = allRequests.filter(
+            (r) => r.status === "approved"
+          ).length;
+        if (rejectedRequestsEl)
+          rejectedRequestsEl.textContent = allRequests.filter(
+            (r) => r.status === "rejected"
+          ).length;
+        // Potentially update charts if they are present and configured
+      }
+
+      async function openModal(requestId) {
+        currentRequest = allRequests.find((r) => r.id === requestId);
+        if (!currentRequest || !requestModal) return;
+
+        // Populate modal fields - adjust selectors and properties based on your modal HTML and data
+        if (studentAvatar)
+          studentAvatar.src =
+            currentRequest.student?.avatar || "placeholder_avatar.png";
+        if (studentName)
+          studentName.textContent = currentRequest.student?.name || "N/A";
+        if (studentMatricule)
+          studentMatricule.textContent = `Matricule: ${
+            currentRequest.student?.matricule || "N/A"
+          }`;
+        if (studentEmail)
+          studentEmail.textContent = `Email: ${
+            currentRequest.student?.email || "N/A"
+          }`;
+        if (requestDate)
+          requestDate.textContent = `Soumis le: ${new Date(
+            currentRequest.dateSubmitted
+          ).toLocaleString()}`;
+        if (requestStatus) {
+          requestStatus.textContent = currentRequest.status || "En attente";
+          requestStatus.className = `request-status status-${
+            currentRequest.status?.toLowerCase() || "pending"
+          }`;
+        }
+        if (currentSection)
+          currentSection.textContent =
+            currentRequest.currentSection?.name || "N/A";
+        if (requestedSection)
+          requestedSection.textContent =
+            currentRequest.requestedSection?.name || "N/A";
+        if (requestReasonText)
+          requestReasonText.textContent =
+            currentRequest.reason || "Aucune raison fournie.";
+
+        if (documentContainer) {
+          documentContainer.innerHTML = ""; // Clear previous documents
+          if (currentRequest.documents && currentRequest.documents.length > 0) {
+            currentRequest.documents.forEach((doc) => {
+              const docLink = document.createElement("a");
+              docLink.href = doc.url; // Assuming doc object has url and name
+              docLink.textContent = doc.name || "Document justificatif";
+              docLink.className = "document-link";
+              docLink.target = "_blank";
+              documentContainer.appendChild(docLink);
             });
-            
-            // Update UI
-            totalRequestsEl.textContent = allRequests.length;
-            pendingRequestsEl.textContent = pendingCount;
-            approvedRequestsEl.textContent = approvedCount;
-            rejectedRequestsEl.textContent = rejectedCount;
+          } else {
+            documentContainer.innerHTML =
+              "<p>Aucun document justificatif fourni.</p>";
+          }
         }
-        
-        function setupEventListeners() {
-            // Filter changes
-            statusFilter.addEventListener('change', () => filterRequests());
-            searchInput.addEventListener('input', () => filterRequests());
-            
-            // Close modal button
-            closeModalBtn.addEventListener('click', closeModal);
-            
-            // Approve and Reject buttons
-            approveBtn.addEventListener('click', () => handleRequestAction('approved'));
-            rejectBtn.addEventListener('click', () => handleRequestAction('rejected'));
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === requestModal) {
-                    closeModal();
-                }
-            });
+
+        // Add logic for approve/reject buttons within the modal if they exist
+        // e.g., const approveBtn = document.getElementById('approve-request-btn');
+        // approveBtn.onclick = () => handleUpdateRequest(currentRequest.id, 'approved');
+
+        requestModal.style.display = "block";
+      }
+
+      function closeModal() {
+        if (requestModal) requestModal.style.display = "none";
+        currentRequest = null;
+      }      // Example: Function to handle updating request status (called from modal buttons)
+      async function handleUpdateRequest(
+        requestId,
+        newStatus,
+        adminNotes = ""
+      ) {
+        if (!authToken) {
+          showMessage("Authentification requise.", "error");
+          return;
         }
-        
-        function filterRequests() {
-            const status = statusFilter.value;
-            const search = searchInput.value.toLowerCase();
-            
-            filteredRequests = allRequests.filter(request => {
-                // Status filter
-                if (status !== 'all' && request.status !== status) {
-                    return false;
-                }
-                
-                // Search filter
-                if (search) {
-                    const studentName = `${request.student?.firstName || ''} ${request.student?.lastName || ''}`.toLowerCase();
-                    const studentMatricule = (request.student?.matricule || '').toLowerCase();
-                    const currentSectionName = (request.currentSection?.name || '').toLowerCase();
-                    const requestedSectionName = (request.requestedSection?.name || '').toLowerCase();
-                    
-                    return studentName.includes(search) || 
-                           studentMatricule.includes(search) || 
-                           currentSectionName.includes(search) || 
-                           requestedSectionName.includes(search);
-                }
-                
-                return true;
-            });
-            
-            // Render the first page
-            currentPage = 1;
-            renderRequests();
+        try {
+          // Assuming updateSectionChangeRequestStatus is defined in admin-api-utils.js or similar
+          const response = await updateSectionChangeRequestStatus(
+            requestId,
+            newStatus,
+            adminNotes,
+            authToken
+          );          if (response && response.success) {
+            showMessage("Statut de la demande mis à jour avec succès.", "success");
+            await loadRequests(); // Reload the list
+          } else {
+            showMessage(response?.message || "Échec de la mise à jour du statut.", "error");
+          }
+        } catch (error) {
+          console.error("Error updating request:", error);
+          showMessage(`Erreur: ${error.message || "Opération échouée"}`, "error");
         }
-        
-        function renderRequests() {
-            // Calculate pagination
-            const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, filteredRequests.length);
-            const currentRequests = filteredRequests.slice(startIndex, endIndex);
-            
-            // Clear table
-            requestsTableBody.innerHTML = '';
-            
-            // Check if no requests match filters
-            if (currentRequests.length === 0) {
-                requestsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="no-data">Aucune demande ne correspond aux critères sélectionnés.</td>
-                    </tr>
-                `;
-                paginationElement.innerHTML = '';
-                return;
-            }
-            
-            // Render requests
-            currentRequests.forEach(request => {
-                // Format date for display
-                const requestDate = new Date(request.createdAt || Date.now());
-                const formattedDate = requestDate.toLocaleDateString('fr-FR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
-                
-                // Get student initials
-                const studentInitials = ((request.student?.firstName || ' ')[0] + (request.student?.lastName || ' ')[0]).toUpperCase();
-                
-                // Get status display class
-                let statusClass = '';
-                let statusText = '';
-                
-                switch (request.status) {
-                    case 'pending':
-                        statusClass = 'status-pending';
-                        statusText = 'En attente';
-                        break;
-                    case 'approved':
-                        statusClass = 'status-approved';
-                        statusText = 'Approuvée';
-                        break;
-                    case 'rejected':
-                        statusClass = 'status-rejected';
-                        statusText = 'Rejetée';
-                        break;
-                    default:
-                        statusClass = 'status-pending';
-                        statusText = 'En attente';
-                }
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${formattedDate}</td>
-                    <td>
-                        <div class="student-info">
-                            <div class="student-avatar">${studentInitials}</div>
-                            <div class="student-details">
-                                <span class="student-name">${request.student?.firstName || ''} ${request.student?.lastName || ''}</span>
-                                <span class="student-matricule">${request.student?.matricule || 'N/A'}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="section-badge">
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            </svg>
-                            ${request.currentSection?.name || 'Non spécifiée'}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="section-change-container">
-                            <span class="section-badge">
-                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                </svg>
-                                ${request.requestedSection?.name || 'Non spécifiée'}
-                            </span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
-                    </td>
-                    <td>
-                        <div class="table-actions">
-                            <button class="action-btn view-btn" data-id="${request.id}" title="Voir les détails">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                // Add to table
-                requestsTableBody.appendChild(row);
-                
-                // Add event listener to view button
-                row.querySelector('.view-btn').addEventListener('click', () => openRequestDetails(request));
-            });
-            
-            // Render pagination
-            renderPagination(totalPages);
-        }
-        
-        function renderPagination(totalPages) {
-            if (totalPages <= 1) {
-                paginationElement.innerHTML = '';
-                return;
-            }
-            
-            let paginationHTML = '';
-            
-            // Previous button
-            paginationHTML += `
-                <button class="pagination-btn previous ${currentPage === 1 ? 'disabled' : ''}" 
-                    ${currentPage === 1 ? 'disabled' : ''}>
-                    &laquo; Précédent
-                </button>
-            `;
-            
-            // Page buttons
-            for (let i = 1; i <= totalPages; i++) {
-                paginationHTML += `
-                    <button class="pagination-btn page-num ${i === currentPage ? 'active' : ''}" data-page="${i}">
-                        ${i}
-                    </button>
-                `;
-            }
-            
-            // Next button
-            paginationHTML += `
-                <button class="pagination-btn next ${currentPage === totalPages ? 'disabled' : ''}" 
-                    ${currentPage === totalPages ? 'disabled' : ''}>
-                    Suivant &raquo;
-                </button>
-            `;
-            
-            paginationElement.innerHTML = paginationHTML;
-            
-            // Add event listeners to pagination buttons
-            document.querySelectorAll('.pagination-btn.page-num').forEach(button => {
-                button.addEventListener('click', () => {
-                    currentPage = parseInt(button.dataset.page);
-                    renderRequests();
-                });
-            });
-            
-            document.querySelector('.pagination-btn.previous').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderRequests();
-                }
-            });
-            
-            document.querySelector('.pagination-btn.next').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderRequests();
-                }
-            });
-        }
-        
-        function openRequestDetails(request) {
-            currentRequest = request;
-            
-            // Get student initials
-            const studentInitials = ((request.student?.firstName || ' ')[0] + (request.student?.lastName || ' ')[0]).toUpperCase();
-            
-            // Format date for display
-            const reqDate = new Date(request.createdAt || Date.now());
-            const formattedDate = reqDate.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            // Fill student info
-            studentAvatar.textContent = studentInitials;
-            studentName.textContent = `${request.student?.firstName || ''} ${request.student?.lastName || ''}`;
-            studentMatricule.textContent = `Matricule: ${request.student?.matricule || 'N/A'}`;
-            studentEmail.textContent = `Email: ${request.student?.email || 'N/A'}`;
-            
-            // Fill request info
-            requestDate.textContent = formattedDate;
-            
-            // Set status with appropriate styling
-            let statusText = '';
-            let statusClass = '';
-            
-            switch (request.status) {
-                case 'pending':
-                    statusText = 'En attente';
-                    statusClass = 'status-pending';
-                    break;
-                case 'approved':
-                    statusText = 'Approuvée';
-                    statusClass = 'status-approved';
-                    break;
-                case 'rejected':
-                    statusText = 'Rejetée';
-                    statusClass = 'status-rejected';
-                    break;
-                default:
-                    statusText = 'En attente';
-                    statusClass = 'status-pending';
-            }
-            
-            requestStatus.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
-            
-            // Fill section info
-            currentSection.textContent = request.currentSection?.name || 'Non spécifiée';
-            requestedSection.textContent = request.requestedSection?.name || 'Non spécifiée';
-            
-            // Fill reason
-            requestReasonText.textContent = request.reason || 'Aucune justification fournie';
-            
-            // Show or hide admin response
-            if (request.status !== 'pending' && request.adminComment) {
-                adminResponseContainer.style.display = 'block';
-                adminResponseText.textContent = request.adminComment;
-            } else {
-                adminResponseContainer.style.display = 'none';
-            }
-            
-            // Show or hide action buttons
-            if (request.status === 'pending') {
-                actionButtons.style.display = 'block';
-            } else {
-                actionButtons.style.display = 'none';
-            }
-            
-            // Clear comment field
-            adminComment.value = '';
-            
-            // Show modal
-            requestModal.style.display = 'block';
-        }
-        
-        function closeModal() {
-            requestModal.style.display = 'none';
-            currentRequest = null;
-        }
-        
-        async function handleRequestAction(status) {
-            if (!currentRequest) return;
-            
-            try {
-                const comment = adminComment.value;
-                
-                // Call API to update request status
-                const response = await fetch(`${API_BASE_URL}/change-requests/${currentRequest.id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: status,
-                        adminComment: comment
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-                
-                // Get updated request
-                const updatedRequest = await response.json();
-                
-                // Update request in array
-                const index = allRequests.findIndex(r => r.id === currentRequest.id);
-                if (index !== -1) {
-                    allRequests[index] = updatedRequest;
-                }
-                
-                // Update UI
-                updateStats();
-                filterRequests();
-                
-                // Show success message
-                const actionText = status === 'approved' ? 'approuvée' : 'rejetée';
-                showMessage(`Demande ${actionText} avec succès!`, 'success');
-                
-                // Close modal
-                closeModal();
-            } catch (error) {
-                console.error(`Error ${status === 'approved' ? 'approving' : 'rejecting'} request:`, error);
-                showMessage(`Erreur lors du traitement de la demande: ${error.message}`, 'error');
-            }
-        }
-        
-        function showMessage(message, type = 'info') {
-            if (type === 'clear') {
-                statusMessage.style.display = 'none';
-                return;
-            }
-            
-            statusMessage.textContent = message;
-            statusMessage.className = 'status-message';
-            
-            switch (type) {
-                case 'success':
-                    statusMessage.classList.add('success');
-                    break;
-                case 'error':
-                    statusMessage.classList.add('error');
-                    break;
-                case 'warning':
-                    statusMessage.classList.add('warning');
-                    break;
-                default:
-                    statusMessage.classList.add('info');
-            }
-            
-            statusMessage.style.display = 'block';
-            
-            // Auto-hide success messages after 5 seconds
-            if (type === 'success') {
-                setTimeout(() => {
-                    statusMessage.style.display = 'none';
-                }, 5000);
-            }
-        }
-    </script>
-</body>
-</html>
+      }
