@@ -72,6 +72,11 @@ function renderSections() {
           }" title="Assigner responsables">
             <span class="material-icons">person_add</span>
           </button>
+          <button class="action-btn timetable-btn" data-id="${
+            section.id
+          }" title="Gérer l'emploi du temps">
+            <span class="material-icons">schedule</span>
+          </button>
           <button class="action-btn delete-btn" data-id="${
             section.id
           }" title="Supprimer">
@@ -91,6 +96,9 @@ function renderSections() {
     row
       .querySelector(".teacher-action-btn")
       .addEventListener("click", () => openTeacherAssignmentModal(section));
+    row
+      .querySelector(".timetable-btn")
+      .addEventListener("click", () => openTimetableManagement(section.id));
     row
       .querySelector(".delete-btn")
       .addEventListener("click", () => confirmDeleteSection(section));

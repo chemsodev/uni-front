@@ -1105,6 +1105,310 @@
         border: 1px solid #fecaca;
         border-radius: 4px;
       }
+
+      /* Add these styles to your existing styles */
+      .timetable-btn {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .timetable-btn:hover {
+        background-color: #2563eb;
+      }
+
+      .timetable-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+      }
+
+      .tab-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        background: none;
+        color: #6b7280;
+        cursor: pointer;
+        font-weight: 500;
+        position: relative;
+      }
+
+      .tab-btn.active {
+        color: var(--primary-color);
+      }
+
+      .tab-btn.active::after {
+        content: "";
+        position: absolute;
+        bottom: -0.5rem;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--primary-color);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .timetable-actions {
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .timetables-list {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .timetable-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .timetable-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .timetable-title {
+        font-weight: 500;
+        color: #111827;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+      }
+
+      .timetable-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+
+      .timetable-date,
+      .timetable-academic-year,
+      .timetable-description {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .timetable-actions {
+        display: flex;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .timetable-action-btn.view {
+        background-color: #e5e7eb;
+        color: #374151;
+      }
+
+      .timetable-action-btn.view:hover {
+        background-color: #d1d5db;
+      }
+
+      .timetable-action-btn.delete {
+        background-color: #fee2e2;
+        color: #ef4444;
+      }
+
+      .timetable-action-btn.delete:hover {
+        background-color: #fecaca;
+      }
+
+      .no-timetables {
+        text-align: center;
+        padding: 2rem;
+        color: #6b7280;
+        font-style: italic;
+        background-color: #f9fafb;
+        border: 1px dashed #d1d5db;
+        border-radius: 0.5rem;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+      }
+
+      .btn-sm {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #2563eb;
+      }
+
+      .btn-secondary {
+        background-color: #6b7280;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background-color: #4b5563;
+      }
+
+      .btn-danger {
+        background-color: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: #dc2626;
+      }
+
+      .btn-disabled {
+        background-color: #d1d5db;
+        color: #6b7280;
+        cursor: not-allowed;
+      }
+
+      .space-x-2 > * + * {
+        margin-left: 0.5rem;
+      }
+
+      /* Timetable Management Styles */
+      .timetable-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .timetable-info {
+        flex: 1;
+      }
+
+      .timetable-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0 0 0.5rem 0;
+      }
+
+      .timetable-description {
+        color: #666;
+        margin: 0 0 0.75rem 0;
+      }
+
+      .timetable-meta {
+        display: flex;
+        gap: 1rem;
+        color: #666;
+        font-size: 0.875rem;
+      }
+
+      .timetable-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+      }
+
+      .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      .btn-primary {
+        background: #2563eb;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1d4ed8;
+      }
+
+      .btn-secondary {
+        background: #64748b;
+        color: white;
+        text-decoration: none;
+      }
+
+      .btn-secondary:hover {
+        background: #475569;
+      }
+
+      .btn-danger {
+        background: #dc2626;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+
+      .btn-disabled {
+        background: #e5e7eb;
+        color: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      .no-timetables {
+        text-align: center;
+        padding: 2rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        color: #6b7280;
+      }
+
+      .error-message {
+        text-align: center;
+        padding: 2rem;
+        background: #fee2e2;
+        border-radius: 8px;
+        color: #991b1b;
+      }
+
+      .material-icons {
+        font-size: 1.25rem;
+      }
+
+      .mt-4 {
+        margin-top: 1rem;
+      }
     </style>
   </head>
   <body>
@@ -1549,6 +1853,50 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Add this after the teacher assignment modal -->
+    <!-- Timetable Management Modal -->
+    <div id="timetable-management-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" id="close-timetable-management-modal"
+          >&times;</span
+        >
+        <h2 id="timetable-management-title">Gestion des Emplois du Temps</h2>
+
+        <div class="timetable-tabs">
+          <button class="tab-btn active" data-tab="regular-timetables">
+            Emplois du temps
+          </button>
+          <button class="tab-btn" data-tab="exam-timetables">
+            Emplois des examens
+          </button>
+        </div>
+
+        <div class="tab-content active" id="regular-timetables-content">
+          <div class="timetable-actions">
+            <button class="btn btn-primary" id="upload-regular-timetable">
+              <span class="material-icons">upload</span> Télécharger un emploi
+              du temps
+            </button>
+          </div>
+          <div id="regular-timetables-list" class="timetables-list">
+            <!-- Regular timetables will be listed here -->
+          </div>
+        </div>
+
+        <div class="tab-content" id="exam-timetables-content">
+          <div class="timetable-actions">
+            <button class="btn btn-primary" id="upload-exam-timetable">
+              <span class="material-icons">upload</span> Télécharger un emploi
+              des examens
+            </button>
+          </div>
+          <div id="exam-timetables-list" class="timetables-list">
+            <!-- Exam timetables will be listed here -->
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2100,6 +2448,11 @@
                 }" title="Assigner responsables">
                   <span class="material-icons">person_add</span>
                 </button>
+                <button class="action-btn timetable-btn" data-id="${
+                  section.id
+                }" title="Gérer l'emploi du temps">
+                  <span class="material-icons">schedule</span>
+                </button>
                 <button class="action-btn delete-btn" data-id="${
                   section.id
                 }" title="Supprimer">
@@ -2120,6 +2473,11 @@
             .querySelector(".teacher-action-btn")
             .addEventListener("click", () =>
               openTeacherAssignmentModal(section)
+            );
+          row
+            .querySelector(".timetable-btn")
+            .addEventListener("click", () =>
+              openTimetableManagement(section.id)
             );
           row
             .querySelector(".delete-btn")
@@ -3378,6 +3736,631 @@
             item.classList.remove("active");
           }
         });
+      }
+
+      // Add this to your existing JavaScript
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize timetable management
+        initializeTimetableManagement();
+      });
+
+      function initializeTimetableManagement() {
+        // Remove any existing event listeners first
+        document.removeEventListener("click", handleTimetableButtonClick);
+
+        // Add click handler for timetable buttons
+        document.addEventListener("click", handleTimetableButtonClick);
+
+        // Tab switching
+        const tabButtons = document.querySelectorAll(
+          ".timetable-tabs .tab-btn"
+        );
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const tabId = button.dataset.tab;
+            switchTimetableTab(tabId);
+          });
+        });
+
+        // Upload buttons
+        const uploadRegularBtn = document.getElementById(
+          "upload-regular-timetable"
+        );
+        const uploadExamBtn = document.getElementById("upload-exam-timetable");
+
+        if (uploadRegularBtn) {
+          uploadRegularBtn.addEventListener("click", () =>
+            openTimetableUploadModal("regular")
+          );
+        }
+        if (uploadExamBtn) {
+          uploadExamBtn.addEventListener("click", () =>
+            openTimetableUploadModal("exam")
+          );
+        }
+      }
+
+      // Separate click handler function
+      function handleTimetableButtonClick(e) {
+        const timetableBtn = e.target.closest(".timetable-btn");
+        if (timetableBtn) {
+          const sectionId = timetableBtn.dataset.id;
+          if (sectionId) {
+            // Check if modal is already open
+            const modal = document.getElementById("timetable-management-modal");
+            if (modal && modal.style.display === "block") {
+              console.log("Modal is already open, not reopening");
+              return;
+            }
+            openTimetableManagement(sectionId);
+          }
+        }
+      }
+
+      function openTimetableManagement(sectionId) {
+        console.log("=== OPENING TIMETABLE MANAGEMENT ===");
+        console.log("Section ID:", sectionId);
+
+        const modal = document.getElementById("timetable-management-modal");
+        console.log("Found modal:", modal);
+
+        if (!modal) {
+          console.error("Modal element not found!");
+          return;
+        }
+
+        // Check if modal is already open
+        if (modal.style.display === "block") {
+          console.log("Modal is already open, not reopening");
+          return;
+        }
+
+        const titleElement = document.getElementById(
+          "timetable-management-title"
+        );
+        console.log("Found title element:", titleElement);
+
+        if (!titleElement) {
+          console.error("Title element not found!");
+          return;
+        }
+
+        // Find the section in the sections array
+        const section = allSections.find((s) => s.id === sectionId);
+        console.log("Found section:", section);
+
+        if (!section) {
+          console.error("Section not found in sections array!");
+          return;
+        }
+
+        // Update the modal title
+        titleElement.textContent = `Gestion des Emplois du Temps - ${
+          section.name || section.nom || "Section"
+        }`;
+
+        // Store the section ID in the modal for later use
+        modal.dataset.sectionId = sectionId;
+
+        // Clear existing timetables before loading new ones
+        const regularContainer = document.getElementById(
+          "regular-timetables-list"
+        );
+        const examContainer = document.getElementById("exam-timetables-list");
+        if (regularContainer)
+          regularContainer.innerHTML =
+            '<div class="loading">Chargement...</div>';
+        if (examContainer)
+          examContainer.innerHTML = '<div class="loading">Chargement...</div>';
+
+        // Show the modal
+        modal.style.display = "block";
+        console.log("Modal displayed");
+
+        // Load timetables with better error handling
+        console.log("Starting to load timetables...");
+
+        // Load both types of timetables in parallel
+        Promise.all([
+          loadTimetables(sectionId, "regular"),
+          loadTimetables(sectionId, "exam"),
+        ])
+          .then(() => {
+            console.log("All timetables loaded successfully");
+          })
+          .catch((error) => {
+            console.error("Error loading timetables:", error);
+            showNotification(
+              "Erreur lors du chargement des emplois du temps",
+              "error"
+            );
+          });
+
+        console.log("=== FINISHED OPENING TIMETABLE MANAGEMENT ===");
+      }
+
+      function switchTimetableTab(tabId) {
+        // Update active tab button
+        document.querySelectorAll(".timetable-tabs .tab-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.tab === tabId);
+        });
+
+        // Update active content
+        document.querySelectorAll(".tab-content").forEach((content) => {
+          content.classList.toggle("active", content.id === `${tabId}-content`);
+        });
+      }
+
+      async function loadTimetables(sectionId, type = "regular") {
+        console.log(`=== STARTING LOAD TIMETABLES (${type}) ===`);
+        console.log("Function called with:", { sectionId, type });
+
+        // Check if API_BASE_URL is defined
+        if (!API_BASE_URL) {
+          console.error("API_BASE_URL is not defined!");
+          showNotification("Configuration error: API URL not defined", "error");
+          return;
+        }
+
+        // Check if authToken is defined
+        if (!authToken) {
+          console.error("authToken is not defined!");
+          showNotification("Authentication error: No token found", "error");
+          return;
+        }
+
+        try {
+          // Try both possible API endpoints
+          let response;
+          let timetables;
+
+          // First try the schedules endpoint
+          try {
+            const url = `${API_BASE_URL}/sections/${sectionId}/schedules?type=${type}`;
+            console.log("Trying first endpoint:", url);
+            console.log("Request headers:", {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            });
+
+            response = await fetch(url, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              credentials: "include",
+            });
+
+            console.log("First endpoint response status:", response.status);
+
+            if (response.ok) {
+              timetables = await response.json();
+              console.log("Success with first endpoint:", timetables);
+            } else {
+              const errorText = await response.text();
+              console.error("First endpoint error response:", errorText);
+              throw new Error(
+                `First endpoint failed: ${response.status} - ${errorText}`
+              );
+            }
+          } catch (firstError) {
+            console.warn(
+              "First endpoint failed, trying alternative:",
+              firstError
+            );
+
+            // Try alternative endpoint
+            const altUrl = `${API_BASE_URL}/sections/schedules/${sectionId}?scheduleType=${type}`;
+            console.log("Trying alternative endpoint:", altUrl);
+            console.log("Request headers:", {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            });
+
+            response = await fetch(altUrl, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              credentials: "include",
+            });
+
+            console.log(
+              "Alternative endpoint response status:",
+              response.status
+            );
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error("Alternative endpoint error response:", errorText);
+              throw new Error(
+                `Both endpoints failed. Last status: ${response.status} - ${errorText}`
+              );
+            }
+
+            timetables = await response.json();
+            console.log("Success with alternative endpoint:", timetables);
+          }
+
+          // Update to use the correct container IDs that match the HTML
+          const containerId =
+            type === "regular"
+              ? "regular-timetables-list"
+              : "exam-timetables-list";
+          const container = document.getElementById(containerId);
+
+          if (!container) {
+            console.error(`Container for ${type} timetables not found`);
+            return;
+          }
+
+          // Handle different response formats
+          const timetableArray = Array.isArray(timetables)
+            ? timetables
+            : timetables.data
+            ? timetables.data
+            : timetables.schedules
+            ? timetables.schedules
+            : [];
+
+          console.log(
+            `Processing ${timetableArray.length} timetables for type: ${type}`
+          );
+          console.log("Timetable array:", timetableArray);
+
+          if (!timetableArray || timetableArray.length === 0) {
+            console.log(`No timetables found for type: ${type}`);
+            container.innerHTML = `
+              <div class="no-timetables">
+                <p>Aucun emploi du temps ${
+                  type === "regular" ? "régulier" : "d'examen"
+                } disponible</p>
+                <button class="btn btn-primary mt-4" onclick="openTimetableUploadModal('${type}')">
+                  <span class="material-icons">upload</span>
+                  Télécharger un emploi du temps
+                </button>
+              </div>`;
+            return;
+          }
+
+          let html = "";
+          timetableArray.forEach((timetable) => {
+            console.log("Processing timetable:", timetable);
+
+            let documentUrl = null;
+            if (timetable.documentData) {
+              try {
+                const binaryData = timetable.documentData.data;
+                const blob = new Blob([new Uint8Array(binaryData)], {
+                  type: "application/pdf",
+                });
+                documentUrl = URL.createObjectURL(blob);
+                console.log("Created document URL:", documentUrl);
+              } catch (error) {
+                console.error("Error creating Blob URL:", error);
+              }
+            }
+
+            html += `
+              <div class="timetable-item">
+                <div class="timetable-info">
+                  <h3 class="timetable-title">${
+                    timetable.title || timetable.name || "Sans titre"
+                  }</h3>
+                  ${
+                    timetable.description
+                      ? `<p class="timetable-description">${timetable.description}</p>`
+                      : ""
+                  }
+                  <div class="timetable-meta">
+                    ${
+                      timetable.academicYear
+                        ? `<span class="timetable-academic-year">Année: ${timetable.academicYear}</span>`
+                        : ""
+                    }
+                    ${
+                      timetable.semester
+                        ? `<span class="timetable-semester">Semestre: ${timetable.semester}</span>`
+                        : ""
+                    }
+                  </div>
+                </div>
+                <div class="timetable-actions">
+                  ${
+                    documentUrl
+                      ? `
+                    <button class="btn btn-sm btn-primary" onclick="window.open('${documentUrl}', '_blank')">
+                      <span class="material-icons">visibility</span>
+                      Voir
+                    </button>
+                    <a href="${documentUrl}" download class="btn btn-sm btn-secondary">
+                      <span class="material-icons">download</span>
+                      Télécharger
+                    </a>
+                  `
+                      : `
+                    <button class="btn btn-sm btn-disabled" disabled>
+                      <span class="material-icons">visibility_off</span>
+                      Document non disponible
+                    </button>
+                  `
+                  }
+                  <button class="btn btn-sm btn-danger" onclick="deleteTimetable('${
+                    timetable.id
+                  }', '${type}')">
+                    <span class="material-icons">delete</span>
+                    Supprimer
+                  </button>
+                </div>
+              </div>`;
+          });
+
+          console.log("Generated HTML:", html);
+          container.innerHTML = html;
+          console.log(`Finished loading ${type} timetables`);
+        } catch (error) {
+          console.error(`Error loading ${type} timetables:`, error);
+          const container = document.getElementById(
+            type === "regular"
+              ? "regular-timetables-list"
+              : "exam-timetables-list"
+          );
+          if (container) {
+            container.innerHTML = `
+              <div class="error-message">
+                <p>Erreur lors du chargement des emplois du temps</p>
+                <button class="btn btn-primary mt-4" onclick="loadTimetables('${sectionId}', '${type}')">
+                  <span class="material-icons">refresh</span>
+                  Réessayer
+                </button>
+              </div>`;
+          }
+          showNotification(
+            `Erreur lors du chargement des emplois du temps ${
+              type === "regular" ? "réguliers" : "d'examen"
+            }`,
+            "error"
+          );
+        }
+        console.log(`=== FINISHED LOAD TIMETABLES (${type}) ===`);
+      }
+
+      async function viewTimetable(timetableId, documentUrl) {
+        try {
+          if (documentUrl) {
+            // If we have a Blob URL, open it directly
+            window.open(documentUrl, "_blank");
+          } else {
+            // Otherwise, try to fetch the timetable
+            const response = await fetch(
+              `${API_BASE_URL}/timetables/${timetableId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const timetable = await response.json();
+            if (timetable.fileUrl) {
+              window.open(timetable.fileUrl, "_blank");
+            } else {
+              throw new Error("No file URL available");
+            }
+          }
+        } catch (error) {
+          console.error("Error viewing timetable:", error);
+          showNotification(
+            "Erreur lors de l'affichage de l'emploi du temps",
+            "error"
+          );
+        }
+      }
+
+      function openTimetableUploadModal(type) {
+        const managementModal = document.getElementById(
+          "timetable-management-modal"
+        );
+        const uploadModal = document.getElementById("timetable-modal");
+        const title = document.getElementById("timetable-modal-title");
+        const typeInput = document.getElementById("timetable-type");
+
+        // Set the type and section ID
+        typeInput.value = type;
+        uploadModal.dataset.sectionId = managementModal.dataset.sectionId;
+
+        // Update title
+        title.textContent =
+          type === "regular"
+            ? "Télécharger un emploi du temps"
+            : "Télécharger un emploi des examens";
+
+        // Close the management modal first
+        managementModal.style.display = "none";
+
+        // Then show the upload modal
+        uploadModal.style.display = "block";
+      }
+
+      async function uploadTimetable(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData();
+        const sectionId =
+          document.getElementById("timetable-modal").dataset.sectionId;
+        const type = document.getElementById("timetable-type").value;
+        const title = document.getElementById("timetable-title").value;
+        const description = document.getElementById(
+          "timetable-description"
+        ).value;
+        const semester = document.getElementById("timetable-semester").value;
+        const academicYear = document.getElementById(
+          "timetable-academic-year"
+        ).value;
+        const file = document.getElementById("timetable-file").files[0];
+
+        // Validate required fields
+        if (!title || !sectionId || !file) {
+          showNotification(
+            "Veuillez remplir tous les champs obligatoires",
+            "error"
+          );
+          return;
+        }
+
+        // Ensure we have a valid schedule type
+        const scheduleType = type === "regular" ? "regular" : "exam";
+        if (!scheduleType) {
+          showNotification("Type d'emploi du temps invalide", "error");
+          return;
+        }
+
+        // Add each field individually to the FormData
+        formData.append("title", title);
+        formData.append("sectionId", sectionId);
+        if (description) formData.append("description", description);
+        formData.append("scheduleType", scheduleType); // Make sure this is set
+        if (academicYear) formData.append("academicYear", academicYear);
+        if (semester) formData.append("semester", semester);
+
+        // Add the file with the correct field name expected by the backend
+        formData.append("document", file);
+
+        try {
+          console.log("Uploading timetable with data:", {
+            title,
+            sectionId,
+            description,
+            scheduleType,
+            academicYear,
+            semester,
+            fileName: file.name,
+          });
+
+          const response = await fetch(
+            `${API_BASE_URL}/sections/schedules/${sectionId}/upload`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              body: formData,
+            }
+          );
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(
+              Array.isArray(error.message)
+                ? error.message.join(", ")
+                : error.message
+            );
+          }
+
+          // Close the modal first
+          const uploadModal = document.getElementById("timetable-modal");
+          uploadModal.style.display = "none";
+
+          // Reset the form
+          form.reset();
+          document.getElementById("selected-file").style.display = "none";
+
+          // Show success message and reload timetables
+          showNotification("Emploi du temps téléchargé avec succès", "success");
+
+          // Reload both regular and exam timetables
+          await loadTimetables(sectionId, "regular");
+          await loadTimetables(sectionId, "exam");
+        } catch (error) {
+          console.error("Error uploading timetable:", error);
+          showNotification(
+            error.message ||
+              "Erreur lors du téléchargement de l'emploi du temps",
+            "error"
+          );
+        }
+      }
+
+      // Add event listener for the timetable form
+      document.addEventListener("DOMContentLoaded", function () {
+        const timetableForm = document.getElementById("timetable-form");
+        if (timetableForm) {
+          timetableForm.addEventListener("submit", uploadTimetable);
+        }
+
+        // Add file input change handler
+        const fileInput = document.getElementById("timetable-file");
+        const selectedFile = document.getElementById("selected-file");
+        const selectedFileName = document.getElementById("selected-file-name");
+        const removeFileBtn = document.getElementById("selected-file-remove");
+
+        if (fileInput) {
+          fileInput.addEventListener("change", function () {
+            if (this.files.length > 0) {
+              selectedFileName.textContent = this.files[0].name;
+              selectedFile.style.display = "flex";
+            } else {
+              selectedFile.style.display = "none";
+            }
+          });
+        }
+
+        if (removeFileBtn) {
+          removeFileBtn.addEventListener("click", function () {
+            fileInput.value = "";
+            selectedFile.style.display = "none";
+          });
+        }
+      });
+
+      async function deleteTimetable(timetableId, type) {
+        if (
+          !confirm(`Êtes-vous sûr de vouloir supprimer cet emploi du temps ?`)
+        ) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/timetables/${timetableId}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          // Reload timetables
+          const sectionId = document.getElementById(
+            "timetable-management-modal"
+          ).dataset.sectionId;
+          loadTimetables(sectionId, type);
+
+          showNotification("Emploi du temps supprimé avec succès", "success");
+        } catch (error) {
+          console.error("Error deleting timetable:", error);
+          showNotification(
+            "Erreur lors de la suppression de l'emploi du temps",
+            "error"
+          );
+        }
       }
     </script>
 

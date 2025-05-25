@@ -268,7 +268,7 @@
 
           // Get timetable data from API
           const response = await fetch(
-            `${API_BASE_URL}/etudiants/timetable${cacheParam}`,
+            `${API_BASE_URL}/sections/schedules/5706258a-a6ee-4cf4-b1bd-ae6a4ab0674d?type=regular${cacheParam}`,
             {
               headers: {
                 Authorization: `Bearer ${authToken}`,
@@ -286,49 +286,41 @@
           console.log("Timetable data:", timetableData);
 
           // Handle case where no schedule is available
-          if (!timetableData.id || timetableData.message) {
+          if (!timetableData || timetableData.length === 0) {
             scheduleContent.innerHTML = `
               <div class="empty-state">
                 <div class="empty-state-icon">📅</div>
-                <p>${
-                  timetableData.message ||
-                  "Aucun emploi du temps n'est disponible pour le moment."
-                }</p>
+                <p>Aucun emploi du temps n'est disponible pour le moment.</p>
                 <p>Veuillez vérifier ultérieurement ou contacter l'administration.</p>
               </div>
             `;
             return;
           }
 
-          // Determine document type from MIME type or extension
-          const isImage =
-            timetableData.documentName &&
-            (timetableData.documentName.match(
-              /\.(jpg|jpeg|png|gif|webp|bmp)$/i
-            ) ||
-              (timetableData.documentMimeType &&
-                timetableData.documentMimeType.startsWith("image/")));
-
-          const isPdf =
-            timetableData.documentName &&
-            (timetableData.documentName.match(/\.pdf$/i) ||
-              (timetableData.documentMimeType &&
-                timetableData.documentMimeType === "application/pdf"));
+          // Get the first schedule (most recent)
+          const schedule = timetableData[0];
 
           // Format dates
-          const createdDate = new Date(timetableData.createdAt).toLocaleString(
+          const createdDate = new Date(schedule.createdAt).toLocaleString(
             "fr-FR"
           );
-          const updatedDate = new Date(timetableData.updatedAt).toLocaleString(
+          const updatedDate = new Date(schedule.updatedAt).toLocaleString(
             "fr-FR"
           );
+
+          // Create a blob URL from the document data
+          const documentData = new Uint8Array(schedule.documentData.data);
+          const blob = new Blob([documentData], {
+            type: schedule.documentMimeType || "image/png",
+          });
+          const documentUrl = URL.createObjectURL(blob);
 
           // Determine viewer type based on document type
           let viewerHtml;
-          if (isImage) {
-            viewerHtml = `<img src="${timetableData.documentUrl}" alt="Emploi du temps" class="document-image">`;
-          } else if (isPdf) {
-            viewerHtml = `<iframe src="${timetableData.documentUrl}" class="document-iframe" title="Emploi du temps"></iframe>`;
+          if (schedule.documentMimeType?.startsWith("image/")) {
+            viewerHtml = `<img src="${documentUrl}" alt="Emploi du temps" class="document-image">`;
+          } else if (schedule.documentMimeType === "application/pdf") {
+            viewerHtml = `<iframe src="${documentUrl}" class="document-iframe" title="Emploi du temps"></iframe>`;
           } else {
             viewerHtml = `
               <div class="empty-state">
@@ -343,26 +335,26 @@
             <div class="schedule-header">
               <div>
                 <h2 class="schedule-title">${
-                  timetableData.title || "Emploi du temps"
+                  schedule.title || "Emploi du temps"
                 }</h2>
                 <div class="schedule-meta">
-                  ${timetableData.description || ""}
+                  ${schedule.description || ""}
                   ${
-                    timetableData.academicYear
-                      ? `<div>Année académique: ${timetableData.academicYear}</div>`
+                    schedule.academicYear
+                      ? `<div>Année académique: ${schedule.academicYear}</div>`
                       : ""
                   }
                   ${
-                    timetableData.semester
-                      ? `<div>Semestre: ${timetableData.semester}</div>`
+                    schedule.semester
+                      ? `<div>Semestre: ${schedule.semester}</div>`
                       : ""
                   }
                   <div>Mis à jour le: ${updatedDate}</div>
                 </div>
               </div>
               <div class="schedule-actions">
-                <a href="${timetableData.documentUrl}" download="${
-            timetableData.documentName || "emploi-du-temps"
+                <a href="${documentUrl}" download="${
+            schedule.documentName || "emploi-du-temps"
           }" class="download-btn">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
@@ -384,6 +376,11 @@
               ${viewerHtml}
             </div>
           `;
+
+          // Clean up the blob URL when the page is unloaded
+          window.addEventListener("unload", () => {
+            URL.revokeObjectURL(documentUrl);
+          });
         } catch (error) {
           console.error("Error loading schedule:", error);
           scheduleContent.innerHTML = `

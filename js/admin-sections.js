@@ -4,21 +4,7 @@
  */
 
 // Use the API utils for backend communication
-const API_CONFIG = {
-  BASE_URL: "https://unicersityback.onrender.com/api",
-  ENDPOINTS: {
-    SECTIONS: {
-      BASE: "/sections",
-      BY_ID: (id) => `/sections/${id}`,
-      STUDENTS: (id) => `/sections/${id}/etudiants`,
-      GROUPS: (id) => `/sections/${id}/groupes`,
-      RESPONSABLES: (id) => `/sections/${id}/responsables`,
-      STATISTICS: "/sections/statistics",
-      SCHEDULES: (id) => `/sections/${id}/schedules`,
-    },
-    DEPARTMENTS: "/departments",
-  },
-};
+// API_CONFIG is defined in admin-api-config.js
 
 /**
  * Get sections with statistics
