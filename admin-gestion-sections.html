@@ -9,12 +9,12 @@
       rel="stylesheet"
     />
     <link href="style/admin.css" rel="stylesheet" />
-    <link href="style/section-statistics.css" rel="stylesheet" />
     <link href="style/timetable-viewer.css" rel="stylesheet" />
-    <!-- Add reference to chart.js for statistics visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="style/section-responsables.css" rel="stylesheet" />
     <!-- Add reference to admin auth helper -->
+    <script src="js/admin-api-config.js"></script>
     <script src="js/admin-auth.js"></script>
+    <script src="js/admin-logout.js"></script>
     <script src="js/admin-pages-validation.js"></script>
     <script src="js/admin-mocks.js"></script>
     <script src="js/admin-api-utils.js"></script>
@@ -31,43 +31,44 @@
       .section-info {
         display: flex;
         align-items: center;
+        gap: 12px;
       }
 
       .section-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #e5e7eb;
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: var(--primary-color);
-        color: white;
         font-weight: 600;
-        margin-right: 10px;
+        color: #374151;
       }
 
-      .section-details span {
-        display: block;
+      .section-details {
+        display: flex;
+        flex-direction: column;
       }
 
       .section-name {
-        font-weight: 600;
+        font-weight: 500;
+        color: #111827;
       }
 
       .section-code {
-        color: var(--gray-color);
-        font-size: 0.85rem;
+        font-size: 0.875rem;
+        color: #6b7280;
       }
 
       .level-badge {
-        background-color: #f0f4ff;
-        color: #3b82f6;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 500;
         display: inline-block;
-        white-space: nowrap;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background-color: #e5e7eb;
+        color: #374151;
+        font-size: 0.875rem;
+        font-weight: 500;
       }
 
       .capacity-badge {
@@ -230,44 +231,10 @@
         cursor: pointer;
         font-size: 18px;
       }
-
       .upload-timetable-btn,
       .upload-exam-btn,
       .view-timetables-btn {
         color: #10b981;
-      }
-
-      /* Statistics styles */
-      .statistics-container {
-        margin-top: 20px;
-      }
-
-      .statistics-card {
-        background-color: #fff;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-      }
-
-      .statistics-card h3 {
-        margin-top: 0;
-        font-size: 1.25rem;
-        color: var(--primary-color);
-      }
-
-      .statistics-card p {
-        margin: 5px 0;
-        color: #333;
-      }
-
-      .statistics-card .chart-container {
-        position: relative;
-        height: 300px;
-      }
-      .statistics-card .chartjs-render-monitor {
-        width: 100% !important;
-        height: 100% !important;
       }
 
       /* Teacher Assignment Modal Styles */
@@ -277,7 +244,6 @@
         border-radius: 4px;
         border-left: 4px solid var(--primary-color);
       }
-
       .current-assignments {
         max-height: 200px;
         overflow-y: auto;
@@ -286,12 +252,36 @@
         padding: 10px;
         background-color: #f9f9f9;
       }
+
+      .assignments-container {
+        margin-bottom: 10px;
+      }
+
+      .role-assignments {
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+      }
+
+      .role-assignments h4 {
+        font-size: 14px;
+        margin: 5px 0;
+        color: #444;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 3px;
+      }
+
+      .role-assignments ul {
+        list-style: none;
+        padding-left: 10px;
+        margin: 0;
+      }
+
       .assignment-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #eee;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
       }
 
       .assignment-item:last-child {
@@ -303,6 +293,27 @@
         flex-direction: column;
         flex-grow: 1;
         gap: 4px;
+      }
+
+      .assignment-teacher {
+        font-size: 14px;
+      }
+
+      .no-assignments,
+      .error {
+        padding: 10px;
+        text-align: center;
+        color: #666;
+        font-style: italic;
+      }
+
+      .error {
+        color: #d32f2f;
+      }
+
+      .create-group-option {
+        font-weight: bold;
+        color: #2196f3;
       }
 
       .assignment-role {
@@ -363,107 +374,24 @@
 
       .teachers-list {
         display: flex;
-        flex-direction: column;
-        gap: 4px;
-        max-height: 120px;
-        overflow-y: auto;
+        flex-wrap: wrap;
+        gap: 8px;
       }
 
       .teacher-assignment {
-        font-size: 0.8rem;
-        padding: 4px 8px;
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
         display: inline-flex;
         align-items: center;
-        margin: 1px 0;
-        min-height: 24px;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        font-weight: 500;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background-color: #f3f4f6;
+        font-size: 0.875rem;
         color: #374151;
-        line-height: 1.2;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .teacher-assignment:hover {
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        border-color: #94a3b8;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .teacher-assignment.unassigned {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        color: #d97706;
-        border: 1px dashed #f59e0b;
-        font-style: italic;
-        font-weight: 400;
-      }
-
-      .teacher-assignment.unassigned:hover {
-        background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
-        border-color: #d97706;
-      }
-
-      /* Role-specific styling */
-      .teacher-assignment[title*="Responsable de Filière"] {
-        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
-        border-color: #8b5cf6;
-        color: #5b21b6;
-      }
-
-      .teacher-assignment[title*="Responsable de Section"] {
-        background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
-        border-color: #3b82f6;
-        color: #1d4ed8;
-      }
-
-      .teacher-assignment[title*="Responsable TD"] {
-        background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
-        border-color: #10b981;
-        color: #047857;
-      }
-
-      .teacher-assignment[title*="Responsable TP"] {
-        background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
-        border-color: #ef4444;
-        color: #dc2626;
       }
 
       .loading-teachers {
         color: #6b7280;
-        font-style: italic;
-        font-size: 0.85rem;
-        padding: 8px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background-color: #f9fafb;
-        border-radius: 4px;
-        border: 1px solid #e5e7eb;
-      }
-
-      .loading-teachers::before {
-        content: "";
-        width: 12px;
-        height: 12px;
-        border: 2px solid #e5e7eb;
-        border-top: 2px solid #3b82f6;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
+        font-size: 0.875rem;
       }
 
       .no-teachers {
@@ -1000,6 +928,183 @@
         opacity: 0.5;
         cursor: not-allowed;
       }
+
+      .no-data {
+        text-align: center;
+        padding: 24px;
+        color: #6b7280;
+        font-size: 0.875rem;
+      }
+
+      .teachers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 4px;
+      }
+
+      .teacher-assignment {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 8px;
+        background-color: #f3f4f6;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        color: #374151;
+      }
+
+      .role-icon {
+        font-size: 1rem;
+      }
+
+      .teacher-name {
+        font-weight: 500;
+      }
+
+      .no-teachers {
+        color: #6b7280;
+        font-style: italic;
+        font-size: 0.875rem;
+        padding: 4px 8px;
+      }
+
+      .error-teachers {
+        color: #ef4444;
+        font-size: 0.875rem;
+        padding: 4px 8px;
+      }
+
+      .teachers-cell {
+        min-width: 200px;
+        padding: 8px;
+      }
+
+      .teachers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .teacher-assignment {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        background-color: #f3f4f6;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        color: #374151;
+        border: 1px solid #e5e7eb;
+      }
+
+      .role-icon {
+        font-size: 1rem;
+        min-width: 24px;
+        text-align: center;
+      }
+
+      .teacher-name {
+        font-weight: 500;
+      }
+
+      .loading-teachers {
+        color: #6b7280;
+        font-style: italic;
+        font-size: 0.875rem;
+        padding: 8px;
+        text-align: center;
+        background-color: #f9fafb;
+        border: 1px dashed #d1d5db;
+        border-radius: 4px;
+      }
+
+      .no-teachers {
+        color: #6b7280;
+        font-style: italic;
+        font-size: 0.875rem;
+        padding: 8px;
+        text-align: center;
+        background-color: #f9fafb;
+        border: 1px dashed #d1d5db;
+        border-radius: 4px;
+      }
+
+      .error-teachers {
+        color: #ef4444;
+        font-size: 0.875rem;
+        padding: 8px;
+        text-align: center;
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 4px;
+      }
+
+      .teachers-container {
+        min-width: 200px;
+        padding: 8px;
+      }
+
+      .teachers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .teacher-assignment {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 8px;
+        background-color: #f3f4f6;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        color: #374151;
+        border: 1px solid #e5e7eb;
+      }
+
+      .role-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+      }
+
+      .teacher-name {
+        font-weight: 500;
+      }
+
+      .loading-teachers {
+        color: #6b7280;
+        font-style: italic;
+        font-size: 0.875rem;
+        padding: 8px;
+        text-align: center;
+        background-color: #f9fafb;
+        border: 1px dashed #d1d5db;
+        border-radius: 4px;
+      }
+
+      .no-teachers {
+        color: #6b7280;
+        font-style: italic;
+        font-size: 0.875rem;
+        padding: 8px;
+        text-align: center;
+        background-color: #f9fafb;
+        border: 1px dashed #d1d5db;
+        border-radius: 4px;
+      }
+
+      .error-teachers {
+        color: #ef4444;
+        font-size: 0.875rem;
+        padding: 8px;
+        text-align: center;
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 4px;
+      }
     </style>
   </head>
   <body>
@@ -1012,17 +1117,6 @@
         <div class="header">
           <h1 class="page-title">Gestion des Sections</h1>
           <div class="header-actions">
-            <button class="header-btn" id="show-statistics-btn">
-              <svg
-                class="header-btn-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M18 20V10M12 20V4M6 20v-6"></path>
-              </svg>
-              Statistiques
-            </button>
             <button class="header-btn" id="add-section-btn">
               <svg
                 class="header-btn-icon"
@@ -1097,30 +1191,18 @@
                   <th>Niveau</th>
                   <th>Spécialité</th>
                   <th>Étudiants</th>
+                  <th>Responsables</th>
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="sections-table-body">
+              <tbody id="sectionsTableBody">
                 <!-- Sections will be loaded here -->
-                <tr class="loading-row">
-                  <td colspan="5">Chargement des sections...</td>
-                </tr>
               </tbody>
             </table>
           </div>
-
           <!-- Pagination -->
           <div class="pagination" id="pagination">
             <!-- Pagination will be added here -->
-          </div>
-
-          <!-- Statistics Container -->
-          <div
-            id="statistics-container"
-            class="statistics-container"
-            style="display: none"
-          >
-            <!-- Statistics will be loaded here -->
           </div>
         </div>
       </div>
@@ -1140,9 +1222,9 @@
               id="section-name"
               class="form-input"
               required
-              pattern="[A-Za-z0-9\s-]+"
+              pattern="[A-Za-z0-9 \-]+"
               title="Le nom doit contenir uniquement des lettres, chiffres, espaces et tirets"
-              minlength="3"
+              minlength="1"
               maxlength="50"
             />
             <div class="error-message" id="section-name-error"></div>
@@ -1153,22 +1235,11 @@
               type="text"
               id="section-code"
               class="form-input"
-              required
-              pattern="[A-Z0-9]+"
-              title="Le code doit contenir uniquement des lettres majuscules et des chiffres"
-              minlength="2"
-              maxlength="10"
+              readonly
+              placeholder="Auto-généré (Spécialité-Niveau-Nom)"
+              title="Code généré automatiquement au format Spécialité-Niveau-Nom"
             />
             <div class="error-message" id="section-code-error"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="section-department">Département:</label>
-            <select id="section-department" class="form-input" required>
-              <option value="">Sélectionner un département</option>
-              <!-- Departments will be loaded dynamically -->
-            </select>
-            <div class="error-message" id="section-department-error"></div>
           </div>
 
           <div class="form-group">
@@ -1178,13 +1249,22 @@
               id="section-specialty"
               class="form-input"
               required
-              pattern="[A-Za-z\s-]+"
+              pattern="[A-Za-z \-]+"
               title="La spécialité doit contenir uniquement des lettres, espaces et tirets"
               minlength="3"
               maxlength="50"
               placeholder="Ex: Informatique, Mathématiques, etc."
             />
             <div class="error-message" id="section-specialty-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="section-department">Département:</label>
+            <select id="section-department" class="form-input" required>
+              <option value="">Sélectionner un département</option>
+              <!-- Departments will be loaded dynamically -->
+            </select>
+            <div class="error-message" id="section-department-error"></div>
           </div>
 
           <div class="form-group">
@@ -1487,7 +1567,7 @@
 
       // DOM Elements
       let statusMessage = document.getElementById("status-message");
-      let sectionsTableBody = document.getElementById("sections-table-body");
+      let sectionsTableBody = document.getElementById("sectionsTableBody");
       let paginationElement = document.getElementById("pagination");
       let specialtyFilter = document.getElementById("specialty-filter");
       let levelFilter = document.getElementById("level-filter");
@@ -1499,8 +1579,6 @@
       let sectionIdInput = document.getElementById("section-id");
       let sectionNameInput = document.getElementById("section-name");
       let sectionCodeInput = document.getElementById("section-code");
-      let sectionDepartmentInput =
-        document.getElementById("section-department");
       let sectionSpecialtyInput = document.getElementById("section-specialty");
       let sectionLevelInput = document.getElementById("section-level");
       let sectionCapacityInput = document.getElementById("section-capacity");
@@ -1518,20 +1596,15 @@
           if (!isAuthenticated) {
             console.error("Authentication failed");
             return;
-          }
-
-          // Load the sidebar
+          } // Load the sidebar
           await loadSidebar();
 
           // Test API connectivity first
           console.log("Testing API connectivity before loading data...");
           await testAPIConnectivity();
 
-          // Load sections data
-          await loadSections();
-
-          // Load departments data
-          await loadDepartments();
+          // Load departments and sections data
+          await Promise.all([loadDepartments(), loadSections()]);
 
           // Setup event listeners
           setupEventListeners();
@@ -1547,7 +1620,7 @@
       function initializeDOMElements() {
         // Initialize all DOM elements
         statusMessage = document.getElementById("status-message");
-        sectionsTableBody = document.getElementById("sections-table-body");
+        sectionsTableBody = document.getElementById("sectionsTableBody");
         paginationElement = document.getElementById("pagination");
         specialtyFilter = document.getElementById("specialty-filter");
         levelFilter = document.getElementById("level-filter");
@@ -1559,7 +1632,6 @@
         sectionIdInput = document.getElementById("section-id");
         sectionNameInput = document.getElementById("section-name");
         sectionCodeInput = document.getElementById("section-code");
-        sectionDepartmentInput = document.getElementById("section-department");
         sectionSpecialtyInput = document.getElementById("section-specialty");
         sectionLevelInput = document.getElementById("section-level");
         sectionCapacityInput = document.getElementById("section-capacity");
@@ -1575,6 +1647,18 @@
 
           // Insert the sidebar HTML into the container
           document.getElementById("sidebar-container").innerHTML = html;
+
+          // Set up logout button event listener
+          const logoutBtn = document.getElementById("logout-btn");
+          if (logoutBtn && typeof handleAdminLogout === "function") {
+            logoutBtn.addEventListener("click", handleAdminLogout);
+          }
+
+          // Update admin info manually since scripts in innerHTML don't execute
+          updateSidebarAdminInfo();
+
+          // Set active menu item
+          setSidebarActiveMenuItem();
         } catch (error) {
           console.error("Error loading sidebar:", error);
           showMessage("Impossible de charger la barre latérale.", "error");
@@ -1583,7 +1667,7 @@
       async function testAPIConnectivity() {
         try {
           console.log("Testing API connectivity...");
-          const response = await fetch(`${API_BASE_URL}/departments`, {
+          const response = await fetch(`${API_BASE_URL}/sections`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -1695,6 +1779,68 @@
         }
       }
 
+      // Add loadDepartments function
+      async function loadDepartments() {
+        try {
+          const departmentSelect =
+            document.getElementById("section-department");
+          if (!departmentSelect) return;
+
+          // Clear existing options except the first one
+          while (departmentSelect.options.length > 1) {
+            departmentSelect.remove(1);
+          }
+
+          // Try to get departments using adminAPI first
+          let departments = [];
+          if (window.adminAPI && window.adminAPI.getDepartments) {
+            try {
+              departments = await window.adminAPI.getDepartments();
+            } catch (apiError) {
+              console.warn("Error using adminAPI.getDepartments:", apiError);
+              departments = [];
+            }
+          }
+
+          // If adminAPI failed, try direct API call
+          if (!departments || departments.length === 0) {
+            try {
+              const response = await fetch(`${API_BASE_URL}/departments`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${authToken}`,
+                },
+              });
+
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const data = await response.json();
+              departments = Array.isArray(data) ? data : data.data || [];
+            } catch (error) {
+              console.error("Error fetching departments:", error);
+              departments = [];
+            }
+          }
+
+          // Add departments to select
+          departments.forEach((dept) => {
+            const option = document.createElement("option");
+            option.value = dept.id;
+            option.textContent = dept.name;
+            departmentSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error loading departments:", error);
+          showNotification(
+            "Erreur lors du chargement des départements",
+            "error"
+          );
+        }
+      }
+
       function loadSpecialties() {
         // Get unique specialties from sections
         const specialties = [
@@ -1723,83 +1869,6 @@
           }
         });
       }
-
-      // Load departments data
-      async function loadDepartments() {
-        try {
-          // First try to use the admin API
-          let departments;
-          if (window.adminAPI && window.adminAPI.getDepartments) {
-            try {
-              departments = await window.adminAPI.getDepartments();
-            } catch (apiError) {
-              console.warn(
-                "Error using adminAPI.getDepartments, falling back to direct API call:",
-                apiError
-              );
-              departments = null;
-            }
-          }
-
-          // If admin API failed, try direct API call
-          if (!departments) {
-            try {
-              const response = await fetch(`${API_BASE_URL}/departments`, {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${authToken}`,
-                },
-                mode: "cors",
-                credentials: "include",
-              });
-
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-
-              const data = await response.json();
-              departments = Array.isArray(data) ? data : data.data || [];
-            } catch (fetchError) {
-              console.error("Error in direct API call:", fetchError);
-              throw fetchError;
-            }
-          }
-
-          // If still no data, try mock data as last resort
-          if (!departments && window.adminMocks) {
-            console.warn("No departments data received, using mock data");
-            departments = window.adminMocks.getMockDepartments();
-          }
-
-          const departmentSelect =
-            document.getElementById("section-department");
-
-          // Clear existing options except the first one
-          while (departmentSelect.children.length > 1) {
-            departmentSelect.removeChild(departmentSelect.lastChild);
-          }
-
-          // Add department options
-          if (Array.isArray(departments)) {
-            departments.forEach((department) => {
-              if (department && department.id && department.name) {
-                const option = document.createElement("option");
-                option.value = department.id;
-                option.textContent = department.name;
-                departmentSelect.appendChild(option);
-              }
-            });
-          }
-        } catch (error) {
-          console.error("Error loading departments:", error);
-          createNotification(
-            "Erreur lors du chargement des départements",
-            "error"
-          );
-        }
-      }
-
       function setupEventListeners() {
         // Filter changes
         if (specialtyFilter) {
@@ -1970,7 +2039,7 @@
         if (!allSections || allSections.length === 0) {
           sectionsTableBody.innerHTML = `
             <tr>
-              <td colspan="5" class="no-data">Aucune section disponible.</td>
+              <td colspan="6" class="no-data">Aucune section disponible.</td>
             </tr>
           `;
           paginationElement.innerHTML = "";
@@ -1981,7 +2050,7 @@
         if (currentSections.length === 0) {
           sectionsTableBody.innerHTML = `
             <tr>
-              <td colspan="5" class="no-data">Aucune section ne correspond aux critères sélectionnés.</td>
+              <td colspan="6" class="no-data">Aucune section ne correspond aux critères sélectionnés.</td>
             </tr>
           `;
           paginationElement.innerHTML = "";
@@ -1990,34 +2059,35 @@
 
         // Render sections
         currentSections.forEach((section) => {
-          // Calculate student count, defaulting to 0 if not available
-          const etudiantsCount =
-            section.etudiantsCount || section.studentsCount || 0;
-          const capacity = section.capacity || section.capacite || 0;
-          const studentCountDisplay = etudiantsCount > 0 ? etudiantsCount : "-";
+          // Handle potential different property names from the API
+          const sectionName = section.name || section.nom || "Section sans nom";
+          const sectionCode = section.code || "N/A";
+          const sectionLevel = section.level || section.niveau || "N/A";
+          const sectionSpecialty =
+            section.specialty || section.specialite || "Non spécifiée";
+
+          // Handle student count - since it's not in the API response, we'll show a dash
+          const studentCountDisplay = "-";
 
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>
               <div class="section-info">
-                <div class="section-icon">${
-                  section.level?.charAt(0) || section.niveau?.charAt(0) || "S"
-                }</div>
+                <div class="section-icon">${sectionLevel.charAt(0) || "S"}</div>
                 <div class="section-details">
-                  <span class="section-name">${
-                    section.name || section.nom || "Section sans nom"
-                  }</span>
-                  <span class="section-code">${section.code || "N/A"}</span>
+                  <span class="section-name">${sectionName}</span>
+                  <span class="section-code">${sectionCode}</span>
                 </div>
               </div>
             </td>
-            <td><span class="level-badge">${
-              section.level || section.niveau || "N/A"
-            }</span></td>
-            <td>${
-              section.specialty || section.specialite || "Non spécifiée"
-            }</td>
+            <td><span class="level-badge">${sectionLevel}</span></td>
+            <td>${sectionSpecialty}</td>
             <td>${studentCountDisplay}</td>
+            <td class="teachers-cell">
+              <div id="teachers-${section.id}" class="teachers-container">
+                <div class="loading-teachers">Chargement...</div>
+              </div>
+            </td>
             <td>
               <div class="table-actions">
                 <button class="action-btn edit-btn" data-id="${
@@ -2039,8 +2109,10 @@
             </td>
           `;
 
-          // Add event listeners to the buttons
+          // Add section to table
           sectionsTableBody.appendChild(row);
+
+          // Add event listeners to the buttons
           row
             .querySelector(".edit-btn")
             .addEventListener("click", () => openEditSectionModal(section));
@@ -2052,10 +2124,45 @@
           row
             .querySelector(".delete-btn")
             .addEventListener("click", () => confirmDeleteSection(section));
+
+          // Load teachers for this section
+          loadSectionTeachers(section.id);
         });
 
         // Render pagination
         renderPagination(totalPages);
+      } // Function to load and display teachers for a section is now handled by js/section-responsables.js
+
+      // Update the getRoleIcon function to use Material Icons
+      function getRoleIcon(role) {
+        const roleIcons = {
+          filiere: "school",
+          section: "assignment",
+          td: "menu_book",
+          tp: "science",
+          CHEF_DEPARTEMENT: "school",
+          RESPONSABLE_SECTION: "assignment",
+          RESPONSABLE_MODULE: "menu_book",
+          ENSEIGNANT: "science",
+        };
+        return `<span class="material-icons">${
+          roleIcons[role] || "person"
+        }</span>`;
+      }
+
+      // Update the getRoleDisplayName function
+      function getRoleDisplayName(role) {
+        const roleNames = {
+          filiere: "Responsable de Filière",
+          section: "Responsable de Section",
+          td: "Responsable TD",
+          tp: "Responsable TP",
+          CHEF_DEPARTEMENT: "Chef de Département",
+          RESPONSABLE_SECTION: "Responsable de Section",
+          RESPONSABLE_MODULE: "Responsable de Module",
+          ENSEIGNANT: "Enseignant",
+        };
+        return roleNames[role] || role;
       }
 
       function renderPagination(totalPages) {
@@ -2129,8 +2236,19 @@
       }
       function resetSectionForm() {
         sectionForm.reset();
-      }
 
+        // Clear all error messages
+        const errorMessages = document.querySelectorAll(".error-message");
+        errorMessages.forEach((error) => {
+          error.textContent = "";
+        });
+
+        // Remove error classes from inputs
+        const inputs = sectionForm.querySelectorAll(".form-input");
+        inputs.forEach((input) => {
+          input.classList.remove("error");
+        });
+      }
       function openAddSectionModal() {
         modalTitle.textContent = "Ajouter une section";
         sectionIdInput.value = "";
@@ -2144,7 +2262,6 @@
         sectionIdInput.value = section.id;
         sectionNameInput.value = section.name || section.nom || "";
         sectionCodeInput.value = section.code || "";
-        sectionDepartmentInput.value = section.departmentId || "";
         sectionSpecialtyInput.value =
           section.specialty || section.specialite || "";
         sectionLevelInput.value = section.level || section.niveau || "";
@@ -2185,13 +2302,15 @@
               .getElementById("section-code")
               .value.trim()
               .toUpperCase(),
-            departmentId: document.getElementById("section-department").value,
             specialty: document
               .getElementById("section-specialty")
               .value.trim(),
             level: document.getElementById("section-level").value,
             capacity: parseInt(
               document.getElementById("section-capacity").value
+            ),
+            departmentId: parseInt(
+              document.getElementById("section-department").value
             ),
           };
 
@@ -2329,16 +2448,63 @@
           showMessage("Erreur lors du chargement des responsables", "error");
         }
       }
-
       async function loadCurrentAssignments(sectionId) {
         const currentAssignments = document.getElementById(
           "current-assignments"
         );
 
         try {
-          const assignments = await apiCall(
-            `sections/${sectionId}/responsables`,
-            "GET"
+          console.log(`Fetching responsables for section: ${sectionId}`);
+
+          // Use direct fetch to ensure we get the raw response
+          const token =
+            localStorage.getItem("admin_token") ||
+            sessionStorage.getItem("admin_token");
+
+          const response = await fetch(
+            `https://unicersityback.onrender.com/api/sections/${sectionId}/responsables`,
+            {
+              headers: {
+                Authorization: token ? `Bearer ${token}` : "",
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("API response for assignments:", data);
+
+          // Enhanced process response to handle even more different response formats
+          let assignments = [];
+          if (data) {
+            if (Array.isArray(data)) {
+              assignments = data;
+            } else if (data.data && Array.isArray(data.data)) {
+              assignments = data.data;
+            } else if (data.responsables && Array.isArray(data.responsables)) {
+              assignments = data.responsables;
+            } else if (data.results && Array.isArray(data.results)) {
+              assignments = data.results;
+            } else if (typeof data === "object") {
+              // Check if this object has nested assignments
+              const possibleArrays = Object.values(data).filter((val) =>
+                Array.isArray(val)
+              );
+              if (possibleArrays.length > 0) {
+                // Use the first array found in the object
+                assignments = possibleArrays[0];
+              } else {
+                assignments = [data]; // Handle single object response
+              }
+            }
+          }
+
+          console.log(
+            `Processing ${assignments ? assignments.length : 0} assignments`
           );
 
           if (Array.isArray(assignments) && assignments.length > 0) {
@@ -2359,35 +2525,105 @@
                   html += `<div class="role-assignments">
                   <h4>${getRoleDisplayName(role)}</h4>
                   <ul>`;
-
                   roleAssignments.forEach((assignment) => {
-                    const teacherName = assignment.enseignant
-                      ? `${
-                          assignment.enseignant.firstName ||
-                          assignment.enseignant.prenom ||
-                          ""
-                        } ${
-                          assignment.enseignant.lastName ||
-                          assignment.enseignant.nom ||
-                          ""
-                        }`.trim()
-                      : "Non assigné";
+                    console.log("Processing assignment:", assignment);
 
-                    const groupInfo = assignment.group
-                      ? ` - Groupe: ${
-                          assignment.group.name || assignment.group
-                        }`
-                      : "";
+                    // Get teacher info from assignment with improved fallbacks
+                    let teacherName = "";
 
-                    html += `
-                    <li class="assignment-item">
-                      <div class="assignment-info">
-                        <span class="assignment-teacher">${teacherName}${groupInfo}</span>
-                      </div>
-                      <button class="remove-assignment-btn" onclick="removeAssignment('${sectionId}', '${assignment.id}')">
-                        <span class="material-icons">close</span>
-                      </button>
-                    </li>`;
+                    // Case 1: Teacher info in enseignant object
+                    if (assignment.enseignant) {
+                      const firstName =
+                        assignment.enseignant.firstName ||
+                        assignment.enseignant.prenom ||
+                        "";
+                      const lastName =
+                        assignment.enseignant.lastName ||
+                        assignment.enseignant.nom ||
+                        "";
+                      teacherName = `${firstName} ${lastName}`.trim();
+                    }
+                    // Case 2: Teacher info directly in the assignment
+                    else if (
+                      assignment.firstName ||
+                      assignment.lastName ||
+                      assignment.prenom ||
+                      assignment.nom
+                    ) {
+                      const firstName =
+                        assignment.firstName || assignment.prenom || "";
+                      const lastName =
+                        assignment.lastName || assignment.nom || "";
+                      teacherName = `${firstName} ${lastName}`.trim();
+                    }
+                    // Case 3: Teacher name as a single field
+                    else if (
+                      assignment.name ||
+                      assignment.teacherName ||
+                      assignment.enseignantName
+                    ) {
+                      teacherName =
+                        assignment.name ||
+                        assignment.teacherName ||
+                        assignment.enseignantName;
+                    }
+                    // Case 4: Teacher ID only (use placeholder)
+                    else if (assignment.enseignantId) {
+                      teacherName = `Enseignant #${assignment.enseignantId}`;
+                    }
+
+                    // Only continue processing if we have a teacher in some form
+                    if (teacherName || assignment.enseignantId) {
+                      // Enhanced group handling with more fallbacks
+                      let groupInfo = "";
+
+                      // Case 1: Group as an object
+                      if (assignment.group) {
+                        const groupName =
+                          assignment.group.name ||
+                          assignment.group.nom ||
+                          (typeof assignment.group === "string"
+                            ? assignment.group
+                            : "");
+                        if (groupName) {
+                          groupInfo = ` - Groupe: ${groupName}`;
+                        }
+                      }
+                      // Case 2: Group as separate ID/Name properties
+                      else if (assignment.groupId || assignment.groupName) {
+                        groupInfo = ` - Groupe: ${
+                          assignment.groupName || assignment.groupId
+                        }`;
+                      }
+                      // Case 3: TD/TP groups in specific properties
+                      else if (
+                        (role === "td" && assignment.tdGroupe) ||
+                        (role === "tp" && assignment.tpGroupe)
+                      ) {
+                        const groupe =
+                          role === "td"
+                            ? assignment.tdGroupe
+                            : assignment.tpGroupe;
+                        const groupName =
+                          typeof groupe === "object"
+                            ? groupe.name || groupe.nom
+                            : groupe;
+                        if (groupName) {
+                          groupInfo = ` - Groupe: ${groupName}`;
+                        }
+                      }
+                      html += `
+                      <li class="assignment-item">
+                        <div class="assignment-info">
+                          <span class="assignment-teacher">${teacherName}${groupInfo}</span>
+                        </div>
+                        <button class="remove-assignment-btn" onclick="removeAssignment('${sectionId}', '${
+                        assignment.id || assignment.enseignantId || ""
+                      }')">
+                          <span class="material-icons">close</span>
+                        </button>
+                      </li>`;
+                    }
                   });
 
                   html += "</ul></div>";
@@ -2396,15 +2632,26 @@
             );
 
             html += "</div>";
-            currentAssignments.innerHTML = html;
+
+            // Check if we actually found any valid assignments to display
+            if (html === '<div class="assignments-container"></div>') {
+              console.log("No valid assignments to display");
+              currentAssignments.innerHTML =
+                '<p class="no-assignments">Aucun responsable assigné</p>';
+            } else {
+              currentAssignments.innerHTML = html;
+            }
           } else {
+            console.log("No assignments found for section");
             currentAssignments.innerHTML =
               '<p class="no-assignments">Aucun responsable assigné</p>';
           }
         } catch (error) {
           console.error("Error loading current assignments:", error);
           currentAssignments.innerHTML =
-            '<p class="error">Erreur lors du chargement des assignations</p>';
+            '<p class="error">Erreur lors du chargement des assignations: ' +
+            (error.message || "Unknown error") +
+            "</p>";
         }
       }
 
@@ -2424,19 +2671,25 @@
         };
         return roleNames[role] || role;
       }
-
       async function handleTeacherAssignment(event) {
         event.preventDefault();
 
         const sectionId = document.getElementById(
           "assignment-section-id"
         ).value;
-        const teacherId = document.getElementById("teacher-select").value;
+        const teacherSelect = document.getElementById("teacher-select");
+        const teacherId = teacherSelect.value;
         const role = document.getElementById("teacher-role").value;
-        const groupId = document.getElementById("group-select").value;
+        const groupSelect = document.getElementById("group-select");
+        const groupId = groupSelect.value;
+
+        console.log(
+          `Assignment request - Section: ${sectionId}, Teacher: ${teacherId}, Role: ${role}, Group: ${groupId}`
+        );
 
         // Validate inputs
         if (!teacherId || !role) {
+          console.error("Missing required teacher or role input");
           showNotification(
             "Veuillez sélectionner un responsable et un rôle",
             "error"
@@ -2446,6 +2699,7 @@
 
         // Check if group is required for TD/TP roles
         if ((role === "td" || role === "tp") && !groupId) {
+          console.error("Missing required group for TD/TP role");
           showNotification(
             "Veuillez sélectionner un groupe pour ce rôle",
             "error"
@@ -2453,38 +2707,95 @@
           return;
         }
 
+        // Get selected teacher name for better feedback
+        const selectedTeacherOption =
+          teacherSelect.options[teacherSelect.selectedIndex];
+        const teacherName = selectedTeacherOption
+          ? selectedTeacherOption.textContent
+          : "Unknown";
+
         try {
           const assignmentData = {
             enseignantId: parseInt(teacherId),
             role: role,
-          };
-
-          // Handle group assignment for TD/TP roles
+          }; // Enhanced group assignment for TD/TP roles with better error handling
           if (groupId && (role === "td" || role === "tp")) {
             if (groupId.startsWith("default_")) {
-              const groupName = groupId.replace("default_", "").toUpperCase();
+              // Extract the group name from the default value
+              let groupName;
+              if (groupId === `default_${role}_new`) {
+                // This is a "create new" option - generate a unique name
+                const timestamp = new Date().getTime() % 10000; // Use timestamp for uniqueness
+                groupName = `${role.toUpperCase()}-${timestamp}`;
+              } else {
+                // Standard default group
+                groupName = groupId.replace("default_", "").toUpperCase();
+              }
+
               const groupType = role.toUpperCase();
+              console.log(
+                `Creating new group: ${groupName} of type ${groupType}`
+              );
 
               try {
-                const newGroup = await apiCall(
-                  `sections/${sectionId}/groupes`,
-                  "POST",
-                  {
-                    name: groupName,
-                    type: groupType,
-                    capacity: role === "td" ? 30 : 15,
-                  }
-                );
-                assignmentData.groupId = newGroup.id;
+                // First try the standard API endpoint
+                let newGroup;
+                try {
+                  newGroup = await apiCall(
+                    `sections/${sectionId}/groupes`,
+                    "POST",
+                    {
+                      name: groupName,
+                      type: groupType,
+                      capacity: role === "td" ? 30 : 15,
+                    }
+                  );
+                } catch (firstError) {
+                  console.warn(
+                    "Failed with first API endpoint, trying alternate:",
+                    firstError
+                  );
+                  // Try alternate API endpoint
+                  newGroup = await apiCall(
+                    `sections/${sectionId}/groups`,
+                    "POST",
+                    {
+                      name: groupName,
+                      type: groupType,
+                      capacity: role === "td" ? 30 : 15,
+                    }
+                  );
+                }
+
+                if (newGroup && newGroup.id) {
+                  assignmentData.groupId = newGroup.id;
+                  console.log(
+                    `Successfully created group with ID: ${newGroup.id}`
+                  );
+                } else {
+                  // No valid ID but creation didn't error
+                  console.warn(
+                    "Group created but no ID returned, using name as fallback"
+                  );
+                  assignmentData.groupName = groupName;
+                }
               } catch (groupError) {
                 console.warn(
-                  "Could not create group, using group name:",
+                  "Could not create group, using group name as fallback:",
                   groupError
                 );
                 assignmentData.groupName = groupName;
+                // Also include type for better identification
+                assignmentData.groupType = groupType;
               }
             } else {
-              assignmentData.groupId = parseInt(groupId);
+              // Use existing group ID
+              try {
+                assignmentData.groupId = parseInt(groupId);
+              } catch (parseError) {
+                // If parsing fails, use the original string
+                assignmentData.groupId = groupId;
+              }
             }
           }
 
@@ -2576,9 +2887,11 @@
           }
         }
       }
-
       async function loadGroupsForSection(sectionId, roleType) {
         const groupSelect = document.getElementById("group-select");
+        console.log(
+          `Loading groups for section ${sectionId}, role type: ${roleType}`
+        );
 
         try {
           // Clear existing options except the first one
@@ -2586,68 +2899,277 @@
             groupSelect.remove(1);
           }
 
-          // Get groups from API
-          const groups = await apiCall(`sections/${sectionId}/groupes`, "GET");
+          // Try multiple API endpoints for better compatibility
+          let response = null;
+          let data = null;
+          const token =
+            localStorage.getItem("admin_token") ||
+            sessionStorage.getItem("admin_token");
 
-          if (Array.isArray(groups)) {
-            // Filter groups based on role type
+          // First, try the standard endpoint
+          try {
+            response = await fetch(
+              `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`,
+              {
+                headers: {
+                  Authorization: token ? `Bearer ${token}` : "",
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            if (response.ok) {
+              data = await response.json();
+              console.log(
+                "API response for groups from primary endpoint:",
+                data
+              );
+            }
+          } catch (firstError) {
+            console.warn("Error with primary groups endpoint:", firstError);
+          }
+
+          // If no data yet, try alternative endpoint
+          if (!data) {
+            try {
+              response = await fetch(
+                `https://unicersityback.onrender.com/api/sections/${sectionId}/groups`,
+                {
+                  headers: {
+                    Authorization: token ? `Bearer ${token}` : "",
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              if (response.ok) {
+                data = await response.json();
+                console.log(
+                  "API response for groups from alternative endpoint:",
+                  data
+                );
+              }
+            } catch (secondError) {
+              console.warn(
+                "Error with alternative groups endpoint:",
+                secondError
+              );
+            }
+          }
+
+          if (!data) {
+            throw new Error("No valid data from any groups endpoint");
+          }
+
+          // Enhanced response processing to handle more formats
+          let groups = [];
+          if (data) {
+            if (Array.isArray(data)) {
+              groups = data;
+            } else if (data.data && Array.isArray(data.data)) {
+              groups = data.data;
+            } else if (data.groups && Array.isArray(data.groups)) {
+              groups = data.groups;
+            } else if (data.groupes && Array.isArray(data.groupes)) {
+              groups = data.groupes;
+            } else if (data.results && Array.isArray(data.results)) {
+              groups = data.results;
+            } else if (typeof data === "object") {
+              // Look for array properties with common group names
+              const arrayProps = Object.entries(data).filter(
+                ([key, val]) =>
+                  Array.isArray(val) &&
+                  (key.includes("group") || key.includes("groupe"))
+              );
+
+              if (arrayProps.length > 0) {
+                groups = arrayProps[0][1]; // Use the first matching array
+              } else {
+                // Last resort: look for any array
+                const anyArray = Object.values(data).find(Array.isArray);
+                if (anyArray) {
+                  groups = anyArray;
+                } else {
+                  groups = [data]; // Handle single object response
+                }
+              }
+            }
+          }
+          console.log(`Processing ${groups ? groups.length : 0} groups`);
+
+          if (Array.isArray(groups) && groups.length > 0) {
+            // Enhanced filtering with more property checks
             const filteredGroups = groups.filter((group) => {
+              if (!group) return false;
+
+              // Get the group type from various possible properties
+              const groupType = (
+                group.type ||
+                group.groupType ||
+                group.type_groupe ||
+                group.typeGroupe ||
+                group.group_type ||
+                ""
+              )
+                .toString()
+                .toLowerCase();
+
+              // Check if the group name contains the type
+              const groupName = (
+                group.name ||
+                group.nom ||
+                group.groupName ||
+                ""
+              )
+                .toString()
+                .toLowerCase();
+
               if (roleType === "td") {
-                return group.type === "TD" || group.type === "td";
+                return (
+                  groupType === "td" ||
+                  groupType.includes("td") ||
+                  groupName.includes("td")
+                );
               } else if (roleType === "tp") {
-                return group.type === "TP" || group.type === "tp";
+                return (
+                  groupType === "tp" ||
+                  groupType.includes("tp") ||
+                  groupName.includes("tp")
+                );
               }
               return true;
             });
 
+            console.log(`${filteredGroups.length} filtered groups available`);
+
+            // Sort groups by name for better usability
+            filteredGroups.sort((a, b) => {
+              const nameA = (a.name || a.nom || "").toString();
+              const nameB = (b.name || b.nom || "").toString();
+              return nameA.localeCompare(nameB);
+            });
+
+            // Add the filtered groups to the select
             filteredGroups.forEach((group) => {
               const option = document.createElement("option");
-              option.value = group.id;
-              option.textContent = `${group.name || group.nom} (${
-                group.type || "Groupe"
-              })`;
+              const groupId = group.id || group._id || group.groupId;
+              option.value = groupId || `temp_${group.name || group.nom}`;
+
+              // Get more consistent name and type
+              const groupName =
+                group.name || group.nom || group.groupName || "Groupe";
+              const groupType =
+                group.type || group.groupType || roleType.toUpperCase();
+
+              option.textContent = `${groupName} (${groupType})`;
               groupSelect.appendChild(option);
             });
 
-            // If no groups found, create default ones
+            // If no matching groups found, create default ones
             if (filteredGroups.length === 0) {
+              console.log("No matching groups found, creating defaults");
               const defaultGroups =
                 roleType === "td"
                   ? ["TD1", "TD2", "TD3"]
-                  : ["TP1", "TP2", "TP3", "TP4"];
-
+                  : ["TP1", "TP2", "TP3", "TP4"]; // Create default groups with section-specific naming
+              let counter = 1;
               defaultGroups.forEach((groupName) => {
                 const option = document.createElement("option");
                 option.value = `default_${groupName.toLowerCase()}`;
-                option.textContent = groupName;
+                option.textContent = `${groupName} (Section ${sectionId})`;
                 groupSelect.appendChild(option);
+                counter++;
               });
+
+              // Add a custom group option
+              const customOption = document.createElement("option");
+              customOption.value = `default_${roleType}${counter}`;
+              customOption.textContent = `${roleType.toUpperCase()}${counter} (Nouveau)`;
+              groupSelect.appendChild(customOption);
             }
+          } else {
+            console.log("No groups found from API, using defaults");
+            // No groups in response, use defaults with section ID
+            const defaultGroups =
+              roleType === "td"
+                ? ["TD1", "TD2", "TD3"]
+                : ["TP1", "TP2", "TP3", "TP4"];
+
+            defaultGroups.forEach((groupName) => {
+              const option = document.createElement("option");
+              option.value = `default_${groupName.toLowerCase()}`;
+              option.textContent = `${groupName} (Section ${sectionId})`;
+              groupSelect.appendChild(option);
+            });
+
+            // Add create new group option
+            const createOption = document.createElement("option");
+            createOption.value = `default_${roleType}_new`;
+            createOption.textContent = `Créer Nouveau Groupe ${roleType.toUpperCase()}`;
+            createOption.className = "create-group-option";
+            groupSelect.appendChild(createOption);
           }
         } catch (error) {
           console.error("Error loading groups:", error);
+          console.log("Falling back to default groups due to error");
 
-          // Fallback: create default groups
+          // Fallback: create default groups with better naming
           const defaultGroups =
             roleType === "td"
               ? ["TD1", "TD2", "TD3"]
               : ["TP1", "TP2", "TP3", "TP4"];
 
+          // Add section info to group names
           defaultGroups.forEach((groupName) => {
             const option = document.createElement("option");
             option.value = `default_${groupName.toLowerCase()}`;
-            option.textContent = groupName;
+            option.textContent = `${groupName} (Par défaut)`;
             groupSelect.appendChild(option);
           });
+
+          // Add create option
+          const createOption = document.createElement("option");
+          createOption.value = `default_${roleType}_new`;
+          createOption.textContent = `Créer Nouveau Groupe ${roleType.toUpperCase()}`;
+          createOption.className = "create-group-option";
+          groupSelect.appendChild(createOption);
+        }
+      }
+
+      // Auto-generate section code function
+      function generateSectionCode() {
+        const specialty = document
+          .getElementById("section-specialty")
+          .value.trim();
+        const level = document.getElementById("section-level").value.trim();
+        const name = document.getElementById("section-name").value.trim();
+        const codeInput = document.getElementById("section-code");
+
+        if (specialty && level && name) {
+          // Take first 3 letters of specialty (or pad with zeros if less than 3)
+          let specialtyCode = specialty.substring(0, 3).toUpperCase();
+          if (specialtyCode.length < 3) {
+            specialtyCode = specialtyCode.padEnd(3, "0");
+          }
+
+          // Use level as-is
+          const levelCode = level.toUpperCase();
+
+          // Take first letter of name
+          const nameCode = name.substring(0, 1).toUpperCase();
+
+          // Generate code in format: ACA-L-A
+          const generatedCode = `${specialtyCode}-${levelCode}-${nameCode}`;
+          codeInput.value = generatedCode;
+        } else {
+          codeInput.value = "";
         }
       }
 
       // Form validation and error handling
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("section-form");
-        const inputs = form.querySelectorAll("input, select");
-
-        // Add input validation
+        const inputs = form.querySelectorAll("input, select"); // Add input validation
         inputs.forEach((input) => {
           input.addEventListener("input", function () {
             validateInput(this);
@@ -2658,69 +3180,32 @@
           });
         });
 
-        // Form submission
-        form.addEventListener("submit", async function (e) {
-          e.preventDefault();
-
-          // Validate all inputs
-          let isValid = true;
-          inputs.forEach((input) => {
-            if (!validateInput(input)) {
-              isValid = false;
-            }
-          });
-
-          if (!isValid) {
-            showNotification(
-              "Veuillez corriger les erreurs dans le formulaire",
-              "error"
-            );
-            return;
-          }
-
-          try {
-            const formData = {
-              name: document.getElementById("section-name").value,
-              code: document.getElementById("section-code").value,
-              departmentId: document.getElementById("section-department").value,
-              specialty: document.getElementById("section-specialty").value,
-              level: document.getElementById("section-level").value,
-              capacity: parseInt(
-                document.getElementById("section-capacity").value
-              ),
-            };
-
-            const sectionId = document.getElementById("section-id").value;
-            let response;
-
-            if (sectionId) {
-              response = await window.sectionAPI.updateSection(
-                sectionId,
-                formData
-              );
-            } else {
-              response = await window.sectionAPI.createSection(formData);
-            }
-
-            // Close modal and refresh sections list
-            closeModal();
-            await loadSections();
-
-            // Show success message
-            showNotification("Section enregistrée avec succès", "success");
-          } catch (error) {
-            showNotification(
-              error.message || "Une erreur est survenue",
-              "error"
-            );
+        // Add auto-generation event listeners for specific fields
+        const specialtyInput = document.getElementById("section-specialty");
+        const levelInput = document.getElementById("section-level");
+        const nameInput = document.getElementById("section-name");
+        [specialtyInput, levelInput, nameInput].forEach((input) => {
+          if (input) {
+            input.addEventListener("input", generateSectionCode);
+            input.addEventListener("change", generateSectionCode);
           }
         });
       });
-
       function validateInput(input) {
         const errorElement = document.getElementById(`${input.id}-error`);
         let isValid = true;
         let errorMessage = "";
+
+        // Skip validation for readonly fields
+        if (input.readOnly) {
+          // Clear any existing error
+          input.classList.remove("error");
+          if (errorElement) {
+            errorElement.textContent = "";
+            errorElement.style.display = "none";
+          }
+          return true;
+        }
 
         // Required field validation
         if (input.required && !input.value.trim()) {
@@ -2736,21 +3221,21 @@
         ) {
           isValid = false;
           errorMessage = input.title || "Format invalide";
-        }
-
-        // Min/max length validation
+        } // Min/max length validation (only for text inputs)
         if (
           isValid &&
+          input.type !== "number" &&
           input.minLength &&
           input.value.length < input.minLength
         ) {
           isValid = false;
           errorMessage = `Minimum ${input.minLength} caractères`;
         }
-
         if (
           isValid &&
+          input.type !== "number" &&
           input.maxLength &&
+          input.maxLength > 0 &&
           input.value.length > input.maxLength
         ) {
           isValid = false;
@@ -2812,6 +3297,88 @@
       function showMessage(message, type = "info") {
         createNotification(message, type);
       }
+
+      // Function to update admin info in the sidebar
+      function updateSidebarAdminInfo() {
+        const adminName = document.getElementById("admin-name");
+        const adminRole = document.getElementById("admin-role");
+        const adminAvatar = document.getElementById("admin-avatar");
+
+        // Get admin data from session/local storage
+        const adminEmail =
+          sessionStorage.getItem("admin_email") ||
+          localStorage.getItem("admin_email");
+        const adminRoleValue =
+          sessionStorage.getItem("admin_role") ||
+          localStorage.getItem("admin_role");
+
+        // Extract name from email (e.g., sophie.williams@example.com -> Sophie Williams)
+        let displayName = "Admin";
+        if (adminEmail) {
+          const emailPrefix = adminEmail.split("@")[0];
+          // Convert email prefix to display name (sophie.williams -> Sophie Williams)
+          displayName = emailPrefix
+            .split(".")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" ");
+        }
+
+        // Map role values to display names
+        const roleDisplayNames = {
+          doyen: "Doyen",
+          "vice-doyen": "Vice-Doyen",
+          "chef-de-departement": "Chef de Département",
+          "chef-de-specialite": "Chef de Spécialité",
+          secretaire: "Secrétaire",
+        };
+
+        const displayRole =
+          roleDisplayNames[adminRoleValue] ||
+          adminRoleValue ||
+          "Administrateur";
+
+        // Update the elements
+        if (adminName) {
+          adminName.textContent = displayName;
+        }
+        if (adminRole) {
+          adminRole.textContent = displayRole;
+        }
+        if (adminAvatar) {
+          adminAvatar.textContent = displayName.charAt(0).toUpperCase();
+        }
+
+        // Also try to get from admin_data for backward compatibility
+        const adminData = JSON.parse(
+          sessionStorage.getItem("admin_data") ||
+            localStorage.getItem("admin_data") ||
+            "{}"
+        );
+
+        if (adminData.name && adminName) {
+          adminName.textContent = adminData.name;
+        }
+        if (adminData.role && adminRole) {
+          adminRole.textContent = adminData.role;
+        }
+        if (adminData.name && adminAvatar) {
+          adminAvatar.textContent = adminData.name.charAt(0).toUpperCase();
+        }
+      }
+
+      // Function to set active menu item in sidebar
+      function setSidebarActiveMenuItem() {
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll(".nav-item");
+
+        navItems.forEach((item) => {
+          if (item.getAttribute("href") === currentPath.split("/").pop()) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
+      }
     </script>
 
     <!-- Include the admin section utils -->
@@ -2822,11 +3389,13 @@
     <script src="js/enhanced-timetable-viewer.js"></script>
     <!-- Include the admin sections script -->
     <script src="js/admin-sections.js"></script>
-    <!-- Include the section statistics script -->
-    <script src="js/section-statistics.js"></script>
-    <!-- Include the section analytics script -->
-    <script src="js/section-analytics.js"></script>
     <!-- Include the improved renderSections function directly -->
     <script src="js/sections-fix.js"></script>
+    <!-- Include the enhanced section responsables display -->
+    <script src="js/section-responsables.js"></script>
+    <!-- Include the section filters functionality -->
+    <script src="js/section-filters.js"></script>
+    <!-- Include the sections initialization script -->
+    <script src="js/admin-sections-init.js"></script>
   </body>
 </html>

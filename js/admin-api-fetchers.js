@@ -18,7 +18,7 @@ async function fetchSectionChangeRequests(filters = {}) {
     console.log("Fetching section change requests with filters:", filters);
 
     // Prepare the endpoint
-    const endpoint = "change-requests/section";
+    const endpoint = "change-requests";
     const queryParams = new URLSearchParams();
 
     // Add filters to query parameters

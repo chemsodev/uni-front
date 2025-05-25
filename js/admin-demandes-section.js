@@ -14,19 +14,48 @@ const statusColors = {
   cancelled: "#6b7280", // Gray
 };
 
-// DOM Elements
-const requestListElement = document.getElementById("request-list");
-const detailsElement = document.getElementById("request-details");
-const filterStatusSelect = document.getElementById("filter-status");
-const filterDepartmentSelect = document.getElementById("filter-department");
-const searchInput = document.getElementById("search-input");
-const statusMessageElement = document.getElementById("status-message");
+// DOM Elements - will be initialized after DOM loads
+let requestListElement;
+let detailsElement;
+let filterStatusSelect;
+let filterDepartmentSelect;
+let searchInput;
+let statusMessageElement;
 
 // Event listeners
 document.addEventListener("DOMContentLoaded", async function () {
   try {
-    // First verify admin token
-    await verifyAdminToken();
+    // Initialize DOM elements
+    requestListElement = document.getElementById("requests-table-body");
+    detailsElement = document.getElementById("request-details");
+    filterStatusSelect = document.getElementById("status-filter");
+    filterDepartmentSelect = document.getElementById("filter-department");
+    searchInput = document.getElementById("search");
+    statusMessageElement = document.getElementById("status-message");
+
+    console.log("DOM elements initialized:", {
+      requestListElement,
+      detailsElement,
+      filterStatusSelect,
+      filterDepartmentSelect,
+      searchInput,
+      statusMessageElement,
+    });
+
+    // First verify admin token with fallback check
+    if (typeof verifyAdminToken === "function") {
+      await verifyAdminToken();
+    } else {
+      console.error("verifyAdminToken function not available");
+      // Fallback: redirect to login if no admin token
+      const token =
+        localStorage.getItem("admin_token") ||
+        sessionStorage.getItem("admin_token");
+      if (!token) {
+        window.location.href = "index.html";
+        return;
+      }
+    }
 
     // Load sidebar
     await loadSidebar();
@@ -73,8 +102,29 @@ async function loadSidebar() {
 
 // Initialize filters
 function initFilters() {
+  console.log("initFilters called");
+
+  // Try to get the elements if they're not already set
+  if (!filterStatusSelect)
+    filterStatusSelect = document.getElementById("status-filter");
+  if (!filterDepartmentSelect)
+    filterDepartmentSelect = document.getElementById("filter-department");
+  if (!searchInput) searchInput = document.getElementById("search");
+
+  console.log("filterStatusSelect:", filterStatusSelect);
+  console.log("filterDepartmentSelect:", filterDepartmentSelect);
+  console.log("searchInput:", searchInput);
+
   if (filterStatusSelect) {
+    console.log("filterStatusSelect.value:", filterStatusSelect.value);
     filterStatusSelect.addEventListener("change", applyFilters);
+  } else {
+    console.error(
+      "filterStatusSelect not found! Looking for element with ID 'status-filter'"
+    );
+    // Try to find it with querySelectorAll to see if there's a similar element
+    const selects = document.querySelectorAll("select");
+    console.log("All select elements:", selects);
   }
 
   if (filterDepartmentSelect) {
@@ -83,21 +133,76 @@ function initFilters() {
 
   if (searchInput) {
     searchInput.addEventListener("input", applyFilters);
+  } else {
+    console.error(
+      "searchInput not found! Looking for element with ID 'search'"
+    );
+    // Try to find any inputs
+    const inputs = document.querySelectorAll('input[type="text"]');
+    console.log("All text inputs:", inputs);
   }
 }
 
 // Load section change requests
 async function loadSectionRequests() {
   showMessage("Chargement des demandes...", "info");
-
   try {
-    // Use enhanced adminAPI if available
+    // Try the working API fetcher first
+    if (window.fetchSectionChangeRequests) {
+      try {
+        const result = await window.fetchSectionChangeRequests();
+        console.log("fetchSectionChangeRequests result:", result);
+        console.log("result type:", typeof result);
+        console.log("result.requests:", result?.requests);
+        console.log("result.success:", result?.success);
+
+        // Handle different possible return formats
+        let requestsArray = [];
+        if (Array.isArray(result)) {
+          // Direct array return
+          requestsArray = result;
+        } else if (result && result.success && Array.isArray(result.requests)) {
+          // Object with success flag and requests array
+          requestsArray = result.requests;
+        } else if (result && Array.isArray(result.data)) {
+          // Object with data array
+          requestsArray = result.data;
+        }
+
+        console.log("Extracted requestsArray:", requestsArray);
+
+        if (requestsArray.length > 0) {
+          console.log(
+            "Successfully got requests from fetchSectionChangeRequests:",
+            requestsArray
+          );
+          currentRequests = requestsArray;
+          filteredRequests = [...currentRequests];
+          console.log(
+            "Set filteredRequests to:",
+            filteredRequests.length,
+            "items"
+          );
+          // Synchronize with HTML script variable
+          syncWithHTMLScript();
+          renderRequestList();
+          showMessage("", "none");
+          return;
+        }
+      } catch (apiError) {
+        console.error("Error using fetchSectionChangeRequests:", apiError);
+      }
+    }
+
+    // Try enhanced adminAPI if available
     if (window.adminAPI && window.adminAPI.getSectionChangeRequests) {
       try {
         const requests = await window.adminAPI.getSectionChangeRequests();
         if (Array.isArray(requests)) {
           currentRequests = requests;
           filteredRequests = [...currentRequests];
+          // Synchronize with HTML script variable
+          syncWithHTMLScript();
           renderRequestList();
           showMessage("", "none");
           return;
@@ -112,14 +217,41 @@ async function loadSectionRequests() {
     }
 
     // Fallback to direct API call
-    const response = await apiCall("change-requests/section");
+    const response = await apiCall("change-requests", "GET");
 
-    if (!response || !response.data) {
-      throw new Error("Invalid response format");
-    }
+    if (!response) {
+      throw new Error("No response received");
+    } // Handle both wrapped and direct array responses
+    currentRequests = Array.isArray(response) ? response : response.data || [];
 
-    currentRequests = response.data;
+    // Debug: Log the raw response to see what we're getting
+    console.log("Raw API response for section requests:", response);
+    console.log("Processed currentRequests:", currentRequests);
+
+    // Filter for section change requests only (exclude group TD requests)
+    // Be more lenient with filtering - accept any request that has requestType "section"
+    // or doesn't have a requestType but might be a section request
+    currentRequests = currentRequests.filter((request) => {
+      const isSection = request.requestType === "section";
+      const mightBeSection = !request.requestType; // Accept requests without explicit type
+
+      console.log(
+        `Request ${request.id}: requestType="${request.requestType}", isSection=${isSection}, mightBeSection=${mightBeSection}`
+      );
+
+      return isSection || mightBeSection;
+    });
+
+    console.log(
+      "Filtered currentRequests after section filtering:",
+      currentRequests
+    );
     filteredRequests = [...currentRequests];
+
+    console.log("Final filteredRequests:", filteredRequests);
+
+    // Synchronize with HTML script variable
+    syncWithHTMLScript();
 
     // Render requests
     renderRequestList();
@@ -129,124 +261,243 @@ async function loadSectionRequests() {
   } catch (error) {
     console.error("Error loading section requests:", error);
 
-    // If we're in development mode, use mock data
-    if (DEV_MODE) {
-      // Try to use the newer mock data function first
-      if (typeof window.getMockDataForEndpoint === "function") {
-        currentRequests = window.getMockDataForEndpoint(
-          "change-requests/section"
-        );
-      } else if (typeof getMockSectionRequests === "function") {
-        currentRequests = getMockSectionRequests();
-      } else {
-        currentRequests = [];
-      }
+    // Enable mock data fallback for debugging
+    console.log("Attempting to use mock data...");
 
-      filteredRequests = [...currentRequests];
-      renderRequestList();
+    // Try to use the newer mock data function first
+    if (typeof window.getMockDataForEndpoint === "function") {
+      currentRequests = window.getMockDataForEndpoint(
+        "change-requests/section"
+      );
+      console.log("Using getMockDataForEndpoint, got:", currentRequests);
+    } else if (typeof getMockSectionRequests === "function") {
+      currentRequests = getMockSectionRequests();
+      console.log("Using getMockSectionRequests, got:", currentRequests);
+    } else {
+      currentRequests = [];
+      console.log("No mock data functions available");
+    }
+    filteredRequests = [...currentRequests];
+    // Synchronize with HTML script variable
+    syncWithHTMLScript();
+    renderRequestList();
+
+    if (currentRequests.length > 0) {
       showMessage(
         "Utilisation des données de test (mode développement)",
         "warning"
       );
     } else {
-      showMessage("Erreur lors du chargement des demandes", "error");
+      showMessage(
+        "Erreur lors du chargement des demandes: " + error.message,
+        "error"
+      );
     }
   }
 }
 
+// Synchronize variables with HTML script
+function syncWithHTMLScript() {
+  if (typeof window !== "undefined") {
+    window.allRequests = currentRequests;
+    window.currentRequests = currentRequests;
+    console.log(
+      "Synchronized variables with HTML script. allRequests length:",
+      window.allRequests.length
+    );
+
+    // Dispatch event to notify HTML script
+    window.dispatchEvent(new Event("sectionRequestsUpdated"));
+  }
+}
+
+// Modal opening function
+function openModal(requestId) {
+  console.log("External JS openModal called with ID:", requestId);
+
+  // Ensure we have the latest data synchronized
+  syncWithHTMLScript();
+
+  // If the HTML script has a function with this name, call it
+  if (
+    typeof window.openModal === "function" &&
+    window.openModal !== openModal
+  ) {
+    console.log("Calling HTML script's openModal function");
+    window.openModal(requestId);
+    return;
+  }
+
+  console.log("HTML openModal not found, opening modal directly");
+
+  // Direct implementation (fallback)
+  const requestModal = document.getElementById("request-modal");
+  const request = currentRequests.find((r) => r.id === requestId);
+
+  if (!request) {
+    console.error("No request found with ID:", requestId);
+    return;
+  }
+
+  if (requestModal) {
+    console.log("Opening modal for request:", request);
+
+    // Try to populate basic modal fields
+    const modalTitle = requestModal.querySelector(".modal-title");
+    if (modalTitle) {
+      modalTitle.textContent = "Détails de la Demande";
+    }
+
+    // Fill student name if possible
+    const studentNameEl = document.getElementById("student-name");
+    if (studentNameEl && request.etudiant) {
+      studentNameEl.textContent = `${request.etudiant.firstName} ${request.etudiant.lastName}`;
+    }
+
+    // Show the modal
+    requestModal.style.display = "block";
+  } else {
+    console.error("Modal element not found!");
+  }
+}
+
+// Make our modal function available globally
+window.openModalFromJS = openModal;
+
 // Render the list of requests
 function renderRequestList() {
-  if (!requestListElement) return;
+  console.log("renderRequestList called");
+
+  // If requestListElement is null, try to get it one more time
+  if (!requestListElement) {
+    requestListElement = document.getElementById("requests-table-body");
+    console.log(
+      "Attempting to re-acquire requestListElement:",
+      requestListElement
+    );
+  }
+
+  console.log("requestListElement:", requestListElement);
+
+  // DEBUGGING: Force filteredRequests to equal currentRequests
+  filteredRequests = [...currentRequests];
+
+  console.log("filteredRequests.length:", filteredRequests.length);
+  console.log("filteredRequests:", filteredRequests);
+
+  if (!requestListElement) {
+    console.error(
+      "requestListElement not found! Make sure the element with ID 'requests-table-body' exists in the HTML"
+    );
+    // Show where requests should be displayed
+    const tables = document.querySelectorAll("table");
+    console.log("Tables found in document:", tables.length);
+    tables.forEach((table, i) => {
+      console.log(`Table ${i} body:`, table.querySelector("tbody"));
+    });
+    return;
+  }
 
   // Clear existing content
   requestListElement.innerHTML = "";
 
   if (filteredRequests.length === 0) {
+    console.log("No filtered requests to display");
     requestListElement.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-        </div>
-        <h3>Aucune demande trouvée</h3>
-        <p>Aucune demande de changement de section ne correspond aux critères sélectionnés.</p>
-      </div>
+      <tr>
+        <td colspan="6" class="text-center">
+          Aucune demande de changement de section trouvée.
+        </td>
+      </tr>
     `;
     return;
   }
 
-  // Create a list item for each request
+  console.log("Rendering", filteredRequests.length, "requests");
+  // Create a table row for each request
   filteredRequests.forEach((request) => {
     const createdDate = new Date(request.createdAt).toLocaleDateString("fr-FR");
     const status = request.status || "pending";
-    const statusColor = statusColors[status] || statusColors.pending;
 
     const studentName = request.etudiant
       ? `${request.etudiant.firstName} ${request.etudiant.lastName}`
       : "Étudiant inconnu";
-
     const studentMatricule = request.etudiant
       ? request.etudiant.matricule
       : "N/A";
 
-    const currentSectionName = request.currentSection
-      ? request.currentSection.name
-      : "Section inconnue";
+    // Try multiple ways to get section names with better fallback handling
+    let currentSectionName = "Section inconnue";
+    let requestedSectionName = "Section inconnue";
 
-    const requestedSectionName = request.requestedSection
-      ? request.requestedSection.name
-      : "Section inconnue";
-
-    const listItem = document.createElement("div");
-    listItem.className = `list-item ${
-      request.id === selectedRequestId ? "active" : ""
-    }`;
-    listItem.onclick = () => selectRequest(request.id);
-
-    listItem.innerHTML = `
-      <div class="list-item-content">
-        <div class="student-info">
-          <div class="student-avatar">
-            ${studentName.charAt(0)}${
-      studentName.split(" ")[1]?.charAt(0) || ""
+    // Check if section data is directly available
+    if (request.currentSection?.name) {
+      currentSectionName = request.currentSection.name;
+    } else if (request.details?.currentSection) {
+      currentSectionName = request.details.currentSection;
+    } else if (request.currentSectionId) {
+      currentSectionName = `Section ID: ${request.currentSectionId}`;
     }
-          </div>
+
+    if (request.requestedSection?.name) {
+      requestedSectionName = request.requestedSection.name;
+    } else if (request.details?.requestedSection) {
+      requestedSectionName = request.details.requestedSection;
+    } else if (request.requestedSectionId) {
+      requestedSectionName = `Section ID: ${request.requestedSectionId}`;
+    }
+
+    // Debug logging for troubleshooting
+    console.log("Section request debug (list):", {
+      id: request.id,
+      currentSection: request.currentSection,
+      requestedSection: request.requestedSection,
+      details: request.details,
+      currentSectionName,
+      requestedSectionName,
+    });
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>
+        <div class="student-info">
+          <div class="student-avatar">${studentName.charAt(0)}</div>
           <div class="student-details">
             <span class="student-name">${studentName}</span>
-            <span class="student-matricule">${studentMatricule}</span>
+            <span class="student-matricule">Mat: ${studentMatricule}</span>
           </div>
         </div>
-
-        <div class="section-change-container">
-          <div class="section-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-            ${currentSectionName}
-          </div>
-          <span class="section-change-arrow">→</span>
-          <div class="section-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-            ${requestedSectionName}
-          </div>
-        </div>
-
-        <div class="list-item-meta">
-          <span class="request-date">${createdDate}</span>
-          <span class="request-status" style="background-color: ${statusColor}20; color: ${statusColor}">
-            ${capitalizeFirstLetter(status)}
-          </span>
-        </div>
-      </div>
+      </td>
+      <td><span class="section-badge">${currentSectionName}</span></td>
+      <td><span class="section-badge">${requestedSectionName}</span></td>
+      <td>${createdDate}</td>
+      <td><span class="request-status status-${status.toLowerCase()}">${capitalizeFirstLetter(
+      status
+    )}</span></td>
+      <td>
+        <button class="btn btn-primary btn-sm" onclick="openModal('${
+          request.id
+        }')">
+          Détails
+        </button>
+      </td>
     `;
-
-    requestListElement.appendChild(listItem);
+    requestListElement.appendChild(row);
   });
+
+  // Mark that the external JS has successfully rendered the table
+  console.log(
+    "External JS successfully rendered",
+    filteredRequests.length,
+    "rows"
+  );
+  window.externalJSRendered = true;
+
+  // Update the stats counters
+  if (typeof updateStats === "function") {
+    console.log("Calling updateStats from external JS");
+    updateStats();
+  }
 }
 
 // Select a request to view its details
@@ -281,18 +532,40 @@ function renderRequestDetails(request) {
   const studentName = request.etudiant
     ? `${request.etudiant.firstName} ${request.etudiant.lastName}`
     : "Étudiant inconnu";
-
   const studentMatricule = request.etudiant
     ? request.etudiant.matricule
     : "N/A";
 
-  const currentSectionName = request.currentSection
-    ? request.currentSection.name
-    : "Section inconnue";
+  // Try multiple ways to get section names with better fallback handling
+  let currentSectionName = "Section inconnue";
+  let requestedSectionName = "Section inconnue";
 
-  const requestedSectionName = request.requestedSection
-    ? request.requestedSection.name
-    : "Section inconnue";
+  // Check if section data is directly available
+  if (request.currentSection?.name) {
+    currentSectionName = request.currentSection.name;
+  } else if (request.details?.currentSection) {
+    currentSectionName = request.details.currentSection;
+  } else if (request.currentSectionId) {
+    currentSectionName = `Section ID: ${request.currentSectionId}`;
+  }
+
+  if (request.requestedSection?.name) {
+    requestedSectionName = request.requestedSection.name;
+  } else if (request.details?.requestedSection) {
+    requestedSectionName = request.details.requestedSection;
+  } else if (request.requestedSectionId) {
+    requestedSectionName = `Section ID: ${request.requestedSectionId}`;
+  }
+
+  // Debug logging for troubleshooting
+  console.log("Section request debug (details):", {
+    id: request.id,
+    currentSection: request.currentSection,
+    requestedSection: request.requestedSection,
+    details: request.details,
+    currentSectionName,
+    requestedSectionName,
+  });
 
   let statusActions = "";
 
@@ -423,24 +696,42 @@ function renderRequestDetails(request) {
 
 // Apply filters to the request list
 function applyFilters() {
+  console.log("=== applyFilters called ===");
   const statusFilter = filterStatusSelect ? filterStatusSelect.value : "";
   const departmentFilter = filterDepartmentSelect
     ? filterDepartmentSelect.value
     : "";
   const searchText = searchInput ? searchInput.value.toLowerCase() : "";
 
+  console.log("Applying filters:", {
+    statusFilter,
+    departmentFilter,
+    searchText,
+  });
+  console.log(
+    "Before filtering - currentRequests.length:",
+    currentRequests.length
+  );
+
   filteredRequests = currentRequests.filter((request) => {
     // Filter by status
-    if (statusFilter && request.status !== statusFilter) {
+    if (
+      statusFilter &&
+      statusFilter !== "all" &&
+      request.status !== statusFilter
+    ) {
+      console.log(
+        `Request ${request.id} filtered out by status: ${request.status} !== ${statusFilter}`
+      );
       return false;
-    }
-
-    // Filter by department
+    } // Filter by department
     if (
       departmentFilter &&
-      !request.currentSection?.department?.id !== departmentFilter &&
-      !request.requestedSection?.department?.id !== departmentFilter
+      departmentFilter !== "all" &&
+      request.currentSection?.department?.id !== departmentFilter &&
+      request.requestedSection?.department?.id !== departmentFilter
     ) {
+      console.log(`Request ${request.id} filtered out by department`);
       return false;
     }
 
@@ -460,9 +751,13 @@ function applyFilters() {
         return false;
       }
     }
-
     return true;
   });
+
+  console.log(
+    "After filtering - filteredRequests.length:",
+    filteredRequests.length
+  );
 
   // Re-render the request list
   renderRequestList();

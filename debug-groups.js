@@ -34,7 +34,7 @@ async function debugGroupAvailability() {
 
   try {
     const response = await fetch(
-      `https://uni-front-zeta.vercel.app/api/sections/${sectionId}/groupes`,
+      `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`,
       {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -122,7 +122,7 @@ async function fetchStudentData() {
   }
 
   const res = await fetch(
-    `https://uni-front-zeta.vercel.app/api/etudiants/${userId}`,
+    `https://unicersityback.onrender.com/api/etudiants/${userId}`,
     {
       headers: { Authorization: `Bearer ${authToken}` },
     }

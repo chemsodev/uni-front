@@ -10,7 +10,10 @@
     />
     <link href="style/admin.css" rel="stylesheet" />
     <link href="style/section-statistics.css" rel="stylesheet" />
-    <!-- Add reference to admin auth helper -->    <script src="js/admin-auth.js"></script>
+    <!-- Add reference to admin auth helper -->
+    <script src="js/admin-api-config.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-logout.js"></script>
     <script src="js/admin-pages-validation.js"></script>
     <script src="js/admin-mocks.js"></script>
     <script src="js/admin-api-utils.js"></script>
@@ -144,6 +147,110 @@
 
       .document-link:hover {
         text-decoration: underline;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.875rem;
+      }
+
+      .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #2563eb;
+      }
+
+      .btn-success {
+        background-color: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background-color: #059669;
+      }
+
+      .btn-danger {
+        background-color: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: #dc2626;
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .modal-actions {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .modal-actions .btn {
+        min-width: 160px;
+      }
+
+      .document-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background-color: #f3f4f6;
+        border-radius: 6px;
+        color: #1f2937;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+
+      .document-link:hover {
+        background-color: #e5e7eb;
+      }
+
+      .document-link svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 1rem;
+      }
+
+      .notes-field {
+        width: 100%;
+        min-height: 100px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        resize: vertical;
+        font-family: inherit;
+        margin-bottom: 1rem;
+      }
+
+      .notes-field:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
       }
     </style>
   </head>
@@ -492,60 +599,53 @@
       const currentSection = document.getElementById("current-section");
       const requestedSection = document.getElementById("requested-section");
       const requestReasonText = document.getElementById("request-reason-text");
-      const documentContainer = document.getElementById("document-container");
-
-      // Event listeners
+      const documentContainer = document.getElementById("document-container"); // Event listeners
       document.addEventListener("DOMContentLoaded", async function () {
         try {
           // Verify admin token first
           await verifyAdminToken();
 
-          // Load sidebar and data
+          // Load sidebar
           await loadSidebar();
-          await loadRequests();
+
+          // Setup event listeners
           setupEventListeners();
-          updateStats(); // Initial stats calculation
         } catch (error) {
           console.error("Error initializing page:", error);
           showMessage("Erreur lors du chargement de la page", "error");
         }
       });
-      async function loadRequests() {
-        if (!requestsTableBody) {
-          console.error("requestsTableBody element not found.");
-          if (statusMessage)
-            statusMessage.textContent = "Erreur: Table non trouvée.";
-          return;
-        }
-        requestsTableBody.innerHTML =
-          '<tr><td colspan="6" class="loading">Chargement des demandes...</td></tr>';
-        try {          // Use the fetchSectionChangeRequests from admin-api-fetchers.js
-          const data = await fetchSectionChangeRequests();
-          // Make sure to extract the requests array properly based on API response
-          allRequests = Array.isArray(data.requests) ? data.requests :
-                      (Array.isArray(data) ? data : []);
-          // Create a copy for filtered requests
-          filteredRequests = [...allRequests];
-          if (allRequests.length === 0) {
-            requestsTableBody.innerHTML =
-              '<tr><td colspan="6" class="no-data">Aucune demande de changement de section trouvée.</td></tr>';
-          } else {
-            renderTable();
+      async function loadSidebar() {
+        try {
+          const response = await fetch("admin-sidebar.html");
+          if (!response.ok) throw new Error("Failed to load sidebar");
+          const html = await response.text();
+          document.getElementById("sidebar-container").innerHTML = html;
+
+          // Set up logout button event listener
+          const logoutBtn = document.getElementById("logout-btn");
+          if (logoutBtn && typeof handleAdminLogout === "function") {
+            logoutBtn.addEventListener("click", handleAdminLogout);
           }
-          updateStats();
+
+          // Update admin info manually since scripts in innerHTML don't execute
+          updateSidebarAdminInfo();
+
+          // Set active menu item
+          setSidebarActiveMenuItem();
         } catch (error) {
-          console.error("Error loading requests:", error);
-          requestsTableBody.innerHTML = `<tr><td colspan="6" class="status-message error">Erreur de chargement des demandes: ${
-            error.message || "Veuillez réessayer."
-          }</td></tr>`;
-          if (statusMessage)
-            showMessage(`Erreur de chargement: ${error.message}`, "error");
+          console.error("Error loading sidebar:", error);
         }
       }
 
       function setupEventListeners() {
         if (statusFilter) {
           statusFilter.addEventListener("change", () => {
+            filterAndRender();
+          });
+        }
+        if (searchInput) {
+          searchInput.addEventListener("input", () => {
             filterAndRender();
           });
         }
@@ -557,23 +657,42 @@
             closeModal();
           }
         });
-        // Add other listeners like search if a search input is added
-      }
 
+        // Add event listeners for approve/reject buttons
+        const approveBtn = document.getElementById("approve-btn");
+        const rejectBtn = document.getElementById("reject-btn");
+        if (approveBtn) {
+          approveBtn.addEventListener("click", () =>
+            handleUpdateRequest(
+              currentRequest.id,
+              "approved",
+              document.getElementById("admin-comment").value
+            )
+          );
+        }
+        if (rejectBtn) {
+          rejectBtn.addEventListener("click", () =>
+            handleUpdateRequest(
+              currentRequest.id,
+              "rejected",
+              document.getElementById("admin-comment").value
+            )
+          );
+        }
+      }
       function filterAndRender() {
         const status = statusFilter ? statusFilter.value : "all";
-        // Add search filter logic if a search input exists
-        // const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
 
         filteredRequests = allRequests.filter((request) => {
           const matchesStatus = status === "all" || request.status === status;
-          // const matchesSearch = searchTerm === "" ||
-          //                       request.student?.name?.toLowerCase().includes(searchTerm) ||
-          //                       request.student?.matricule?.toLowerCase().includes(searchTerm) ||
-          //                       request.currentSection?.name?.toLowerCase().includes(searchTerm) ||
-          //                       request.requestedSection?.name?.toLowerCase().includes(searchTerm);
-          // return matchesStatus && matchesSearch;
-          return matchesStatus;
+          const matchesSearch =
+            searchTerm === "" ||
+            request.student?.name?.toLowerCase().includes(searchTerm) ||
+            request.student?.matricule?.toLowerCase().includes(searchTerm) ||
+            request.currentSection?.name?.toLowerCase().includes(searchTerm) ||
+            request.requestedSection?.name?.toLowerCase().includes(searchTerm);
+          return matchesStatus && matchesSearch;
         });
         currentPage = 1;
         renderTable();
@@ -582,7 +701,7 @@
 
       function renderTable() {
         if (!requestsTableBody) return;
-        requestsTableBody.innerHTML = ""; // Clear previous rows
+        requestsTableBody.innerHTML = "";
 
         if (filteredRequests.length === 0) {
           requestsTableBody.innerHTML =
@@ -597,20 +716,18 @@
 
         paginatedRequests.forEach((request) => {
           const row = document.createElement("tr");
-          // Adjust according to the actual data structure from your backend
+          const studentName = `${request.etudiant?.firstName || ""} ${
+            request.etudiant?.lastName || ""
+          }`.trim();
+          const studentMatricule = request.etudiant?.matricule || "N/A";
+
           row.innerHTML = `
             <td>
               <div class="student-info">
-                <img src="${
-                  request.student?.avatar || "placeholder_avatar.png"
-                }" alt="Avatar" class="student-avatar">
+                <div class="student-avatar">${studentName.charAt(0)}</div>
                 <div class="student-details">
-                  <span class="student-name">${
-                    request.student?.name || "N/A"
-                  }</span>
-                  <span class="student-matricule">Mat: ${
-                    request.student?.matricule || "N/A"
-                  }</span>
+                  <span class="student-name">${studentName || "N/A"}</span>
+                  <span class="student-matricule">Mat: ${studentMatricule}</span>
                 </div>
               </div>
             </td>
@@ -620,15 +737,21 @@
             <td><span class="section-badge">${
               request.requestedSection?.name || "N/A"
             }</span></td>
-            <td>${new Date(request.dateSubmitted).toLocaleDateString()}</td>
+            <td>${new Date(request.createdAt).toLocaleDateString()}</td>
             <td><span class="request-status status-${
               request.status?.toLowerCase() || "pending"
             }">${request.status || "En attente"}</span></td>
             <td>
               <button class="btn btn-primary btn-sm" onclick="openModal('${
                 request.id
-              }')">Détails</button>
-              <!-- Add approve/reject buttons if direct actions are needed here -->
+              }')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Détails
+              </button>
             </td>
           `;
           requestsTableBody.appendChild(row);
@@ -659,88 +782,148 @@
       }
 
       function updateStats() {
-        if (totalRequestsEl) totalRequestsEl.textContent = allRequests.length;
-        if (pendingRequestsEl)
+        if (!allRequests) return;
+
+        // Update total requests
+        if (totalRequestsEl) {
+          totalRequestsEl.textContent = allRequests.length;
+        }
+
+        // Update pending requests
+        if (pendingRequestsEl) {
           pendingRequestsEl.textContent = allRequests.filter(
             (r) => r.status === "pending"
           ).length;
-        if (approvedRequestsEl)
+        }
+
+        // Update approved requests
+        if (approvedRequestsEl) {
           approvedRequestsEl.textContent = allRequests.filter(
             (r) => r.status === "approved"
           ).length;
-        if (rejectedRequestsEl)
+        }
+
+        // Update rejected requests
+        if (rejectedRequestsEl) {
           rejectedRequestsEl.textContent = allRequests.filter(
             (r) => r.status === "rejected"
           ).length;
-        // Potentially update charts if they are present and configured
+        }
       }
 
-      async function openModal(requestId) {
-        currentRequest = allRequests.find((r) => r.id === requestId);
-        if (!currentRequest || !requestModal) return;
+      // Helper to show status messages with improved formatting
+      function showMessage(message, type = "info") {
+        if (!statusMessage) return;
 
-        // Populate modal fields - adjust selectors and properties based on your modal HTML and data
-        if (studentAvatar)
-          studentAvatar.src =
-            currentRequest.student?.avatar || "placeholder_avatar.png";
-        if (studentName)
-          studentName.textContent = currentRequest.student?.name || "N/A";
-        if (studentMatricule)
-          studentMatricule.textContent = `Matricule: ${
-            currentRequest.student?.matricule || "N/A"
-          }`;
-        if (studentEmail)
-          studentEmail.textContent = `Email: ${
-            currentRequest.student?.email || "N/A"
-          }`;
-        if (requestDate)
+        statusMessage.textContent = message;
+        statusMessage.className = `status-message ${type}`;
+        statusMessage.style.display = "block";
+
+        // Auto-hide success and info messages after 5 seconds
+        if (type === "success" || type === "info") {
+          setTimeout(() => {
+            statusMessage.style.display = "none";
+          }, 5000);
+        }
+      }
+      async function openModal(requestId) {
+        console.log(
+          "[HTML Script] openModal called with requestId:",
+          requestId
+        );
+
+        // Try to find the request in allRequests first
+        currentRequest = allRequests.find((r) => r.id === requestId);
+
+        // If not found, check window.currentRequests (from external JS)
+        if (!currentRequest && window.currentRequests) {
+          console.log(
+            "[HTML Script] Request not found in allRequests, checking window.currentRequests"
+          );
+          currentRequest = window.currentRequests.find(
+            (r) => r.id === requestId
+          );
+        }
+
+        if (!currentRequest) {
+          console.error("[HTML Script] Request not found with ID:", requestId);
+          return;
+        }
+
+        if (!requestModal) {
+          console.error("[HTML Script] Modal element not found");
+          return;
+        }
+
+        console.log("[HTML Script] Opening modal for request:", currentRequest);
+
+        // Populate modal fields
+        const studentName = `${currentRequest.etudiant?.firstName || ""} ${
+          currentRequest.etudiant?.lastName || ""
+        }`.trim();
+        const studentMatricule = currentRequest.etudiant?.matricule || "N/A";
+        const studentEmail = currentRequest.etudiant?.email || "N/A";
+
+        if (studentAvatar) {
+          studentAvatar.textContent = studentName.charAt(0);
+        }
+        if (studentName) {
+          document.getElementById("student-name").textContent = studentName;
+        }
+        if (studentMatricule) {
+          document.getElementById(
+            "student-matricule"
+          ).textContent = `Matricule: ${studentMatricule}`;
+        }
+        if (studentEmail) {
+          document.getElementById(
+            "student-email"
+          ).textContent = `Email: ${studentEmail}`;
+        }
+        if (requestDate) {
           requestDate.textContent = `Soumis le: ${new Date(
-            currentRequest.dateSubmitted
+            currentRequest.createdAt
           ).toLocaleString()}`;
+        }
         if (requestStatus) {
           requestStatus.textContent = currentRequest.status || "En attente";
           requestStatus.className = `request-status status-${
             currentRequest.status?.toLowerCase() || "pending"
           }`;
         }
-        if (currentSection)
+        if (currentSection) {
           currentSection.textContent =
             currentRequest.currentSection?.name || "N/A";
-        if (requestedSection)
+        }
+        if (requestedSection) {
           requestedSection.textContent =
             currentRequest.requestedSection?.name || "N/A";
-        if (requestReasonText)
+        }
+        if (requestReasonText) {
           requestReasonText.textContent =
-            currentRequest.reason || "Aucune raison fournie.";
-
-        if (documentContainer) {
-          documentContainer.innerHTML = ""; // Clear previous documents
-          if (currentRequest.documents && currentRequest.documents.length > 0) {
-            currentRequest.documents.forEach((doc) => {
-              const docLink = document.createElement("a");
-              docLink.href = doc.url; // Assuming doc object has url and name
-              docLink.textContent = doc.name || "Document justificatif";
-              docLink.className = "document-link";
-              docLink.target = "_blank";
-              documentContainer.appendChild(docLink);
-            });
-          } else {
-            documentContainer.innerHTML =
-              "<p>Aucun document justificatif fourni.</p>";
-          }
+            currentRequest.justification || "Aucune raison fournie.";
         }
 
-        // Add logic for approve/reject buttons within the modal if they exist
-        // e.g., const approveBtn = document.getElementById('approve-request-btn');
-        // approveBtn.onclick = () => handleUpdateRequest(currentRequest.id, 'approved');
+        // Update document link
+        updateDocumentLink(currentRequest);
+
+        // Show/hide action buttons based on request status
+        const actionButtons = document.getElementById("action-buttons");
+        if (actionButtons) {
+          actionButtons.style.display =
+            currentRequest.status === "pending" ? "block" : "none";
+        }
 
         requestModal.style.display = "block";
       }
-
       function closeModal() {
+        console.log("[HTML Script] Closing modal");
         if (requestModal) requestModal.style.display = "none";
         currentRequest = null;
-      }      // Example: Function to handle updating request status (called from modal buttons)
+      }
+
+      // Make closeModal available globally
+      window.closeModal = closeModal;
       async function handleUpdateRequest(
         requestId,
         newStatus,
@@ -750,21 +933,260 @@
           showMessage("Authentification requise.", "error");
           return;
         }
+
+        // Disable buttons during processing
+        const approveBtn = document.getElementById("approve-btn");
+        const rejectBtn = document.getElementById("reject-btn");
+        if (approveBtn) approveBtn.disabled = true;
+        if (rejectBtn) rejectBtn.disabled = true;
+
         try {
-          // Assuming updateSectionChangeRequestStatus is defined in admin-api-utils.js or similar
-          const response = await updateSectionChangeRequestStatus(
-            requestId,
-            newStatus,
-            adminNotes,
-            authToken
-          );          if (response && response.success) {
-            showMessage("Statut de la demande mis à jour avec succès.", "success");
-            await loadRequests(); // Reload the list
-          } else {
-            showMessage(response?.message || "Échec de la mise à jour du statut.", "error");
+          showMessage("Traitement de la demande...", "info");
+
+          // Use enhanced adminAPI if available
+          let success = false;
+          if (window.adminAPI && window.adminAPI.updateSectionChangeStatus) {
+            try {
+              await window.adminAPI.updateSectionChangeStatus(
+                requestId,
+                newStatus,
+                adminNotes
+              );
+              success = true;
+            } catch (apiError) {
+              console.error(
+                "Error using adminAPI.updateSectionChangeStatus:",
+                apiError
+              );
+            }
           }
+
+          // Fallback to direct API call if adminAPI failed
+          if (!success) {
+            await apiCall(`change-requests/${requestId}/status`, "PATCH", {
+              status: newStatus,
+              responseMessage: adminNotes,
+            });
+          }
+
+          // Close modal first
+          closeModal();
+
+          // Reload all data
+          await loadSectionRequests();
+
+          // Update stats and render table
+          updateStats();
+          renderTable();
+
+          showMessage(
+            `Demande ${
+              newStatus === "approved" ? "approuvée" : "rejetée"
+            } avec succès!`,
+            "success"
+          );
         } catch (error) {
           console.error("Error updating request:", error);
-          showMessage(`Erreur: ${error.message || "Opération échouée"}`, "error");
+          showMessage(
+            `Erreur: ${error.message || "Opération échouée"}`,
+            "error"
+          );
+        } finally {
+          // Re-enable buttons
+          if (approveBtn) approveBtn.disabled = false;
+          if (rejectBtn) rejectBtn.disabled = false;
         }
       }
+
+      // Synchronize with external JS
+      function syncWithExternalJS() {
+        if (window.currentRequests) {
+          allRequests = window.currentRequests;
+          updateStats();
+        }
+      }
+
+      // Add event listener for when external JS updates the data
+      window.addEventListener("sectionRequestsUpdated", syncWithExternalJS);
+
+      // Initial sync
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(syncWithExternalJS, 500); // Wait for external JS to load data
+      });
+
+      function openDocumentViewer(requestId, documentName) {
+        const authToken =
+          sessionStorage.getItem("admin_token") ||
+          localStorage.getItem("admin_token");
+        if (!authToken) {
+          showMessage(
+            "Authentification requise pour voir le document",
+            "error"
+          );
+          return;
+        }
+
+        const viewerUrl = `document-viewer.html?id=${requestId}&token=${encodeURIComponent(
+          authToken
+        )}&context=admin`;
+        window.open(viewerUrl, "_blank", "width=800,height=600");
+      }
+
+      // Update the document link in the modal
+      function updateDocumentLink(request) {
+        const documentContainer = document.getElementById("document-container");
+        const documentLink = document.getElementById("document-link");
+        const documentName = document.getElementById("document-name");
+
+        if (documentContainer && documentLink && documentName) {
+          if (request.documentName || request.documentData) {
+            documentContainer.style.display = "block";
+            documentName.textContent =
+              request.documentName || "Document justificatif";
+
+            // Update document link with icon and download functionality
+            documentLink.innerHTML = `
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>${request.documentName || "Document justificatif"}</span>
+            `;
+
+            // Handle both viewing and downloading
+            documentLink.onclick = async (e) => {
+              e.preventDefault();
+
+              // If it's a direct download (Ctrl+Click or right-click)
+              if (e.ctrlKey || e.button === 2) {
+                try {
+                  const response = await fetch(
+                    `${API_BASE_URL}/change-requests/${request.id}/document`,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${authToken}`,
+                      },
+                    }
+                  );
+
+                  if (!response.ok)
+                    throw new Error("Failed to download document");
+
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = request.documentName || `document-${request.id}`;
+                  document.body.appendChild(a);
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(a);
+                } catch (error) {
+                  console.error("Error downloading document:", error);
+                  showMessage(
+                    "Erreur lors du téléchargement du document",
+                    "error"
+                  );
+                }
+              } else {
+                // Normal click - open in viewer
+                openDocumentViewer(request.id, request.documentName);
+              }
+            };
+
+            // Add right-click context menu
+            documentLink.addEventListener("contextmenu", (e) => {
+              e.preventDefault();
+              documentLink.click();
+            });
+          } else {
+            documentContainer.style.display = "none";
+          }
+        }
+      }
+
+      // Function to update admin info in the sidebar
+      function updateSidebarAdminInfo() {
+        const adminName = document.getElementById("admin-name");
+        const adminRole = document.getElementById("admin-role");
+        const adminAvatar = document.getElementById("admin-avatar");
+
+        // Get admin data from session/local storage
+        const adminEmail =
+          sessionStorage.getItem("admin_email") ||
+          localStorage.getItem("admin_email");
+        const adminRoleValue =
+          sessionStorage.getItem("admin_role") ||
+          localStorage.getItem("admin_role");
+
+        // Extract name from email (e.g., sophie.williams@example.com -> Sophie Williams)
+        let displayName = "Admin";
+        if (adminEmail) {
+          const emailPrefix = adminEmail.split("@")[0];
+          // Convert email prefix to display name (sophie.williams -> Sophie Williams)
+          displayName = emailPrefix
+            .split(".")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" ");
+        }
+
+        // Map role values to display names
+        const roleDisplayNames = {
+          doyen: "Doyen",
+          "vice-doyen": "Vice-Doyen",
+          "chef-de-departement": "Chef de Département",
+          "chef-de-specialite": "Chef de Spécialité",
+          secretaire: "Secrétaire",
+        };
+
+        const displayRole =
+          roleDisplayNames[adminRoleValue] ||
+          adminRoleValue ||
+          "Administrateur";
+
+        // Update the elements
+        if (adminName) {
+          adminName.textContent = displayName;
+        }
+        if (adminRole) {
+          adminRole.textContent = displayRole;
+        }
+        if (adminAvatar) {
+          adminAvatar.textContent = displayName.charAt(0).toUpperCase();
+        }
+
+        // Also try to get from admin_data for backward compatibility
+        const adminData = JSON.parse(
+          sessionStorage.getItem("admin_data") ||
+            localStorage.getItem("admin_data") ||
+            "{}"
+        );
+
+        if (adminData.name && adminName) {
+          adminName.textContent = adminData.name;
+        }
+        if (adminData.role && adminRole) {
+          adminRole.textContent = adminData.role;
+        }
+        if (adminData.name && adminAvatar) {
+          adminAvatar.textContent = adminData.name.charAt(0).toUpperCase();
+        }
+      }
+
+      // Function to set active menu item in sidebar
+      function setSidebarActiveMenuItem() {
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll(".nav-item");
+
+        navItems.forEach((item) => {
+          if (item.getAttribute("href") === currentPath.split("/").pop()) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

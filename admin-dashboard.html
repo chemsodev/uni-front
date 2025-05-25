@@ -12,6 +12,7 @@
     <link href="style/section-statistics.css" rel="stylesheet" />
     <script src="js/admin-api-config.js"></script>
     <script src="js/admin-auth.js"></script>
+    <script src="js/admin-logout.js"></script>
     <script src="js/admin-pages-validation.js"></script>
     <script src="js/admin-mocks.js"></script>
     <script src="js/admin-dashboard-utils.js"></script>
@@ -349,13 +350,22 @@
           );
         }
       });
-
       async function loadSidebar() {
         try {
           const response = await fetch("admin-sidebar.html");
           if (!response.ok) throw new Error("Failed to load sidebar");
           const html = await response.text();
           navbarContainer.innerHTML = html;
+
+          // Set up logout button event listener
+          const logoutBtn = document.getElementById("logout-btn");
+          if (logoutBtn && typeof handleAdminLogout === "function") {
+            logoutBtn.addEventListener("click", handleAdminLogout);
+          } // Update admin info manually since scripts in innerHTML don't execute
+          updateSidebarAdminInfo();
+
+          // Set active menu item
+          setSidebarActiveMenuItem();
         } catch (error) {
           console.error("Error loading sidebar:", error);
           showMessage("Failed to load navigation sidebar", "error");
@@ -826,6 +836,88 @@
             statusMessage.style.display = "none";
           }, 5000);
         }
+      }
+
+      // Function to update admin info in the sidebar
+      function updateSidebarAdminInfo() {
+        const adminName = document.getElementById("admin-name");
+        const adminRole = document.getElementById("admin-role");
+        const adminAvatar = document.getElementById("admin-avatar");
+
+        // Get admin data from session/local storage
+        const adminEmail =
+          sessionStorage.getItem("admin_email") ||
+          localStorage.getItem("admin_email");
+        const adminRoleValue =
+          sessionStorage.getItem("admin_role") ||
+          localStorage.getItem("admin_role");
+
+        // Extract name from email (e.g., sophie.williams@example.com -> Sophie Williams)
+        let displayName = "Admin";
+        if (adminEmail) {
+          const emailPrefix = adminEmail.split("@")[0];
+          // Convert email prefix to display name (sophie.williams -> Sophie Williams)
+          displayName = emailPrefix
+            .split(".")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" ");
+        }
+
+        // Map role values to display names
+        const roleDisplayNames = {
+          doyen: "Doyen",
+          "vice-doyen": "Vice-Doyen",
+          "chef-de-departement": "Chef de Département",
+          "chef-de-specialite": "Chef de Spécialité",
+          secretaire: "Secrétaire",
+        };
+
+        const displayRole =
+          roleDisplayNames[adminRoleValue] ||
+          adminRoleValue ||
+          "Administrateur";
+
+        // Update the elements
+        if (adminName) {
+          adminName.textContent = displayName;
+        }
+        if (adminRole) {
+          adminRole.textContent = displayRole;
+        }
+        if (adminAvatar) {
+          adminAvatar.textContent = displayName.charAt(0).toUpperCase();
+        }
+
+        // Also try to get from admin_data for backward compatibility
+        const adminData = JSON.parse(
+          sessionStorage.getItem("admin_data") ||
+            localStorage.getItem("admin_data") ||
+            "{}"
+        );
+
+        if (adminData.name && adminName) {
+          adminName.textContent = adminData.name;
+        }
+        if (adminData.role && adminRole) {
+          adminRole.textContent = adminData.role;
+        }
+        if (adminData.name && adminAvatar) {
+          adminAvatar.textContent = adminData.name.charAt(0).toUpperCase();
+        }
+      }
+
+      // Function to set active menu item in sidebar
+      function setSidebarActiveMenuItem() {
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll(".nav-item");
+
+        navItems.forEach((item) => {
+          if (item.getAttribute("href") === currentPath.split("/").pop()) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
       }
     </script>
   </body>

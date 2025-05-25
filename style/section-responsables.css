@@ -1,0 +1,281 @@
+/* Section Responsables Styling */
+
+/* Main responsables container */
+.responsables-organized {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  max-width: 240px;
+  min-width: 200px;
+  border-radius: 8px;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* List styling for responsables */
+.responsables-organized ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.responsables-organized li {
+  padding: 0;
+  margin: 0;
+}
+
+/* Role group styling */
+.role-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background-color: rgba(var(--primary-color-rgb), 0.05);
+  border-left: 3px solid var(--primary-color);
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.role-group:hover {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  transform: translateX(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Role-specific styling with enhanced colors */
+.role-group[title*="Filière"] {
+  border-left-color: #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.08);
+}
+.role-group[title*="Filière"]:hover {
+  background-color: rgba(139, 92, 246, 0.12);
+}
+
+.role-group[title*="Section"] {
+  border-left-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.08);
+}
+.role-group[title*="Section"]:hover {
+  background-color: rgba(59, 130, 246, 0.12);
+}
+
+.role-group[title*="TD"] {
+  border-left-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.08);
+}
+.role-group[title*="TD"]:hover {
+  background-color: rgba(16, 185, 129, 0.12);
+}
+
+.role-group[title*="TP"] {
+  border-left-color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.08);
+}
+.role-group[title*="TP"]:hover {
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+/* Role header styling */
+.role-header {
+  font-size: 16px;
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Teacher name styling */
+.teacher-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: default;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.teacher-name:hover {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.teacher-name:after {
+  content: attr(title);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.teacher-name:hover:after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Teacher assignments container */
+.teacher-assignments {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.teacher-assignments ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 3px;
+}
+
+.teacher-assignments li {
+  padding: 2px 0;
+  margin: 0;
+}
+
+/* Loading and empty states */
+.loading-teachers {
+  font-size: 0.8rem;
+  color: #666;
+  padding: 8px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  animation: pulse 1.5s infinite;
+}
+
+.no-teachers {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.85rem;
+  padding: 8px;
+  text-align: center;
+  background-color: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 4px;
+  font-weight: 400;
+}
+
+.error-teachers {
+  color: #ef4444;
+  font-size: 0.85rem;
+  padding: 8px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Animation for loading state */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* Role-specific header colors */
+.role-filiere .role-header {
+  color: #8b5cf6;
+}
+
+.role-section .role-header {
+  color: #3b82f6;
+}
+
+.role-td .role-header {
+  color: #10b981;
+}
+
+.role-tp .role-header {
+  color: #f59e0b;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .responsables-organized {
+    max-width: 200px;
+    min-width: 180px;
+    padding: 4px;
+  }
+
+  .role-group {
+    padding: 2px 4px;
+    gap: 4px;
+  }
+
+  .teacher-name {
+    font-size: 0.75rem;
+  }
+
+  .role-header {
+    font-size: 12px;
+    min-width: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .responsables-organized {
+    max-width: 150px;
+    min-width: 120px;
+  }
+
+  .role-group {
+    padding: 1px 3px;
+    gap: 3px;
+  }
+
+  .teacher-name {
+    font-size: 0.7rem;
+  }
+
+  .role-header {
+    font-size: 11px;
+    min-width: 16px;
+  }
+}
+
+/* Table cell container */
+.teachers-info {
+  max-width: 250px;
+  min-width: 200px;
+  padding: 8px;
+}

@@ -12,16 +12,337 @@
     />
     <link href="style/admin.css" rel="stylesheet" />
     <link href="style/section-statistics.css" rel="stylesheet" />
+    <script src="js/admin-api-config.js"></script>
     <script src="js/admin-auth.js"></script>
+    <script src="js/admin-logout.js"></script>
     <script src="js/admin-pages-validation.js"></script>
     <script src="js/admin-mocks.js"></script>
     <script src="js/admin-api-utils.js"></script>
     <script src="js/admin-api-fetchers.js"></script>
     <script src="js/admin-api-loader.js"></script>
     <script src="js/section-statistics.js"></script>
+    <script src="js/profile-requests-handler.js"></script>
     <!-- Chart.js for statistics visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+      /* Enhanced Base Styles */
+      :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --success-color: #059669;
+        --success-hover: #047857;
+        --danger-color: #dc2626;
+        --danger-hover: #b91c1c;
+        --warning-color: #d97706;
+        --info-color: #0369a1;
+        --gray-color: #64748b;
+        --light-gray: #f1f5f9;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --radius-sm: 0.375rem;
+        --radius: 0.5rem;
+        --radius-lg: 0.75rem;
+        --transition: all 0.2s ease-in-out;
+      }
+
+      /* Enhanced Button Styles */
+      .btn {
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--radius);
+        font-weight: 500;
+        transition: var(--transition);
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .btn-success {
+        background-color: var(--success-color);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background-color: var(--success-hover);
+      }
+
+      .btn-danger {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: var(--danger-hover);
+      }
+
+      .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+      }
+
+      /* Enhanced Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      .modal.show {
+        opacity: 1;
+      }
+
+      .modal-content {
+        position: relative;
+        background-color: white;
+        margin: 2rem auto;
+        padding: 2rem;
+        width: 90%;
+        max-width: 800px;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .modal.show .modal-content {
+        transform: translateY(0);
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        color: var(--gray-color);
+        cursor: pointer;
+        transition: var(--transition);
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius);
+      }
+
+      .close-modal:hover {
+        background-color: var(--light-gray);
+        color: var(--danger-color);
+      }
+
+      /* Enhanced Status Message Styles */
+      .status-message {
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .status-message.success {
+        background-color: #ecfdf5;
+        color: var(--success-color);
+        border: 1px solid #a7f3d0;
+      }
+
+      .status-message.error {
+        background-color: #fef2f2;
+        color: var(--danger-color);
+        border: 1px solid #fecaca;
+      }
+
+      .status-message.info {
+        background-color: #eff6ff;
+        color: var(--info-color);
+        border: 1px solid #bfdbfe;
+      }
+
+      .status-message.warning {
+        background-color: #fffbeb;
+        color: var(--warning-color);
+        border: 1px solid #fef3c7;
+      }
+
+      /* Enhanced Table Styles */
+      .table-container {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table th {
+        background-color: var(--light-gray);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--gray-color);
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .data-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .data-table tr:hover {
+        background-color: var(--light-gray);
+      }
+
+      /* Enhanced Filter Styles */
+      .filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .filter-item {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .filter-select,
+      .filter-input {
+        width: 100%;
+        padding: 0.625rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background-color: white;
+        transition: var(--transition);
+      }
+
+      .filter-select:focus,
+      .filter-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      /* Enhanced Field Change Styles */
+      .field-change {
+        background-color: white;
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+      }
+
+      .field-change:hover {
+        box-shadow: var(--shadow);
+      }
+
+      .field-comparison {
+        background-color: var(--light-gray);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-top: 0.5rem;
+      }
+
+      /* Animations */
+      @keyframes slideIn {
+        from {
+          transform: translateY(-10px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Loading States */
+      .loading {
+        position: relative;
+        pointer-events: none;
+      }
+
+      .loading::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: inherit;
+      }
+
+      .loading::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid var(--light-gray);
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 1;
+      }
+
+      @keyframes spin {
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
       .user-info {
         display: flex;
         align-items: center;
@@ -521,13 +842,23 @@
       const actionButtons = document.getElementById("action-buttons");
       const adminComment = document.getElementById("admin-comment");
       const approveBtn = document.getElementById("approve-btn");
-      const rejectBtn = document.getElementById("reject-btn");
-
-      // Event listeners
+      const rejectBtn = document.getElementById("reject-btn"); // Event listeners
       document.addEventListener("DOMContentLoaded", async function () {
         try {
-          // Verify admin token first
-          await verifyAdminToken();
+          // Verify admin token first with fallback check
+          if (typeof verifyAdminToken === "function") {
+            await verifyAdminToken();
+          } else {
+            console.error("verifyAdminToken function not available");
+            // Fallback: redirect to index.html if no admin token
+            const token =
+              localStorage.getItem("admin_token") ||
+              sessionStorage.getItem("admin_token");
+            if (!token) {
+              window.location.href = "index.html";
+              return;
+            }
+          }
 
           // Load sidebar and data
           await loadSidebar();
@@ -538,7 +869,6 @@
           showMessage("Erreur lors du chargement de la page", "error");
         }
       });
-
       async function loadSidebar() {
         try {
           const response = await fetch("admin-sidebar.html");
@@ -547,74 +877,92 @@
           const html = await response.text();
           document.getElementById("sidebar-container").innerHTML = html;
 
-          // Initialize sidebar scripts if they exist
-          if (window.updateAdminInfo) {
-            window.updateAdminInfo();
-          }
+          // Set up logout button event listener
+          const logoutBtn = document.getElementById("logout-btn");
+          if (logoutBtn && typeof handleAdminLogout === "function") {
+            logoutBtn.addEventListener("click", handleAdminLogout);
+          } // Update admin info manually since scripts in innerHTML don't execute
+          updateSidebarAdminInfo();
 
-          if (window.setActiveMenuItem) {
-            window.setActiveMenuItem();
-          }
+          // Set active menu item
+          setSidebarActiveMenuItem();
         } catch (error) {
           console.error("Error loading sidebar:", error);
         }
       }
+
       async function loadRequests() {
         try {
-          showMessage("Chargement des demandes...", "info");
-
-          // Use our consistent function from admin-api-fetchers.js
-          const data = await fetchProfileRequestsAPI();
-
-          // Handle the response structure consistently
-          allRequests = Array.isArray(data.requests)
-            ? data.requests
-            : Array.isArray(data)
-            ? data
-            : [];
-
-          if (!data.success && !allRequests.length) {
-            // Fall back to direct apiCall if the API function fails
-            const response = await apiCall("profile-requests");
-
-            if (!response || !response.data) {
-              // No mock data in production environment
-              throw new Error(
-                "Failed to fetch profile requests - server may be unavailable."
-              );
-            } else {
-              allRequests = response.data; // Extract data from apiCall's response
-            }
-          }
-
-          // Store the requests and update the UI
-          updateStats();
-          filterRequests();
-
-          showMessage("Demandes chargées avec succès", "success");
+          // Call the loadProfileRequests function from profile-requests-handler.js
+          await loadProfileRequests();
         } catch (error) {
-          console.error("Error loading profile requests:", error);
-          allRequests = [];
+          console.error("Error loading requests:", error);
           showMessage("Erreur lors du chargement des demandes", "error");
-          requestsTableBody.innerHTML = `<tr><td colspan="6" class="text-center">Erreur lors du chargement des demandes. Veuillez réessayer plus tard.</td></tr>`;
+          requestsTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center">
+                Erreur lors du chargement des demandes. Veuillez réessayer plus tard.
+              </td>
+            </tr>
+          `;
         }
       }
 
       function updateStats() {
-        const stats = {
-          total: allRequests.length,
-          pending: allRequests.filter((req) => req.status === "pending").length,
-          approved: allRequests.filter((req) => req.status === "approved")
-            .length,
-          rejected: allRequests.filter((req) => req.status === "rejected")
-            .length,
-        };
+        try {
+          const stats = {
+            total: allRequests.length,
+            pending: allRequests.filter((req) => req.status === "pending")
+              .length,
+            approved: allRequests.filter((req) => req.status === "approved")
+              .length,
+            rejected: allRequests.filter((req) => req.status === "rejected")
+              .length,
+            cancelled: allRequests.filter((req) => req.status === "cancelled")
+              .length,
+          };
 
-        // Update stats cards
-        totalRequestsEl.textContent = stats.total;
-        pendingRequestsEl.textContent = stats.pending;
-        approvedRequestsEl.textContent = stats.approved;
-        rejectedRequestsEl.textContent = stats.rejected;
+          // Update stats cards
+          totalRequestsEl.textContent = stats.total;
+          pendingRequestsEl.textContent = stats.pending;
+          approvedRequestsEl.textContent = stats.approved;
+          rejectedRequestsEl.textContent = stats.rejected + stats.cancelled; // Include cancelled in rejected count
+        } catch (error) {
+          console.error("Error updating stats:", error);
+          // Set default values on error
+          totalRequestsEl.textContent = "--";
+          pendingRequestsEl.textContent = "--";
+          approvedRequestsEl.textContent = "--";
+          rejectedRequestsEl.textContent = "--";
+        }
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case "approved":
+            return "status-approved";
+          case "rejected":
+            return "status-rejected";
+          case "cancelled":
+            return "status-rejected";
+          case "pending":
+          default:
+            return "status-pending";
+        }
+      }
+
+      function getStatusText(status) {
+        switch (status) {
+          case "approved":
+            return "Approuvée";
+          case "rejected":
+            return "Rejetée";
+          case "cancelled":
+            return "Annulée";
+          case "pending":
+          default:
+            return "En attente";
+        }
       }
 
       function setupEventListeners() {
@@ -641,340 +989,148 @@
           handleRequestAction("rejected")
         );
       }
-
       function filterRequests() {
-        const typeValue = requestTypeFilter.value;
-        const statusValue = statusFilter.value;
-        const searchValue = searchInput.value.toLowerCase();
-
-        filteredRequests = allRequests.filter((request) => {
-          // Filter by user type
-          if (typeValue !== "all" && request.user.type !== typeValue) {
-            return false;
-          }
-
-          // Filter by status
-          if (statusValue !== "all" && request.status !== statusValue) {
-            return false;
-          }
-
-          // Filter by search term (user name or email)
-          if (searchValue) {
-            const userName =
-              `${request.user.firstName} ${request.user.lastName}`.toLowerCase();
-            const userEmail = request.user.email
-              ? request.user.email.toLowerCase()
-              : "";
-
-            if (
-              !userName.includes(searchValue) &&
-              !userEmail.includes(searchValue)
-            ) {
-              return false;
-            }
-          }
-
-          return true;
-        });
-
-        // Reset to first page when filters change
-        currentPage = 1;
-
-        // Render the filtered requests
-        renderRequests();
+        // Call the filterProfileRequests function from profile-requests-handler.js
+        filterProfileRequests();
       }
-
-      function renderRequests() {
-        // Calculate pagination
-        const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(
-          startIndex + itemsPerPage,
-          filteredRequests.length
-        );
-        const currentItems = filteredRequests.slice(startIndex, endIndex);
-
-        // Clear table
-        requestsTableBody.innerHTML = "";
-
-        // Show 'no data' if nothing fetched at all
-        if (!allRequests || allRequests.length === 0) {
-          requestsTableBody.innerHTML = `<tr><td colspan="6" class="text-center">Aucune demande disponible.</td></tr>`;
-          paginationElement.innerHTML = "";
-          return;
-        }
-        // Show 'no match' if filters result in empty
-        if (currentItems.length === 0) {
-          requestsTableBody.innerHTML = `<tr><td colspan="6" class="text-center">Aucune demande trouvée.</td></tr>`;
-          paginationElement.innerHTML = "";
-          return;
-        }
-
-        // Render each request row
-        currentItems.forEach((request) => {
-          // Format date
-          const requestDate = request.createdAt
-            ? new Date(request.createdAt).toLocaleDateString("fr-FR")
-            : "-";
-          // Create status badge class
-          let statusClass = "status-pending";
-          let statusText = "En attente";
-          if (request.status === "approved") {
-            statusClass = "status-approved";
-            statusText = "Approuvée";
-          } else if (request.status === "rejected") {
-            statusClass = "status-rejected";
-            statusText = "Rejetée";
-          }
-          const user = request.user || {};
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${user.firstName || "-"} ${user.lastName || "-"}</td>
-            <td>${user.email || "-"}</td>
-            <td>${requestDate}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td>${request.justification || "-"}</td>
-            <td>
-              <button class="action-btn view-btn" data-id="${
-                request.id
-              }" title="Voir">👁️</button>
-            </td>
-          `;
-          requestsTableBody.appendChild(row);
-          row
-            .querySelector(".view-btn")
-            .addEventListener("click", () => openRequestModal(request));
-        });
-
-        // Render pagination
-        renderPagination(totalPages);
-      }
-
-      function renderPagination(totalPages) {
-        // Clear pagination
-        paginationElement.innerHTML = "";
-
-        // Don't render pagination if there's only one page
-        if (totalPages <= 1) return;
-
-        // Add Previous button
-        const prevBtn = document.createElement("button");
-        prevBtn.classList.add("pagination-btn");
-        prevBtn.innerHTML = "&laquo; Précédent";
-        prevBtn.disabled = currentPage === 1;
-        prevBtn.addEventListener("click", () => {
-          if (currentPage > 1) {
-            currentPage--;
-            renderRequests();
-          }
-        });
-        paginationElement.appendChild(prevBtn);
-
-        // Add page buttons
-        const maxVisiblePages = 5;
-        let startPage = Math.max(
-          1,
-          currentPage - Math.floor(maxVisiblePages / 2)
-        );
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-        // Adjust start page if we're near the end
-        if (endPage - startPage + 1 < maxVisiblePages) {
-          startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
-
-        // First page button if not visible
-        if (startPage > 1) {
-          const firstBtn = document.createElement("button");
-          firstBtn.classList.add("pagination-btn");
-          firstBtn.textContent = "1";
-          firstBtn.addEventListener("click", () => {
-            currentPage = 1;
-            renderRequests();
-          });
-          paginationElement.appendChild(firstBtn);
-
-          // Add ellipsis if there's a gap
-          if (startPage > 2) {
-            const ellipsis = document.createElement("span");
-            ellipsis.classList.add("pagination-ellipsis");
-            ellipsis.textContent = "...";
-            paginationElement.appendChild(ellipsis);
-          }
-        }
-
-        // Page buttons
-        for (let i = startPage; i <= endPage; i++) {
-          const pageBtn = document.createElement("button");
-          pageBtn.classList.add("pagination-btn");
-          if (i === currentPage) pageBtn.classList.add("active");
-          pageBtn.textContent = i;
-          pageBtn.addEventListener("click", () => {
-            currentPage = i;
-            renderRequests();
-          });
-          paginationElement.appendChild(pageBtn);
-        }
-
-        // Last page button if not visible
-        if (endPage < totalPages) {
-          // Add ellipsis if there's a gap
-          if (endPage < totalPages - 1) {
-            const ellipsis = document.createElement("span");
-            ellipsis.classList.add("pagination-ellipsis");
-            ellipsis.textContent = "...";
-            paginationElement.appendChild(ellipsis);
-          }
-
-          const lastBtn = document.createElement("button");
-          lastBtn.classList.add("pagination-btn");
-          lastBtn.textContent = totalPages;
-          lastBtn.addEventListener("click", () => {
-            currentPage = totalPages;
-            renderRequests();
-          });
-          paginationElement.appendChild(lastBtn);
-        }
-
-        // Add Next button
-        const nextBtn = document.createElement("button");
-        nextBtn.classList.add("pagination-btn");
-        nextBtn.innerHTML = "Suivant &raquo;";
-        nextBtn.disabled = currentPage === totalPages;
-        nextBtn.addEventListener("click", () => {
-          if (currentPage < totalPages) {
-            currentPage++;
-            renderRequests();
-          }
-        });
-        paginationElement.appendChild(nextBtn);
-      }
-
       function openRequestDetails(requestId) {
-        // Find the request by ID
-        const request = allRequests.find((req) => req.id == requestId);
+        console.log("openRequestDetails called with ID:", requestId);
+        console.log("allRequests:", allRequests);
 
+        const request = allRequests.find((req) => req.id === requestId);
         if (!request) {
-          showMessage("Demande introuvable", "error");
+          console.error("Request not found for ID:", requestId);
+          showMessage("Demande non trouvée", "error");
           return;
         }
 
-        // Store current request for action handlers
-        currentRequest = request; // Set user details with null checks
-        const userFirstName =
-          request.user && request.user.firstName ? request.user.firstName : "U";
-        const userLastName =
-          request.user && request.user.lastName ? request.user.lastName : "U";
-        const userInitials = `${userFirstName[0]}${userLastName[0]}`;
+        console.log("Found request:", request);
+        currentRequest = request;
 
-        userAvatar.textContent = userInitials;
-        userName.textContent = `${userFirstName} ${userLastName}`;
-        userEmail.textContent = (request.user && request.user.email) || "N/A";
+        // Add loading state to modal
+        requestModal.classList.add("loading");
 
-        const userType =
-          request.user && request.user.type ? request.user.type : "unknown";
+        // Populate modal content
+        populateModalContent(request);
+
+        // Show modal with animation
+        requestModal.style.display = "block";
+        setTimeout(() => {
+          requestModal.classList.add("show");
+          requestModal.classList.remove("loading");
+        }, 10);
+      }
+
+      function populateModalContent(request) {
+        const student = request.student || {};
+
+        // Update user info
+        userAvatar.textContent = `${student.firstName?.charAt(0) || ""}${
+          student.lastName?.charAt(0) || ""
+        }`;
+        userName.textContent = `${student.firstName || ""} ${
+          student.lastName || ""
+        }`;
+        userEmail.textContent = student.email || "";
         userType.textContent =
-          userType === "student"
-            ? "Étudiant"
-            : userType === "teacher"
-            ? "Enseignant"
-            : "Utilisateur";
+          student.userType === "student" ? "Étudiant" : "Enseignant";
 
-        // Set request details
-        requestDate.textContent = new Date(
-          request.createdAt
-        ).toLocaleDateString("fr-FR");
+        // Update request info
+        requestDate.textContent = request.createdAt
+          ? new Date(request.createdAt).toLocaleDateString("fr-FR")
+          : "-";
+        requestStatus.textContent = getStatusText(request.status);
+        requestStatus.className = `detail-value request-status ${getStatusClass(
+          request.status
+        )}`;
 
-        // Set status
-        let statusClass = "status-pending";
-        let statusText = "En attente";
+        // Clear and populate fields container
+        fieldsContainer.innerHTML = "";
+        if (request.changes) {
+          Object.entries(request.changes).forEach(([field, value]) => {
+            const fieldChange = document.createElement("div");
+            fieldChange.className = "field-change";
 
-        if (request.status === "approved") {
-          statusClass = "status-approved";
-          statusText = "Approuvée";
-        } else if (request.status === "rejected") {
-          statusClass = "status-rejected";
-          statusText = "Rejetée";
+            const fieldName = document.createElement("div");
+            fieldName.className = "field-name";
+            fieldName.textContent = getFieldLabel(field);
+
+            const comparison = document.createElement("div");
+            comparison.className = "field-comparison";
+
+            const oldValue = document.createElement("div");
+            oldValue.className = "field-old";
+            oldValue.textContent = request.oldValues?.[field] || "-";
+
+            const arrow = document.createElement("div");
+            arrow.className = "compare-arrow";
+            arrow.innerHTML = `
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            `;
+
+            const newValue = document.createElement("div");
+            newValue.className = "field-new";
+            newValue.textContent = value || "-";
+
+            comparison.appendChild(oldValue);
+            comparison.appendChild(arrow);
+            comparison.appendChild(newValue);
+
+            fieldChange.appendChild(fieldName);
+            fieldChange.appendChild(comparison);
+            fieldsContainer.appendChild(fieldChange);
+          });
         }
 
-        requestStatus.textContent = statusText;
-        requestStatus.className = `request-status ${statusClass}`; // Set field changes with null checks
-        fieldsContainer.innerHTML = "";
-        if (
-          request.changes &&
-          Array.isArray(request.changes) &&
-          request.changes.length > 0
-        ) {
-          request.changes.forEach((change) => {
-            const fieldDiv = document.createElement("div");
-            fieldDiv.className = "field-change";
-            fieldDiv.innerHTML = `
-            <div class="field-name">${formatFieldName(change.field)}</div>
-            <div class="field-comparison">
-              <div class="field-old">${change.oldValue || "Non spécifié"}</div>
-              <div class="compare-arrow">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 12h14"></path>
-                  <path d="m12 5 7 7-7 7"></path>
-                </svg>
-              </div>
-              <div class="field-new">${change.newValue || "Non spécifié"}</div>
-            </div>
-          `;
-            fieldsContainer.appendChild(fieldDiv);
-          });
+        // Handle document if present
+        if (request.documentUrl) {
+          documentContainer.style.display = "block";
+          documentLink.href = request.documentUrl;
+          documentName.textContent =
+            request.documentName || "Document justificatif";
+        } else {
+          documentContainer.style.display = "none";
+        }
 
-          // Check if there's a supporting document
-          if (request.documentUrl) {
-            documentContainer.style.display = "block";
-            documentLink.href = request.documentUrl;
-            documentName.textContent =
-              request.documentName || "Document justificatif";
-          } else {
-            documentContainer.style.display = "none";
-          }
+        // Handle admin response
+        if (request.status !== "pending" && request.adminComment) {
+          adminResponseContainer.style.display = "block";
+          adminResponseText.textContent = request.adminComment;
+        } else {
+          adminResponseContainer.style.display = "none";
+        }
 
-          // Handle admin response display
-          if (request.adminResponse) {
-            adminResponseContainer.style.display = "block";
-            adminResponseText.textContent = request.adminResponse;
-          } else {
-            adminResponseContainer.style.display = "none";
-          }
-
-          // Show/hide action buttons based on status
-          actionButtons.style.display =
-            request.status === "pending" ? "block" : "none";
-
-          // Clear comment field
+        // Show/hide action buttons based on status
+        if (request.status === "pending") {
+          actionButtons.style.display = "block";
           adminComment.value = "";
-
-          // Open the modal
-          requestModal.style.display = "block";
+        } else {
+          actionButtons.style.display = "none";
         }
       }
 
-      function formatFieldName(fieldName) {
-        const fieldMap = {
+      function getFieldLabel(field) {
+        const labels = {
           firstName: "Prénom",
           lastName: "Nom",
           email: "Email",
           phone: "Téléphone",
           address: "Adresse",
-          dateOfBirth: "Date de naissance",
-          specialty: "Spécialité",
-          specialite: "Spécialité",
+          birthDate: "Date de naissance",
+          // Add more field labels as needed
         };
-
-        return (
-          fieldMap[fieldName] ||
-          fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
-        );
+        return labels[field] || field;
       }
 
       function closeModal() {
-        requestModal.style.display = "none";
-        currentRequest = null;
+        requestModal.classList.remove("show");
+        setTimeout(() => {
+          requestModal.style.display = "none";
+          currentRequest = null;
+        }, 300);
       }
 
       async function handleRequestAction(status) {
@@ -984,36 +1140,62 @@
         }
 
         try {
-          showMessage("Traitement de la demande...", "info");
+          // Add loading state to buttons
+          const buttons = [approveBtn, rejectBtn];
+          buttons.forEach((btn) => btn.classList.add("loading"));
+          buttons.forEach((btn) => (btn.disabled = true));
 
-          let response;
-          // Use enhanced adminAPI methods if available
-          if (window.adminAPI && window.adminAPI.updateRequestStatus) {
-            response = await window.adminAPI.updateRequestStatus(
-              currentRequest.id,
-              status,
-              adminComment.value
-            );
-          } else {
-            // Fallback to direct apiCall if adminAPI is not available
-            const requestData = {
-              status: status,
-              adminResponse: adminComment.value,
-            };
+          showMessage("Traitement de la demande...", "info"); // First verify the request still exists and is in a valid state
+          const verifyResponse = await apiCall(
+            `profile-requests/${currentRequest.id}`,
+            "GET"
+          );
+          if (!verifyResponse || !verifyResponse.data) {
+            throw new Error("La demande n'existe plus ou a été modifiée");
+          }
 
-            response = await apiCall(
-              `profile-requests/${currentRequest.id}/status`,
-              "PATCH",
-              requestData
+          const currentStatus = verifyResponse.data.status;
+          if (currentStatus !== "pending") {
+            throw new Error(
+              `Cette demande a déjà été ${getStatusText(
+                currentStatus
+              ).toLowerCase()}`
             );
           }
 
-          // Update request in local array
+          // Prepare the request data
+          const requestData = {
+            status: status,
+            adminComment: adminComment.value.trim(),
+          };
+
+          // Proceed with the update
+          const response = await apiCall(
+            `profile-requests/${currentRequest.id}/status`,
+            "PATCH",
+            requestData
+          );
+
+          if (!response) {
+            throw new Error("Pas de réponse du serveur");
+          }
+
+          if (!response.success) {
+            throw new Error(response.error || "Erreur lors de la mise à jour");
+          }
+
+          // Update the request in the local array
           const index = allRequests.findIndex(
             (req) => req.id === currentRequest.id
           );
-          if (index !== -1 && response && response.data) {
-            allRequests[index] = response.data; // apiCall wraps in data
+          if (index !== -1) {
+            allRequests[index] = {
+              ...allRequests[index],
+              ...response.data,
+              status: status,
+              adminComment: requestData.adminComment,
+              processedById: getCurrentAdminId(),
+            };
           }
 
           // Update UI
@@ -1032,18 +1214,223 @@
             `Erreur lors du traitement de la demande: ${error.message}`,
             "error"
           );
+        } finally {
+          // Remove loading state from buttons
+          const buttons = [approveBtn, rejectBtn];
+          buttons.forEach((btn) => btn.classList.remove("loading"));
+          buttons.forEach((btn) => (btn.disabled = false));
         }
       }
 
-      function showMessage(message, type = "info") {
-        statusMessage.textContent = message;
-        statusMessage.className = `status-message ${type}`;
-        statusMessage.style.display = "block";
+      function getCurrentAdminId() {
+        return (
+          sessionStorage.getItem("admin_id") ||
+          localStorage.getItem("admin_id") ||
+          null
+        );
+      }
 
-        // Hide message after 5 seconds
+      function showMessage(message, type = "info") {
+        statusMessage.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            ${getStatusIcon(type)}
+          </svg>
+          <span>${message}</span>
+        `;
+        statusMessage.className = `status-message ${type}`;
+        statusMessage.style.display = "flex";
+
+        // Hide message after 5 seconds with fade out animation
         setTimeout(() => {
-          statusMessage.style.display = "none";
+          statusMessage.style.opacity = "0";
+          setTimeout(() => {
+            statusMessage.style.display = "none";
+            statusMessage.style.opacity = "1";
+          }, 300);
         }, 5000);
+      }
+
+      function getStatusIcon(type) {
+        switch (type) {
+          case "success":
+            return `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>`;
+          case "error":
+            return `<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>`;
+          case "warning":
+            return `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>`;
+          default:
+            return `<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>`;
+        }
+      }
+
+      function filterProfileRequests() {
+        filteredRequests = [...allRequests];
+
+        // Apply user type filter
+        if (requestTypeFilter && requestTypeFilter.value !== "all") {
+          filteredRequests = filteredRequests.filter(
+            (request) => request.student?.userType === requestTypeFilter.value
+          );
+        }
+
+        // Apply status filter
+        if (statusFilter && statusFilter.value !== "all") {
+          filteredRequests = filteredRequests.filter(
+            (request) => request.status === statusFilter.value
+          );
+        }
+
+        // Search filter - match student name, email, or any changed field
+        if (searchInput && searchInput.value.trim()) {
+          const searchTerm = searchInput.value.trim().toLowerCase();
+          filteredRequests = filteredRequests.filter((request) => {
+            const student = request.student || {};
+            const changes = request.changes || {};
+
+            // Check student info
+            const studentMatch =
+              (student.firstName &&
+                student.firstName.toLowerCase().includes(searchTerm)) ||
+              (student.lastName &&
+                student.lastName.toLowerCase().includes(searchTerm)) ||
+              (student.email &&
+                student.email.toLowerCase().includes(searchTerm));
+
+            // Check changed fields
+            const changesMatch = Object.values(changes).some(
+              (value) =>
+                value && value.toString().toLowerCase().includes(searchTerm)
+            );
+
+            return studentMatch || changesMatch;
+          });
+        } // Always reset to first page on filter
+        currentPage = 1;
+
+        // Render the filtered requests
+        renderProfileRequests();
+      }
+
+      // Add updatePagination function if not already defined
+      if (typeof updatePagination === "undefined") {
+        function updatePagination(totalPages) {
+          if (!paginationElement) return;
+
+          let paginationHTML = "";
+
+          if (totalPages > 1) {
+            paginationHTML += `<button class="pagination-button" onclick="changePage(${
+              currentPage - 1
+            })" ${currentPage === 1 ? "disabled" : ""}>Précédent</button>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+              paginationHTML += `<button class="pagination-button ${
+                i === currentPage ? "active" : ""
+              }" onclick="changePage(${i})">${i}</button>`;
+            }
+
+            paginationHTML += `<button class="pagination-button" onclick="changePage(${
+              currentPage + 1
+            })" ${
+              currentPage === totalPages ? "disabled" : ""
+            }>Suivant</button>`;
+          }
+
+          paginationElement.innerHTML = paginationHTML;
+        }
+      }
+
+      // Add changePage function if not already defined
+      if (typeof changePage === "undefined") {
+        function changePage(page) {
+          const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+          if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            renderProfileRequests();
+          }
+        }
+      }
+
+      // Function to update admin info in the sidebar
+      function updateSidebarAdminInfo() {
+        const adminName = document.getElementById("admin-name");
+        const adminRole = document.getElementById("admin-role");
+        const adminAvatar = document.getElementById("admin-avatar");
+
+        // Get admin data from session/local storage
+        const adminEmail =
+          sessionStorage.getItem("admin_email") ||
+          localStorage.getItem("admin_email");
+        const adminRoleValue =
+          sessionStorage.getItem("admin_role") ||
+          localStorage.getItem("admin_role");
+
+        // Extract name from email (e.g., sophie.williams@example.com -> Sophie Williams)
+        let displayName = "Admin";
+        if (adminEmail) {
+          const emailPrefix = adminEmail.split("@")[0];
+          // Convert email prefix to display name (sophie.williams -> Sophie Williams)
+          displayName = emailPrefix
+            .split(".")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" ");
+        }
+
+        // Map role values to display names
+        const roleDisplayNames = {
+          doyen: "Doyen",
+          "vice-doyen": "Vice-Doyen",
+          "chef-de-departement": "Chef de Département",
+          "chef-de-specialite": "Chef de Spécialité",
+          secretaire: "Secrétaire",
+        };
+
+        const displayRole =
+          roleDisplayNames[adminRoleValue] ||
+          adminRoleValue ||
+          "Administrateur";
+
+        // Update the elements
+        if (adminName) {
+          adminName.textContent = displayName;
+        }
+        if (adminRole) {
+          adminRole.textContent = displayRole;
+        }
+        if (adminAvatar) {
+          adminAvatar.textContent = displayName.charAt(0).toUpperCase();
+        }
+
+        // Also try to get from admin_data for backward compatibility
+        const adminData = JSON.parse(
+          sessionStorage.getItem("admin_data") ||
+            localStorage.getItem("admin_data") ||
+            "{}"
+        );
+
+        if (adminData.name && adminName) {
+          adminName.textContent = adminData.name;
+        }
+        if (adminData.role && adminRole) {
+          adminRole.textContent = adminData.role;
+        }
+        if (adminData.name && adminAvatar) {
+          adminAvatar.textContent = adminData.name.charAt(0).toUpperCase();
+        }
+      }
+
+      // Function to set active menu item in sidebar
+      function setSidebarActiveMenuItem() {
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll(".nav-item");
+
+        navItems.forEach((item) => {
+          if (item.getAttribute("href") === currentPath.split("/").pop()) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
       }
     </script>
   </body>

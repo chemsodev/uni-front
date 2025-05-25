@@ -59,7 +59,7 @@ async function loadSectionAnalytics() {
       // Get section analytics
       let analytics;
       try {
-        const API_URL = "https://uni-front-zeta.vercel.app/api";
+        const API_URL = "https://unicersityback.onrender.com/api";
         const token = getAuthToken();
 
         const response = await fetch(

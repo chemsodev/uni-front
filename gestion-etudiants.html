@@ -684,7 +684,7 @@
         async function loadTeacherData() {
           try {
             const res = await fetch(
-              "https://uni-front-zeta.vercel.app/api/auth/verify",
+              "https://unicersityback.onrender.com/api/auth/verify",
               {
                 method: "GET",
                 headers: {
@@ -700,7 +700,7 @@
               // Also fetch the teacher's sections right away
               try {
                 const sectionsRes = await fetch(
-                  "https://uni-front-zeta.vercel.app/api/enseignants/my-sections",
+                  "https://unicersityback.onrender.com/api/enseignants/my-sections",
                   {
                     method: "GET",
                     headers: {
@@ -756,7 +756,7 @@
             if (!targetSectionId) {
               // If no specific section is selected, use the first available section
               const sections = await fetch(
-                `https://uni-front-zeta.vercel.app/api/enseignants/my-sections`,
+                `https://unicersityback.onrender.com/api/enseignants/my-sections`,
                 {
                   headers: { Authorization: `Bearer ${authToken}` },
                 }
@@ -773,7 +773,7 @@
             // or we're switching sections
             if (reloadData || !sectionCache[targetSectionId]) {
               // Base endpoint using the enseignant ID to get their section students
-              let endpoint = `https://uni-front-zeta.vercel.app/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
+              let endpoint = `https://unicersityback.onrender.com/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
 
               // Add group type filter if selected
               if (groupFilter) {
@@ -1392,10 +1392,10 @@
 
           if (delegateType === "section") {
             // For section delegate, use the set-section-delegate endpoint
-            url = `https://uni-front-zeta.vercel.app/api/etudiants/${studentId}/set-section-delegate/${assignmentId}`;
+            url = `https://unicersityback.onrender.com/api/etudiants/${studentId}/set-section-delegate/${assignmentId}`;
           } else {
             // For group delegate, use the set-group-delegate endpoint
-            url = `https://uni-front-zeta.vercel.app/api/etudiants/${studentId}/set-group-delegate/${assignmentId}`;
+            url = `https://unicersityback.onrender.com/api/etudiants/${studentId}/set-group-delegate/${assignmentId}`;
             body = { groupType };
           }
 
@@ -1788,7 +1788,7 @@
             // Try to remove section delegate status
             try {
               const sectionResponse = await fetch(
-                `https://uni-front-zeta.vercel.app/api/etudiants/${studentId}/remove-section-delegate`,
+                `https://unicersityback.onrender.com/api/etudiants/${studentId}/remove-section-delegate`,
                 {
                   method: "PATCH",
                   headers: {
@@ -1809,7 +1809,7 @@
             // Try to remove group delegate status
             try {
               const groupResponse = await fetch(
-                `https://uni-front-zeta.vercel.app/api/etudiants/${studentId}/remove-group-delegate`,
+                `https://unicersityback.onrender.com/api/etudiants/${studentId}/remove-group-delegate`,
                 {
                   method: "PATCH",
                   headers: {

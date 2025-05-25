@@ -234,7 +234,7 @@ async function loadTimetables(sectionId, type) {
     if (window.sectionAPI && window.sectionAPI.getSectionSchedules) {
       schedules = await window.sectionAPI.getSectionSchedules(sectionId, type);
     } else {
-      const API_URL = "https://uni-front-zeta.vercel.app/api";
+      const API_URL = "https://unicersityback.onrender.com/api";
       const token = getAuthToken();
 
       const response = await fetch(
@@ -387,7 +387,7 @@ async function loadScheduleStatistics(sectionId) {
     if (window.sectionAPI && window.sectionAPI.getSectionScheduleStatistics) {
       stats = await window.sectionAPI.getSectionScheduleStatistics(sectionId);
     } else {
-      const API_URL = "https://uni-front-zeta.vercel.app/api";
+      const API_URL = "https://unicersityback.onrender.com/api";
       const token = getAuthToken();
 
       const response = await fetch(
@@ -529,7 +529,7 @@ function renderScheduleStatistics(container, stats) {
 async function deleteTimetable(sectionId, scheduleId) {
   try {
     // Use API to delete the schedule
-    const API_URL = "https://uni-front-zeta.vercel.app/api";
+    const API_URL = "https://unicersityback.onrender.com/api";
     const token = getAuthToken();
 
     const response = await fetch(
@@ -581,9 +581,9 @@ function getAuthToken() {
  * Helper function to show notification
  */
 function showNotification(message, type = "info") {
-  // Check if the notification function exists in the global scope
-  if (typeof window.showNotification === "function") {
-    window.showNotification(message, type);
+  // Check if the global notification function exists
+  if (typeof window.createNotification === "function") {
+    window.createNotification(message, type);
     return;
   }
 

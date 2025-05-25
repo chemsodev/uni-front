@@ -73,7 +73,7 @@ async function createChangeRequestNotification(
 
   try {
     const response = await fetch(
-      "https://uni-front-zeta.vercel.app/api/notifications",
+      "https://unicersityback.onrender.com/api/notifications",
       {
         method: "POST",
         headers: {
@@ -135,7 +135,7 @@ async function processOfflineNotifications() {
   for (const item of offlineNotifications) {
     try {
       const response = await fetch(
-        "https://uni-front-zeta.vercel.app/api/notifications",
+        "https://unicersityback.onrender.com/api/notifications",
         {
           method: "POST",
           headers: {
@@ -170,7 +170,7 @@ async function processOfflineNotifications() {
 async function updateNotificationBadge() {
   try {
     const response = await fetch(
-      "https://uni-front-zeta.vercel.app/api/notifications/unread-count",
+      "https://unicersityback.onrender.com/api/notifications/unread-count",
       {
         headers: {
           Authorization: `Bearer ${authToken}`,

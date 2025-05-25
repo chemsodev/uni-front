@@ -172,9 +172,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-logout.js"></script>
     <script>
       // Configuration
-      const API_URL = "https://uni-front-zeta.vercel.app/api";
+      const API_URL = "https://unicersityback.onrender.com/api";
 
       $(document).ready(function () {
         // Load departments
@@ -219,9 +221,7 @@
         // Handle logout
         $("#logout-btn").click(function (e) {
           e.preventDefault();
-          localStorage.removeItem("admin_token");
-          sessionStorage.removeItem("admin_token");
-          window.location.href = "admin-login.html";
+          handleAdminLogout();
         });
       });
 

@@ -677,7 +677,7 @@
             }
 
             const res = await fetch(
-              "https://uni-front-zeta.vercel.app/api/auth/verify",
+              "https://unicersityback.onrender.com/api/auth/verify",
               {
                 method: "GET",
                 headers: {
@@ -694,7 +694,7 @@
                 // Load teacher's assigned sections for the dropdown
                 try {
                   const sectionsRes = await fetch(
-                    "https://uni-front-zeta.vercel.app/api/enseignants/my-sections",
+                    "https://unicersityback.onrender.com/api/enseignants/my-sections",
                     {
                       headers: {
                         Authorization: `Bearer ${authToken}`,
@@ -766,7 +766,7 @@
             if (!targetSectionId) {
               // If no specific section is selected, use the first available section
               const sections = await fetch(
-                `https://uni-front-zeta.vercel.app/api/enseignants/my-sections`,
+                `https://unicersityback.onrender.com/api/enseignants/my-sections`,
                 {
                   headers: { Authorization: `Bearer ${authToken}` },
                 }
@@ -783,7 +783,7 @@
             // or we're switching sections
             if (reloadData || !sectionCache[targetSectionId]) {
               // Fetch all students from the section - we'll filter for disabilities client-side
-              let endpoint = `https://uni-front-zeta.vercel.app/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
+              let endpoint = `https://unicersityback.onrender.com/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
 
               // Add group type filter if selected
               if (groupFilter) {

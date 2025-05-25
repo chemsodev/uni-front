@@ -1,5 +1,5 @@
 // Admin authentication helper functions
-const API_BASE_URL = "https://uni-front-zeta.vercel.app/api";
+const API_BASE_URL = "https://unicersityback.onrender.com/api";
 
 // Enable production mode
 const DEV_MODE = false; // Permanently disabled
@@ -191,47 +191,74 @@ function getMockProfileRequests() {
   return [
     {
       id: 1,
-      user: {
+      student: {
         id: 101,
         firstName: "Karim",
         lastName: "Khaled",
         email: "karim.khaled@student.univ.dz",
-        type: "student",
+        matricule: "20230001",
+        userType: "student",
       },
-      changes: [
-        {
-          field: "phone",
-          oldValue: "+213 555 111 222",
-          newValue: "+213 555 333 444",
-        },
-        {
-          field: "address",
-          oldValue: "123 Rue des Oliviers, Alger",
-          newValue: "456 Avenue de l'Université, Alger",
-        },
-      ],
+      changes: {
+        phone: "+213 555 333 444",
+        address: "456 Avenue de l'Université, Alger",
+      },
+      oldValues: {
+        phone: "+213 555 111 222",
+        address: "123 Rue des Oliviers, Alger",
+      },
       status: "pending",
       createdAt: new Date().toISOString(),
+      documentUrl: null,
+      documentName: null,
+      adminComment: null,
     },
     {
       id: 2,
-      user: {
-        id: 1,
-        firstName: "Ahmed",
-        lastName: "Benali",
-        email: "ahmed.benali@univ.dz",
-        type: "teacher",
+      student: {
+        id: 102,
+        firstName: "Fatima",
+        lastName: "Zahra",
+        email: "fatima.zahra@student.univ.dz",
+        matricule: "20230002",
+        userType: "student",
       },
-      changes: [
-        {
-          field: "email",
-          oldValue: "ahmed.benali@univ.dz",
-          newValue: "ahmed.benali@gmail.com",
-        },
-      ],
+      changes: {
+        email: "fatima.zahra@gmail.com",
+        phone: "+213 555 999 888",
+      },
+      oldValues: {
+        email: "fatima.zahra@student.univ.dz",
+        phone: "+213 555 777 666",
+      },
       status: "approved",
-      adminResponse: "Secondary email approved",
+      adminComment: "Email change approved for personal communication",
       createdAt: new Date(Date.now() - 600000000).toISOString(),
+      documentUrl: null,
+      documentName: null,
+    },
+    {
+      id: 3,
+      student: {
+        id: 103,
+        firstName: "Mohammed",
+        lastName: "Larbi",
+        email: "mohammed.larbi@student.univ.dz",
+        matricule: "20230003",
+        userType: "student",
+      },
+      changes: {
+        address: "789 Boulevard de la Liberté, Oran",
+      },
+      oldValues: {
+        address: "321 Rue de la Paix, Oran",
+      },
+      status: "rejected",
+      adminComment:
+        "Address change request denied - insufficient documentation",
+      createdAt: new Date(Date.now() - 1200000000).toISOString(),
+      documentUrl: null,
+      documentName: null,
     },
   ];
 }
@@ -546,7 +573,7 @@ function clearAdminAuth() {
 window.clearAdminAuth = clearAdminAuth;
 
 function redirectToLogin() {
-  window.location.href = "admin-login.html";
+  window.location.href = "index.html";
 }
 window.redirectToLogin = redirectToLogin;
 

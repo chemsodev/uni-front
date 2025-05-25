@@ -5,7 +5,7 @@
 
 // Use the API utils for backend communication
 const API_CONFIG = {
-  BASE_URL: "https://uni-front-zeta.vercel.app/api",
+  BASE_URL: "https://unicersityback.onrender.com/api",
   ENDPOINTS: {
     SECTIONS: {
       BASE: "/sections",
@@ -145,16 +145,21 @@ async function createSection(sectionData) {
     const requiredFields = [
       "name",
       "code",
-      "departmentId",
       "specialty",
       "level",
       "capacity",
+      "departmentId",
     ];
     const missingFields = requiredFields.filter((field) => !sectionData[field]);
 
     if (missingFields.length > 0) {
       throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
     }
+
+    const requestData = {
+      ...sectionData,
+      departmentId: parseInt(sectionData.departmentId), // Ensure departmentId is a number
+    };
 
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SECTIONS.BASE}`,
@@ -164,7 +169,7 @@ async function createSection(sectionData) {
           Authorization: `Bearer ${getAuthToken()}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(sectionData),
+        body: JSON.stringify(requestData),
       }
     );
 
@@ -191,16 +196,21 @@ async function updateSection(id, sectionData) {
     const requiredFields = [
       "name",
       "code",
-      "departmentId",
       "specialty",
       "level",
       "capacity",
+      "departmentId",
     ];
     const missingFields = requiredFields.filter((field) => !sectionData[field]);
 
     if (missingFields.length > 0) {
       throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
     }
+
+    const requestData = {
+      ...sectionData,
+      departmentId: parseInt(sectionData.departmentId), // Ensure departmentId is a number
+    };
 
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SECTIONS.BY_ID(id)}`,
@@ -210,7 +220,7 @@ async function updateSection(id, sectionData) {
           Authorization: `Bearer ${getAuthToken()}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(sectionData),
+        body: JSON.stringify(requestData),
       }
     );
 

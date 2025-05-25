@@ -1,107 +1,7 @@
 /**
- * Improved renderSections function with robust data handling
+ * Enhanced section responsables display for admin-gestion-sections.html
+ * Displays section responsables with a structured and visually appealing layout
  */
-function renderSections() {
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredSections.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredSections.length);
-  const currentSections = filteredSections.slice(startIndex, endIndex);
-
-  // Clear table
-  sectionsTableBody.innerHTML = "";
-
-  // Show 'no data' if nothing fetched at all
-  if (!allSections || allSections.length === 0) {
-    sectionsTableBody.innerHTML = `
-      <tr>
-        <td colspan="6" class="no-data">Aucune section disponible.</td>
-      </tr>
-    `;
-    paginationElement.innerHTML = "";
-    return;
-  }
-
-  // Show 'no match' if filters result in empty
-  if (currentSections.length === 0) {
-    sectionsTableBody.innerHTML = `
-      <tr>
-        <td colspan="6" class="no-data">Aucune section ne correspond aux critères sélectionnés.</td>
-      </tr>
-    `;
-    paginationElement.innerHTML = "";
-    return;
-  }
-
-  // Render sections
-  currentSections.forEach((section) => {
-    // Handle potential different property names from the API
-    const sectionName = section.name || "Section sans nom";
-    const sectionCode = section.code || "N/A";
-    const sectionLevel = section.level || "N/A";
-    const sectionSpecialty = section.specialty || "Non spécifiée";
-
-    // Handle student count - since it's not in the API response, we'll show a dash
-    const studentCountDisplay = "-";
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>
-        <div class="section-info">
-          <div class="section-icon">${sectionLevel.charAt(0) || "S"}</div>
-          <div class="section-details">
-            <span class="section-name">${sectionName}</span>
-            <span class="section-code">${sectionCode}</span>
-          </div>
-        </div>
-      </td>
-      <td><span class="level-badge">${sectionLevel}</span></td>
-      <td>${sectionSpecialty}</td>      <td>${studentCountDisplay}</td>
-      <td id="teachers-${section.id}" class="teachers-info">
-        <div class="loading-teachers">Chargement des responsables...</div>
-      </td>
-      <td>
-        <div class="table-actions">
-          <button class="action-btn edit-btn" data-id="${
-            section.id
-          }" title="Modifier">
-            <span class="material-icons">edit</span>
-          </button>
-          <button class="action-btn teacher-action-btn" data-id="${
-            section.id
-          }" title="Assigner responsables">
-            <span class="material-icons">person_add</span>
-          </button>
-          <button class="action-btn delete-btn" data-id="${
-            section.id
-          }" title="Supprimer">
-            <span class="material-icons">delete</span>
-          </button>
-        </div>
-      </td>
-    `;
-
-    // Add section to table
-    sectionsTableBody.appendChild(row);
-
-    // Add event listeners to the buttons
-    row
-      .querySelector(".edit-btn")
-      .addEventListener("click", () => openEditSectionModal(section));
-    row
-      .querySelector(".teacher-action-btn")
-      .addEventListener("click", () => openTeacherAssignmentModal(section));
-    row
-      .querySelector(".delete-btn")
-      .addEventListener("click", () => confirmDeleteSection(section));
-
-    // Load teachers for this section
-    loadSectionTeachers(section.id);
-  });
-
-  // Render pagination
-  renderPagination(totalPages);
-}
 
 // Function to load and display teachers for a section
 async function loadSectionTeachers(sectionId) {
@@ -109,24 +9,51 @@ async function loadSectionTeachers(sectionId) {
   if (!teachersContainer) return;
 
   try {
+    console.log(`Fetching responsables for section: ${sectionId}`);
+
     // Use apiCall if available, otherwise fetch directly
-    const assignments =
-      typeof apiCall !== "undefined"
-        ? await apiCall(`sections/${sectionId}/responsables`, "GET")
-        : await fetch(
-            `https://unicersityback.onrender.com/api/sections/${sectionId}/responsables`,
-            {
-              headers: {
-                Authorization: `Bearer ${
-                  localStorage.getItem("admin_token") ||
-                  sessionStorage.getItem("admin_token")
-                }`,
-                "Content-Type": "application/json",
-              },
-            }
-          ).then((res) => res.json());
+    let assignments = []; // Always try to call the API for real data
+    try {
+      const response =
+        typeof apiCall !== "undefined"
+          ? await apiCall(`sections/${sectionId}/responsables`, "GET")
+          : await fetch(
+              `https://unicersityback.onrender.com/api/sections/${sectionId}/responsables`,
+              {
+                headers: {
+                  Authorization: `Bearer ${
+                    localStorage.getItem("admin_token") ||
+                    sessionStorage.getItem("admin_token")
+                  }`,
+                  "Content-Type": "application/json",
+                },
+              }
+            ).then((res) => res.json());
+
+      console.log(`API response for section ${sectionId}:`, response);
+
+      // Make sure response is handled correctly based on different response formats
+      if (response) {
+        if (Array.isArray(response)) {
+          assignments = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          assignments = response.data;
+        } else if (typeof response === "object") {
+          assignments = [response];
+        }
+      }
+    } catch (apiError) {
+      console.error("API error:", apiError);
+      teachersContainer.innerHTML = `<div class="error-teachers">Erreur: ${apiError.message}</div>`;
+      return;
+    }
+    console.log(
+      `Processing ${assignments ? assignments.length : 0} assignments`
+    );
 
     if (Array.isArray(assignments) && assignments.length > 0) {
+      console.log("Assignments data:", assignments);
+
       // Group assignments by role
       const roleGroups = {
         filiere: [],
@@ -138,14 +65,22 @@ async function loadSectionTeachers(sectionId) {
 
       // Sort assignments into role groups
       assignments.forEach((assignment) => {
-        if (!assignment.enseignant) return;
+        console.log("Processing assignment:", assignment);
+
+        if (!assignment.enseignant) {
+          console.log("Missing enseignant data in assignment");
+          return;
+        }
 
         const role = assignment.role || "other";
-        const teacherName = `${assignment.enseignant.firstName || ""} ${
-          assignment.enseignant.lastName || ""
-        }`.trim();
+        const firstName =
+          assignment.enseignant.firstName || assignment.enseignant.prenom || "";
+        const lastName =
+          assignment.enseignant.lastName || assignment.enseignant.nom || "";
+        const teacherName = `${firstName} ${lastName}`.trim();
 
         if (teacherName) {
+          console.log(`Found teacher: ${teacherName} with role: ${role}`);
           if (roleGroups[role]) {
             roleGroups[role].push({
               name: teacherName,
@@ -158,6 +93,8 @@ async function loadSectionTeachers(sectionId) {
               id: assignment.enseignant.id,
             });
           }
+        } else {
+          console.log("Missing teacher name in assignment");
         }
       });
 
@@ -302,3 +239,86 @@ function getRoleDisplayName(role) {
   };
   return roleNames[role] || role;
 }
+
+// Test with example data
+window.testSectionResponsables = function (sectionId) {
+  const testData = [
+    {
+      id: "ad296c29-a5c3-41e7-8e5e-3da1356d404d",
+      sectionId: "5706258a-a6ee-4cf4-b1bd-ae6a4ab0674d",
+      enseignantId: 3707,
+      role: "section",
+      assignedAt: "2025-05-24T16:01:13.846Z",
+      section: {
+        id: "5706258a-a6ee-4cf4-b1bd-ae6a4ab0674d",
+        name: "A",
+        capacity: null,
+        specialty: "ACAD",
+        level: "L3",
+        code: "ACA-L-A",
+      },
+      enseignant: {
+        id: 3707,
+        firstName: "CHEMS",
+        lastName: "BOURABIA",
+        email: "chemso@gmail.com",
+        createdAt: "2025-05-24T14:08:11.872Z",
+        updatedAt: "2025-05-24T14:36:44.863Z",
+        adminRole: "enseignant",
+        matricule: "ens123",
+      },
+    },
+    {
+      id: "a5c8aec3-03a5-4f0f-bdd0-cdc4e4774dde",
+      sectionId: "5706258a-a6ee-4cf4-b1bd-ae6a4ab0674d",
+      enseignantId: 3674,
+      role: "filiere",
+      assignedAt: "2025-05-24T19:17:31.435Z",
+      section: {
+        id: "5706258a-a6ee-4cf4-b1bd-ae6a4ab0674d",
+        name: "A",
+        capacity: null,
+        specialty: "ACAD",
+        level: "L3",
+        code: "ACA-L-A",
+      },
+      enseignant: {
+        id: 3674,
+        firstName: "Youcef",
+        lastName: "HADJALI",
+        email: "youcef.hadjali@univ.dz",
+        createdAt: "2025-05-16T23:47:04.515Z",
+        updatedAt: "2025-05-16T23:47:04.515Z",
+        adminRole: "enseignant",
+        matricule: "ENS008",
+      },
+    },
+  ];
+
+  // Mock the fetch/API call
+  const originalFetch = window.fetch;
+  window.fetch = function (url) {
+    if (url.includes("/responsables")) {
+      console.log("Intercepted fetch for responsables, returning test data");
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(testData),
+      });
+    }
+    return originalFetch.apply(this, arguments);
+  };
+
+  // Run the function with our test data
+  const testContainer = document.getElementById(`teachers-${sectionId}`);
+  if (!testContainer) {
+    console.warn(`No container found for section ${sectionId}`);
+    return;
+  }
+
+  loadSectionTeachers(sectionId);
+
+  // Restore the original fetch after a delay
+  setTimeout(() => {
+    window.fetch = originalFetch;
+  }, 1000);
+};
