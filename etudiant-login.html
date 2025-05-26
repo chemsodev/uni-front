@@ -125,7 +125,7 @@
 
           // Verify existing token
           const verificationResponse = await fetch(
-            "http://localhost:3000/api/auth/verify",
+            "https://unicersityback.onrender.com/api/auth/verify",
             {
               method: "GET",
               headers: {
@@ -225,7 +225,7 @@
           const timeoutId = setTimeout(() => controller.abort(), 10000);
 
           const response = await fetch(
-            "http://localhost:3000/api/auth/etudiant/login",
+            "https://unicersityback.onrender.com/api/auth/etudiant/login",
             {
               method: "POST",
               headers: {
@@ -270,7 +270,7 @@
             if (userId) {
               // Fetch the student data using the token we just received
               const userResponse = await fetch(
-                `http://localhost:3000/api/etudiants/${userId}`,
+                `https://unicersityback.onrender.com/api/etudiants/${userId}`,
                 {
                   headers: {
                     Authorization: `Bearer ${data.access_token}`,

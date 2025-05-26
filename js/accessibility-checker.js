@@ -50,7 +50,7 @@ async function checkForStudentsWithDisabilities(
     let userId = null;
     try {
       const userResponse = await fetch(
-        "http://localhost:3000/api/auth/verify",
+        "https://unicersityback.onrender.com/api/auth/verify",
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -74,7 +74,7 @@ async function checkForStudentsWithDisabilities(
     for (const sectionId of sectionIds) {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/enseignants/${userId}/sections/${sectionId}/students?page=1&limit=100`,
+          `https://unicersityback.onrender.com/api/enseignants/${userId}/sections/${sectionId}/students?page=1&limit=100`,
           {
             headers: {
               Authorization: `Bearer ${authToken}`,

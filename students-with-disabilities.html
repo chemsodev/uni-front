@@ -664,12 +664,15 @@
               return;
             }
 
-            const res = await fetch("http://localhost:3000/api/auth/verify", {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${authToken}`,
-              },
-            });
+            const res = await fetch(
+              "https://unicersityback.onrender.com/api/auth/verify",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+              }
+            );
 
             if (res.ok) {
               const data = await res.json();
@@ -679,7 +682,7 @@
                 // Load teacher's assigned sections for the dropdown
                 try {
                   const sectionsRes = await fetch(
-                    "http://localhost:3000/api/enseignants/my-sections",
+                    "https://unicersityback.onrender.com/api/enseignants/my-sections",
                     {
                       headers: {
                         Authorization: `Bearer ${authToken}`,
@@ -751,7 +754,7 @@
             if (!targetSectionId) {
               // If no specific section is selected, use the first available section
               const sections = await fetch(
-                `http://localhost:3000/api/enseignants/my-sections`,
+                `https://unicersityback.onrender.com/api/enseignants/my-sections`,
                 {
                   headers: { Authorization: `Bearer ${authToken}` },
                 }
@@ -768,7 +771,7 @@
             // or we're switching sections
             if (reloadData || !sectionCache[targetSectionId]) {
               // Fetch all students from the section - we'll filter for disabilities client-side
-              let endpoint = `http://localhost:3000/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
+              let endpoint = `https://unicersityback.onrender.com/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
 
               // Add group type filter if selected
               if (groupFilter) {

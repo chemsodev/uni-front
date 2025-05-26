@@ -1,5 +1,5 @@
 // Admin authentication helper functions
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "https://unicersityback.onrender.com/api";
 
 // Enable production mode
 const DEV_MODE = false; // Permanently disabled

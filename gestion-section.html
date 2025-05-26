@@ -151,7 +151,7 @@
             try {
               // Get all enseignants and find by email
               const response = await fetch(
-                `http://localhost:3000/api/enseignants`,
+                `https://unicersityback.onrender.com/api/enseignants`,
                 {
                   headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -468,7 +468,7 @@
           if (isBackendAvailable) {
             // Get students directly from the section's students API
             const response = await fetch(
-              `http://localhost:3000/api/sections/${sectionId}/etudiants`,
+              `https://unicersityback.onrender.com/api/sections/${sectionId}/etudiants`,
               {
                 headers: {
                   Authorization: `Bearer ${authToken}`,

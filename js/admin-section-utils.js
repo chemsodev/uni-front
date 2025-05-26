@@ -7,7 +7,7 @@
 (function () {
   // Fallback implementation if admin-sections.js hasn't loaded yet
   if (!window.sectionAPI) {
-    const API_URL = "http://localhost:3000/api";
+    const API_URL = "https://unicersityback.onrender.com/api";
 
     // Helper function to get auth token
     function getAuthToken() {

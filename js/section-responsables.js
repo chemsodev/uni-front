@@ -18,7 +18,7 @@ async function loadSectionTeachers(sectionId) {
         typeof apiCall !== "undefined"
           ? await apiCall(`sections/${sectionId}/responsables`, "GET")
           : await fetch(
-              `http://localhost:3000/api/sections/${sectionId}/responsables`,
+              `https://unicersityback.onrender.com/api/sections/${sectionId}/responsables`,
               {
                 headers: {
                   Authorization: `Bearer ${

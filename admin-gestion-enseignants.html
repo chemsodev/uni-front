@@ -754,7 +754,7 @@
           for (const section of sections) {
             try {
               const response = await fetch(
-                `http://localhost:3000/api/sections/${section.id}/responsables`,
+                `https://unicersityback.onrender.com/api/sections/${section.id}/responsables`,
                 {
                   headers: {
                     Authorization: `Bearer ${

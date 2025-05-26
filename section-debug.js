@@ -17,7 +17,7 @@ async function debugSectionAvailability() {
   let currentUserId;
   try {
     const verifyResponse = await fetch(
-      "http://localhost:3000/api/auth/verify",
+      "https://unicersityback.onrender.com/api/auth/verify",
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -39,7 +39,7 @@ async function debugSectionAvailability() {
   // Get student data
   try {
     const studentRes = await fetch(
-      `http://localhost:3000/api/etudiants/${currentUserId}`,
+      `https://unicersityback.onrender.com/api/etudiants/${currentUserId}`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -69,7 +69,7 @@ async function debugSectionAvailability() {
 
     // Get all sections with the same specialty and level
     const sectionsRes = await fetch(
-      `http://localhost:3000/api/sections?specialty=${currentSection.specialty}&level=${currentSection.level}`,
+      `https://unicersityback.onrender.com/api/sections?specialty=${currentSection.specialty}&level=${currentSection.level}`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }

@@ -5,7 +5,7 @@
 
 // Create a global API tester object
 window.adminAPITester = {
-  apiBaseURL: "http://localhost:3000/api", // Default API URL
+  apiBaseURL: "https://unicersityback.onrender.com/api", // Default API URL
 
   // Results of the last test run
   lastTestResults: {

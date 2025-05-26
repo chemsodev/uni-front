@@ -101,7 +101,7 @@
 
           // Verify existing token
           const verificationResponse = await fetch(
-            "http://localhost:3000/api/auth/verify",
+            "https://unicersityback.onrender.com/api/auth/verify",
             {
               method: "GET",
               headers: {
@@ -221,7 +221,7 @@
           const timeoutId = setTimeout(() => controller.abort(), 10000);
 
           const response = await fetch(
-            "http://localhost:3000/api/auth/enseignant/login",
+            "https://unicersityback.onrender.com/api/auth/enseignant/login",
             {
               method: "POST",
               headers: {

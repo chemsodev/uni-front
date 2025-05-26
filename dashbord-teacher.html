@@ -193,7 +193,7 @@
       let isBackendAvailable = true;
       let allSections = [];
       let allStudents = {};
-      const apiUrl = "http://localhost:3000";
+      const apiUrl = "https://unicersityback.onrender.com";
       const stats = {
         students: 0,
         sections: 0,
@@ -556,7 +556,7 @@
           }
 
           const response = await fetch(
-            "http://localhost:3000/api/enseignants/group-change-requests",
+            "https://unicersityback.onrender.com/api/enseignants/group-change-requests",
             {
               headers: { Authorization: `Bearer ${authToken}` },
               signal: AbortSignal.timeout(5000),
@@ -624,7 +624,7 @@
           }
 
           const response = await fetch(
-            `http://localhost:3000/api/enseignants/${teacherId}/sections/${sectionId}/students`,
+            `https://unicersityback.onrender.com/api/enseignants/${teacherId}/sections/${sectionId}/students`,
             {
               headers: { Authorization: `Bearer ${authToken}` },
               signal: AbortSignal.timeout(5000),
@@ -1283,7 +1283,7 @@
           let response;
           try {
             response = await fetch(
-              `http://localhost:3000/api/notifications/from-teacher/${teacherId}`,
+              `https://unicersityback.onrender.com/api/notifications/from-teacher/${teacherId}`,
               {
                 headers: {
                   Authorization: `Bearer ${authToken}`,
@@ -1298,7 +1298,7 @@
                   "API endpoint not found, falling back to main notifications endpoint"
                 );
                 response = await fetch(
-                  `http://localhost:3000/api/notifications`,
+                  `https://unicersityback.onrender.com/api/notifications`,
                   {
                     headers: {
                       Authorization: `Bearer ${authToken}`,
