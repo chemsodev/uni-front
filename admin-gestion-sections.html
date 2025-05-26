@@ -3462,7 +3462,7 @@
             sessionStorage.getItem("admin_token");
 
           const response = await fetch(
-            `https://unicersityback.onrender.com/api/sections/${sectionId}/responsables`,
+            `https://unicersityback-production-1fbe.up.railway.app/api/sections/${sectionId}/responsables`,
             {
               headers: {
                 Authorization: token ? `Bearer ${token}` : "",

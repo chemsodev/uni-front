@@ -198,7 +198,7 @@
       // If no cached data, fetch from server
       if (!userData) {
         const res = await fetch(
-          "https://unicersityback.onrender.com/api/auth/verify",
+          "https://unicersityback-production-1fbe.up.railway.app/api/auth/verify",
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }
@@ -212,7 +212,7 @@
 
         // Now fetch student details
         const studentRes = await fetch(
-          `https://unicersityback.onrender.com/api/etudiants/${tokenData.userId}`,
+          `https://unicersityback-production-1fbe.up.railway.app/api/etudiants/${tokenData.userId}`,
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }

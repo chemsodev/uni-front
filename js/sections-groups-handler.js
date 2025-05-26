@@ -90,11 +90,14 @@ function populateSectionOptions(selectElement) {
       selectElement.appendChild(loadingOption);
 
       // Load sections and update the dropdown later
-      fetch("https://unicersityback.onrender.com/api/enseignants/my-sections", {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      })
+      fetch(
+        "https://unicersityback-production-1fbe.up.railway.app/api/enseignants/my-sections",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      )
         .then((response) => response.json())
         .then((sections) => {
           // Save to global variable
@@ -364,7 +367,7 @@ async function loadStudentSections(studentId, assignmentSelect) {
     } else {
       // Need to fetch the student data from API to get the section
       const response = await fetch(
-        `https://unicersityback.onrender.com/api/etudiants/${studentId}`,
+        `https://unicersityback-production-1fbe.up.railway.app/api/etudiants/${studentId}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -438,7 +441,7 @@ async function loadStudentGroups(studentId, groupType, assignmentSelect) {
     } else {
       // Need to fetch the student data from API
       const response = await fetch(
-        `https://unicersityback.onrender.com/api/etudiants/${studentId}`,
+        `https://unicersityback-production-1fbe.up.railway.app/api/etudiants/${studentId}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,

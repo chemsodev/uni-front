@@ -1,6 +1,6 @@
 // Admin API Configuration
 const API_CONFIG = {
-  BASE_URL: "https://unicersityback.onrender.com/api", // Update this with your actual backend URL
+  BASE_URL: "https://unicersityback-production-1fbe.up.railway.app/api", // Update this with your actual backend URL
   ENDPOINTS: {
     AUTH: {
       LOGIN: "/auth/administrateur/login",

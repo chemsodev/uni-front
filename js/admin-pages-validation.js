@@ -50,7 +50,7 @@ function checkNoRedundantApiBaseUrl(page) {
   for (let i = 0; i < scripts.length; i++) {
     if (
       scripts[i].innerText.includes(
-        'const API_BASE_URL = "https://unicersityback.onrender.com/api"'
+        'const API_BASE_URL = "https://unicersityback-production-1fbe.up.railway.app/api"'
       )
     ) {
       return false;

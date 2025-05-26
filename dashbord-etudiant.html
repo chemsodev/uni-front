@@ -257,7 +257,8 @@
 
     <script>
       // Global constants and variables
-      const API_BASE_URL = "https://unicersityback.onrender.com/api";
+      const API_BASE_URL =
+        "https://unicersityback-production-1fbe.up.railway.app/api";
       let authToken = null;
       let currentUser = null;
       let isBackendAvailable = true;
@@ -1048,7 +1049,7 @@
 
         try {
           const response = await fetch(
-            `https://unicersityback.onrender.com/api/notifications/${id}/mark-read`,
+            `https://unicersityback-production-1fbe.up.railway.app/api/notifications/${id}/mark-read`,
             {
               method: "PATCH",
               headers: {
@@ -1072,7 +1073,7 @@
       async function updateUnreadNotificationCount() {
         try {
           const response = await fetch(
-            "https://unicersityback.onrender.com/api/notifications/unread-count",
+            "https://unicersityback-production-1fbe.up.railway.app/api/notifications/unread-count",
             {
               headers: {
                 Authorization: `Bearer ${authToken}`,

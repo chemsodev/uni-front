@@ -59,7 +59,8 @@ async function loadSectionAnalytics() {
       // Get section analytics
       let analytics;
       try {
-        const API_URL = "https://unicersityback.onrender.com/api";
+        const API_URL =
+          "https://unicersityback-production-1fbe.up.railway.app/api";
         const token = getAuthToken();
 
         const response = await fetch(
