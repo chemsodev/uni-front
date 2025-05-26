@@ -81,7 +81,28 @@ document.addEventListener("DOMContentLoaded", async function () {
  */
 async function loadSidebar() {
   try {
-    const response = await fetch("admin-sidebar.html");
+    // Get role from storage
+    const role =
+      localStorage.getItem("admin_role") ||
+      sessionStorage.getItem("admin_role");
+
+    console.log("Loading sidebar for role:", role);
+
+    // Map roles to sidebar files
+    const sidebarFiles = {
+      doyen: "admin-sidebar-doyen.html",
+      "vice-doyen": "admin-sidebar-vice-doyen.html",
+      "chef-de-departement": "admin-sidebar-chef-departement.html",
+      "chef-de-specialite": "admin-sidebar-chef-specialite.html",
+      secretaire: "admin-sidebar-secretaire.html",
+    };
+
+    // Get the sidebar file for the role
+    const sidebarFile = sidebarFiles[role] || sidebarFiles["doyen"]; // Default to doyen
+
+    console.log("Loading sidebar file:", sidebarFile);
+
+    const response = await fetch(sidebarFile);
     if (!response.ok) throw new Error("Failed to load sidebar");
 
     const html = await response.text();
@@ -95,6 +116,8 @@ async function loadSidebar() {
     if (window.setActiveMenuItem) {
       window.setActiveMenuItem();
     }
+
+    console.log("✅ Sidebar loaded successfully for role:", role);
   } catch (error) {
     console.error("Error loading sidebar:", error);
   }

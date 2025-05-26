@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des Emplois du Temps - Administration</title>
+    <link href="style/admin-dashboard.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <script src="js/admin-auth.js"></script>
+    <script src="js/sidebar-loader.js"></script>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <div id="navbar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">Gestion des Emplois du Temps</h1>
+          <div class="header-actions">
+            <button onclick="refreshData()" class="btn-secondary">
+              <i class="fas fa-sync-alt"></i> Actualiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Section Selection -->
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-users"></i>
+            Sélection de Section
+          </h2>
+          <div class="section-selector">
+            <select id="sectionSelect" onchange="loadSectionSchedules()">
+              <option value="">Sélectionner une section</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Schedule Upload -->
+        <div class="card" id="uploadCard" style="display: none">
+          <h2 class="card-title">
+            <i class="fas fa-upload"></i>
+            Télécharger un Emploi du Temps
+          </h2>
+          <form id="scheduleUploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="scheduleTitle">Titre de l'emploi du temps</label>
+              <input type="text" id="scheduleTitle" name="title" required />
+            </div>
+
+            <div class="form-group">
+              <label for="scheduleDescription">Description (optionnel)</label>
+              <textarea
+                id="scheduleDescription"
+                name="description"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="scheduleType">Type d'emploi du temps</label>
+              <select id="scheduleType" name="scheduleType" required>
+                <option value="regular">Emploi du temps régulier</option>
+                <option value="exam">Emploi du temps d'examens</option>
+                <option value="special">Emploi du temps spécial</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="scheduleFile">Fichier de l'emploi du temps</label>
+              <input
+                type="file"
+                id="scheduleFile"
+                name="document"
+                accept=".pdf,.jpg,.jpeg,.png"
+                required
+              />
+              <small>Formats acceptés: PDF, JPG, PNG (max 5MB)</small>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-upload"></i> Télécharger l'emploi du temps
+            </button>
+          </form>
+        </div>
+
+        <!-- Current Schedules -->
+        <div class="card" id="schedulesCard" style="display: none">
+          <h2 class="card-title">
+            <i class="fas fa-calendar-alt"></i>
+            Emplois du Temps Actuels
+          </h2>
+          <div id="schedulesList">
+            <!-- Schedules will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentUser = null;
+      let authToken = null;
+      let sections = [];
+      let currentSectionId = null;
+      const apiUrl = "http://localhost:3000";
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          // Verify authentication
+          const authResult = await verifyAdminAuth();
+          if (!authResult.isAuthenticated) {
+            return;
+          }
+
+          currentUser = authResult.user;
+          authToken =
+            sessionStorage.getItem("admin_token") ||
+            localStorage.getItem("admin_token");
+
+          // Load navigation
+          await loadAdminSidebar("navbar-container");
+
+          // Load sections
+          await loadSections();
+        } catch (error) {
+          console.error("Initialization error:", error);
+          logout();
+        }
+      });
+
+      async function loadSections() {
+        try {
+          const response = await fetch(`${apiUrl}/api/sections`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            sections = await response.json();
+            populateSectionSelect();
+          } else {
+            throw new Error("Failed to load sections");
+          }
+        } catch (error) {
+          console.error("Error loading sections:", error);
+          showError("Erreur lors du chargement des sections");
+        }
+      }
+
+      function populateSectionSelect() {
+        const select = document.getElementById("sectionSelect");
+        select.innerHTML = '<option value="">Sélectionner une section</option>';
+
+        sections.forEach((section) => {
+          const option = document.createElement("option");
+          option.value = section.id;
+          option.textContent = `${section.name} (${section.code}) - ${section.specialty}`;
+          select.appendChild(option);
+        });
+      }
+
+      async function loadSectionSchedules() {
+        const sectionId = document.getElementById("sectionSelect").value;
+        currentSectionId = sectionId;
+
+        const uploadCard = document.getElementById("uploadCard");
+        const schedulesCard = document.getElementById("schedulesCard");
+
+        if (!sectionId) {
+          uploadCard.style.display = "none";
+          schedulesCard.style.display = "none";
+          return;
+        }
+
+        uploadCard.style.display = "block";
+        schedulesCard.style.display = "block";
+
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/sections/schedules/${sectionId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (response.ok) {
+            const schedules = await response.json();
+            displaySchedules(schedules);
+          } else {
+            throw new Error("Failed to load schedules");
+          }
+        } catch (error) {
+          console.error("Error loading schedules:", error);
+          document.getElementById("schedulesList").innerHTML =
+            '<p class="error-message">Erreur lors du chargement des emplois du temps</p>';
+        }
+      }
+
+      function displaySchedules(schedules) {
+        const container = document.getElementById("schedulesList");
+
+        if (!schedules || schedules.length === 0) {
+          container.innerHTML =
+            '<p class="empty-message">Aucun emploi du temps trouvé pour cette section</p>';
+          return;
+        }
+
+        container.innerHTML = schedules
+          .map(
+            (schedule) => `
+                <div class="schedule-item">
+                    <div class="schedule-info">
+                        <h4>${schedule.title}</h4>
+                        <p><strong>Type:</strong> ${getScheduleTypeLabel(
+                          schedule.scheduleType
+                        )}</p>
+                        <p><strong>Description:</strong> ${
+                          schedule.description || "Aucune description"
+                        }</p>
+                        <p><strong>Créé le:</strong> ${new Date(
+                          schedule.createdAt
+                        ).toLocaleDateString()}</p>
+                        <p><strong>Fichier:</strong> ${
+                          schedule.documentName || "Aucun fichier"
+                        }</p>
+                    </div>
+                    <div class="schedule-actions">
+                        <button onclick="viewSchedule('${
+                          schedule.id
+                        }')" class="btn-secondary">
+                            <i class="fas fa-eye"></i> Voir
+                        </button>
+                        <button onclick="downloadSchedule('${
+                          schedule.id
+                        }')" class="btn-secondary">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                        <button onclick="deleteSchedule('${
+                          schedule.id
+                        }')" class="btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function getScheduleTypeLabel(type) {
+        const labels = {
+          regular: "Emploi du temps régulier",
+          exam: "Emploi du temps d'examens",
+          special: "Emploi du temps spécial",
+        };
+        return labels[type] || type;
+      }
+
+      // Handle form submission
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("scheduleUploadForm");
+        if (form) {
+          form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            await uploadSchedule();
+          });
+        }
+      });
+
+      async function uploadSchedule() {
+        if (!currentSectionId) {
+          showError("Veuillez sélectionner une section");
+          return;
+        }
+
+        const form = document.getElementById("scheduleUploadForm");
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/sections/schedules/${currentSectionId}/upload`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              body: formData,
+            }
+          );
+
+          if (response.ok) {
+            showSuccess("Emploi du temps téléchargé avec succès");
+            form.reset();
+            await loadSectionSchedules(); // Refresh the list
+          } else {
+            const error = await response.json();
+            throw new Error(error.message || "Erreur lors du téléchargement");
+          }
+        } catch (error) {
+          console.error("Error uploading schedule:", error);
+          showError("Erreur lors du téléchargement: " + error.message);
+        }
+      }
+
+      async function viewSchedule(scheduleId) {
+        if (!currentSectionId) return;
+
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/sections/schedules/${currentSectionId}/document/${scheduleId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            // Create a modal to display the document
+            const modal = document.createElement("div");
+            modal.className = "document-viewer-modal";
+            modal.innerHTML = `
+              <div class="document-viewer-content">
+                <span class="close-modal">&times;</span>
+                <iframe src="${url}" class="document-iframe"></iframe>
+              </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Add styles for the modal
+            const style = document.createElement("style");
+            style.textContent = `
+              .document-viewer-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+              }
+              .document-viewer-content {
+                position: relative;
+                width: 90%;
+                height: 90%;
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+              }
+              .document-iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+              }
+              .close-modal {
+                position: absolute;
+                top: 10px;
+                right: 20px;
+                font-size: 24px;
+                cursor: pointer;
+                color: #666;
+              }
+              .close-modal:hover {
+                color: #000;
+              }
+            `;
+            document.head.appendChild(style);
+
+            // Add close functionality
+            modal.querySelector(".close-modal").onclick = () => {
+              document.body.removeChild(modal);
+              window.URL.revokeObjectURL(url);
+            };
+          } else {
+            throw new Error("Erreur lors de l'ouverture du document");
+          }
+        } catch (error) {
+          console.error("Error viewing schedule:", error);
+          showError("Erreur lors de l'ouverture du document");
+        }
+      }
+
+      async function downloadSchedule(scheduleId) {
+        if (!currentSectionId) return;
+
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/sections/schedules/${currentSectionId}/download/${scheduleId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `emploi-du-temps-${scheduleId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          } else {
+            throw new Error("Erreur lors du téléchargement");
+          }
+        } catch (error) {
+          console.error("Error downloading schedule:", error);
+          showError("Erreur lors du téléchargement");
+        }
+      }
+
+      async function deleteSchedule(scheduleId) {
+        if (!currentSectionId) return;
+
+        if (
+          !confirm("Êtes-vous sûr de vouloir supprimer cet emploi du temps ?")
+        ) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/sections/schedules/${currentSectionId}/${scheduleId}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            showSuccess("Emploi du temps supprimé avec succès");
+            await loadSectionSchedules(); // Refresh the list
+          } else {
+            throw new Error("Erreur lors de la suppression");
+          }
+        } catch (error) {
+          console.error("Error deleting schedule:", error);
+          showError("Erreur lors de la suppression");
+        }
+      }
+
+      async function refreshData() {
+        await loadSections();
+        if (currentSectionId) {
+          await loadSectionSchedules();
+        }
+      }
+
+      function showSuccess(message) {
+        // Create a simple success notification
+        const notification = document.createElement("div");
+        notification.className = "notification success";
+        notification.textContent = message;
+        notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+            `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+      }
+
+      function showError(message) {
+        // Create a simple error notification
+        const notification = document.createElement("div");
+        notification.className = "notification error";
+        notification.textContent = message;
+        notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #dc3545;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+            `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 5000);
+      }
+    </script>
+
+    <style>
+      .section-selector select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      .form-group small {
+        color: #666;
+        font-size: 12px;
+      }
+
+      .schedule-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        background: #f9f9f9;
+      }
+
+      .schedule-info h4 {
+        margin: 0 0 10px 0;
+        color: #333;
+      }
+
+      .schedule-info p {
+        margin: 5px 0;
+        color: #666;
+      }
+
+      .schedule-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .schedule-actions button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .btn-danger {
+        background: #dc3545;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #c82333;
+      }
+
+      .empty-message,
+      .error-message {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-style: italic;
+      }
+
+      .error-message {
+        color: #dc3545;
+      }
+    </style>
+  </body>
+</html>

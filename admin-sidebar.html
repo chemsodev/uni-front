@@ -5,6 +5,124 @@
     <title>Admin Sidebar</title>
     <script src="js/admin-auth.js"></script>
     <script src="js/admin-logout.js"></script>
+    <script>
+      // Get the current role immediately
+      const currentRole =
+        localStorage.getItem("admin_role") ||
+        sessionStorage.getItem("admin_role") ||
+        "none";
+      console.log("IMMEDIATE HEAD SCRIPT - Current role:", currentRole);
+
+      // Set a data attribute on the document for CSS selection
+      document.documentElement.setAttribute("data-admin-role", currentRole);
+
+      // Define role permissions - SINGLE SOURCE OF TRUTH
+      const ROLE_PERMISSIONS = {
+        doyen: {
+          "nav-dashboard": true,
+          "nav-enseignants": true,
+          "nav-sections": true,
+          "nav-demandes": true,
+          "nav-demandes-profil": true,
+        },
+        "vice-doyen": {
+          "nav-dashboard": true,
+          "nav-enseignants": false,
+          "nav-sections": true,
+          "nav-demandes": true,
+          "nav-demandes-profil": true,
+        },
+        "chef-de-departement": {
+          "nav-dashboard": true,
+          "nav-enseignants": true,
+          "nav-sections": false,
+          "nav-demandes": false,
+          "nav-demandes-profil": true,
+        },
+        "chef-de-specialite": {
+          "nav-dashboard": true,
+          "nav-enseignants": true,
+          "nav-sections": false,
+          "nav-demandes": false,
+          "nav-demandes-profil": true,
+        },
+        secretaire: {
+          "nav-dashboard": true,
+          "nav-enseignants": false,
+          "nav-sections": false,
+          "nav-demandes": false,
+          "nav-demandes-profil": true,
+        },
+      };
+
+      function applyMenuVisibility() {
+        // Extensive logging for debugging
+        console.group("🔍 Menu Visibility Diagnostic");
+
+        // Log all storage mechanisms
+        console.log("Storage Mechanisms:", {
+          localStorage_role: localStorage.getItem("admin_role"),
+          sessionStorage_role: sessionStorage.getItem("admin_role"),
+          documentRole:
+            document.documentElement.getAttribute("data-admin-role"),
+        });
+
+        // Get current role from storage
+        const role =
+          localStorage.getItem("admin_role") ||
+          sessionStorage.getItem("admin_role") ||
+          document.documentElement.getAttribute("data-admin-role") ||
+          "none";
+
+        console.log("🎭 Detected Role:", role);
+
+        // Get permissions for the current role, default to doyen if not found
+        const permissions = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["doyen"];
+        console.log("📋 Role Permissions:", permissions);
+
+        // Comprehensive menu item check
+        const menuItems = [
+          "nav-dashboard",
+          "nav-enseignants",
+          "nav-sections",
+          "nav-demandes",
+          "nav-demandes-profil",
+        ];
+
+        // Apply visibility to each menu item
+        menuItems.forEach((menuId) => {
+          const menuElement = document.getElementById(menuId);
+          if (menuElement) {
+            const isVisible = permissions[menuId];
+
+            // Detailed logging for each menu item
+            console.log(`🖥️ ${menuId}:`, {
+              expectedVisibility: isVisible,
+              currentClasses: menuElement.classList.toString(),
+              computedStyle: window.getComputedStyle(menuElement),
+            });
+
+            if (isVisible) {
+              menuElement.classList.add("active");
+              menuElement.removeAttribute("style");
+            } else {
+              menuElement.classList.remove("active");
+            }
+          } else {
+            console.warn(`❌ MENU ELEMENT NOT FOUND: ${menuId}`);
+          }
+        });
+
+        console.groupEnd();
+      }
+
+      // Apply visibility on multiple events to ensure reliability
+      document.addEventListener("DOMContentLoaded", applyMenuVisibility);
+      window.addEventListener("load", applyMenuVisibility);
+
+      // Expose for manual debugging
+      window.applyMenuVisibility = applyMenuVisibility;
+    </script>
     <style>
       .sidebar {
         width: 260px;
@@ -141,9 +259,20 @@
           transform: translateX(0);
         }
       }
+
+      /* Role-based visibility classes */
+      .nav-item.role-hidden {
+        display: none !important;
+      }
+
+      .nav-item.role-visible {
+        display: flex !important;
+      }
+
+      /* WORKING SOLUTION */
     </style>
   </head>
-  <body>
+  <body onload="applyRoleAccess()">
     <div
       id="sidebar-error-banner"
       style="
@@ -175,7 +304,11 @@
       </div>
 
       <nav class="sidebar-nav">
-        <a href="admin-dashboard.html" class="nav-item" id="nav-dashboard">
+        <a
+          href="admin-dashboard.html"
+          class="nav-item active"
+          id="nav-dashboard"
+        >
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -191,6 +324,46 @@
           </svg>
           Tableau de bord
         </a>
+
+        <a
+          href="admin-gestion-enseignants.html"
+          class="nav-item"
+          id="nav-enseignants"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Gestion des Enseignants
+        </a>
+
+        <a
+          href="admin-gestion-sections.html"
+          class="nav-item"
+          id="nav-sections"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          Gestion des Sections
+        </a>
+
         <a
           href="admin-demandes-section.html"
           class="nav-item"
@@ -214,43 +387,7 @@
           </svg>
           Demandes de Section
         </a>
-        <a
-          href="admin-gestion-enseignants.html"
-          class="nav-item"
-          id="nav-enseignants"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          Gestion des Enseignants
-        </a>
-        <a
-          href="admin-gestion-sections.html"
-          class="nav-item"
-          id="nav-sections"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-          Gestion des Sections
-        </a>
+
         <a
           href="admin-profile-requests.html"
           class="nav-item"
@@ -270,6 +407,48 @@
           Demandes de Profil
         </a>
       </nav>
+
+      <script>
+        // DIRECT SIMPLE SOLUTION - NO MORE COMPLEX STUFF
+        setTimeout(function () {
+          const roleText = document
+            .getElementById("admin-role")
+            .textContent.trim();
+          console.log("🎯 ROLE:", roleText);
+
+          if (roleText === "Doyen") {
+            // Doyen sees ALL menu items - make them all visible
+            document.getElementById("nav-enseignants").style.display = "flex";
+            document.getElementById("nav-sections").style.display = "flex";
+            document.getElementById("nav-demandes").style.display = "flex";
+            console.log("✅ DOYEN - All items shown");
+          } else if (roleText === "Vice-Doyen") {
+            // Vice-Doyen: sections, demandes, profile (not enseignants)
+            document.getElementById("nav-enseignants").style.display = "none";
+            document.getElementById("nav-sections").style.display = "flex";
+            document.getElementById("nav-demandes").style.display = "flex";
+            console.log("✅ VICE-DOYEN - Hidden enseignants");
+          } else if (roleText === "Chef de Département") {
+            // Chef de Département: enseignants, profile (not sections, demandes)
+            document.getElementById("nav-enseignants").style.display = "flex";
+            document.getElementById("nav-sections").style.display = "none";
+            document.getElementById("nav-demandes").style.display = "none";
+            console.log("✅ CHEF DE DÉPARTEMENT - Shown enseignants only");
+          } else if (roleText === "Chef de Spécialité") {
+            // Chef de Spécialité: enseignants, profile (not sections, demandes)
+            document.getElementById("nav-enseignants").style.display = "flex";
+            document.getElementById("nav-sections").style.display = "none";
+            document.getElementById("nav-demandes").style.display = "none";
+            console.log("✅ CHEF DE SPÉCIALITÉ - Shown enseignants only");
+          } else if (roleText === "Secrétaire") {
+            // Secrétaire: only dashboard and profile
+            document.getElementById("nav-enseignants").style.display = "none";
+            document.getElementById("nav-sections").style.display = "none";
+            document.getElementById("nav-demandes").style.display = "none";
+            console.log("✅ SECRÉTAIRE - Hidden all except basic");
+          }
+        }, 50);
+      </script>
 
       <div class="sidebar-footer">
         <button id="logout-btn" class="logout-btn">
@@ -386,47 +565,47 @@
           return false;
         }
 
-        // Check page-specific permissions
+        // Check page-specific permissions based on the access table
         const currentPage = window.location.pathname.split("/").pop();
         const rolePermissions = {
-          secretaire: [
-            "admin-dashboard.html",
-            "admin-gestion-enseignants.html",
-            "admin-profile-requests.html",
-          ],
-          "chef-de-specialite": [
-            "admin-dashboard.html",
-            "admin-gestion-sections.html",
-            "admin-demandes-section.html",
-            "admin-gestion-enseignants.html",
-          ],
-          "chef-de-departement": [
-            "admin-dashboard.html",
-            "admin-gestion-sections.html",
-            "admin-demandes-section.html",
-            "admin-gestion-enseignants.html",
-          ],
-          "vice-doyen": [
-            "admin-dashboard.html",
-            "admin-gestion-sections.html",
-            "admin-demandes-section.html",
-            "admin-profile-requests.html",
-            "admin-gestion-enseignants.html",
-          ],
+          // Doyen has access to all pages
           doyen: [
             "admin-dashboard.html",
             "admin-gestion-sections.html",
-            "admin-demandes-section.html",
-            "admin-profile-requests.html",
             "admin-gestion-enseignants.html",
+            "admin-profile-requests.html",
+            "admin-demandes-section.html",
           ],
+          // Vice-Doyen has access to Dashboard, Sections, Profile Requests
+          "vice-doyen": [
+            "admin-dashboard.html",
+            "admin-gestion-sections.html",
+            "admin-profile-requests.html",
+            "admin-demandes-section.html",
+          ],
+          // Chef de Département has access to Dashboard, Teachers, Profile Requests
+          "chef-de-departement": [
+            "admin-dashboard.html",
+            "admin-gestion-enseignants.html",
+            "admin-profile-requests.html",
+          ],
+          // Chef de Spécialité has the same permissions as Chef de Département
+          "chef-de-specialite": [
+            "admin-dashboard.html",
+            "admin-gestion-enseignants.html",
+            "admin-profile-requests.html",
+          ],
+          // Secrétaire has access to Dashboard and Profile Requests
+          secretaire: ["admin-dashboard.html", "admin-profile-requests.html"],
         };
 
+        // Check if user has access to the current page
         if (
           currentPage !== "admin-dashboard.html" &&
           (!rolePermissions[role] ||
             !rolePermissions[role].includes(currentPage))
         ) {
+          console.log(`Access denied for ${role} to ${currentPage}`);
           window.location.href = "admin-dashboard.html";
           return false;
         }
@@ -458,12 +637,363 @@
       // Optionally, expose for direct call
       window.showSidebarErrorBanner = showSidebarErrorBanner;
 
-      // Run initializations
-      document.addEventListener("DOMContentLoaded", function () {
-        if (verifyAccess()) {
-          updateAdminInfo();
-          setActiveMenuItem();
+      // Direct access control function
+      function applyRoleAccess() {
+        try {
+          console.error("🚨 APPLYING ROLE ACCESS - START OF FUNCTION");
+
+          // Get role directly from storage
+          const roleFromLocal = localStorage.getItem("admin_role");
+          const roleFromSession = sessionStorage.getItem("admin_role");
+          const role = roleFromLocal || roleFromSession || "none";
+
+          console.error("🔍 ROLE DETECTION:", {
+            localStorage_role: roleFromLocal,
+            sessionStorage_role: roleFromSession,
+            final_role: role,
+          });
+
+          // Comprehensive role permissions mapping
+          const ROLE_PERMISSIONS = {
+            doyen: {
+              "nav-dashboard": true,
+              "nav-enseignants": true,
+              "nav-sections": true,
+              "nav-demandes": true,
+              "nav-demandes-profil": true,
+            },
+            "vice-doyen": {
+              "nav-dashboard": true,
+              "nav-enseignants": false,
+              "nav-sections": true,
+              "nav-demandes": true,
+              "nav-demandes-profil": true,
+            },
+            "chef-de-departement": {
+              "nav-dashboard": true,
+              "nav-enseignants": true,
+              "nav-sections": false,
+              "nav-demandes": false,
+              "nav-demandes-profil": true,
+            },
+            "chef-de-specialite": {
+              "nav-dashboard": true,
+              "nav-enseignants": true,
+              "nav-sections": false,
+              "nav-demandes": false,
+              "nav-demandes-profil": true,
+            },
+            secretaire: {
+              "nav-dashboard": true,
+              "nav-enseignants": false,
+              "nav-sections": false,
+              "nav-demandes": false,
+              "nav-demandes-profil": true,
+            },
+          };
+
+          // Always show dashboard
+          const dashboardElement = document.getElementById("nav-dashboard");
+          if (dashboardElement) {
+            dashboardElement.classList.add("active");
+            dashboardElement.setAttribute("data-visible", "true");
+            console.error("✅ Dashboard menu item set to VISIBLE");
+          } else {
+            console.error("❌ Dashboard menu item NOT FOUND");
+          }
+
+          // Get permissions for the current role, default to doyen if not found
+          const permissions =
+            ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["doyen"];
+          console.error(
+            "🔑 APPLYING PERMISSIONS:",
+            JSON.stringify(permissions, null, 2)
+          );
+
+          // Apply permissions to each menu item with extensive logging
+          Object.entries(permissions).forEach(([menuId, isVisible]) => {
+            const menuElement = document.getElementById(menuId);
+            if (menuElement) {
+              if (isVisible) {
+                menuElement.classList.add("active");
+                menuElement.setAttribute("data-visible", "true");
+                console.error(`🖥️ ${menuId}: VISIBLE`);
+              } else {
+                menuElement.classList.remove("active");
+                menuElement.setAttribute("data-visible", "false");
+                console.error(`🖥️ ${menuId}: HIDDEN`);
+              }
+            } else {
+              console.error(`❌ MENU ELEMENT NOT FOUND: ${menuId}`);
+            }
+          });
+
+          console.error("✨ ROLE ACCESS APPLICATION COMPLETE");
+        } catch (error) {
+          console.error("🚨 CRITICAL ERROR IN applyRoleAccess:", error);
         }
+      }
+
+      // Modify the diagnostic function to be more aggressive
+      function diagnoseRoleAccess() {
+        try {
+          console.error("🔍 COMPREHENSIVE ROLE ACCESS DIAGNOSIS - START");
+
+          // Capture all storage and role information
+          const storageInfo = {
+            localStorage_role: localStorage.getItem("admin_role"),
+            sessionStorage_role: sessionStorage.getItem("admin_role"),
+            window_role: window.currentAdminRole,
+            page_role: document.documentElement.getAttribute("data-admin-role"),
+          };
+
+          console.error(
+            "🗄️ STORAGE ROLES:",
+            JSON.stringify(storageInfo, null, 2)
+          );
+
+          // Comprehensive menu item check
+          const menuItems = [
+            "nav-dashboard",
+            "nav-enseignants",
+            "nav-sections",
+            "nav-demandes",
+            "nav-demandes-profil",
+          ];
+
+          console.error("🖥️ MENU ITEM DETAILED STATUS:");
+          menuItems.forEach((menuId) => {
+            const element = document.getElementById(menuId);
+            if (element) {
+              const computedStyle = window.getComputedStyle(element);
+              console.error(`${menuId}:`, {
+                exists: true,
+                inlineDisplay: element.style.display,
+                computedDisplay: computedStyle.display,
+                visibility: computedStyle.visibility,
+                opacity: computedStyle.opacity,
+                pointerEvents: computedStyle.pointerEvents,
+              });
+            } else {
+              console.error(`❌ MENU ITEM NOT FOUND: ${menuId}`);
+            }
+          });
+
+          console.error("🔍 COMPREHENSIVE ROLE ACCESS DIAGNOSIS - END");
+        } catch (error) {
+          console.error("🚨 CRITICAL ERROR IN diagnoseRoleAccess:", error);
+        }
+      }
+
+      // Aggressive initialization with multiple fallback mechanisms
+      function initializeSidebarMenu() {
+        console.error("🚀 INITIALIZING SIDEBAR MENU");
+
+        // Multiple methods to trigger menu visibility
+        setTimeout(applyRoleAccess, 0);
+        setTimeout(applyRoleAccess, 100);
+        setTimeout(applyRoleAccess, 500);
+
+        // Ensure diagnostic logging
+        setTimeout(diagnoseRoleAccess, 50);
+        setTimeout(diagnoseRoleAccess, 200);
+        setTimeout(diagnoseRoleAccess, 1000);
+      }
+
+      // Replace existing event listeners with more comprehensive initialization
+      document.addEventListener("DOMContentLoaded", initializeSidebarMenu);
+      window.addEventListener("load", initializeSidebarMenu);
+
+      // Function to apply permissions based on role
+      function applyRoleBasedMenuItems() {
+        try {
+          // Get current role from storage
+          const role =
+            localStorage.getItem("admin_role") ||
+            sessionStorage.getItem("admin_role");
+
+          if (!role) {
+            console.error(
+              "⚠️ No role found in storage, defaulting to basic access"
+            );
+            // If no role, just show dashboard as fallback
+            hideAllMenuItems();
+            document.getElementById("nav-dashboard").style.display = "flex";
+            return;
+          }
+
+          console.log("🔒 Applying menu visibility for role:", role);
+
+          // First hide all menu items
+          hideAllMenuItems();
+
+          // Get permissions for current role, default to doyen if role not found
+          const permissions =
+            ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["doyen"];
+
+          // Apply visibility to each menu item
+          Object.entries(permissions).forEach(([menuId, isVisible]) => {
+            const menuItem = document.getElementById(menuId);
+            if (menuItem) {
+              if (isVisible) {
+                menuItem.style.display = "flex";
+                menuItem.removeAttribute("hidden");
+              } else {
+                menuItem.style.display = "none";
+                menuItem.setAttribute("hidden", "true");
+              }
+            }
+          });
+
+          console.log("✅ Menu items updated for role:", role);
+        } catch (error) {
+          console.error("🚨 Error applying role permissions:", error);
+          // Fallback to showing only dashboard on error
+          hideAllMenuItems();
+          document.getElementById("nav-dashboard").style.display = "flex";
+        }
+      }
+
+      // Helper function to hide all menu items
+      function hideAllMenuItems() {
+        document.querySelectorAll(".nav-item").forEach((item) => {
+          item.style.display = "none";
+          item.setAttribute("hidden", "true");
+        });
+      }
+
+      // Apply role-based access on page load
+      document.addEventListener("DOMContentLoaded", applyRoleBasedMenuItems);
+
+      // Also apply on load in case DOMContentLoaded already fired
+      if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+      ) {
+        setTimeout(applyRoleBasedMenuItems, 100); // Short delay to ensure DOM is ready
+      }
+
+      // Add another delayed check to ensure permissions are applied
+      window.addEventListener("load", function () {
+        setTimeout(applyRoleBasedMenuItems, 500);
+      });
+
+      // FINAL DEFINITIVE ROLE-BASED MENU CONTROL
+      // This function will override all other menu visibility settings
+
+      function enforceRoleBasedAccess() {
+        // First, hide all menu items except dashboard
+        document
+          .querySelectorAll(".nav-item:not(#nav-dashboard)")
+          .forEach((item) => {
+            item.style.display = "none";
+          });
+
+        // Always show dashboard
+        document.getElementById("nav-dashboard").style.display = "flex";
+
+        // Get the role
+        const roleText = document
+          .getElementById("admin-role")
+          .textContent.toLowerCase();
+        const storedRole =
+          localStorage.getItem("admin_role") ||
+          sessionStorage.getItem("admin_role") ||
+          "";
+
+        console.log("🔒 FINAL ENFORCEMENT - Role text:", roleText);
+        console.log("🔒 FINAL ENFORCEMENT - Stored role:", storedRole);
+
+        // Show menu items based on displayed role text (most reliable)
+        if (roleText.includes("doyen") && !roleText.includes("vice")) {
+          console.log("🔒 FINAL ENFORCEMENT - Applying DOYEN permissions");
+          document.getElementById("nav-enseignants").style.display = "flex";
+          document.getElementById("nav-sections").style.display = "flex";
+          document.getElementById("nav-demandes").style.display = "flex";
+          document.getElementById("nav-demandes-profil").style.display = "flex";
+        } else if (roleText.includes("vice")) {
+          console.log("🔒 FINAL ENFORCEMENT - Applying VICE-DOYEN permissions");
+          document.getElementById("nav-sections").style.display = "flex";
+          document.getElementById("nav-demandes").style.display = "flex";
+          document.getElementById("nav-demandes-profil").style.display = "flex";
+        } else if (
+          roleText.includes("département") ||
+          roleText.includes("departement")
+        ) {
+          console.log(
+            "🔒 FINAL ENFORCEMENT - Applying CHEF DE DÉPARTEMENT permissions"
+          );
+          document.getElementById("nav-enseignants").style.display = "flex";
+          document.getElementById("nav-demandes-profil").style.display = "flex";
+        } else if (
+          roleText.includes("spécialité") ||
+          roleText.includes("specialite")
+        ) {
+          console.log(
+            "🔒 FINAL ENFORCEMENT - Applying CHEF DE SPÉCIALITÉ permissions"
+          );
+          document.getElementById("nav-enseignants").style.display = "flex";
+          document.getElementById("nav-demandes-profil").style.display = "flex";
+        } else if (
+          roleText.includes("secrétaire") ||
+          roleText.includes("secretaire")
+        ) {
+          console.log("🔒 FINAL ENFORCEMENT - Applying SECRÉTAIRE permissions");
+          document.getElementById("nav-demandes-profil").style.display = "flex";
+        }
+
+        // Fallback to stored role if needed
+        else if (storedRole) {
+          if (storedRole === "doyen") {
+            console.log(
+              "🔒 FINAL ENFORCEMENT - Applying DOYEN permissions (from storage)"
+            );
+            document.getElementById("nav-enseignants").style.display = "flex";
+            document.getElementById("nav-sections").style.display = "flex";
+            document.getElementById("nav-demandes").style.display = "flex";
+            document.getElementById("nav-demandes-profil").style.display =
+              "flex";
+          } else if (storedRole === "vice-doyen") {
+            console.log(
+              "🔒 FINAL ENFORCEMENT - Applying VICE-DOYEN permissions (from storage)"
+            );
+            document.getElementById("nav-sections").style.display = "flex";
+            document.getElementById("nav-demandes").style.display = "flex";
+            document.getElementById("nav-demandes-profil").style.display =
+              "flex";
+          } else if (storedRole === "chef-de-departement") {
+            console.log(
+              "🔒 FINAL ENFORCEMENT - Applying CHEF DE DÉPARTEMENT permissions (from storage)"
+            );
+            document.getElementById("nav-enseignants").style.display = "flex";
+            document.getElementById("nav-demandes-profil").style.display =
+              "flex";
+          } else if (storedRole === "chef-de-specialite") {
+            console.log(
+              "🔒 FINAL ENFORCEMENT - Applying CHEF DE SPÉCIALITÉ permissions (from storage)"
+            );
+            document.getElementById("nav-enseignants").style.display = "flex";
+            document.getElementById("nav-demandes-profil").style.display =
+              "flex";
+          } else if (storedRole === "secretaire") {
+            console.log(
+              "🔒 FINAL ENFORCEMENT - Applying SECRÉTAIRE permissions (from storage)"
+            );
+            document.getElementById("nav-demandes-profil").style.display =
+              "flex";
+          }
+        }
+      }
+
+      // Call the enforcer on load and after a delay
+      document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(enforceRoleBasedAccess, 0);
+        setTimeout(enforceRoleBasedAccess, 300);
+        setTimeout(enforceRoleBasedAccess, 1000);
+      });
+      window.addEventListener("load", function () {
+        setTimeout(enforceRoleBasedAccess, 0);
+        setTimeout(enforceRoleBasedAccess, 500);
       });
     </script>
   </body>

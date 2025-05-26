@@ -4,53 +4,21 @@
     <meta charset="UTF-8" />
     <title>Gestion des Responsables de Sections</title>
     <link href="style/gestion-responsables.css" rel="stylesheet" />
+    <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link href="style/teacher-sidebar.css" rel="stylesheet" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
   </head>
   <body>
     <div class="dashboard-container">
       <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="user-info">
-          <div class="user-avatar">MB</div>
-          <div class="user-name">Mohamed Belkacem</div>
-          <div class="user-id">Enseignant</div>
-        </div>
-
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="dashbord-teacher.html" class="nav-link">Tableau de bord</a>
-          </li>
-          <li class="nav-item">
-            <a href="gestion-section.html" class="nav-link"
-              >Gestion des Sections</a
-            >
-          </li>
-          <li class="nav-item">
-            <a href="gestion-etudiant.html" class="nav-link"
-              >Gestion des Étudiants</a
-            >
-          </li>
-          <li class="nav-item">
-            <a href="gestion-responsables.html" class="nav-link active"
-              >Gestion des Responsables</a
-            >
-          </li>
-          <li class="nav-item">
-            <a href="emploi.html" class="nav-link">Emploi du temps</a>
-          </li>
-          <li class="nav-item">
-            <a href="note-evaluation.html" class="nav-link"
-              >Notes et Évaluations</a
-            >
-          </li>
-          <li class="nav-item">
-            <a href="#" id="logout-btn" class="nav-link">Déconnexion</a>
-          </li>
-        </ul>
-      </div>
+      <div id="navbar-container"></div>
 
       <!-- Main Content -->
       <div class="main-content">
@@ -172,13 +140,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/admin-auth.js"></script>
-    <script src="js/admin-logout.js"></script>
+    <script src="js/enseignant-auth.js"></script>
+    <script src="js/sidebar-loader.js"></script>
     <script>
       // Configuration
-      const API_URL = "https://unicersityback.onrender.com/api";
+      const API_URL = "http://localhost:3000/api";
 
-      $(document).ready(function () {
+      $(document).ready(async function () {
+        // Load teacher sidebar
+        await loadTeacherSidebar();
         // Load departments
         loadDepartments();
 
@@ -218,11 +188,7 @@
           assignResponsable(sectionId, teacherId, role);
         });
 
-        // Handle logout
-        $("#logout-btn").click(function (e) {
-          e.preventDefault();
-          handleAdminLogout();
-        });
+        // Logout functionality is now handled by onclick in HTML
       });
 
       function getAuthToken() {

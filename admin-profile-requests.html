@@ -466,6 +466,69 @@
         min-height: 100px;
         resize: vertical;
       }
+
+      /* Enhanced action buttons */
+      .action-buttons {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .action-buttons .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+      }
+
+      .action-buttons .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .action-buttons .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+      }
+
+      .action-buttons .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+      }
+
+      .action-buttons .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+      }
+
+      .action-buttons .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+
+      .action-buttons .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+
+      .action-buttons .btn-primary:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+      }
+
+      @media (max-width: 768px) {
+        .action-buttons {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .action-buttons .btn {
+          justify-content: center;
+          margin-bottom: 4px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -871,7 +934,28 @@
       });
       async function loadSidebar() {
         try {
-          const response = await fetch("admin-sidebar.html");
+          // Get role from storage
+          const role =
+            localStorage.getItem("admin_role") ||
+            sessionStorage.getItem("admin_role");
+
+          console.log("Loading sidebar for role:", role);
+
+          // Map roles to sidebar files
+          const sidebarFiles = {
+            doyen: "admin-sidebar-doyen.html",
+            "vice-doyen": "admin-sidebar-vice-doyen.html",
+            "chef-de-departement": "admin-sidebar-chef-departement.html",
+            "chef-de-specialite": "admin-sidebar-chef-specialite.html",
+            secretaire: "admin-sidebar-secretaire.html",
+          };
+
+          // Get the sidebar file for the role
+          const sidebarFile = sidebarFiles[role] || sidebarFiles["doyen"]; // Default to doyen
+
+          console.log("Loading sidebar file:", sidebarFile);
+
+          const response = await fetch(sidebarFile);
           if (!response.ok) throw new Error("Failed to load sidebar");
 
           const html = await response.text();
@@ -881,11 +965,15 @@
           const logoutBtn = document.getElementById("logout-btn");
           if (logoutBtn && typeof handleAdminLogout === "function") {
             logoutBtn.addEventListener("click", handleAdminLogout);
-          } // Update admin info manually since scripts in innerHTML don't execute
+          }
+
+          // Update admin info manually since scripts in innerHTML don't execute
           updateSidebarAdminInfo();
 
           // Set active menu item
           setSidebarActiveMenuItem();
+
+          console.log("✅ Sidebar loaded successfully for role:", role);
         } catch (error) {
           console.error("Error loading sidebar:", error);
         }
@@ -995,16 +1083,73 @@
       }
       function openRequestDetails(requestId) {
         console.log("openRequestDetails called with ID:", requestId);
-        console.log("allRequests:", allRequests);
 
-        const request = allRequests.find((req) => req.id === requestId);
-        if (!request) {
-          console.error("Request not found for ID:", requestId);
-          showMessage("Demande non trouvée", "error");
-          return;
+        // Ensure the ID is properly parsed if it's a string
+        if (typeof requestId === "string") {
+          // Try both with and without conversion
+          const numericId = parseInt(requestId, 10);
+
+          // Try to find the request using both the original string and the parsed number
+          let request = allRequests.find(
+            (req) => req.id === requestId || req.id === numericId
+          );
+
+          // If still not found, try case-insensitive matching if string IDs
+          if (!request) {
+            request = allRequests.find(
+              (req) =>
+                String(req.id).toLowerCase() === String(requestId).toLowerCase()
+            );
+          }
+
+          if (request) {
+            console.log("Found request:", request);
+            displayRequestDetails(request);
+            return;
+          }
+        } else {
+          // Try direct matching if not a string
+          const request = allRequests.find((req) => req.id === requestId);
+          if (request) {
+            console.log("Found request:", request);
+            displayRequestDetails(request);
+            return;
+          }
         }
 
-        console.log("Found request:", request);
+        console.error("Request not found for ID:", requestId);
+        console.log("Current allRequests array:", allRequests);
+
+        // If we get here, the request wasn't found - try reloading requests
+        showMessage("Chargement des demandes...", "info");
+
+        // Try to reload requests before giving up
+        loadProfileRequests()
+          .then(() => {
+            // Try finding the request again after reload
+            const request = allRequests.find(
+              (req) =>
+                req.id === requestId ||
+                req.id === parseInt(requestId, 10) ||
+                String(req.id) === String(requestId)
+            );
+
+            if (request) {
+              console.log("Found request after reload:", request);
+              displayRequestDetails(request);
+            } else {
+              console.error("Request still not found after reload:", requestId);
+              showMessage("Demande non trouvée", "error");
+            }
+          })
+          .catch((error) => {
+            console.error("Error reloading requests:", error);
+            showMessage("Erreur lors du chargement des demandes", "error");
+          });
+      }
+
+      // Helper function to display request details
+      function displayRequestDetails(request) {
         currentRequest = request;
 
         // Add loading state to modal

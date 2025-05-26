@@ -411,7 +411,7 @@ function getAuthToken() {
   );
 }
 
-// Export functions for use in admin-gestion-sections.html
+// Export functions through window.sectionAPI
 window.sectionAPI = {
   getSections,
   getDepartments,

@@ -20,6 +20,9 @@
     <script src="js/admin-api-utils.js"></script>
     <script src="js/admin-api-fetchers.js"></script>
     <script src="js/admin-api-loader.js"></script>
+    <script src="js/admin-section-utils.js"></script>
+    <script src="js/admin-sections.js"></script>
+    <script src="js/admin-sections-init.js"></script>
 
     <!-- Add Google Material Icons -->
     <link
@@ -936,6 +939,195 @@
         font-size: 0.875rem;
       }
 
+      /* Enhanced timetable management styles */
+      .upload-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+      }
+
+      .upload-section h4 {
+        margin: 0 0 15px 0;
+        color: #495057;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #495057;
+        font-size: 14px;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
+      .timetables-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 10px 0;
+      }
+
+      .timetable-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        background: white;
+        transition: box-shadow 0.2s ease;
+      }
+
+      .timetable-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .timetable-info h4 {
+        margin: 0 0 5px 0;
+        color: #495057;
+        font-size: 16px;
+      }
+
+      .timetable-info p {
+        margin: 0 0 5px 0;
+        color: #6c757d;
+        font-size: 14px;
+      }
+
+      .timetable-meta {
+        display: flex;
+        gap: 10px;
+        font-size: 12px;
+        color: #6c757d;
+      }
+
+      .timetable-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .timetable-actions .btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+      }
+
+      .timetable-actions .btn-primary {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .timetable-actions .btn-primary:hover {
+        background-color: #0056b3;
+      }
+
+      .timetable-actions .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+
+      .timetable-actions .btn-secondary:hover {
+        background-color: #545b62;
+      }
+
+      .timetable-actions .btn-danger {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      .timetable-actions .btn-danger:hover {
+        background-color: #c82333;
+      }
+
+      .loading-timetables {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+        font-style: italic;
+      }
+
+      .no-timetables {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+      }
+
+      .no-timetables p {
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      .error-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #dc3545;
+      }
+
+      .error-message p {
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      @media (max-width: 768px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .timetable-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 15px;
+        }
+
+        .timetable-actions {
+          width: 100%;
+          justify-content: flex-end;
+        }
+      }
+
       .teachers-list {
         display: flex;
         flex-direction: column;
@@ -1409,6 +1601,126 @@
       .mt-4 {
         margin-top: 1rem;
       }
+
+      /* Schedule Management Styles */
+      .upload-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+      }
+
+      .upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .form-group label {
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .form-group small {
+        color: #6c757d;
+        font-size: 12px;
+      }
+
+      .schedules-section {
+        margin-top: 20px;
+      }
+
+      .schedules-list {
+        display: grid;
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .schedule-item {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .schedule-info h4 {
+        margin: 0 0 5px 0;
+        color: #212529;
+      }
+
+      .schedule-info p {
+        margin: 3px 0;
+        color: #6c757d;
+        font-size: 14px;
+      }
+
+      .schedule-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .schedule-actions button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .btn-view {
+        background: #e9ecef;
+        color: #495057;
+      }
+
+      .btn-download {
+        background: #e7f5ff;
+        color: #1971c2;
+      }
+
+      .btn-delete {
+        background: #fff5f5;
+        color: #e03131;
+      }
+
+      .btn-view:hover {
+        background: #dee2e6;
+      }
+
+      .btn-download:hover {
+        background: #d0ebff;
+      }
+
+      .btn-delete:hover {
+        background: #ffe3e3;
+      }
     </style>
   </head>
   <body>
@@ -1421,17 +1733,7 @@
         <div class="header">
           <h1 class="page-title">Gestion des Sections</h1>
           <div class="header-actions">
-            <button class="header-btn" id="add-section-btn">
-              <svg
-                class="header-btn-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M12 5v14M5 12h14"></path>
-              </svg>
-              Ajouter une section
-            </button>
+            <!-- Button removed -->
           </div>
         </div>
 
@@ -1758,25 +2060,55 @@
         >
         <h2 id="view-timetables-modal-title">Emplois du temps</h2>
 
-        <div class="tabs">
-          <button class="tab-btn active" data-tab="regular-timetables">
-            Emplois du temps
-          </button>
-          <button class="tab-btn" data-tab="exam-timetables">
-            Emplois des examens
-          </button>
-        </div>
+        <!-- No tabs needed as we're only keeping regular timetables -->
 
         <div class="tab-content active" id="regular-timetables">
-          <div id="regular-timetables-list" class="timetables-list">
-            <!-- Regular timetables will be listed here -->
-            <div class="no-timetables">Aucun emploi du temps disponible</div>
+          <!-- Upload Form for Regular Timetables -->
+          <div class="upload-section">
+            <h4>Télécharger un nouvel emploi du temps</h4>
+            <form id="regular-upload-form" class="upload-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="regular-title">Titre</label>
+                  <input
+                    type="text"
+                    id="regular-title"
+                    name="title"
+                    required
+                    placeholder="Ex: Emploi du temps Semestre 1"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="regular-file">Fichier</label>
+                  <input
+                    type="file"
+                    id="regular-file"
+                    name="document"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="regular-description">Description (optionnel)</label>
+                <textarea
+                  id="regular-description"
+                  name="description"
+                  rows="2"
+                  placeholder="Description de l'emploi du temps"
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Télécharger
+              </button>
+            </form>
           </div>
-        </div>
-        <div class="tab-content" id="exam-timetables">
-          <div id="exam-timetables-list" class="timetables-list">
-            <!-- Exam timetables will be listed here -->
-            <div class="no-timetables">Aucun emploi des examens disponible</div>
+
+          <!-- List of Regular Timetables -->
+          <div id="regular-timetables-list" class="timetables-list">
+            <div class="loading-timetables">
+              Chargement des emplois du temps...
+            </div>
           </div>
         </div>
       </div>
@@ -1790,7 +2122,11 @@
         >
         <h2 id="teacher-assignment-modal-title">Assigner des responsables</h2>
 
-        <form id="teacher-assignment-form" class="form">
+        <form
+          id="teacher-assignment-form"
+          class="form"
+          onsubmit="return false;"
+        >
           <input type="hidden" id="assignment-section-id" />
 
           <div class="form-group">
@@ -1815,11 +2151,17 @@
             id="group-selection-container"
             style="display: none"
           >
-            <label for="group-select">Groupe:</label>
+            <label for="group-select"
+              >Groupe:
+              <span class="required" style="color: #dc3545">*</span></label
+            >
             <select id="group-select" class="form-input">
               <option value="">Sélectionner un groupe</option>
               <!-- Groups will be loaded dynamically -->
             </select>
+            <small class="form-help" style="color: #666; font-size: 0.85rem">
+              Requis pour les responsables TD/TP
+            </small>
           </div>
 
           <div class="form-group">
@@ -1845,9 +2187,10 @@
               Annuler
             </button>
             <button
-              type="submit"
+              type="button"
               class="btn btn-primary"
               id="save-teacher-assignment-btn"
+              onclick="handleTeacherAssignment(event)"
             >
               Assigner
             </button>
@@ -1869,32 +2212,89 @@
           <button class="tab-btn active" data-tab="regular-timetables">
             Emplois du temps
           </button>
-          <button class="tab-btn" data-tab="exam-timetables">
-            Emplois des examens
-          </button>
+          <!-- Removed exam timetable tab button -->
         </div>
 
-        <div class="tab-content active" id="regular-timetables-content">
+        <div
+          class="tab-content active"
+          id="regular-timetables-content"
+          style="display: block"
+        >
           <div class="timetable-actions">
             <button class="btn btn-primary" id="upload-regular-timetable">
               <span class="material-icons">upload</span> Télécharger un emploi
               du temps
             </button>
+            <button
+              class="btn btn-secondary"
+              id="view-all-regular-timetables"
+              onclick="openAllTimetablesInNewPages()"
+            >
+              <span class="material-icons">open_in_new</span> Afficher tous dans
+              de nouvelles pages
+            </button>
           </div>
-          <div id="regular-timetables-list" class="timetables-list">
+          <div id="mgmt-regular-timetables-list" class="timetables-list">
             <!-- Regular timetables will be listed here -->
+            <div class="loading-timetables">
+              Chargement des emplois du temps...
+            </div>
           </div>
         </div>
 
-        <div class="tab-content" id="exam-timetables-content">
-          <div class="timetable-actions">
-            <button class="btn btn-primary" id="upload-exam-timetable">
-              <span class="material-icons">upload</span> Télécharger un emploi
-              des examens
+        <!-- Removed exam timetables content section -->
+      </div>
+    </div>
+
+    <!-- Schedule Management Modal -->
+    <div id="schedule-management-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Gestion des Emplois du Temps</h2>
+
+        <!-- Upload Form -->
+        <div class="upload-section">
+          <h3>Télécharger un nouvel emploi du temps</h3>
+          <form id="schedule-upload-form" class="upload-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="schedule-title">Titre</label>
+                <input type="text" id="schedule-title" required />
+              </div>
+              <div class="form-group">
+                <label for="schedule-type">Type</label>
+                <select id="schedule-type" required>
+                  <option value="regular">Emploi du temps régulier</option>
+                  <!-- Removed exam option -->
+                  <option value="special">Emploi du temps spécial</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="schedule-description">Description (optionnel)</label>
+              <textarea id="schedule-description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="schedule-file">Fichier</label>
+              <input
+                type="file"
+                id="schedule-file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                required
+              />
+              <small>Formats acceptés: PDF, JPG, PNG (max 5MB)</small>
+            </div>
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-upload"></i> Télécharger
             </button>
-          </div>
-          <div id="exam-timetables-list" class="timetables-list">
-            <!-- Exam timetables will be listed here -->
+          </form>
+        </div>
+
+        <!-- Current Schedules -->
+        <div class="schedules-section">
+          <h3>Emplois du temps actuels</h3>
+          <div id="schedules-list" class="schedules-list">
+            <!-- Schedules will be loaded here -->
           </div>
         </div>
       </div>
@@ -1989,8 +2389,29 @@
 
       async function loadSidebar() {
         try {
+          // Get role from storage
+          const role =
+            localStorage.getItem("admin_role") ||
+            sessionStorage.getItem("admin_role");
+
+          console.log("Loading sidebar for role:", role);
+
+          // Map roles to sidebar files
+          const sidebarFiles = {
+            doyen: "admin-sidebar-doyen.html",
+            "vice-doyen": "admin-sidebar-vice-doyen.html",
+            "chef-de-departement": "admin-sidebar-chef-departement.html",
+            "chef-de-specialite": "admin-sidebar-chef-specialite.html",
+            secretaire: "admin-sidebar-secretaire.html",
+          };
+
+          // Get the sidebar file for the role
+          const sidebarFile = sidebarFiles[role] || sidebarFiles["doyen"]; // Default to doyen
+
+          console.log("Loading sidebar file:", sidebarFile);
+
           // Load the sidebar HTML
-          const response = await fetch("admin-sidebar.html");
+          const response = await fetch(sidebarFile);
           const html = await response.text();
 
           // Insert the sidebar HTML into the container
@@ -2007,6 +2428,8 @@
 
           // Set active menu item
           setSidebarActiveMenuItem();
+
+          console.log("✅ Sidebar loaded successfully for role:", role);
         } catch (error) {
           console.error("Error loading sidebar:", error);
           showMessage("Impossible de charger la barre latérale.", "error");
@@ -2235,7 +2658,11 @@
         // Add section button
         const addSectionBtn = document.getElementById("add-section-btn");
         if (addSectionBtn) {
-          addSectionBtn.addEventListener("click", openAddSectionModal);
+          console.log("Setting up Add Section button click handler");
+          addSectionBtn.addEventListener("click", function () {
+            console.log("Add Section button clicked");
+            openAddSectionModal();
+          });
         }
 
         // Modal close button
@@ -2267,12 +2694,8 @@
           "cancel-teacher-assignment-btn"
         );
 
-        if (teacherAssignmentForm) {
-          teacherAssignmentForm.addEventListener(
-            "submit",
-            handleTeacherAssignment
-          );
-        }
+        // Form submit handler removed - using button click instead
+        // The form has onsubmit="return false;" and button is type="button"
 
         if (closeTeacherAssignmentModal) {
           closeTeacherAssignmentModal.addEventListener("click", () => {
@@ -2315,6 +2738,12 @@
             "change",
             handleRoleSelectionChange
           );
+        }
+
+        // Also add the handler to the select element directly for immediate response
+        const roleSelect = document.querySelector("#teacher-role");
+        if (roleSelect) {
+          roleSelect.onchange = handleRoleSelectionChange;
         }
       }
 
@@ -2437,7 +2866,7 @@
               </div>
             </td>
             <td>
-              <div class="table-actions">
+              <div class="section-actions">
                 <button class="action-btn edit-btn" data-id="${
                   section.id
                 }" title="Modifier">
@@ -2448,7 +2877,7 @@
                 }" title="Assigner responsables">
                   <span class="material-icons">person_add</span>
                 </button>
-                <button class="action-btn timetable-btn" data-id="${
+                <button class="action-btn schedule-btn" data-id="${
                   section.id
                 }" title="Gérer l'emploi du temps">
                   <span class="material-icons">schedule</span>
@@ -2475,20 +2904,113 @@
               openTeacherAssignmentModal(section)
             );
           row
-            .querySelector(".timetable-btn")
+            .querySelector(".schedule-btn")
             .addEventListener("click", () =>
-              openTimetableManagement(section.id)
+              openScheduleManagement(section.id)
             );
           row
             .querySelector(".delete-btn")
             .addEventListener("click", () => confirmDeleteSection(section));
 
           // Load teachers for this section
-          loadSectionTeachers(section.id);
+          loadSectionTeachers(section.id).catch((error) => {
+            console.error(
+              `Error loading teachers for section ${section.id}:`,
+              error
+            );
+            const container = document.getElementById(`teachers-${section.id}`);
+            if (container) {
+              container.innerHTML =
+                '<div class="error-teachers">Erreur de chargement</div>';
+            }
+          });
         });
 
         // Render pagination
         renderPagination(totalPages);
+      }
+
+      // Function to load and display teachers for a section
+      async function loadSectionTeachers(sectionId) {
+        const container = document.getElementById(`teachers-${sectionId}`);
+        if (!container) {
+          console.warn(`Container for section ${sectionId} teachers not found`);
+          return;
+        }
+
+        try {
+          // Show loading state
+          container.innerHTML =
+            '<div class="loading-teachers">Chargement...</div>';
+
+          // Fetch section responsables
+          const response = await fetch(
+            `${API_BASE_URL}/sections/${sectionId}/responsables`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const responsables = await response.json();
+          console.log(
+            `Loaded ${responsables.length} responsables for section ${sectionId}`
+          );
+
+          // Display responsables
+          if (!responsables || responsables.length === 0) {
+            container.innerHTML =
+              '<div class="no-teachers">Aucun responsable assigné</div>';
+            return;
+          }
+
+          // Group responsables by role
+          const groupedResponsables = {
+            filiere: responsables.filter((r) => r.role === "filiere"),
+            section: responsables.filter((r) => r.role === "section"),
+            td: responsables.filter((r) => r.role === "td"),
+            tp: responsables.filter((r) => r.role === "tp"),
+          };
+
+          let html = '<div class="teachers-list">';
+
+          Object.entries(groupedResponsables).forEach(
+            ([role, roleResponsables]) => {
+              if (roleResponsables.length > 0) {
+                roleResponsables.forEach((responsable) => {
+                  const teacherName = responsable.enseignant
+                    ? `${responsable.enseignant.firstName || ""} ${
+                        responsable.enseignant.lastName || ""
+                      }`.trim()
+                    : `Enseignant #${responsable.enseignantId}`;
+
+                  html += `
+                  <div class="teacher-assignment">
+                    ${getRoleIcon(role)}
+                    <span class="teacher-name">${teacherName}</span>
+                  </div>
+                `;
+                });
+              }
+            }
+          );
+
+          html += "</div>";
+          container.innerHTML = html;
+        } catch (error) {
+          console.error(
+            `Error loading teachers for section ${sectionId}:`,
+            error
+          );
+          container.innerHTML =
+            '<div class="error-teachers">Erreur de chargement</div>';
+        }
       } // Function to load and display teachers for a section is now handled by js/section-responsables.js
 
       // Update the getRoleIcon function to use Material Icons
@@ -2634,14 +3156,18 @@
       }
       async function handleFormSubmit(event) {
         event.preventDefault();
+        console.log("Form submitted", event.target);
 
         // Validate all inputs
         const inputs = event.target.querySelectorAll("input, select");
         let isValid = true;
 
         inputs.forEach((input) => {
-          if (!validateInput(input)) {
+          if (input.required && !input.value.trim()) {
+            input.classList.add("error");
             isValid = false;
+          } else {
+            input.classList.remove("error");
           }
         });
 
@@ -2654,45 +3180,133 @@
         }
 
         try {
+          // Validate form fields
+          const nameInput = document.getElementById("section-name");
+          const codeInput = document.getElementById("section-code");
+          const specialtyInput = document.getElementById("section-specialty");
+          const levelInput = document.getElementById("section-level");
+          const capacityInput = document.getElementById("section-capacity");
+          const departmentInput = document.getElementById("section-department");
+
+          if (!nameInput.value.trim()) {
+            showNotification("Le nom de la section est requis", "error");
+            nameInput.focus();
+            return;
+          }
+
+          if (!codeInput.value.trim()) {
+            showNotification("Le code de la section est requis", "error");
+            codeInput.focus();
+            return;
+          }
+
+          if (!specialtyInput.value.trim()) {
+            showNotification("La spécialité est requise", "error");
+            specialtyInput.focus();
+            return;
+          }
+
+          if (!levelInput.value) {
+            showNotification("Le niveau est requis", "error");
+            levelInput.focus();
+            return;
+          }
+
+          if (
+            !capacityInput.value ||
+            isNaN(parseInt(capacityInput.value)) ||
+            parseInt(capacityInput.value) <= 0
+          ) {
+            showNotification(
+              "La capacité doit être un nombre positif",
+              "error"
+            );
+            capacityInput.focus();
+            return;
+          }
+
+          if (!departmentInput.value) {
+            showNotification("Le département est requis", "error");
+            departmentInput.focus();
+            return;
+          }
+
+          // Prepare form data
           const formData = {
-            name: document.getElementById("section-name").value.trim(),
-            code: document
-              .getElementById("section-code")
-              .value.trim()
-              .toUpperCase(),
-            specialty: document
-              .getElementById("section-specialty")
-              .value.trim(),
-            level: document.getElementById("section-level").value,
-            capacity: parseInt(
-              document.getElementById("section-capacity").value
-            ),
-            departmentId: parseInt(
-              document.getElementById("section-department").value
-            ),
+            name: nameInput.value.trim(),
+            code: codeInput.value.trim().toUpperCase(),
+            specialty: specialtyInput.value.trim(),
+            level: levelInput.value,
+            capacity: parseInt(capacityInput.value),
+            departmentId: parseInt(departmentInput.value),
           };
+
+          console.log("Submitting section data:", formData);
 
           const sectionId = document.getElementById("section-id").value;
           let response;
 
           if (sectionId) {
-            response = await window.sectionAPI.updateSection(
-              sectionId,
-              formData
-            );
+            console.log("Updating section:", sectionId, formData);
+            if (
+              window.sectionAPI &&
+              typeof window.sectionAPI.updateSection === "function"
+            ) {
+              console.log("Using sectionAPI.updateSection");
+              response = await window.sectionAPI.updateSection(
+                sectionId,
+                formData
+              );
+            } else {
+              console.log("Using direct API call for updateSection");
+              response = await apiCall(
+                `sections/${sectionId}`,
+                "PUT",
+                formData
+              );
+            }
           } else {
-            response = await window.sectionAPI.createSection(formData);
+            console.log("Creating new section:", formData);
+            if (
+              window.sectionAPI &&
+              typeof window.sectionAPI.createSection === "function"
+            ) {
+              console.log("Using sectionAPI.createSection");
+              response = await window.sectionAPI.createSection(formData);
+            } else {
+              console.log("Using direct API call for createSection");
+              response = await apiCall("sections", "POST", formData);
+            }
+          }
+
+          if (!response) {
+            throw new Error("Aucune réponse du serveur");
+          }
+
+          if (response.error) {
+            throw new Error(
+              response.error || "Erreur lors de l'enregistrement de la section"
+            );
           }
 
           // Close modal and refresh sections list
           closeModal();
-          await loadSections();
 
-          // Show success message
-          showNotification("Section enregistrée avec succès", "success");
+          // Function name is fetchSections, not loadSections
+          await fetchSections();
+          showMessage(
+            sectionId
+              ? "Section modifiée avec succès!"
+              : "Section ajoutée avec succès!",
+            "success"
+          );
         } catch (error) {
           console.error("Error saving section:", error);
-          showNotification(error.message || "Une erreur est survenue", "error");
+          showNotification(
+            error.message ||
+              "Une erreur est survenue lors de l'enregistrement de la section",
+            "error"
+          );
         }
       }
       async function confirmDeleteSection(section) {
@@ -2769,9 +3383,28 @@
         ]);
 
         // Reset role selection and hide group container
-        document.getElementById("teacher-role").value = "";
-        document.getElementById("group-selection-container").style.display =
-          "none";
+        const roleSelect = document.getElementById("teacher-role");
+        const groupContainer = document.getElementById(
+          "group-selection-container"
+        );
+        const groupSelect = document.getElementById("group-select");
+
+        if (roleSelect) {
+          roleSelect.value = "";
+        }
+
+        if (groupContainer) {
+          groupContainer.style.display = "none";
+        }
+
+        if (groupSelect) {
+          groupSelect.value = "";
+          groupSelect.required = false;
+          // Clear all options except the first
+          while (groupSelect.options.length > 1) {
+            groupSelect.remove(1);
+          }
+        }
 
         // Show modal
         modal.style.display = "block";
@@ -2811,8 +3444,17 @@
           "current-assignments"
         );
 
+        if (!currentAssignments) {
+          console.warn("Current assignments container not found");
+          return;
+        }
+
         try {
           console.log(`Fetching responsables for section: ${sectionId}`);
+
+          // Show loading state
+          currentAssignments.innerHTML =
+            '<div class="loading">Chargement des assignations...</div>';
 
           // Use direct fetch to ensure we get the raw response
           const token =
@@ -2820,7 +3462,7 @@
             sessionStorage.getItem("admin_token");
 
           const response = await fetch(
-            `https://unicersityback.onrender.com/api/sections/${sectionId}/responsables`,
+            `http://localhost:3000/api/sections/${sectionId}/responsables`,
             {
               headers: {
                 Authorization: token ? `Bearer ${token}` : "",
@@ -3032,6 +3674,14 @@
       async function handleTeacherAssignment(event) {
         event.preventDefault();
 
+        // Prevent multiple submissions
+        const submitBtn = document.getElementById(
+          "save-teacher-assignment-btn"
+        );
+        if (submitBtn.disabled) {
+          return;
+        }
+
         const sectionId = document.getElementById(
           "assignment-section-id"
         ).value;
@@ -3072,7 +3722,22 @@
           ? selectedTeacherOption.textContent
           : "Unknown";
 
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Assignation...';
+
         try {
+          // Validate API configuration
+          if (!API_BASE_URL) {
+            throw new Error(
+              "Configuration manquante: API_BASE_URL non définie"
+            );
+          }
+          if (!authToken) {
+            throw new Error("Token d'authentification manquant");
+          }
+
           const assignmentData = {
             enseignantId: parseInt(teacherId),
             role: role,
@@ -3157,17 +3822,48 @@
             }
           }
 
-          await apiCall(
-            `sections/${sectionId}/responsables`,
-            "POST",
-            assignmentData
+          // Make the API call with better error handling
+          console.log("Making API call with data:", assignmentData);
+
+          const response = await fetch(
+            `${API_BASE_URL}/sections/${sectionId}/responsables`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+              },
+              body: JSON.stringify(assignmentData),
+            }
           );
 
-          // Close modal and refresh data
-          const modal = document.getElementById("teacher-assignment-modal");
-          if (modal) {
-            modal.style.display = "none";
+          console.log("API response status:", response.status);
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("API error response:", errorData);
+            throw new Error(
+              errorData.message ||
+                `HTTP ${response.status}: ${response.statusText}`
+            );
           }
+
+          const result = await response.json();
+          console.log("Assignment successful:", result);
+
+          // Show success message first
+          showNotification(
+            `${teacherName} assigné comme ${getRoleDisplayName(
+              role
+            )} avec succès`,
+            "success"
+          );
+
+          // Reload the specific section's teachers
+          await loadSectionTeachers(sectionId);
+
+          // Reload current assignments in the modal
+          await loadCurrentAssignments(sectionId);
 
           // Reset form
           document.getElementById("teacher-role").value = "";
@@ -3176,21 +3872,44 @@
           document.getElementById("group-selection-container").style.display =
             "none";
 
-          // Show success message
-          showNotification("Responsable assigné avec succès", "success");
-
-          // Reload sections to update the view
-          await loadSections();
+          // Close modal after a short delay to allow user to see the success
+          setTimeout(() => {
+            const modal = document.getElementById("teacher-assignment-modal");
+            if (modal) {
+              modal.style.display = "none";
+            }
+          }, 1500);
         } catch (error) {
           console.error("Error assigning teacher:", error);
           let errorMessage = "Erreur lors de l'assignation du responsable";
-          if (error.message && error.message.includes("already assigned")) {
-            errorMessage =
-              "Ce responsable est déjà assigné à ce rôle pour cette section";
-          } else if (error.message && error.message.includes("not found")) {
-            errorMessage = "Responsable ou section introuvable";
+
+          if (error.message) {
+            if (
+              error.message.includes("already assigned") ||
+              error.message.includes("déjà assigné")
+            ) {
+              errorMessage =
+                "Ce responsable est déjà assigné à ce rôle pour cette section";
+            } else if (
+              error.message.includes("not found") ||
+              error.message.includes("introuvable")
+            ) {
+              errorMessage = "Responsable ou section introuvable";
+            } else if (
+              error.message.includes("validation") ||
+              error.message.includes("invalid")
+            ) {
+              errorMessage = "Données d'assignation invalides";
+            } else {
+              errorMessage = `Erreur: ${error.message}`;
+            }
           }
+
           showNotification(errorMessage, "error");
+        } finally {
+          // Reset button state
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "Assigner";
         }
       }
 
@@ -3222,12 +3941,26 @@
         );
         const groupSelect = document.getElementById("group-select");
 
+        if (!roleSelect || !groupContainer || !groupSelect) {
+          console.error("Required elements not found for role selection");
+          return;
+        }
+
         const selectedRole = roleSelect.value;
+        console.log("Role changed to:", selectedRole);
 
         // Show group selection for TD/TP roles
         if (selectedRole === "td" || selectedRole === "tp") {
+          console.log("Showing group selection for", selectedRole);
           groupContainer.style.display = "block";
           groupSelect.required = true;
+
+          // Add visual feedback
+          groupContainer.style.animation = "fadeIn 0.3s ease-in";
+          groupSelect.style.border = "2px solid #007bff";
+          setTimeout(() => {
+            groupSelect.style.border = "1px solid #ced4da";
+          }, 2000);
 
           // Load groups for the current section
           const sectionId = document.getElementById(
@@ -3235,10 +3968,14 @@
           ).value;
           if (sectionId) {
             loadGroupsForSection(sectionId, selectedRole);
+          } else {
+            console.warn("No section ID found for loading groups");
           }
         } else {
+          console.log("Hiding group selection");
           groupContainer.style.display = "none";
           groupSelect.required = false;
+          groupSelect.value = "";
           // Clear group selection
           while (groupSelect.options.length > 1) {
             groupSelect.remove(1);
@@ -3247,9 +3984,7 @@
       }
       async function loadGroupsForSection(sectionId, roleType) {
         const groupSelect = document.getElementById("group-select");
-        console.log(
-          `Loading groups for section ${sectionId}, role type: ${roleType}`
-        );
+        if (!groupSelect) return;
 
         try {
           // Clear existing options except the first one
@@ -3257,240 +3992,51 @@
             groupSelect.remove(1);
           }
 
-          // Try multiple API endpoints for better compatibility
-          let response = null;
-          let data = null;
-          const token =
-            localStorage.getItem("admin_token") ||
-            sessionStorage.getItem("admin_token");
-
-          // First, try the standard endpoint
-          try {
-            response = await fetch(
-              `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`,
-              {
-                headers: {
-                  Authorization: token ? `Bearer ${token}` : "",
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-
-            if (response.ok) {
-              data = await response.json();
-              console.log(
-                "API response for groups from primary endpoint:",
-                data
-              );
+          // Fetch groups for the section
+          const response = await fetch(
+            `${API_BASE_URL}/sections/${sectionId}/groupes`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
             }
-          } catch (firstError) {
-            console.warn("Error with primary groups endpoint:", firstError);
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to load groups");
           }
 
-          // If no data yet, try alternative endpoint
-          if (!data) {
-            try {
-              response = await fetch(
-                `https://unicersityback.onrender.com/api/sections/${sectionId}/groups`,
-                {
-                  headers: {
-                    Authorization: token ? `Bearer ${token}` : "",
-                    "Content-Type": "application/json",
-                  },
-                }
-              );
+          const groups = await response.json();
 
-              if (response.ok) {
-                data = await response.json();
-                console.log(
-                  "API response for groups from alternative endpoint:",
-                  data
-                );
-              }
-            } catch (secondError) {
-              console.warn(
-                "Error with alternative groups endpoint:",
-                secondError
-              );
-            }
-          }
+          // Filter groups by type if needed
+          const filteredGroups = roleType
+            ? groups.filter((group) => group.type === roleType)
+            : groups;
 
-          if (!data) {
-            throw new Error("No valid data from any groups endpoint");
-          }
-
-          // Enhanced response processing to handle more formats
-          let groups = [];
-          if (data) {
-            if (Array.isArray(data)) {
-              groups = data;
-            } else if (data.data && Array.isArray(data.data)) {
-              groups = data.data;
-            } else if (data.groups && Array.isArray(data.groups)) {
-              groups = data.groups;
-            } else if (data.groupes && Array.isArray(data.groupes)) {
-              groups = data.groupes;
-            } else if (data.results && Array.isArray(data.results)) {
-              groups = data.results;
-            } else if (typeof data === "object") {
-              // Look for array properties with common group names
-              const arrayProps = Object.entries(data).filter(
-                ([key, val]) =>
-                  Array.isArray(val) &&
-                  (key.includes("group") || key.includes("groupe"))
-              );
-
-              if (arrayProps.length > 0) {
-                groups = arrayProps[0][1]; // Use the first matching array
-              } else {
-                // Last resort: look for any array
-                const anyArray = Object.values(data).find(Array.isArray);
-                if (anyArray) {
-                  groups = anyArray;
-                } else {
-                  groups = [data]; // Handle single object response
-                }
-              }
-            }
-          }
-          console.log(`Processing ${groups ? groups.length : 0} groups`);
-
-          if (Array.isArray(groups) && groups.length > 0) {
-            // Enhanced filtering with more property checks
-            const filteredGroups = groups.filter((group) => {
-              if (!group) return false;
-
-              // Get the group type from various possible properties
-              const groupType = (
-                group.type ||
-                group.groupType ||
-                group.type_groupe ||
-                group.typeGroupe ||
-                group.group_type ||
-                ""
-              )
-                .toString()
-                .toLowerCase();
-
-              // Check if the group name contains the type
-              const groupName = (
-                group.name ||
-                group.nom ||
-                group.groupName ||
-                ""
-              )
-                .toString()
-                .toLowerCase();
-
-              if (roleType === "td") {
-                return (
-                  groupType === "td" ||
-                  groupType.includes("td") ||
-                  groupName.includes("td")
-                );
-              } else if (roleType === "tp") {
-                return (
-                  groupType === "tp" ||
-                  groupType.includes("tp") ||
-                  groupName.includes("tp")
-                );
-              }
-              return true;
-            });
-
-            console.log(`${filteredGroups.length} filtered groups available`);
-
-            // Sort groups by name for better usability
-            filteredGroups.sort((a, b) => {
-              const nameA = (a.name || a.nom || "").toString();
-              const nameB = (b.name || b.nom || "").toString();
-              return nameA.localeCompare(nameB);
-            });
-
-            // Add the filtered groups to the select
+          if (filteredGroups && filteredGroups.length > 0) {
             filteredGroups.forEach((group) => {
               const option = document.createElement("option");
-              const groupId = group.id || group._id || group.groupId;
-              option.value = groupId || `temp_${group.name || group.nom}`;
-
-              // Get more consistent name and type
-              const groupName =
-                group.name || group.nom || group.groupName || "Groupe";
-              const groupType =
-                group.type || group.groupType || roleType.toUpperCase();
-
-              option.textContent = `${groupName} (${groupType})`;
+              option.value = group.id;
+              option.textContent = `Groupe ${group.type.toUpperCase()} ${
+                group.name
+              }`;
               groupSelect.appendChild(option);
             });
-
-            // If no matching groups found, create default ones
-            if (filteredGroups.length === 0) {
-              console.log("No matching groups found, creating defaults");
-              const defaultGroups =
-                roleType === "td"
-                  ? ["TD1", "TD2", "TD3"]
-                  : ["TP1", "TP2", "TP3", "TP4"]; // Create default groups with section-specific naming
-              let counter = 1;
-              defaultGroups.forEach((groupName) => {
-                const option = document.createElement("option");
-                option.value = `default_${groupName.toLowerCase()}`;
-                option.textContent = `${groupName} (Section ${sectionId})`;
-                groupSelect.appendChild(option);
-                counter++;
-              });
-
-              // Add a custom group option
-              const customOption = document.createElement("option");
-              customOption.value = `default_${roleType}${counter}`;
-              customOption.textContent = `${roleType.toUpperCase()}${counter} (Nouveau)`;
-              groupSelect.appendChild(customOption);
-            }
           } else {
-            console.log("No groups found from API, using defaults");
-            // No groups in response, use defaults with section ID
-            const defaultGroups =
-              roleType === "td"
-                ? ["TD1", "TD2", "TD3"]
-                : ["TP1", "TP2", "TP3", "TP4"];
-
-            defaultGroups.forEach((groupName) => {
-              const option = document.createElement("option");
-              option.value = `default_${groupName.toLowerCase()}`;
-              option.textContent = `${groupName} (Section ${sectionId})`;
-              groupSelect.appendChild(option);
-            });
-
-            // Add create new group option
-            const createOption = document.createElement("option");
-            createOption.value = `default_${roleType}_new`;
-            createOption.textContent = `Créer Nouveau Groupe ${roleType.toUpperCase()}`;
-            createOption.className = "create-group-option";
-            groupSelect.appendChild(createOption);
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = `Aucun groupe ${roleType.toUpperCase()} disponible`;
+            option.disabled = true;
+            groupSelect.appendChild(option);
           }
         } catch (error) {
           console.error("Error loading groups:", error);
-          console.log("Falling back to default groups due to error");
-
-          // Fallback: create default groups with better naming
-          const defaultGroups =
-            roleType === "td"
-              ? ["TD1", "TD2", "TD3"]
-              : ["TP1", "TP2", "TP3", "TP4"];
-
-          // Add section info to group names
-          defaultGroups.forEach((groupName) => {
-            const option = document.createElement("option");
-            option.value = `default_${groupName.toLowerCase()}`;
-            option.textContent = `${groupName} (Par défaut)`;
-            groupSelect.appendChild(option);
-          });
-
-          // Add create option
-          const createOption = document.createElement("option");
-          createOption.value = `default_${roleType}_new`;
-          createOption.textContent = `Créer Nouveau Groupe ${roleType.toUpperCase()}`;
-          createOption.className = "create-group-option";
-          groupSelect.appendChild(createOption);
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "Erreur de chargement des groupes";
+          option.disabled = true;
+          groupSelect.appendChild(option);
         }
       }
 
@@ -3762,6 +4308,39 @@
           });
         });
 
+        // Close button for timetable management modal
+        const closeTimetableManagementModal = document.getElementById(
+          "close-timetable-management-modal"
+        );
+        if (closeTimetableManagementModal) {
+          console.log("Setting up close button for timetable management modal");
+          closeTimetableManagementModal.addEventListener("click", function () {
+            const modal = document.getElementById("timetable-management-modal");
+            if (modal) {
+              console.log("Closing timetable management modal");
+              modal.style.display = "none";
+            }
+          });
+        }
+
+        // Close modal when clicking outside
+        const timetableManagementModal = document.getElementById(
+          "timetable-management-modal"
+        );
+        if (timetableManagementModal) {
+          console.log(
+            "Setting up click outside for timetable management modal"
+          );
+          window.addEventListener("click", function (event) {
+            if (event.target === timetableManagementModal) {
+              console.log(
+                "Clicked outside, closing timetable management modal"
+              );
+              timetableManagementModal.style.display = "none";
+            }
+          });
+        }
+
         // Upload buttons
         const uploadRegularBtn = document.getElementById(
           "upload-regular-timetable"
@@ -3844,56 +4423,223 @@
 
         // Clear existing timetables before loading new ones
         const regularContainer = document.getElementById(
-          "regular-timetables-list"
+          "mgmt-regular-timetables-list"
         );
-        const examContainer = document.getElementById("exam-timetables-list");
+        const examContainer = document.getElementById(
+          "mgmt-exam-timetables-list"
+        );
         if (regularContainer)
           regularContainer.innerHTML =
-            '<div class="loading">Chargement...</div>';
+            '<div class="loading-timetables">Chargement des emplois du temps...</div>';
         if (examContainer)
-          examContainer.innerHTML = '<div class="loading">Chargement...</div>';
+          examContainer.innerHTML =
+            '<div class="loading-timetables">Chargement des emplois des examens...</div>';
+
+        // Setup upload form handlers
+        setupUploadForms(sectionId);
+
+        // Setup tab switchers in this modal
+        setupTimetableTabs();
 
         // Show the modal
         modal.style.display = "block";
         console.log("Modal displayed");
 
-        // Load timetables with better error handling
-        console.log("Starting to load timetables...");
-
-        // Load both types of timetables in parallel
-        Promise.all([
-          loadTimetables(sectionId, "regular"),
-          loadTimetables(sectionId, "exam"),
-        ])
-          .then(() => {
-            console.log("All timetables loaded successfully");
-          })
-          .catch((error) => {
-            console.error("Error loading timetables:", error);
-            showNotification(
-              "Erreur lors du chargement des emplois du temps",
-              "error"
-            );
-          });
+        // Instead of auto-loading, show an empty state with a load button
+        if (regularContainer) {
+          regularContainer.innerHTML = `
+            <div class="no-timetables">
+              <p>Aucun emploi du temps chargé</p>
+              <button class="btn btn-primary mt-4" onclick="loadTimetables('${sectionId}', 'regular')">
+                <span class="material-icons">refresh</span>
+                Charger les emplois du temps
+              </button>
+            </div>`;
+        }
 
         console.log("=== FINISHED OPENING TIMETABLE MANAGEMENT ===");
       }
 
+      // Function to set up tab switching in the timetable modal
+      function setupTimetableTabs() {
+        console.log("Setting up timetable tabs");
+        const tabButtons = document.querySelectorAll(
+          ".timetable-tabs .tab-btn"
+        );
+
+        // First, remove any existing event listeners by cloning and replacing
+        tabButtons.forEach((btn) => {
+          const newBtn = btn.cloneNode(true);
+          if (btn.parentNode) {
+            btn.parentNode.replaceChild(newBtn, btn);
+          }
+        });
+
+        // Get the fresh elements
+        const freshTabButtons = document.querySelectorAll(
+          ".timetable-tabs .tab-btn"
+        );
+
+        // Add new event listeners
+        freshTabButtons.forEach((button) => {
+          console.log(
+            "Adding event listener to tab button:",
+            button.dataset.tab
+          );
+          button.addEventListener("click", () => {
+            const tabId = button.dataset.tab;
+            console.log("Tab button clicked:", tabId);
+            switchTimetableTab(tabId);
+          });
+        });
+
+        // Make sure first tab is active by default
+        if (freshTabButtons.length > 0) {
+          const firstTabId = freshTabButtons[0].dataset.tab;
+          console.log("Activating first tab:", firstTabId);
+          switchTimetableTab(firstTabId);
+        }
+      }
+
       function switchTimetableTab(tabId) {
+        console.log("Switching to tab:", tabId);
+
         // Update active tab button
-        document.querySelectorAll(".timetable-tabs .tab-btn").forEach((btn) => {
-          btn.classList.toggle("active", btn.dataset.tab === tabId);
+        const tabButtons = document.querySelectorAll(
+          ".timetable-tabs .tab-btn"
+        );
+        tabButtons.forEach((btn) => {
+          const isActive = btn.dataset.tab === tabId;
+          btn.classList.toggle("active", isActive);
+          console.log(
+            `Tab button ${btn.dataset.tab}: ${isActive ? "active" : "inactive"}`
+          );
         });
 
         // Update active content
-        document.querySelectorAll(".tab-content").forEach((content) => {
-          content.classList.toggle("active", content.id === `${tabId}-content`);
+        const tabContents = document.querySelectorAll(".tab-content");
+        tabContents.forEach((content) => {
+          const isActive = content.id === `${tabId}-content`;
+          content.classList.toggle("active", isActive);
+          console.log(
+            `Tab content ${content.id}: ${isActive ? "active" : "inactive"}`
+          );
+
+          // Fix visibility with inline style as well
+          content.style.display = isActive ? "block" : "none";
         });
       }
 
+      // Setup upload form handlers for integrated forms
+      function setupUploadForms(sectionId) {
+        // Regular timetable upload form
+        const regularForm = document.getElementById("regular-upload-form");
+        const examForm = document.getElementById("exam-upload-form");
+
+        if (regularForm) {
+          // Remove existing event listeners by cloning
+          const newRegularForm = regularForm.cloneNode(true);
+          regularForm.parentNode.replaceChild(newRegularForm, regularForm);
+
+          // Add new event listener
+          newRegularForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await handleIntegratedUpload(sectionId, "regular", newRegularForm);
+          });
+        }
+
+        if (examForm) {
+          // Remove existing event listeners by cloning
+          const newExamForm = examForm.cloneNode(true);
+          examForm.parentNode.replaceChild(newExamForm, examForm);
+
+          // Add new event listener
+          newExamForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await handleIntegratedUpload(sectionId, "exam", newExamForm);
+          });
+        }
+      }
+
+      // Handle integrated upload from the modal forms
+      async function handleIntegratedUpload(sectionId, type, form) {
+        try {
+          const formData = new FormData();
+
+          // Get form values
+          const title = form.querySelector(`#${type}-title`).value;
+          const description = form.querySelector(`#${type}-description`).value;
+          const file = form.querySelector(`#${type}-file`).files[0];
+
+          // Validate required fields
+          if (!title || !file) {
+            showNotification(
+              "Veuillez remplir tous les champs obligatoires",
+              "error"
+            );
+            return;
+          }
+
+          // Show loading state
+          const submitBtn = form.querySelector('button[type="submit"]');
+          const originalText = submitBtn.innerHTML;
+          submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Téléchargement...';
+          submitBtn.disabled = true;
+
+          // Prepare form data
+          formData.append("title", title);
+          formData.append("scheduleType", type);
+          formData.append("document", file);
+          if (description) {
+            formData.append("description", description);
+          }
+
+          console.log(`Uploading ${type} timetable:`, {
+            title,
+            description,
+            fileName: file.name,
+          });
+
+          // Upload to API
+          const response = await fetch(
+            `${API_BASE_URL}/sections/schedules/${sectionId}/upload`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+              body: formData,
+            }
+          );
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Erreur lors du téléchargement");
+          }
+
+          // Success
+          showNotification("Emploi du temps téléchargé avec succès", "success");
+          form.reset();
+
+          // Reload the specific timetable list
+          await loadTimetables(sectionId, type);
+        } catch (error) {
+          console.error("Error uploading timetable:", error);
+          showNotification(`Erreur: ${error.message}`, "error");
+        } finally {
+          // Reset button state
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-upload"></i> Télécharger';
+            submitBtn.disabled = false;
+          }
+        }
+      }
+
       async function loadTimetables(sectionId, type = "regular") {
-        console.log(`=== STARTING LOAD TIMETABLES (${type}) ===`);
-        console.log("Function called with:", { sectionId, type });
+        console.log(`=== STARTING LOAD TIMETABLES ===`);
+        console.log("Function called with:", { sectionId });
 
         // Check if API_BASE_URL is defined
         if (!API_BASE_URL) {
@@ -3909,20 +4655,38 @@
           return;
         }
 
+        // Determine which modal is active and set the correct container ID
+        const mgmtModal = document.getElementById("timetable-management-modal");
+        const isMgmtModal = mgmtModal && mgmtModal.style.display === "block";
+        const containerId = isMgmtModal
+          ? "mgmt-regular-timetables-list"
+          : "regular-timetables-list";
+        console.log(`Using container ID: ${containerId} for timetables`);
+
+        const container = document.getElementById(containerId);
+        if (!container) {
+          console.error(`Container for timetables not found`);
+          return;
+        }
+
+        // Show loading state
+        container.innerHTML = `
+          <div class="loading-timetables">
+            <div class="loading-spinner" style="margin: 20px auto; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p>Chargement des emplois du temps...</p>
+          </div>
+        `;
+
         try {
           // Try both possible API endpoints
           let response;
           let timetables;
+          let error = null;
 
           // First try the schedules endpoint
           try {
-            const url = `${API_BASE_URL}/sections/${sectionId}/schedules?type=${type}`;
+            const url = `${API_BASE_URL}/sections/${sectionId}/schedules?type=regular`;
             console.log("Trying first endpoint:", url);
-            console.log("Request headers:", {
-              Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            });
 
             response = await fetch(url, {
               method: "GET",
@@ -3937,12 +4701,20 @@
             console.log("First endpoint response status:", response.status);
 
             if (response.ok) {
-              timetables = await response.json();
-              console.log("Success with first endpoint:", timetables);
+              const responseText = await response.text();
+              console.log("Response text:", responseText);
+
+              try {
+                timetables = JSON.parse(responseText);
+                console.log("Success with first endpoint:", timetables);
+              } catch (parseError) {
+                console.error("Error parsing JSON response:", parseError);
+                error = new Error("Failed to parse response as JSON");
+              }
             } else {
               const errorText = await response.text();
               console.error("First endpoint error response:", errorText);
-              throw new Error(
+              error = new Error(
                 `First endpoint failed: ${response.status} - ${errorText}`
               );
             }
@@ -3951,77 +4723,101 @@
               "First endpoint failed, trying alternative:",
               firstError
             );
+            error = firstError;
 
             // Try alternative endpoint
-            const altUrl = `${API_BASE_URL}/sections/schedules/${sectionId}?scheduleType=${type}`;
-            console.log("Trying alternative endpoint:", altUrl);
-            console.log("Request headers:", {
-              Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            });
+            try {
+              const altUrl = `${API_BASE_URL}/sections/schedules/${sectionId}?scheduleType=regular`;
+              console.log("Trying alternative endpoint:", altUrl);
 
-            response = await fetch(altUrl, {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${authToken}`,
-                "Content-Type": "application/json",
-                Accept: "application/json",
-              },
-              credentials: "include",
-            });
+              response = await fetch(altUrl, {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                credentials: "include",
+              });
 
-            console.log(
-              "Alternative endpoint response status:",
-              response.status
-            );
-
-            if (!response.ok) {
-              const errorText = await response.text();
-              console.error("Alternative endpoint error response:", errorText);
-              throw new Error(
-                `Both endpoints failed. Last status: ${response.status} - ${errorText}`
+              console.log(
+                "Alternative endpoint response status:",
+                response.status
               );
+
+              if (!response.ok) {
+                const errorText = await response.text();
+                console.error(
+                  "Alternative endpoint error response:",
+                  errorText
+                );
+                throw new Error(
+                  `Both endpoints failed. Last status: ${response.status} - ${errorText}`
+                );
+              }
+
+              const responseText = await response.text();
+              console.log("Alternative endpoint response text:", responseText);
+
+              try {
+                timetables = JSON.parse(responseText);
+                console.log("Success with alternative endpoint:", timetables);
+                // If we got here, clear the previous error
+                error = null;
+              } catch (parseError) {
+                console.error("Error parsing JSON response:", parseError);
+                throw new Error("Failed to parse response as JSON");
+              }
+            } catch (altError) {
+              // If alternative endpoint also failed, throw the error
+              console.error("Alternative endpoint also failed:", altError);
+              throw error || altError;
             }
-
-            timetables = await response.json();
-            console.log("Success with alternative endpoint:", timetables);
           }
 
-          // Update to use the correct container IDs that match the HTML
-          const containerId =
-            type === "regular"
-              ? "regular-timetables-list"
-              : "exam-timetables-list";
-          const container = document.getElementById(containerId);
-
-          if (!container) {
-            console.error(`Container for ${type} timetables not found`);
-            return;
-          }
+          // If we still have an error at this point, throw it
+          if (error) throw error;
 
           // Handle different response formats
-          const timetableArray = Array.isArray(timetables)
-            ? timetables
-            : timetables.data
-            ? timetables.data
-            : timetables.schedules
-            ? timetables.schedules
-            : [];
+          let timetableArray = [];
+          if (Array.isArray(timetables)) {
+            timetableArray = timetables;
+          } else if (timetables) {
+            if (timetables.data && Array.isArray(timetables.data)) {
+              timetableArray = timetables.data;
+            } else if (
+              timetables.schedules &&
+              Array.isArray(timetables.schedules)
+            ) {
+              timetableArray = timetables.schedules;
+            } else if (
+              timetables.results &&
+              Array.isArray(timetables.results)
+            ) {
+              timetableArray = timetables.results;
+            } else if (typeof timetables === "object") {
+              // Try to find any array in the response
+              for (const key in timetables) {
+                if (Array.isArray(timetables[key])) {
+                  timetableArray = timetables[key];
+                  break;
+                }
+              }
+            }
+          }
 
-          console.log(
-            `Processing ${timetableArray.length} timetables for type: ${type}`
-          );
+          console.log(`Processing ${timetableArray.length} timetables`);
           console.log("Timetable array:", timetableArray);
 
+          // Clear loading state first
+          container.innerHTML = "";
+
           if (!timetableArray || timetableArray.length === 0) {
-            console.log(`No timetables found for type: ${type}`);
+            console.log(`No timetables found`);
             container.innerHTML = `
               <div class="no-timetables">
-                <p>Aucun emploi du temps ${
-                  type === "regular" ? "régulier" : "d'examen"
-                } disponible</p>
-                <button class="btn btn-primary mt-4" onclick="openTimetableUploadModal('${type}')">
+                <p>Aucun emploi du temps disponible</p>
+                <button class="btn btn-primary mt-4" onclick="openTimetableUploadModal('regular')">
                   <span class="material-icons">upload</span>
                   Télécharger un emploi du temps
                 </button>
@@ -4030,21 +4826,52 @@
           }
 
           let html = "";
-          timetableArray.forEach((timetable) => {
-            console.log("Processing timetable:", timetable);
+          timetableArray.forEach((timetable, index) => {
+            console.log(`Processing timetable ${index}:`, timetable);
 
+            // Generate a fallback URL if documentData is not available
             let documentUrl = null;
             if (timetable.documentData) {
               try {
                 const binaryData = timetable.documentData.data;
+                // Determine mime type (default to application/octet-stream)
+                let mimeType = "application/octet-stream";
+
+                // Check for PNG signature
+                if (
+                  binaryData[0] === 137 &&
+                  binaryData[1] === 80 &&
+                  binaryData[2] === 78 &&
+                  binaryData[3] === 71
+                ) {
+                  mimeType = "image/png";
+                }
+                // Check for JPEG signature
+                else if (binaryData[0] === 255 && binaryData[1] === 216) {
+                  mimeType = "image/jpeg";
+                }
+                // Check for PDF signature
+                else if (
+                  binaryData[0] === 37 &&
+                  binaryData[1] === 80 &&
+                  binaryData[2] === 68 &&
+                  binaryData[3] === 70
+                ) {
+                  mimeType = "application/pdf";
+                }
+
                 const blob = new Blob([new Uint8Array(binaryData)], {
-                  type: "application/pdf",
+                  type: mimeType,
                 });
                 documentUrl = URL.createObjectURL(blob);
                 console.log("Created document URL:", documentUrl);
               } catch (error) {
                 console.error("Error creating Blob URL:", error);
               }
+            } else if (timetable.documentUrl) {
+              documentUrl = timetable.documentUrl;
+            } else if (timetable.fileUrl) {
+              documentUrl = timetable.fileUrl;
             }
 
             html += `
@@ -4075,25 +4902,31 @@
                   ${
                     documentUrl
                       ? `
-                    <button class="btn btn-sm btn-primary" onclick="window.open('${documentUrl}', '_blank')">
-                      <span class="material-icons">visibility</span>
-                      Voir
-                    </button>
-                    <a href="${documentUrl}" download class="btn btn-sm btn-secondary">
-                      <span class="material-icons">download</span>
-                      Télécharger
-                    </a>
-                  `
+                      <button class="btn btn-sm btn-primary" onclick="window.open('${documentUrl}', '_blank')">
+                        <span class="material-icons">visibility</span>
+                        Voir
+                      </button>
+                      <button class="btn btn-sm btn-secondary" onclick="openInDocumentViewer('${documentUrl}', '${
+                          timetable.title || timetable.name || "Sans titre"
+                        }')">
+                        <span class="material-icons">open_in_new</span>
+                        Voir en page séparée
+                      </button>
+                      <a href="${documentUrl}" download class="btn btn-sm btn-secondary">
+                        <span class="material-icons">download</span>
+                        Télécharger
+                      </a>
+                    `
                       : `
-                    <button class="btn btn-sm btn-disabled" disabled>
-                      <span class="material-icons">visibility_off</span>
-                      Document non disponible
-                    </button>
-                  `
+                      <button class="btn btn-sm btn-disabled" disabled>
+                        <span class="material-icons">visibility_off</span>
+                        Document non disponible
+                      </button>
+                    `
                   }
                   <button class="btn btn-sm btn-danger" onclick="deleteTimetable('${
                     timetable.id
-                  }', '${type}')">
+                  }', 'regular')">
                     <span class="material-icons">delete</span>
                     Supprimer
                   </button>
@@ -4103,32 +4936,27 @@
 
           console.log("Generated HTML:", html);
           container.innerHTML = html;
-          console.log(`Finished loading ${type} timetables`);
+          console.log(`Finished loading timetables`);
         } catch (error) {
-          console.error(`Error loading ${type} timetables:`, error);
-          const container = document.getElementById(
-            type === "regular"
-              ? "regular-timetables-list"
-              : "exam-timetables-list"
-          );
-          if (container) {
-            container.innerHTML = `
-              <div class="error-message">
-                <p>Erreur lors du chargement des emplois du temps</p>
-                <button class="btn btn-primary mt-4" onclick="loadTimetables('${sectionId}', '${type}')">
-                  <span class="material-icons">refresh</span>
-                  Réessayer
-                </button>
-              </div>`;
+          console.error(`Error loading timetables:`, error);
+          container.innerHTML = `
+            <div class="error-message">
+              <p>Erreur lors du chargement des emplois du temps</p>
+              <p>${error.message || "Une erreur inconnue s'est produite"}</p>
+              <button class="btn btn-primary mt-4" onclick="loadTimetables('${sectionId}')">
+                <span class="material-icons">refresh</span>
+                Réessayer
+              </button>
+            </div>`;
+          // Only show notification if this is a genuine error, not just empty results
+          if (error.message !== "No timetables found") {
+            showNotification(
+              `Erreur lors du chargement des emplois du temps`,
+              "error"
+            );
           }
-          showNotification(
-            `Erreur lors du chargement des emplois du temps ${
-              type === "regular" ? "réguliers" : "d'examen"
-            }`,
-            "error"
-          );
         }
-        console.log(`=== FINISHED LOAD TIMETABLES (${type}) ===`);
+        console.log(`=== FINISHED LOAD TIMETABLES ===`);
       }
 
       async function viewTimetable(timetableId, documentUrl) {
@@ -4210,6 +5038,10 @@
         ).value;
         const file = document.getElementById("timetable-file").files[0];
 
+        // Get the save button for loading state
+        const saveButton = document.getElementById("save-timetable-btn");
+        const originalButtonText = saveButton.innerHTML;
+
         // Validate required fields
         if (!title || !sectionId || !file) {
           showNotification(
@@ -4237,6 +5069,27 @@
         // Add the file with the correct field name expected by the backend
         formData.append("document", file);
 
+        // Show loading state
+        saveButton.disabled = true;
+        saveButton.innerHTML =
+          '<span class="material-icons spinner">refresh</span> Téléchargement...';
+
+        // Add a spinner style if not already present
+        if (!document.querySelector("style#spinner-style")) {
+          const spinnerStyle = document.createElement("style");
+          spinnerStyle.id = "spinner-style";
+          spinnerStyle.textContent = `
+            .spinner {
+              animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `;
+          document.head.appendChild(spinnerStyle);
+        }
+
         try {
           console.log("Uploading timetable with data:", {
             title,
@@ -4259,14 +5112,28 @@
             }
           );
 
+          // Parse the response first to check for any API errors
+          let responseData;
+          const responseText = await response.text();
+          try {
+            responseData = JSON.parse(responseText);
+          } catch (e) {
+            // If it's not JSON, just use the text
+            responseData = { message: responseText };
+          }
+
+          // Check if the response was successful
           if (!response.ok) {
-            const error = await response.json();
             throw new Error(
-              Array.isArray(error.message)
-                ? error.message.join(", ")
-                : error.message
+              Array.isArray(responseData.message)
+                ? responseData.message.join(", ")
+                : responseData.message ||
+                  `Error ${response.status}: ${response.statusText}`
             );
           }
+
+          // Operation was successful
+          console.log("Upload successful:", responseData);
 
           // Close the modal first
           const uploadModal = document.getElementById("timetable-modal");
@@ -4279,9 +5146,8 @@
           // Show success message and reload timetables
           showNotification("Emploi du temps téléchargé avec succès", "success");
 
-          // Reload both regular and exam timetables
+          // Reload regular timetables
           await loadTimetables(sectionId, "regular");
-          await loadTimetables(sectionId, "exam");
         } catch (error) {
           console.error("Error uploading timetable:", error);
           showNotification(
@@ -4289,6 +5155,10 @@
               "Erreur lors du téléchargement de l'emploi du temps",
             "error"
           );
+        } finally {
+          // Always restore the button state, even if there was an error
+          saveButton.disabled = false;
+          saveButton.innerHTML = originalButtonText;
         }
       }
 
@@ -4331,6 +5201,19 @@
           return;
         }
 
+        // Get the button that was clicked
+        const clickedButton = event.target.closest("button");
+        const originalButtonHTML = clickedButton
+          ? clickedButton.innerHTML
+          : null;
+
+        // Show loading state on the button
+        if (clickedButton) {
+          clickedButton.disabled = true;
+          clickedButton.innerHTML =
+            '<span class="material-icons spinner">refresh</span> Suppression...';
+        }
+
         try {
           const response = await fetch(
             `${API_BASE_URL}/timetables/${timetableId}`,
@@ -4344,23 +5227,593 @@
           );
 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            // Try to parse error response
+            let errorMessage;
+            try {
+              const errorData = await response.json();
+              errorMessage =
+                errorData.message || `HTTP error! status: ${response.status}`;
+            } catch (e) {
+              errorMessage = `HTTP error! status: ${response.status}`;
+            }
+            throw new Error(errorMessage);
           }
 
           // Reload timetables
           const sectionId = document.getElementById(
             "timetable-management-modal"
           ).dataset.sectionId;
-          loadTimetables(sectionId, type);
 
           showNotification("Emploi du temps supprimé avec succès", "success");
+
+          // Wait a moment before reloading to let the notification be visible
+          setTimeout(() => {
+            loadTimetables(sectionId, type);
+          }, 300);
         } catch (error) {
           console.error("Error deleting timetable:", error);
           showNotification(
-            "Erreur lors de la suppression de l'emploi du temps",
+            "Erreur lors de la suppression de l'emploi du temps: " +
+              error.message,
+            "error"
+          );
+
+          // Restore the button state on error
+          if (clickedButton) {
+            clickedButton.disabled = false;
+            clickedButton.innerHTML =
+              originalButtonHTML ||
+              '<span class="material-icons">delete</span> Supprimer';
+          }
+        }
+      }
+
+      // Add schedule management functions
+      async function openScheduleManagement(sectionId) {
+        const modal = document.getElementById("schedule-management-modal");
+        const schedulesList = document.getElementById("schedules-list");
+
+        // Show empty state instead of loading timetables automatically
+        schedulesList.innerHTML = `
+          <div class="empty">
+            <p>Aucun emploi du temps chargé</p>
+            <button class="btn btn-primary mt-4" onclick="loadSchedules('${sectionId}')">
+              <span class="material-icons">refresh</span>
+              Charger les emplois du temps
+            </button>
+          </div>`;
+
+        // Show the modal
+        modal.style.display = "block";
+
+        // Setup upload form - keep this part
+        setupScheduleUploadForm(sectionId);
+      }
+
+      // Add new function to load schedules on demand
+      async function loadSchedules(sectionId) {
+        const schedulesList = document.getElementById("schedules-list");
+
+        // Show loading state
+        schedulesList.innerHTML =
+          '<div class="loading">Chargement des emplois du temps...</div>';
+
+        try {
+          // Load schedules
+          const response = await fetch(
+            `${API_BASE_URL}/sections/schedules/${sectionId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to load schedules");
+          }
+
+          const schedules = await response.json();
+          displaySchedules(schedules, sectionId);
+        } catch (error) {
+          console.error("Error loading schedules:", error);
+          schedulesList.innerHTML =
+            '<div class="error">Erreur lors du chargement des emplois du temps</div>';
+        }
+      }
+
+      function displaySchedules(schedules, sectionId) {
+        const schedulesList = document.getElementById("schedules-list");
+
+        if (!schedules || schedules.length === 0) {
+          schedulesList.innerHTML =
+            '<div class="empty">Aucun emploi du temps trouvé</div>';
+          return;
+        }
+
+        schedulesList.innerHTML = schedules
+          .map(
+            (schedule) => `
+          <div class="schedule-item">
+            <div class="schedule-info">
+              <h4>${schedule.title}</h4>
+              <p><strong>Type:</strong> ${getScheduleTypeLabel(
+                schedule.scheduleType
+              )}</p>
+              <p><strong>Description:</strong> ${
+                schedule.description || "Aucune description"
+              }</p>
+              <p><strong>Créé le:</strong> ${new Date(
+                schedule.createdAt
+              ).toLocaleDateString()}</p>
+            </div>
+            <div class="schedule-actions">
+              <button class="btn-view" onclick="viewSchedule('${schedule.id}')">
+                <i class="fas fa-eye"></i> Voir
+              </button>
+              <button class="btn-download" onclick="downloadSchedule('${
+                schedule.id
+              }')">
+                <i class="fas fa-download"></i> Télécharger
+              </button>
+              <button class="btn-delete" onclick="deleteSchedule('${
+                schedule.id
+              }', '${sectionId}')">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function setupScheduleUploadForm(sectionId) {
+        const form = document.getElementById("schedule-upload-form");
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData();
+          formData.append(
+            "title",
+            document.getElementById("schedule-title").value
+          );
+          formData.append(
+            "scheduleType",
+            document.getElementById("schedule-type").value
+          );
+          formData.append(
+            "description",
+            document.getElementById("schedule-description").value
+          );
+          formData.append(
+            "document",
+            document.getElementById("schedule-file").files[0]
+          );
+
+          try {
+            const response = await fetch(
+              `${API_BASE_URL}/sections/schedules/${sectionId}/upload`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+                body: formData,
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Failed to upload schedule");
+            }
+
+            // Refresh schedules list
+            openScheduleManagement(sectionId);
+
+            // Reset form
+            form.reset();
+
+            showMessage("Emploi du temps téléchargé avec succès", "success");
+          } catch (error) {
+            console.error("Error uploading schedule:", error);
+            showMessage("Erreur lors du téléchargement", "error");
+          }
+        };
+      }
+
+      function getScheduleTypeLabel(type) {
+        const labels = {
+          regular: "Emploi du temps régulier",
+          exam: "Emploi du temps d'examens",
+          special: "Emploi du temps spécial",
+        };
+        return labels[type] || type;
+      }
+
+      async function viewSchedule(scheduleId) {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/schedules/${scheduleId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to load schedule");
+          }
+
+          const schedule = await response.json();
+          window.open(schedule.documentUrl, "_blank");
+        } catch (error) {
+          console.error("Error viewing schedule:", error);
+          showMessage(
+            "Erreur lors de l'affichage de l'emploi du temps",
             "error"
           );
         }
+      }
+
+      async function downloadSchedule(scheduleId) {
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/schedules/${scheduleId}/download`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to download schedule");
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `schedule-${scheduleId}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (error) {
+          console.error("Error downloading schedule:", error);
+          showMessage("Erreur lors du téléchargement", "error");
+        }
+      }
+
+      async function deleteSchedule(scheduleId, sectionId) {
+        if (
+          !confirm("Êtes-vous sûr de vouloir supprimer cet emploi du temps ?")
+        ) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/sections/schedules/${sectionId}/${scheduleId}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to delete schedule");
+          }
+
+          // Refresh schedules list
+          openScheduleManagement(sectionId);
+          showMessage("Emploi du temps supprimé avec succès", "success");
+        } catch (error) {
+          console.error("Error deleting schedule:", error);
+          showMessage("Erreur lors de la suppression", "error");
+        }
+      }
+
+      // Add event listener for schedule button
+      document.addEventListener("click", function (e) {
+        if (e.target.closest(".schedule-btn")) {
+          const sectionId = e.target.closest(".schedule-btn").dataset.id;
+          openScheduleManagement(sectionId);
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize the teacher assignment modal
+        const teacherAssignmentModal = document.getElementById(
+          "teacher-assignment-modal"
+        );
+        const closeTeacherAssignmentModal = document.getElementById(
+          "close-teacher-assignment-modal"
+        );
+
+        if (closeTeacherAssignmentModal) {
+          closeTeacherAssignmentModal.onclick = function () {
+            teacherAssignmentModal.style.display = "none";
+          };
+        }
+
+        // Add role selection change handler
+        const roleSelect = document.getElementById("teacher-role");
+        if (roleSelect) {
+          roleSelect.addEventListener("change", handleRoleSelectionChange);
+        }
+
+        // Initialize other components
+        initializeSectionManagement();
+      });
+
+      // Function to open a timetable in the document viewer page
+      function openInDocumentViewer(documentUrl, title) {
+        if (documentUrl) {
+          // Create URL for document viewer
+          let viewerUrl = "document-viewer.html?";
+
+          // Pass document URL as a parameter
+          viewerUrl += `url=${encodeURIComponent(documentUrl)}`;
+
+          // Add title if available
+          if (title) {
+            viewerUrl += `&title=${encodeURIComponent(title)}`;
+          }
+
+          // Add token for authentication
+          if (authToken) {
+            viewerUrl += `&token=${encodeURIComponent(authToken)}`;
+          }
+
+          // Add context as admin
+          viewerUrl += "&context=admin";
+
+          // Open in a new tab/window
+          window.open(viewerUrl, "_blank");
+        } else {
+          showNotification("Document non disponible", "error");
+        }
+      }
+
+      // Function to open all timetables in new pages
+      function openAllTimetablesInNewPages() {
+        console.log("Opening all timetables in new pages");
+
+        // Get the modal element to access the section ID
+        const modal = document.getElementById("timetable-management-modal");
+        if (!modal || !modal.dataset.sectionId) {
+          console.error("Modal or section ID not found");
+          showNotification("Erreur: Section non trouvée", "error");
+          return;
+        }
+
+        // Get the button that triggered this and show loading state
+        const button = event ? event.target.closest("button") : null;
+        const originalButtonHTML = button ? button.innerHTML : null;
+
+        if (button) {
+          button.disabled = true;
+          button.innerHTML =
+            '<span class="material-icons spinner">refresh</span> Chargement...';
+        }
+
+        const sectionId = modal.dataset.sectionId;
+        console.log(`Using section ID: ${sectionId}`);
+
+        // Fetch the timetables data directly - USING CORRECT URL FORMAT
+        // Note: The correct format is /sections/schedules/{sectionId} not /sections/{sectionId}/schedules
+        const url = `${API_BASE_URL}/sections/schedules/${sectionId}?type=regular`;
+        console.log(`Fetching timetables directly from: ${url}`);
+
+        fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+          })
+          .then((text) => {
+            console.log("Raw API response:", text);
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              console.error("Error parsing JSON:", e);
+              showNotification("Erreur de format de données", "error");
+              throw new Error("Invalid JSON response");
+            }
+          })
+          .then((timetables) => {
+            console.log("Timetables data:", timetables);
+
+            // Handle different response formats
+            let timetableArray = [];
+            if (Array.isArray(timetables)) {
+              timetableArray = timetables;
+            } else if (timetables) {
+              if (timetables.data && Array.isArray(timetables.data)) {
+                timetableArray = timetables.data;
+              } else if (
+                timetables.schedules &&
+                Array.isArray(timetables.schedules)
+              ) {
+                timetableArray = timetables.schedules;
+              } else if (
+                timetables.results &&
+                Array.isArray(timetables.results)
+              ) {
+                timetableArray = timetables.results;
+              } else if (typeof timetables === "object") {
+                // Try to find any array in the response
+                for (const key in timetables) {
+                  if (Array.isArray(timetables[key])) {
+                    timetableArray = timetables[key];
+                    break;
+                  }
+                }
+              }
+            }
+
+            console.log(`Found ${timetableArray.length} timetables to open`);
+
+            if (timetableArray.length === 0) {
+              showNotification("Aucun emploi du temps trouvé", "info");
+              // Restore button state
+              if (button) {
+                button.disabled = false;
+                button.innerHTML =
+                  originalButtonHTML || "Afficher tous dans de nouvelles pages";
+              }
+              return;
+            }
+
+            // Process each timetable
+            let openCount = 0;
+            let processedCount = 0;
+
+            // Show notification right away
+            showNotification(
+              `Traitement de ${timetableArray.length} emplois du temps...`,
+              "info"
+            );
+
+            timetableArray.forEach((timetable, index) => {
+              // Extract document data and create a blob URL
+              if (
+                timetable.documentData ||
+                timetable.documentUrl ||
+                timetable.fileUrl
+              ) {
+                let documentUrl = null;
+
+                if (timetable.documentData && timetable.documentData.data) {
+                  // Create blob URL from binary data
+                  try {
+                    const binaryData = timetable.documentData.data;
+                    // Determine mime type (default to application/octet-stream)
+                    let mimeType = "application/octet-stream";
+
+                    // Check for PNG signature
+                    if (
+                      binaryData[0] === 137 &&
+                      binaryData[1] === 80 &&
+                      binaryData[2] === 78 &&
+                      binaryData[3] === 71
+                    ) {
+                      mimeType = "image/png";
+                    }
+                    // Check for JPEG signature
+                    else if (binaryData[0] === 255 && binaryData[1] === 216) {
+                      mimeType = "image/jpeg";
+                    }
+                    // Check for PDF signature
+                    else if (
+                      binaryData[0] === 37 &&
+                      binaryData[1] === 80 &&
+                      binaryData[2] === 68 &&
+                      binaryData[3] === 70
+                    ) {
+                      mimeType = "application/pdf";
+                    }
+
+                    const blob = new Blob([new Uint8Array(binaryData)], {
+                      type: mimeType,
+                    });
+                    documentUrl = URL.createObjectURL(blob);
+                    console.log(
+                      `Created blob URL for ${timetable.title}:`,
+                      documentUrl
+                    );
+                  } catch (error) {
+                    console.error("Error creating blob URL:", error);
+                    processedCount++;
+                  }
+                } else if (timetable.documentUrl) {
+                  documentUrl = timetable.documentUrl;
+                } else if (timetable.fileUrl) {
+                  documentUrl = timetable.fileUrl;
+                }
+
+                if (documentUrl) {
+                  // Delay opening each window slightly to avoid popup blocking
+                  setTimeout(() => {
+                    console.log(
+                      `Opening timetable in new page: ${
+                        timetable.title || timetable.name || "Sans titre"
+                      }`
+                    );
+                    openInDocumentViewer(
+                      documentUrl,
+                      timetable.title || timetable.name || "Sans titre"
+                    );
+                    openCount++;
+                    processedCount++;
+
+                    // If all have been processed, restore button
+                    if (processedCount >= timetableArray.length) {
+                      if (button) {
+                        button.disabled = false;
+                        button.innerHTML =
+                          originalButtonHTML ||
+                          "Afficher tous dans de nouvelles pages";
+                      }
+
+                      // Update notification
+                      showNotification(
+                        `${openCount} emplois du temps ouverts`,
+                        "success"
+                      );
+                    }
+                  }, index * 300);
+                } else {
+                  processedCount++;
+                }
+              } else {
+                processedCount++;
+              }
+            });
+
+            // If nothing was opened or all were processed synchronously
+            if (openCount === 0 && processedCount >= timetableArray.length) {
+              showNotification(
+                "Aucun emploi du temps avec document trouvé",
+                "info"
+              );
+
+              // Restore button state
+              if (button) {
+                button.disabled = false;
+                button.innerHTML =
+                  originalButtonHTML || "Afficher tous dans de nouvelles pages";
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching timetables:", error);
+            showNotification(
+              "Erreur lors du chargement des emplois du temps: " +
+                error.message,
+              "error"
+            );
+
+            // Restore button state on error
+            if (button) {
+              button.disabled = false;
+              button.innerHTML =
+                originalButtonHTML || "Afficher tous dans de nouvelles pages";
+            }
+          });
       }
     </script>
 

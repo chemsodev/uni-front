@@ -1008,8 +1008,8 @@
 
       // Initialize when document is ready
       document.addEventListener("DOMContentLoaded", async function () {
-        // Load sidebar
-        await loadNavbar();
+        // Load teacher sidebar
+        await loadTeacherSidebar();
 
         // Initialize the teacher announcements module
         const initSuccess = await window.TeacherAnnouncements.init();
@@ -1440,7 +1440,7 @@
           let response;
           try {
             response = await fetch(
-              `https://unicersityback.onrender.com/api/notifications/from-teacher/${teacherId}`,
+              `http://localhost:3000/api/notifications/from-teacher/${teacherId}`,
               {
                 headers: {
                   Authorization: `Bearer ${authToken}`,
@@ -1455,7 +1455,7 @@
                   "API endpoint not found, falling back to main notifications endpoint"
                 );
                 response = await fetch(
-                  `https://unicersityback.onrender.com/api/notifications`,
+                  `http://localhost:3000/api/notifications`,
                   {
                     headers: {
                       Authorization: `Bearer ${authToken}`,
@@ -1579,65 +1579,7 @@
         }
       }
 
-      // Load sidebar
-      async function loadNavbar() {
-        try {
-          const nav = await fetch("enseignant-nav.html").then((r) => r.text());
-          document.getElementById("navbar-container").innerHTML = nav;
-
-          // Set active link
-          document.querySelectorAll(".nav-link").forEach((link) => {
-            link.classList.remove("active");
-            if (link.textContent.includes("Annonces")) {
-              link.classList.add("active");
-            }
-          });
-
-          // Update teacher info in the navbar
-          updateTeacherNavInfo();
-        } catch (e) {
-          console.error("Error loading navbar:", e);
-        }
-      }
-
-      // Update teacher info in the navbar
-      function updateTeacherNavInfo() {
-        const teacher = localStorage.getItem("enseignantData")
-          ? JSON.parse(localStorage.getItem("enseignantData"))
-          : JSON.parse(sessionStorage.getItem("enseignantData"));
-        if (!teacher) {
-          sessionStorage.removeItem("enseignantData");
-          sessionStorage.removeItem("enseignant_token");
-          sessionStorage.removeItem("enseignantUserData");
-          sessionStorage.removeItem("teacherSections");
-          localStorage.removeItem("enseignantData");
-          localStorage.removeItem("enseignant_token");
-          window.location.href = "enseignant-login.html";
-          return;
-        }
-        const avatar = document.getElementById("userAvatar");
-        const fullName = document.getElementById("userFullName");
-        const userId = document.getElementById("userId");
-        const userDepartment = document.getElementById("userDepartment");
-
-        if (avatar && teacher.firstName && teacher.lastName) {
-          avatar.textContent = (
-            teacher.firstName.charAt(0) + teacher.lastName.charAt(0)
-          ).toUpperCase();
-        }
-
-        if (fullName && teacher.firstName && teacher.lastName) {
-          fullName.textContent = `${teacher.firstName} ${teacher.lastName}`;
-        }
-
-        if (userId && teacher.id) {
-          userId.textContent = `ENS${String(teacher.id).padStart(3, "0")}`;
-        }
-
-        if (userDepartment && teacher.departmentName) {
-          userDepartment.textContent = teacher.departmentName;
-        }
-      }
+      // Sidebar loading is now handled by loadTeacherSidebar()
     </script>
   </body>
 </html>

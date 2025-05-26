@@ -141,12 +141,12 @@
               <button
                 type="button"
                 class="btn btn-secondary"
-                onclick="window.history.back()"
+                onclick="window.location.href='profile.html'"
               >
-                Annuler
+                <i class="fas fa-arrow-left"></i> Retour au profil
               </button>
               <button type="submit" class="btn btn-primary" id="submit-btn">
-                Soumettre la demande
+                <i class="fas fa-paper-plane"></i> Soumettre la demande
               </button>
             </div>
           </form>
@@ -156,7 +156,7 @@
 
     <script>
       // Global constants and variables
-      const API_BASE_URL = "https://unicersityback.onrender.com/api";
+      const API_BASE_URL = "http://localhost:3000/api";
       const PROFILE_REQUESTS_API = `${API_BASE_URL}/profile-requests`;
 
       let authToken = null;
@@ -565,8 +565,10 @@
 
           // Disable submit button and show loading state
           const submitBtn = document.getElementById("submit-btn");
+          const originalText = submitBtn.innerHTML;
           submitBtn.disabled = true;
-          submitBtn.textContent = "Envoi en cours...";
+          submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
 
           try {
             // Create request object
@@ -619,7 +621,7 @@
           } finally {
             // Reset button state
             submitBtn.disabled = false;
-            submitBtn.textContent = "Soumettre la demande";
+            submitBtn.innerHTML = originalText;
           }
         });
       }

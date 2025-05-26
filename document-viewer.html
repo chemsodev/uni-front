@@ -153,6 +153,13 @@
     <div class="header">
       <h1 id="document-title">Chargement du document...</h1>
       <div class="header-actions">
+        <button
+          onclick="universalLogout()"
+          id="logout-btn"
+          title="Se déconnecter"
+        >
+          Déconnexion
+        </button>
         <button id="download-btn">Télécharger</button>
         <button onclick="window.close()">Fermer</button>
       </div>
@@ -183,14 +190,35 @@
       const requestId = urlParams.get("id");
       const authToken = urlParams.get("token");
       const context = urlParams.get("context") || "student"; // Default to student context if not specified
-      const API_BASE_URL = "https://unicersityback.onrender.com/api";
+      const directUrl = urlParams.get("url"); // Direct URL to document
+      const documentTitle = urlParams.get("title") || "Document"; // Document title
+      const API_BASE_URL = "http://localhost:3000/api";
 
       let documentUrl = null;
       let documentBlob = null;
       let documentName = null;
 
+      // Load global page setup (includes universal logout)
+      const setupScript = document.createElement("script");
+      setupScript.src = "js/global-page-setup.js";
+      document.head.appendChild(setupScript);
+
       // Load document on page load
       document.addEventListener("DOMContentLoaded", function () {
+        // If direct URL is provided, use it instead of fetching
+        if (directUrl) {
+          console.log("Using direct document URL:", directUrl);
+          documentUrl = directUrl;
+          documentName = documentTitle || "Document";
+
+          // Update document title
+          document.title = documentName;
+          document.getElementById("document-title").textContent = documentName;
+
+          loadDirectDocument(directUrl);
+          return;
+        }
+
         if (!requestId || !authToken) {
           showError("Paramètres manquants dans l'URL");
           return;
@@ -474,6 +502,64 @@
           URL.revokeObjectURL(documentUrl);
         }
       });
+
+      // Load a document directly from URL
+      async function loadDirectDocument(url) {
+        try {
+          document
+            .getElementById("download-btn")
+            .addEventListener("click", downloadDocument);
+
+          console.log("Loading document from direct URL:", url);
+
+          // Add authorization header if token is available
+          const headers = {};
+          if (authToken) {
+            headers.Authorization = `Bearer ${authToken}`;
+          }
+
+          const response = await fetch(url, { headers });
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch document: ${response.status}`);
+          }
+
+          documentBlob = await response.blob();
+          console.log("Document blob received:", {
+            size: documentBlob.size,
+            type: documentBlob.type,
+          });
+
+          documentUrl = URL.createObjectURL(documentBlob);
+
+          const container = document.getElementById("document-container");
+
+          // Determine how to display based on file type
+          const mimeType = documentBlob.type;
+
+          if (mimeType.startsWith("image/")) {
+            displayImage(container, documentUrl, documentName);
+          } else if (mimeType === "application/pdf") {
+            displayPdf(container, documentUrl, documentName);
+          } else if (mimeType.startsWith("video/")) {
+            displayVideo(container, documentUrl, documentName);
+          } else if (mimeType.startsWith("audio/")) {
+            displayAudio(container, documentUrl, documentName);
+          } else if (mimeType === "text/plain" || mimeType === "text/html") {
+            await displayTextContent(container, documentBlob, documentName);
+          } else {
+            // For other types, create a download link
+            displayDownloadLink(container, documentUrl, documentName);
+          }
+
+          // Hide loading, show document
+          document.getElementById("loading").style.display = "none";
+          container.style.display = "block";
+        } catch (error) {
+          console.error("Error loading document:", error);
+          showError(error.message);
+        }
+      }
     </script>
   </body>
 </html>

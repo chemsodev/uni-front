@@ -1,5 +1,5 @@
 // Admin authentication helper functions
-const API_BASE_URL = "https://unicersityback.onrender.com/api";
+const API_BASE_URL = "http://localhost:3000/api";
 
 // Enable production mode
 const DEV_MODE = false; // Permanently disabled
@@ -187,85 +187,6 @@ function getMockChangeRequests() {
   ];
 }
 
-function getMockProfileRequests() {
-  return [
-    {
-      id: 1,
-      student: {
-        id: 101,
-        firstName: "Karim",
-        lastName: "Khaled",
-        email: "karim.khaled@student.univ.dz",
-        matricule: "20230001",
-        userType: "student",
-      },
-      changes: {
-        phone: "+213 555 333 444",
-        address: "456 Avenue de l'Université, Alger",
-      },
-      oldValues: {
-        phone: "+213 555 111 222",
-        address: "123 Rue des Oliviers, Alger",
-      },
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      documentUrl: null,
-      documentName: null,
-      adminComment: null,
-    },
-    {
-      id: 2,
-      student: {
-        id: 102,
-        firstName: "Fatima",
-        lastName: "Zahra",
-        email: "fatima.zahra@student.univ.dz",
-        matricule: "20230002",
-        userType: "student",
-      },
-      changes: {
-        email: "fatima.zahra@gmail.com",
-        phone: "+213 555 999 888",
-      },
-      oldValues: {
-        email: "fatima.zahra@student.univ.dz",
-        phone: "+213 555 777 666",
-      },
-      status: "approved",
-      adminComment: "Email change approved for personal communication",
-      createdAt: new Date(Date.now() - 600000000).toISOString(),
-      documentUrl: null,
-      documentName: null,
-    },
-    {
-      id: 3,
-      student: {
-        id: 103,
-        firstName: "Mohammed",
-        lastName: "Larbi",
-        email: "mohammed.larbi@student.univ.dz",
-        matricule: "20230003",
-        userType: "student",
-      },
-      changes: {
-        address: "789 Boulevard de la Liberté, Oran",
-      },
-      oldValues: {
-        address: "321 Rue de la Paix, Oran",
-      },
-      status: "rejected",
-      adminComment:
-        "Address change request denied - insufficient documentation",
-      createdAt: new Date(Date.now() - 1200000000).toISOString(),
-      documentUrl: null,
-      documentName: null,
-    },
-  ];
-}
-
-// Make getMockProfileRequests available globally
-window.getMockProfileRequests = getMockProfileRequests;
-
 function getMockDashboardStats() {
   return {
     teachersCount: 24,
@@ -396,39 +317,6 @@ const getMockDataForEndpoint = (ep, method = "GET", body = null) => {
   if (cleanEndpointPath.includes("sections")) return getMockSections();
   if (cleanEndpointPath.includes("change-requests"))
     return getMockChangeRequests();
-  if (
-    cleanEndpointPath.includes("profile-requests") ||
-    cleanEndpointPath.includes("profile-change-requests")
-  ) {
-    if (
-      method === "PATCH" &&
-      (cleanEndpointPath.startsWith("profile-requests/") ||
-        cleanEndpointPath.startsWith("profile-change-requests/")) &&
-      cleanEndpointPath.endsWith("/status")
-    ) {
-      const parts = cleanEndpointPath.split("/"); // e.g., "profile-requests", "1", "status"
-      const id = parseInt(parts[1]);
-      const mockRequests = window.getMockProfileRequests(); // Assuming this returns an array
-      const requestToUpdate = mockRequests.find((req) => req.id === id);
-      let updatedData = {
-        ...body,
-        id: id,
-        updatedAt: new Date().toISOString(),
-      }; // Basic mock response
-      if (requestToUpdate) {
-        // More detailed mock response if original found
-        updatedData = {
-          ...requestToUpdate,
-          ...body,
-          status: body.status,
-          adminResponse: body.adminResponse,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return updatedData; // This is an object
-    }
-    return window.getMockProfileRequests(); // This is an array for GET
-  }
   if (cleanEndpointPath.includes("dashboard/stats"))
     return getMockDashboardStats();
   if (cleanEndpointPath.includes("notifications"))

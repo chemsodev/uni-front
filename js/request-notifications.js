@@ -72,17 +72,14 @@ async function createChangeRequestNotification(
   };
 
   try {
-    const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(notification),
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/notifications", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(notification),
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to create notification: ${response.status}`);
@@ -134,17 +131,14 @@ async function processOfflineNotifications() {
 
   for (const item of offlineNotifications) {
     try {
-      const response = await fetch(
-        "https://unicersityback.onrender.com/api/notifications",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(item.notification),
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/notifications", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(item.notification),
+      });
 
       if (!response.ok) {
         failedNotifications.push(item);
@@ -170,7 +164,7 @@ async function processOfflineNotifications() {
 async function updateNotificationBadge() {
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/unread-count",
+      "http://localhost:3000/api/notifications/unread-count",
       {
         headers: {
           Authorization: `Bearer ${authToken}`,

@@ -73,14 +73,11 @@ async function loadStudentData() {
     }
 
     // If not, fetch from the API
-    const response = await fetch(
-      "https://unicersityback.onrender.com/api/etudiants/me",
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/etudiants/me", {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -155,17 +152,14 @@ async function loadNavbar() {
 // Verify auth token
 async function verifyToken() {
   try {
-    const res = await fetch(
-      "https://unicersityback.onrender.com/api/auth/verify",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-        signal: AbortSignal.timeout(5000),
-      }
-    );
+    const res = await fetch("http://localhost:3000/api/auth/verify", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(5000),
+    });
 
     if (!res.ok) {
       console.warn(`Token verification failed with status: ${res.status}`);
@@ -203,16 +197,13 @@ async function refreshToken() {
       return false;
     }
 
-    const response = await fetch(
-      "https://unicersityback.onrender.com/api/auth/refresh",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken: refreshTokenValue }),
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/auth/refresh", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken: refreshTokenValue }),
+    });
 
     if (!response.ok) {
       console.warn("Token refresh failed");
@@ -248,14 +239,11 @@ async function refreshToken() {
 // Fetch notifications from backend
 async function loadNotifications() {
   try {
-    const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications",
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/notifications", {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -281,7 +269,7 @@ async function loadNotifications() {
 async function updateUnreadBadge() {
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/unread-count",
+      "http://localhost:3000/api/notifications/unread-count",
       {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -540,7 +528,7 @@ function createNotificationElement(notification) {
 async function markAsRead(id, button) {
   try {
     const response = await fetch(
-      `https://unicersityback.onrender.com/api/notifications/${id}/mark-read`,
+      `http://localhost:3000/api/notifications/${id}/mark-read`,
       {
         method: "PATCH",
         headers: {
@@ -582,7 +570,7 @@ async function markAsRead(id, button) {
 async function markAllAsRead() {
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/mark-all-read",
+      "http://localhost:3000/api/notifications/mark-all-read",
       {
         method: "PATCH",
         headers: {
@@ -621,7 +609,7 @@ async function deleteNotification(id) {
 
   try {
     const response = await fetch(
-      `https://unicersityback.onrender.com/api/notifications/${id}`,
+      `http://localhost:3000/api/notifications/${id}`,
       {
         method: "DELETE",
         headers: {
@@ -655,7 +643,7 @@ async function deleteAllRead() {
 
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/read/all",
+      "http://localhost:3000/api/notifications/read/all",
       {
         method: "DELETE",
         headers: {
@@ -762,7 +750,7 @@ function savePreferences() {
 async function savePreferencesToServer(preferences) {
   try {
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/notifications/preferences",
+      "http://localhost:3000/api/notifications/preferences",
       {
         method: "PUT",
         headers: {

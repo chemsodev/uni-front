@@ -14,7 +14,7 @@ async function verifyEnseignantAuth(redirectOnFailure = true) {
 
     // 2. Verify token and role
     const verificationResponse = await fetch(
-      "https://unicersityback.onrender.com/api/auth/verify",
+      "http://localhost:3000/api/auth/verify",
       {
         method: "GET",
         headers: {
@@ -91,7 +91,7 @@ async function loadTeacherSections() {
     }
 
     const response = await fetch(
-      "https://unicersityback.onrender.com/api/enseignants/my-sections",
+      "http://localhost:3000/api/enseignants/my-sections",
       {
         method: "GET",
         headers: {
@@ -131,7 +131,7 @@ async function loadTeacherStudents(page = 1, limit = 10, search = "") {
       throw new Error("No authentication token found");
     }
 
-    let url = `https://unicersityback.onrender.com/api/etudiants?page=${page}&limit=${limit}`;
+    let url = `http://localhost:3000/api/etudiants?page=${page}&limit=${limit}`;
     if (search) {
       url += `&search=${encodeURIComponent(search)}`;
     }
@@ -172,7 +172,7 @@ async function loadSectionStudents(sectionId) {
       throw new Error("No authentication token found");
     }
 
-    let url = `https://unicersityback.onrender.com/api/sections/${sectionId}/etudiants`;
+    let url = `http://localhost:3000/api/sections/${sectionId}/etudiants`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -215,7 +215,7 @@ async function fetchSectionSchedule(sectionId) {
     // If you want to try the real API once it's fixed, uncomment this:
     /*
         const response = await fetch(
-            `https://unicersityback.onrender.com/api/sections/${sectionId}/schedules`,
+            `http://localhost:3000/api/sections/${sectionId}/schedules`,
             {
                 method: "GET",
                 headers: {
@@ -471,7 +471,7 @@ async function verifyEnseignantAuthRobust() {
 
           // Try to verify in the background but don't wait for it
           setTimeout(() => {
-            fetch("https://unicersityback.onrender.com/api/auth/verify", {
+            fetch("http://localhost:3000/api/auth/verify", {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${authToken}`,
@@ -511,7 +511,7 @@ async function verifyEnseignantAuthRobust() {
 
     try {
       const verificationResponse = await fetch(
-        "https://unicersityback.onrender.com/api/auth/verify",
+        "http://localhost:3000/api/auth/verify",
         {
           method: "GET",
           headers: {

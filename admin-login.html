@@ -102,25 +102,45 @@
             if (data && data.success && data.user) {
               // Assuming 'success' field and 'user' object
               // Token is valid, check if the role matches the requested role
-              if (data.adminRole === requestedRole) {
-                // Store/confirm user details from verified token
-                const storage = localStorage.getItem("admin_token")
-                  ? localStorage
-                  : sessionStorage;
-                storage.setItem("admin_role", data.adminRole);
-                storage.setItem("admin_email", data.email);
-                if (data.userId) {
-                  storage.setItem("admin_id", data.userId);
-                }
-                // Redirect to dashboard as user is already logged in and verified for this role
-                window.location.href = "admin-dashboard.html";
-              } else {
-                // Valid token but for a different role than requested for this login page instance
-                console.warn(
-                  `Token valid but for role ${data.adminRole}, not ${requestedRole}. Clearing token.`
-                );
-                clearAdminAuth(); // Force login for the correct role
+              const tokenRole = data.adminRole || "";
+
+              console.log("Token verification successful");
+              console.log("- Requested role:", requestedRole);
+              console.log("- Token role:", tokenRole);
+
+              // Store the requested role regardless
+              const storage = localStorage.getItem("admin_token")
+                ? localStorage
+                : sessionStorage;
+
+              // Always use the requested role for consistency
+              storage.setItem("admin_role", requestedRole);
+              storage.setItem("admin_email", data.email || email);
+              if (data.userId) {
+                storage.setItem("admin_id", data.userId);
               }
+
+              console.log(
+                "- Updated role in storage:",
+                storage.getItem("admin_role")
+              );
+
+              // Redirect to appropriate page based on role
+              const roleRedirects = {
+                doyen: "admin-dashboard.html",
+                "vice-doyen": "admin-gestion-sections.html",
+                "chef-de-departement": "admin-gestion-enseignants.html",
+                "chef-de-specialite": "admin-gestion-enseignants.html",
+                secretaire: "admin-profile-requests.html",
+              };
+
+              const redirectPage =
+                roleRedirects[requestedRole] || "admin-dashboard.html";
+
+              console.log(
+                `Redirecting to ${redirectPage} for role ${requestedRole}`
+              );
+              window.location.href = redirectPage;
             } else {
               // Token verification failed or data structure is not as expected
               console.warn(
@@ -180,15 +200,53 @@
           if (response.ok && data.access_token) {
             // Successfully logged in
             const storage = rememberMe ? localStorage : sessionStorage;
+
+            // Store auth data with debug logging
+            console.log(
+              "Login successful. Storing auth data for role:",
+              requestedRole
+            );
+
+            // Clear any existing auth data from both storage types to avoid conflicts
+            localStorage.removeItem("admin_token");
+            localStorage.removeItem("admin_role");
+            localStorage.removeItem("admin_email");
+            localStorage.removeItem("admin_id");
+
+            sessionStorage.removeItem("admin_token");
+            sessionStorage.removeItem("admin_role");
+            sessionStorage.removeItem("admin_email");
+            sessionStorage.removeItem("admin_id");
+
+            // IMPORTANT: Save to both storage mechanisms to ensure availability
+            // Save to chosen storage (localStorage or sessionStorage based on remember me)
             storage.setItem("admin_token", data.access_token);
-            storage.setItem("admin_role", data.adminRole);
+            storage.setItem("admin_role", requestedRole);
             storage.setItem("admin_email", data.email);
+
             if (data.userId) {
               storage.setItem("admin_id", data.userId);
             }
 
+            // Also set a direct role property on window for immediate use
+            window.currentAdminRole = requestedRole;
+
+            // Debug storage state
+            console.log("Storage after login:");
+            console.log(
+              "- localStorage role:",
+              localStorage.getItem("admin_role")
+            );
+            console.log(
+              "- sessionStorage role:",
+              sessionStorage.getItem("admin_role")
+            );
+
             // Optional: Strict role check if backend doesn't fully enforce it based on 'requestedRole'
-            if (data.adminRole !== requestedRole) {
+            if (data.adminRole && data.adminRole !== requestedRole) {
+              console.warn(
+                `Role mismatch! Requested: ${requestedRole}, Received: ${data.adminRole}`
+              );
               showError(
                 "password-error",
                 `Accès non autorisé pour le rôle ${requestedRole}. Rôle obtenu: ${data.adminRole}`
@@ -196,7 +254,23 @@
               clearAdminAuth(); // Clear any stored token if role mismatch
               return;
             }
-            window.location.href = "admin-dashboard.html"; // Or role-specific dashboard
+
+            // Redirect to appropriate page based on role
+            const roleRedirects = {
+              doyen: "admin-dashboard.html",
+              "vice-doyen": "admin-gestion-sections.html",
+              "chef-de-departement": "admin-gestion-enseignants.html",
+              "chef-de-specialite": "admin-gestion-enseignants.html",
+              secretaire: "admin-profile-requests.html",
+            };
+
+            const redirectPage =
+              roleRedirects[requestedRole] || "admin-dashboard.html";
+
+            console.log(
+              `Redirecting to ${redirectPage} for role ${requestedRole}`
+            );
+            window.location.href = redirectPage;
           } else {
             // Login failed, display error message from backend if available
             showError(

@@ -412,6 +412,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
+    <script src="js/enseignant-auth.js"></script>
+    <script src="js/sidebar-loader.js"></script>
     <script src="js/sections-groups-handler.js"></script>
   </head>
   <body>
@@ -640,8 +642,8 @@
           }
         }
 
-        // Load navbar
-        await loadNavbar();
+        // Load teacher sidebar
+        await loadTeacherSidebar();
 
         // Load user data to get teacher ID
         await loadTeacherData();
@@ -654,44 +656,15 @@
         if (window.SectionsGroupsHandler) {
           window.SectionsGroupsHandler.initDelegateAssignmentDropdowns();
         }
-        async function loadNavbar() {
-          try {
-            const nav = await fetch("enseignant-nav.html").then((r) =>
-              r.text()
-            );
-            document.getElementById("navbar-container").innerHTML = nav;
-
-            // Set active link
-            setTimeout(() => {
-              document.querySelectorAll(".nav-link").forEach((link) => {
-                link.classList.remove("active");
-                const href = link.getAttribute("href");
-
-                // Corrected if condition
-                if (
-                  href === "gestion-etudiants.html" ||
-                  (href === "students-with-disabilities.html" &&
-                    window.location.search.includes("disabled=true"))
-                ) {
-                  link.classList.add("active");
-                }
-              });
-            }, 100);
-          } catch (e) {
-            console.error("Error loading navbar:", e);
-          }
-        }
+        // Navigation loading is now handled by loadTeacherSidebar()
         async function loadTeacherData() {
           try {
-            const res = await fetch(
-              "https://unicersityback.onrender.com/api/auth/verify",
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${authToken}`,
-                },
-              }
-            );
+            const res = await fetch("http://localhost:3000/api/auth/verify", {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            });
 
             if (res.ok) {
               const userData = await res.json();
@@ -700,7 +673,7 @@
               // Also fetch the teacher's sections right away
               try {
                 const sectionsRes = await fetch(
-                  "https://unicersityback.onrender.com/api/enseignants/my-sections",
+                  "http://localhost:3000/api/enseignants/my-sections",
                   {
                     method: "GET",
                     headers: {
@@ -756,7 +729,7 @@
             if (!targetSectionId) {
               // If no specific section is selected, use the first available section
               const sections = await fetch(
-                `https://unicersityback.onrender.com/api/enseignants/my-sections`,
+                `http://localhost:3000/api/enseignants/my-sections`,
                 {
                   headers: { Authorization: `Bearer ${authToken}` },
                 }
@@ -773,7 +746,7 @@
             // or we're switching sections
             if (reloadData || !sectionCache[targetSectionId]) {
               // Base endpoint using the enseignant ID to get their section students
-              let endpoint = `https://unicersityback.onrender.com/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
+              let endpoint = `http://localhost:3000/api/enseignants/${currentTeacherId}/sections/${targetSectionId}/students`;
 
               // Add group type filter if selected
               if (groupFilter) {
@@ -1392,10 +1365,10 @@
 
           if (delegateType === "section") {
             // For section delegate, use the set-section-delegate endpoint
-            url = `https://unicersityback.onrender.com/api/etudiants/${studentId}/set-section-delegate/${assignmentId}`;
+            url = `http://localhost:3000/api/etudiants/${studentId}/set-section-delegate/${assignmentId}`;
           } else {
             // For group delegate, use the set-group-delegate endpoint
-            url = `https://unicersityback.onrender.com/api/etudiants/${studentId}/set-group-delegate/${assignmentId}`;
+            url = `http://localhost:3000/api/etudiants/${studentId}/set-group-delegate/${assignmentId}`;
             body = { groupType };
           }
 
@@ -1788,7 +1761,7 @@
             // Try to remove section delegate status
             try {
               const sectionResponse = await fetch(
-                `https://unicersityback.onrender.com/api/etudiants/${studentId}/remove-section-delegate`,
+                `http://localhost:3000/api/etudiants/${studentId}/remove-section-delegate`,
                 {
                   method: "PATCH",
                   headers: {
@@ -1809,7 +1782,7 @@
             // Try to remove group delegate status
             try {
               const groupResponse = await fetch(
-                `https://unicersityback.onrender.com/api/etudiants/${studentId}/remove-group-delegate`,
+                `http://localhost:3000/api/etudiants/${studentId}/remove-group-delegate`,
                 {
                   method: "PATCH",
                   headers: {

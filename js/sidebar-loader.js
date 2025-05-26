@@ -138,3 +138,52 @@ function loadScript(src) {
     document.head.appendChild(script);
   });
 }
+
+// Sidebar Loader - Loads the correct sidebar based on user role
+function loadSidebar() {
+  // Get role from storage
+  const role =
+    localStorage.getItem("admin_role") || sessionStorage.getItem("admin_role");
+
+  console.log("Loading sidebar for role:", role);
+
+  // Map roles to sidebar files
+  const sidebarFiles = {
+    doyen: "admin-sidebar-doyen.html",
+    "vice-doyen": "admin-sidebar-vice-doyen.html",
+    "chef-de-departement": "admin-sidebar-chef-departement.html",
+    "chef-de-specialite": "admin-sidebar-chef-specialite.html",
+    secretaire: "admin-sidebar-secretaire.html",
+  };
+
+  // Get the sidebar file for the role
+  const sidebarFile = sidebarFiles[role] || sidebarFiles["doyen"]; // Default to doyen
+
+  console.log("Loading sidebar file:", sidebarFile);
+
+  // Create iframe to load the sidebar
+  const iframe = document.createElement("iframe");
+  iframe.src = sidebarFile;
+  iframe.style.border = "none";
+  iframe.style.width = "260px";
+  iframe.style.height = "100vh";
+  iframe.style.position = "fixed";
+  iframe.style.left = "0";
+  iframe.style.top = "0";
+  iframe.style.zIndex = "1000";
+  iframe.id = "sidebar-iframe";
+
+  // Remove any existing sidebar
+  const existingSidebar = document.getElementById("sidebar-iframe");
+  if (existingSidebar) {
+    existingSidebar.remove();
+  }
+
+  // Add the iframe to the page
+  document.body.appendChild(iframe);
+
+  console.log("Sidebar loaded successfully");
+}
+
+// Export loadSidebar for admin pages to use
+window.loadSidebar = loadSidebar;

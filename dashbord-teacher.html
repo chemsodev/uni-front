@@ -193,7 +193,7 @@
       let isBackendAvailable = true;
       let allSections = [];
       let allStudents = {};
-      const apiUrl = "https://unicersityback.onrender.com";
+      const apiUrl = "http://localhost:3000";
       const stats = {
         students: 0,
         sections: 0,
@@ -556,7 +556,7 @@
           }
 
           const response = await fetch(
-            "https://unicersityback.onrender.com/api/enseignants/group-change-requests",
+            "http://localhost:3000/api/enseignants/group-change-requests",
             {
               headers: { Authorization: `Bearer ${authToken}` },
               signal: AbortSignal.timeout(5000),
@@ -598,15 +598,20 @@
             "sectionDetailsTitle"
           ).textContent = `Étudiants - ${section.specialty} ${section.name}`;
 
-          // Show loading state
-          document.getElementById("sectionStudentsList").innerHTML =
-            '<div class="loading-spinner"></div>';
-
           // Check if we already have this section's students cached
           if (allStudents[sectionId]) {
             renderSectionStudents(allStudents[sectionId], section);
             return allStudents[sectionId];
           }
+
+          // Show loading state with skeleton
+          document.getElementById("sectionStudentsList").innerHTML = `
+          <div class="loading-skeleton">
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+          </div>
+        `;
 
           // Get teacher ID
           const teacherId = currentUser.userId;
@@ -619,7 +624,7 @@
           }
 
           const response = await fetch(
-            `https://unicersityback.onrender.com/api/enseignants/${teacherId}/sections/${sectionId}/students`,
+            `http://localhost:3000/api/enseignants/${teacherId}/sections/${sectionId}/students`,
             {
               headers: { Authorization: `Bearer ${authToken}` },
               signal: AbortSignal.timeout(5000),
@@ -715,23 +720,40 @@
                 </div>
             </div>
             <div class="section-card-footer">
-                <button class="btn-view-students">Voir les étudiants</button>
+                <button class="btn-view-students" data-section-id="${
+                  section.id
+                }">
+                  <i class="fas fa-users"></i> Voir les étudiants
+                </button>
             </div>
           `;
 
-          // Add click handler
-          card
-            .querySelector(".btn-view-students")
-            .addEventListener("click", () => {
-              // Mark this card as active and remove active from others
-              document
-                .querySelectorAll(".section-card.active")
-                .forEach((el) => el.classList.remove("active"));
-              card.classList.add("active");
+          // Add click handler with optimized loading
+          const viewBtn = card.querySelector(".btn-view-students");
+          viewBtn.addEventListener("click", async () => {
+            // Show loading state immediately
+            viewBtn.innerHTML =
+              '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+            viewBtn.disabled = true;
 
-              // Load the students for this section
-              loadSectionStudents(section.id);
-            });
+            // Mark this card as active and remove active from others
+            document
+              .querySelectorAll(".section-card.active")
+              .forEach((el) => el.classList.remove("active"));
+            card.classList.add("active");
+
+            try {
+              // Load the students for this section with caching
+              await loadSectionStudents(section.id);
+            } catch (error) {
+              console.error("Error loading students:", error);
+            } finally {
+              // Reset button state
+              viewBtn.innerHTML =
+                '<i class="fas fa-users"></i> Voir les étudiants';
+              viewBtn.disabled = false;
+            }
+          });
 
           list.appendChild(card);
         });
@@ -896,30 +918,8 @@
         container.appendChild(table);
         container.appendChild(pagination);
 
-        // Add export/print options
-        const actionBar = document.createElement("div");
-        actionBar.className = "student-list-actions";
-        actionBar.innerHTML = `
-            <button class="btn-secondary btn-export-excel">
-                <i class="fas fa-file-excel"></i> Exporter Excel
-            </button>
-            <button class="btn-secondary btn-print">
-                <i class="fas fa-print"></i> Imprimer
-            </button>
-        `;
-
-        // Add event listeners for export/print
-        actionBar
-          .querySelector(".btn-export-excel")
-          .addEventListener("click", () => {
-            alert(`Export Excel pour ${section.name} à implémenter`);
-          });
-
-        actionBar.querySelector(".btn-print").addEventListener("click", () => {
-          alert(`Impression de la liste pour ${section.name} à implémenter`);
-        });
-
-        container.appendChild(actionBar);
+        // No export/print options
+        container.appendChild(document.createElement("div"));
 
         // Render the first page
         renderPage(1);
@@ -1283,7 +1283,7 @@
           let response;
           try {
             response = await fetch(
-              `https://unicersityback.onrender.com/api/notifications/from-teacher/${teacherId}`,
+              `http://localhost:3000/api/notifications/from-teacher/${teacherId}`,
               {
                 headers: {
                   Authorization: `Bearer ${authToken}`,
@@ -1298,7 +1298,7 @@
                   "API endpoint not found, falling back to main notifications endpoint"
                 );
                 response = await fetch(
-                  `https://unicersityback.onrender.com/api/notifications`,
+                  `http://localhost:3000/api/notifications`,
                   {
                     headers: {
                       Authorization: `Bearer ${authToken}`,
@@ -1491,5 +1491,99 @@
         }
       }
     </script>
+
+    <style>
+      /* Loading skeleton styles */
+      .loading-skeleton {
+        padding: 20px;
+      }
+
+      .skeleton-item {
+        height: 60px;
+        background: linear-gradient(
+          90deg,
+          #f0f0f0 25%,
+          #e0e0e0 50%,
+          #f0f0f0 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* Enhanced button styles */
+      .btn-view-students {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .btn-view-students:hover:not(:disabled) {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      }
+
+      .btn-view-students:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Error message with retry button */
+      .error-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #dc3545;
+      }
+
+      .error-message i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.7;
+      }
+
+      .error-message p {
+        margin: 0 0 16px 0;
+        font-size: 16px;
+      }
+
+      .retry-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s ease;
+      }
+
+      .retry-btn:hover {
+        background: #c82333;
+      }
+    </style>
   </body>
 </html>

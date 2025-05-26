@@ -249,8 +249,23 @@ async function getSectionById(sectionId) {
  */
 async function createSection(sectionData) {
   try {
+    // Convert departmentId to number if it's a string
+    if (
+      sectionData.departmentId &&
+      typeof sectionData.departmentId === "string"
+    ) {
+      sectionData.departmentId = parseInt(sectionData.departmentId, 10);
+    }
+
+    // Ensure capacity is a number
+    if (sectionData.capacity && typeof sectionData.capacity === "string") {
+      sectionData.capacity = parseInt(sectionData.capacity, 10);
+    }
+
+    console.log("Sending section data to server:", JSON.stringify(sectionData));
+
     const response = await apiCall("sections", "POST", sectionData);
-    return response.data;
+    return response.data || response;
   } catch (error) {
     console.error("Error creating section:", error);
     throw error;

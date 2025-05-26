@@ -349,16 +349,13 @@ function setupTabNavigation() {
 async function checkBackendConnectivity() {
   try {
     // Try loading student data instead of using a non-existent health endpoint
-    const response = await fetch(
-      "https://unicersityback.onrender.com/api/auth/verify",
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-        method: "GET",
-        signal: AbortSignal.timeout(3000),
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/auth/verify", {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+      method: "GET",
+      signal: AbortSignal.timeout(3000),
+    });
 
     isBackendAvailable = response.ok;
     return response.ok;
@@ -465,7 +462,7 @@ async function loadUserData() {
 
 async function fetchStudentData() {
   const res = await fetch(
-    `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
+    `http://localhost:3000/api/etudiants/${currentUser.id}`,
     {
       headers: { Authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5000),
@@ -625,7 +622,7 @@ async function fetchGroups(type, currentId, studentData) {
       if (level) queryParams.append("level", level);
 
       const res = await fetch(
-        `https://unicersityback.onrender.com/api/sections?${queryParams.toString()}`,
+        `http://localhost:3000/api/sections?${queryParams.toString()}`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
           signal: AbortSignal.timeout(5000),
@@ -648,7 +645,7 @@ async function fetchGroups(type, currentId, studentData) {
       }
 
       // Try to fetch all groups for this section from a dedicated endpoint
-      const groupsUrl = `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`;
+      const groupsUrl = `http://localhost:3000/api/sections/${sectionId}/groupes`;
 
       try {
         const groupsRes = await fetch(groupsUrl, {
@@ -751,7 +748,7 @@ async function checkStudentGroupAssignments() {
 
     // Get student data
     const studentRes = await fetch(
-      `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
+      `http://localhost:3000/api/etudiants/${currentUser.id}`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -785,7 +782,7 @@ async function checkStudentGroupAssignments() {
     html += `<p>Section ID: ${sectionId}</p>`;
 
     const sectionRes = await fetch(
-      `https://unicersityback.onrender.com/api/sections/${sectionId}`,
+      `http://localhost:3000/api/sections/${sectionId}`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -807,7 +804,7 @@ async function checkStudentGroupAssignments() {
     // Get all available sections for the same specialty and level
     try {
       const availableSectionsRes = await fetch(
-        `https://unicersityback.onrender.com/api/sections?specialty=${sectionData.specialty}&level=${sectionData.level}`,
+        `http://localhost:3000/api/sections?specialty=${sectionData.specialty}&level=${sectionData.level}`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }
@@ -865,7 +862,7 @@ async function checkStudentGroupAssignments() {
 
     // Get groups for this section
     const groupsRes = await fetch(
-      `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`,
+      `http://localhost:3000/api/sections/${sectionId}/groupes`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
@@ -1232,7 +1229,7 @@ async function submitRequest(type, prefix, e) {
 
         // Submit request with multipart form data for file upload
         response = await fetch(
-          "https://unicersityback.onrender.com/api/change-requests/section-with-document",
+          "http://localhost:3000/api/change-requests/section-with-document",
           {
             method: "POST",
             headers: {
@@ -1245,7 +1242,7 @@ async function submitRequest(type, prefix, e) {
       } else {
         // No document, use regular JSON request
         response = await fetch(
-          "https://unicersityback.onrender.com/api/change-requests/section",
+          "http://localhost:3000/api/change-requests/section",
           {
             method: "POST",
             headers: {
@@ -1278,7 +1275,7 @@ async function submitRequest(type, prefix, e) {
 
       // Submit request for group change with file
       response = await fetch(
-        "https://unicersityback.onrender.com/api/change-requests/group",
+        "http://localhost:3000/api/change-requests/group",
         {
           method: "POST",
           headers: {
@@ -1420,16 +1417,13 @@ async function loadUserRequests() {
 
     // Check if the token is still valid
     try {
-      const tokenCheck = await fetch(
-        "https://unicersityback.onrender.com/api/auth/verify",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-          signal: AbortSignal.timeout(5000),
-        }
-      );
+      const tokenCheck = await fetch("http://localhost:3000/api/auth/verify", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        signal: AbortSignal.timeout(5000),
+      });
 
       if (!tokenCheck.ok) {
         console.error("Token validation failed:", tokenCheck.status);
@@ -1570,7 +1564,7 @@ async function fetchRequests(endpoint) {
     // Normalize the endpoint to avoid double URLs
     const apiEndpoint = endpoint.includes("http://")
       ? `${endpoint}/my-requests`
-      : `https://unicersityback.onrender.com/api/${endpoint}/my-requests`;
+      : `http://localhost:3000/api/${endpoint}/my-requests`;
 
     console.log(`Fetching requests from ${apiEndpoint}`);
 
@@ -1867,17 +1861,14 @@ async function loadNavbar() {
 // AUTH
 async function verifyToken() {
   try {
-    const res = await fetch(
-      "https://unicersityback.onrender.com/api/auth/verify",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-        signal: AbortSignal.timeout(5000),
-      }
-    );
+    const res = await fetch("http://localhost:3000/api/auth/verify", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(5000),
+    });
 
     if (!res.ok) {
       console.warn(`Token verification failed with status: ${res.status}`);
@@ -1965,17 +1956,14 @@ async function refreshToken() {
 
     console.log("Attempting to refresh token...");
 
-    const response = await fetch(
-      "https://unicersityback.onrender.com/api/auth/refresh",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken: refreshTokenValue }),
-        signal: AbortSignal.timeout(5000),
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/auth/refresh", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      signal: AbortSignal.timeout(5000),
+    });
 
     if (!response.ok) {
       console.warn("Token refresh failed:", response.status);
@@ -2272,16 +2260,13 @@ function setupTabNavigation() {
 async function checkBackendConnectivity() {
   try {
     // Try loading student data instead of using a non-existent health endpoint
-    const response = await fetch(
-      "https://unicersityback.onrender.com/api/auth/verify",
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-        method: "GET",
-        signal: AbortSignal.timeout(3000),
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/auth/verify", {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+      method: "GET",
+      signal: AbortSignal.timeout(3000),
+    });
 
     isBackendAvailable = response.ok;
     return response.ok;
@@ -2388,7 +2373,7 @@ async function loadUserData() {
 
 async function fetchStudentData() {
   const res = await fetch(
-    `https://unicersityback.onrender.com/api/etudiants/${currentUser.id}`,
+    `http://localhost:3000/api/etudiants/${currentUser.id}`,
     {
       headers: { Authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5000),
@@ -2548,7 +2533,7 @@ async function fetchGroups(type, currentId, studentData) {
       if (level) queryParams.append("level", level);
 
       const res = await fetch(
-        `https://unicersityback.onrender.com/api/sections?${queryParams.toString()}`,
+        `http://localhost:3000/api/sections?${queryParams.toString()}`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
           signal: AbortSignal.timeout(5000),
@@ -2571,7 +2556,7 @@ async function fetchGroups(type, currentId, studentData) {
       }
 
       // Try to fetch all groups for this section from a dedicated endpoint
-      const groupsUrl = `https://unicersityback.onrender.com/api/sections/${sectionId}/groupes`;
+      const groupsUrl = `http://localhost:3000/api/sections/${sectionId}/groupes`;
 
       try {
         const groupsRes = await fetch(groupsUrl, {

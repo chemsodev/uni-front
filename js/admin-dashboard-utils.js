@@ -10,10 +10,13 @@ async function fetchDashboardStats() {
     const response = await apiCall("administrateurs/dashboard/stats");
 
     if (response && response.success && response.data) {
-      console.log("Successfully fetched dashboard stats from endpoint:", response.data);
+      console.log(
+        "Successfully fetched dashboard stats from endpoint:",
+        response.data
+      );
       return {
         stats: response.data,
-        success: true
+        success: true,
       };
     }
 
@@ -64,7 +67,7 @@ async function fetchDashboardStats() {
 
     return {
       stats: stats,
-      success: true
+      success: true,
     };
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
@@ -73,11 +76,12 @@ async function fetchDashboardStats() {
         teachersCount: 0,
         studentsCount: 0,
         sectionsCount: 0,
-        pendingRequestsCount: 0
+        pendingRequestsCount: 0,
       },
       success: false,
-      error: error.message
+      error: error.message,
     };
+  }
 }
 
 // Function to fetch recent activities

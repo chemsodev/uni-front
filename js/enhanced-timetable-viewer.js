@@ -234,7 +234,7 @@ async function loadTimetables(sectionId, type) {
     if (window.sectionAPI && window.sectionAPI.getSectionSchedules) {
       schedules = await window.sectionAPI.getSectionSchedules(sectionId, type);
     } else {
-      const API_URL = "https://unicersityback.onrender.com/api";
+      const API_URL = "http://localhost:3000/api";
       const token = getAuthToken();
 
       const response = await fetch(
@@ -387,7 +387,7 @@ async function loadScheduleStatistics(sectionId) {
     if (window.sectionAPI && window.sectionAPI.getSectionScheduleStatistics) {
       stats = await window.sectionAPI.getSectionScheduleStatistics(sectionId);
     } else {
-      const API_URL = "https://unicersityback.onrender.com/api";
+      const API_URL = "http://localhost:3000/api";
       const token = getAuthToken();
 
       const response = await fetch(
@@ -529,7 +529,7 @@ function renderScheduleStatistics(container, stats) {
 async function deleteTimetable(sectionId, scheduleId) {
   try {
     // Use API to delete the schedule
-    const API_URL = "https://unicersityback.onrender.com/api";
+    const API_URL = "http://localhost:3000/api";
     const token = getAuthToken();
 
     const response = await fetch(

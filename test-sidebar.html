@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Sidebar System</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+
+      .main-content {
+        margin-left: 260px;
+        padding: 2rem;
+      }
+
+      .role-selector {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .role-selector h3 {
+        margin-top: 0;
+      }
+
+      .role-btn {
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        background: #4f46e5;
+        color: white;
+        font-size: 0.875rem;
+      }
+
+      .role-btn:hover {
+        background: #3730a3;
+      }
+
+      .info-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-content">
+      <div class="role-selector">
+        <h3>Test Different Admin Roles</h3>
+        <p>Click a button to see the sidebar for that role:</p>
+        <button class="role-btn" onclick="testRole('doyen')">Doyen</button>
+        <button class="role-btn" onclick="testRole('chef-de-departement')">
+          Chef de Département
+        </button>
+        <button class="role-btn" onclick="testRole('vice-doyen')">
+          Vice-Doyen
+        </button>
+        <button class="role-btn" onclick="testRole('chef-de-specialite')">
+          Chef de Spécialité
+        </button>
+        <button class="role-btn" onclick="testRole('secretaire')">
+          Secrétaire
+        </button>
+      </div>
+
+      <div class="info-box">
+        <h2>Sidebar System Test</h2>
+        <p>This page demonstrates the new role-based sidebar system.</p>
+        <p>
+          <strong>Current Role:</strong> <span id="current-role">None</span>
+        </p>
+
+        <h3>Expected Menu Items:</h3>
+        <ul id="expected-items"></ul>
+
+        <h3>How it works:</h3>
+        <ol>
+          <li>Each role has its own separate sidebar HTML file</li>
+          <li>
+            The sidebar-loader.js script loads the correct sidebar based on the
+            user's role
+          </li>
+          <li>
+            No complex JavaScript or CSS conflicts - just clean, simple HTML
+            files
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <script src="js/sidebar-loader.js"></script>
+    <script>
+      function testRole(role) {
+        // Set the role in localStorage
+        localStorage.setItem("admin_role", role);
+
+        // Update the display
+        document.getElementById("current-role").textContent = role;
+
+        // Show expected menu items
+        const menuItems = {
+          doyen: [
+            "Tableau de bord",
+            "Gestion des Enseignants",
+            "Gestion des Sections",
+            "Demandes de Section",
+            "Demandes de Profil",
+          ],
+          "chef-de-departement": [
+            "Tableau de bord",
+            "Gestion des Enseignants",
+            "Demandes de Profil",
+          ],
+          "vice-doyen": [
+            "Tableau de bord",
+            "Gestion des Sections",
+            "Demandes de Section",
+          ],
+          "chef-de-specialite": [
+            "Tableau de bord",
+            "Gestion des Enseignants",
+            "Demandes de Profil",
+          ],
+          secretaire: ["Tableau de bord", "Demandes de Profil"],
+        };
+
+        const expectedList = document.getElementById("expected-items");
+        expectedList.innerHTML = "";
+
+        menuItems[role].forEach((item) => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          expectedList.appendChild(li);
+        });
+
+        // Reload the sidebar
+        if (window.loadSidebar) {
+          window.loadSidebar();
+        }
+
+        console.log("Switched to role:", role);
+      }
+
+      // Initialize with doyen role
+      testRole("doyen");
+    </script>
+  </body>
+</html>

@@ -5,6 +5,7 @@
     <title>Emploi du temps - Espace Enseignant</title>
     <link href="style/emploi.css" rel="stylesheet" />
     <link href="style/teacher-green-theme.css" rel="stylesheet" />
+    <link href="style/teacher-sidebar.css" rel="stylesheet" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
@@ -159,6 +160,9 @@
                     <i class="fas fa-file-alt"></i> Aperçu de l'emploi du temps
                   </div>
                   <div class="preview-actions" style="display: flex; gap: 10px">
+                    <button class="btn-secondary" id="viewFullBtn">
+                      <i class="fas fa-eye"></i> Voir en plein écran
+                    </button>
                     <button class="btn-secondary" id="downloadBtn">
                       <i class="fas fa-download"></i> Télécharger
                     </button>
@@ -316,6 +320,7 @@
       let authToken = null;
       let isBackendAvailable = true;
       let teacherSections = [];
+      const apiUrl = "http://localhost:3000";
 
       document.addEventListener("DOMContentLoaded", async function () {
         try {
@@ -333,7 +338,7 @@
             localStorage.getItem("enseignant_token");
 
           // Load navigation using sidebar-loader
-          await loadTeacherSidebar("navbar-container");
+          await loadTeacherSidebar();
 
           // Initialize file upload handling
           initFileUpload();
@@ -370,6 +375,7 @@
         const fileName = document.getElementById("fileName");
         const deleteBtn = document.getElementById("deleteBtn");
         const downloadBtn = document.getElementById("downloadBtn");
+        const viewFullBtn = document.getElementById("viewFullBtn");
 
         // Show file selector when button is clicked
         selectFileBtn.addEventListener("click", () => {
@@ -409,6 +415,23 @@
         // Handle download button click (placeholder)
         downloadBtn.addEventListener("click", () => {
           alert("Téléchargement en cours...");
+        });
+
+        // Handle view full size button click
+        viewFullBtn.addEventListener("click", () => {
+          const files = fileInput.files;
+          if (files.length > 0) {
+            const file = files[0];
+            const fileUrl = URL.createObjectURL(file);
+            const viewerUrl = `document-viewer.html?url=${encodeURIComponent(
+              fileUrl
+            )}&title=${encodeURIComponent(file.name)}&context=teacher`;
+            window.open(
+              viewerUrl,
+              "_blank",
+              "width=1200,height=800,scrollbars=yes,resizable=yes"
+            );
+          }
         });
       }
 
@@ -465,22 +488,8 @@
             teacherSections = sections || [];
 
             if (sections && sections.length > 0) {
-              // Use the sections to create teacher assignment info
-              const assignments = {
-                departement:
-                  sections.length > 0
-                    ? sections[0].department?.name || "Informatique"
-                    : "Informatique",
-                grade: "Maître de Conférences", // This could be fetched from teacher profile
-                responsabilite:
-                  sections.length > 0
-                    ? `Responsable ${sections.length} Section${
-                        sections.length > 1 ? "s" : ""
-                      }`
-                    : "Resp. Module Algorithmique",
-                anneeAcademique: "2023-2024",
-              };
-
+              // Get teacher assignments from sections
+              const assignments = await getTeacherAssignments(sections);
               displayTeacherInfo(assignments);
             } else {
               throw new Error("No sections found");
@@ -495,38 +504,140 @@
         }
       }
 
+      // Get teacher assignments from sections
+      async function getTeacherAssignments(sections) {
+        const assignments = {
+          departement: "Informatique",
+          grade: "Maître de Conférences",
+          responsabilites: [],
+          sections: [],
+          anneeAcademique: "2023-2024",
+        };
+
+        if (sections && sections.length > 0) {
+          // Extract department from first section
+          if (sections[0].department) {
+            assignments.departement =
+              sections[0].department.name || "Informatique";
+          }
+
+          // Process each section to get responsibilities
+          sections.forEach((section) => {
+            const sectionInfo = {
+              name: section.name || section.nom,
+              code: section.code,
+              level: section.level || section.niveau,
+              specialty: section.specialty?.name || section.specialite?.name,
+              studentCount:
+                section.studentCount || section.nombreEtudiants || 0,
+            };
+
+            assignments.sections.push(sectionInfo);
+
+            // Add responsibilities based on section assignments
+            if (section.responsables) {
+              section.responsables.forEach((resp) => {
+                if (resp.enseignant && resp.enseignant.id === currentUser.id) {
+                  const roleText = getRoleDisplayName(resp.role);
+                  const responsibility = `${roleText} - ${sectionInfo.name}`;
+                  if (!assignments.responsabilites.includes(responsibility)) {
+                    assignments.responsabilites.push(responsibility);
+                  }
+                }
+              });
+            }
+          });
+
+          // If no specific responsibilities found, add general ones
+          if (assignments.responsabilites.length === 0) {
+            assignments.responsabilites.push(
+              `Enseignant - ${assignments.sections.length} Section${
+                assignments.sections.length > 1 ? "s" : ""
+              }`
+            );
+          }
+        }
+
+        return assignments;
+      }
+
+      // Helper function to get role display name
+      function getRoleDisplayName(role) {
+        const roleNames = {
+          filiere: "Responsable de Filière",
+          section: "Responsable de Section",
+          td: "Responsable TD",
+          tp: "Responsable TP",
+        };
+        return roleNames[role] || "Enseignant";
+      }
+
       // Display teacher information
       function displayTeacherInfo(data) {
         const container = document.getElementById("teacher-info");
+        if (!container) return;
+
         container.innerHTML = `
-                <div class="info-item">
-                    <div class="info-label">Département</div>
-                    <div class="info-value">${
-                      data.departement || "Informatique"
-                    }</div>
-                </div>
+          <div class="info-item">
+            <span class="info-label">Département:</span>
+            <span class="info-value">${data.departement}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Grade:</span>
+            <span class="info-value">${data.grade}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Responsabilités:</span>
+            <span class="info-value">
+              ${
+                data.responsabilites.length > 0
+                  ? data.responsabilites.join(", ")
+                  : "Aucune responsabilité assignée"
+              }
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Sections assignées:</span>
+            <span class="info-value">${data.sections.length} section${
+          data.sections.length > 1 ? "s" : ""
+        }</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Année académique:</span>
+            <span class="info-value">${data.anneeAcademique}</span>
+          </div>
+        `;
 
-                <div class="info-item">
-                    <div class="info-label">Grade</div>
-                    <div class="info-value">${
-                      data.grade || "Maître de Conférences"
+        // Add detailed sections info
+        if (data.sections.length > 0) {
+          const sectionsDetail = document.createElement("div");
+          sectionsDetail.className = "sections-detail";
+          sectionsDetail.innerHTML = `
+            <h4>Détails des sections:</h4>
+            <div class="sections-grid">
+              ${data.sections
+                .map(
+                  (section) => `
+                <div class="section-card">
+                  <div class="section-header">
+                    <strong>${section.name}</strong>
+                    <span class="section-code">${section.code}</span>
+                  </div>
+                  <div class="section-details">
+                    <div>Niveau: ${section.level}</div>
+                    <div>Spécialité: ${
+                      section.specialty || "Non spécifiée"
                     }</div>
+                    <div>Étudiants: ${section.studentCount}</div>
+                  </div>
                 </div>
-
-                <div class="info-item">
-                    <div class="info-label">Responsabilité</div>
-                    <div class="info-value">${
-                      data.responsabilite || "Resp. Module Algorithmique"
-                    }</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Année académique</div>
-                    <div class="info-value">${
-                      data.anneeAcademique || "2023-2024"
-                    }</div>
-                </div>
-            `;
+              `
+                )
+                .join("")}
+            </div>
+          `;
+          container.appendChild(sectionsDetail);
+        }
       }
 
       // Display fallback teacher information
@@ -534,7 +645,8 @@
         displayTeacherInfo({
           departement: "Informatique",
           grade: "Maître de Conférences",
-          responsabilite: "Resp. Module Algorithmique",
+          responsabilites: [],
+          sections: [],
           anneeAcademique: "2023-2024",
         });
       }
@@ -634,110 +746,283 @@
         }
       };
 
-      // Populate section dropdown for schedules
+      // Populate section dropdown
       async function populateSectionDropdown() {
+        const dropdown = document.getElementById("section-schedule-filter");
+        if (!dropdown) return;
+
         try {
-          const select = document.getElementById("section-schedule-filter");
-          select.innerHTML =
+          // Clear existing options except the first one
+          dropdown.innerHTML =
             '<option value="">Sélectionner une section</option>';
 
-          if (teacherSections.length === 0) {
-            // Try loading teacher sections if not already loaded
-            const sections = await loadTeacherSections();
-            teacherSections = sections || [];
-          }
-
-          teacherSections.forEach((section) => {
+          if (teacherSections && teacherSections.length > 0) {
+            teacherSections.forEach((section) => {
+              const option = document.createElement("option");
+              option.value = section.id;
+              option.textContent = `${section.name || section.nom} (${
+                section.code || "N/A"
+              })`;
+              dropdown.appendChild(option);
+            });
+          } else {
             const option = document.createElement("option");
-            option.value = section.id;
-            option.textContent = `${
-              section.specialty || section.filiere || "Filière"
-            } - Section ${section.name || section.nom || ""}`;
-            select.appendChild(option);
-          });
+            option.value = "";
+            option.textContent = "Aucune section assignée";
+            option.disabled = true;
+            dropdown.appendChild(option);
+          }
         } catch (error) {
           console.error("Error populating section dropdown:", error);
+          dropdown.innerHTML =
+            '<option value="">Erreur lors du chargement</option>';
         }
       }
 
-      // Load schedule for a specific section
+      // Display section schedule
       async function displaySectionSchedule() {
-        const sectionId = document.getElementById(
-          "section-schedule-filter"
-        ).value;
+        const dropdown = document.getElementById("section-schedule-filter");
         const container = document.getElementById("section-schedule-container");
 
-        if (!sectionId) {
+        if (!dropdown || !container) return;
+
+        const selectedSectionId = dropdown.value;
+
+        if (!selectedSectionId) {
           container.innerHTML =
             '<div class="empty-state">Sélectionnez une section pour voir son emploi du temps</div>';
           return;
         }
 
+        // Show loading state
+        container.innerHTML =
+          '<div class="loading-state">Chargement de l\'emploi du temps...</div>';
+
         try {
-          container.innerHTML =
-            '<div class="loading-message">Chargement de l\'emploi du temps...</div>';
+          // Find the selected section
+          const selectedSection = teacherSections.find(
+            (s) => s.id === selectedSectionId
+          );
 
-          // Use our helper function to get section schedules
-          const scheduleData = await fetchSectionSchedule(sectionId);
-
-          if (scheduleData && scheduleData.length > 0) {
-            // Display the schedule data
-            displayScheduleData(scheduleData, container);
-          } else {
-            container.innerHTML =
-              '<div class="empty-state">Aucun emploi du temps trouvé pour cette section</div>';
+          if (!selectedSection) {
+            throw new Error("Section non trouvée");
           }
+
+          // Try to load schedule from backend
+          let schedules = [];
+          if (isBackendAvailable) {
+            try {
+              // Use the correct section-specific schedule endpoint
+              const response = await fetch(
+                `${apiUrl}/api/sections/schedules/${selectedSectionId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              if (response.ok) {
+                schedules = await response.json();
+                console.log(
+                  `Loaded ${schedules.length} schedules for section ${selectedSectionId}:`,
+                  schedules
+                );
+              } else {
+                console.warn(
+                  `Failed to load schedules: ${response.status} ${response.statusText}`
+                );
+              }
+            } catch (error) {
+              console.warn("Could not load schedules from backend:", error);
+            }
+          }
+
+          // Display schedule information
+          displayScheduleInfo(selectedSection, schedules);
         } catch (error) {
-          console.error("Error loading section schedule:", error);
-          container.innerHTML =
-            '<div class="error-message">Erreur de chargement de l\'emploi du temps</div>';
+          console.error("Error displaying section schedule:", error);
+          container.innerHTML = `
+            <div class="error-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p>Erreur lors du chargement de l'emploi du temps</p>
+              <small>${error.message}</small>
+            </div>
+          `;
         }
       }
 
-      // Display schedule data
-      function displayScheduleData(schedules, container) {
-        const scheduleList = document.createElement("div");
-        scheduleList.className = "schedule-documents";
+      // Display schedule information
+      function displayScheduleInfo(section, schedules) {
+        const container = document.getElementById("section-schedule-container");
+        if (!container) return;
 
-        schedules.forEach((schedule) => {
-          const documentDate = new Date(schedule.createdAt).toLocaleDateString(
-            "fr-FR"
+        let scheduleContent = "";
+
+        if (schedules && schedules.length > 0) {
+          // Display actual schedules
+          scheduleContent = `
+            <div class="schedule-header">
+              <h3>Emploi du temps - ${section.name}</h3>
+              <div class="schedule-meta">
+                <span>Code: ${section.code}</span>
+                <span>Niveau: ${section.level || section.niveau}</span>
+                <span>Étudiants: ${
+                  section.studentCount || section.nombreEtudiants || 0
+                }</span>
+              </div>
+            </div>
+            <div class="schedules-list">
+              ${schedules
+                .map(
+                  (schedule) => `
+                <div class="schedule-item">
+                  <div class="schedule-info">
+                    <h4>${schedule.title || "Emploi du temps"}</h4>
+                    <p>Type: ${
+                      schedule.scheduleType || schedule.type || "Régulier"
+                    }</p>
+                    <p>Créé le: ${new Date(
+                      schedule.createdAt
+                    ).toLocaleDateString()}</p>
+                  </div>
+                  <div class="schedule-actions">
+                    <button onclick="viewSchedule('${
+                      schedule.id
+                    }')" class="btn-secondary">
+                      <i class="fas fa-eye"></i> Voir
+                    </button>
+                    <button onclick="downloadSchedule('${
+                      schedule.id
+                    }')" class="btn-secondary">
+                      <i class="fas fa-download"></i> Télécharger
+                    </button>
+                  </div>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          `;
+        } else {
+          // No schedules found
+          scheduleContent = `
+            <div class="schedule-header">
+              <h3>Emploi du temps - ${section.name}</h3>
+              <div class="schedule-meta">
+                <span>Code: ${section.code}</span>
+                <span>Niveau: ${section.level || section.niveau}</span>
+                <span>Étudiants: ${
+                  section.studentCount || section.nombreEtudiants || 0
+                }</span>
+              </div>
+            </div>
+            <div class="no-schedule-state">
+              <i class="fas fa-calendar-times"></i>
+              <p>Aucun emploi du temps disponible pour cette section</p>
+              <small>Les emplois du temps seront affichés ici une fois qu'ils seront créés par l'administration.</small>
+            </div>
+          `;
+        }
+
+        container.innerHTML = scheduleContent;
+      }
+
+      // View schedule function
+      async function viewSchedule(scheduleId) {
+        try {
+          console.log("Viewing schedule:", scheduleId);
+
+          // Get the current selected section ID
+          const dropdown = document.getElementById("section-schedule-filter");
+          const selectedSectionId = dropdown ? dropdown.value : null;
+
+          if (!selectedSectionId) {
+            alert("Erreur: Section non sélectionnée");
+            return;
+          }
+
+          // Prepare the schedule URL
+          const scheduleUrl = `${apiUrl}/api/sections/schedules/${selectedSectionId}/document/${scheduleId}`;
+
+          try {
+            // Check if the document actually exists first
+            const checkResponse = await fetch(scheduleUrl, {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            });
+
+            if (!checkResponse.ok) {
+              throw new Error(`Document not found: ${checkResponse.status}`);
+            }
+
+            // Document exists, proceed to viewer
+            console.log("Document exists, opening viewer");
+          } catch (fetchError) {
+            console.error("Error fetching document:", fetchError);
+            alert("Erreur: Impossible de trouver le document demandé");
+            return;
+          }
+
+          // Create a URL for the document viewer with the schedule
+          const viewerUrl = `document-viewer.html?url=${encodeURIComponent(
+            scheduleUrl
+          )}&token=${encodeURIComponent(authToken)}&title=${encodeURIComponent(
+            `Emploi du temps - Section ${selectedSectionId}`
+          )}&context=teacher`;
+
+          // Open document viewer with the schedule
+          window.open(
+            viewerUrl,
+            "_blank",
+            "width=1200,height=800,scrollbars=yes,resizable=yes"
+          );
+        } catch (error) {
+          console.error("Error viewing schedule:", error);
+          alert("Erreur lors de l'ouverture de l'emploi du temps");
+        }
+      }
+
+      // Download schedule function
+      async function downloadSchedule(scheduleId) {
+        try {
+          // Get the current selected section ID for the download
+          const dropdown = document.getElementById("section-schedule-filter");
+          const selectedSectionId = dropdown ? dropdown.value : null;
+
+          if (!selectedSectionId) {
+            alert("Erreur: Section non sélectionnée");
+            return;
+          }
+
+          const response = await fetch(
+            `${apiUrl}/api/sections/schedules/${selectedSectionId}/download/${scheduleId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
           );
 
-          const scheduleItem = document.createElement("div");
-          scheduleItem.className = "schedule-item";
-
-          scheduleItem.innerHTML = `
-                    <div class="schedule-info">
-                        <div class="schedule-title">${
-                          schedule.title || "Emploi du temps"
-                        }</div>
-                        <div class="schedule-date">Publié le ${documentDate}</div>
-                        <div class="schedule-description">${
-                          schedule.description || "Aucune description"
-                        }</div>
-                    </div>
-                    <div class="schedule-preview pdf-preview">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                        <div>${
-                          schedule.title.includes("examen")
-                            ? "Planning d'examens"
-                            : "Emploi du temps global"
-                        }</div>
-                    </div>
-                `;
-
-          scheduleList.appendChild(scheduleItem);
-        });
-
-        container.innerHTML = "";
-        container.appendChild(scheduleList);
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `emploi-du-temps-${scheduleId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          } else {
+            throw new Error("Erreur lors du téléchargement");
+          }
+        } catch (error) {
+          console.error("Error downloading schedule:", error);
+          alert("Erreur lors du téléchargement de l'emploi du temps");
+        }
       }
     </script>
   </body>

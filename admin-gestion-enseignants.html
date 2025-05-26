@@ -620,11 +620,14 @@
     </div>
 
     <script>
-      // Global variables
+      // Initialize global variables
       let allTeachers = [];
       let filteredTeachers = [];
       let currentPage = 1;
       let itemsPerPage = 10;
+      let authToken =
+        localStorage.getItem("admin_token") ||
+        sessionStorage.getItem("admin_token");
       let teacherToDelete = null; // Track the ID of teacher to delete
 
       // DOM Elements
@@ -751,7 +754,7 @@
           for (const section of sections) {
             try {
               const response = await fetch(
-                `https://unicersityback.onrender.com/api/sections/${section.id}/responsables`,
+                `http://localhost:3000/api/sections/${section.id}/responsables`,
                 {
                   headers: {
                     Authorization: `Bearer ${
@@ -881,7 +884,10 @@
         try {
           // Verify authentication using the admin-auth.js helper
           const isAuthenticated = await verifyAdminToken();
-          if (!isAuthenticated) return;
+          if (!isAuthenticated) {
+            window.location.href = "admin-login.html";
+            return;
+          }
 
           // Load the sidebar
           await loadSidebar(); // Load teachers data
@@ -902,8 +908,29 @@
       });
       async function loadSidebar() {
         try {
+          // Get role from storage
+          const role =
+            localStorage.getItem("admin_role") ||
+            sessionStorage.getItem("admin_role");
+
+          console.log("Loading sidebar for role:", role);
+
+          // Map roles to sidebar files
+          const sidebarFiles = {
+            doyen: "admin-sidebar-doyen.html",
+            "vice-doyen": "admin-sidebar-vice-doyen.html",
+            "chef-de-departement": "admin-sidebar-chef-departement.html",
+            "chef-de-specialite": "admin-sidebar-chef-specialite.html",
+            secretaire: "admin-sidebar-secretaire.html",
+          };
+
+          // Get the sidebar file for the role
+          const sidebarFile = sidebarFiles[role] || sidebarFiles["doyen"]; // Default to doyen
+
+          console.log("Loading sidebar file:", sidebarFile);
+
           // Load the sidebar HTML
-          const response = await fetch("admin-sidebar.html");
+          const response = await fetch(sidebarFile);
           const html = await response.text();
 
           // Insert the sidebar HTML into the container
@@ -913,11 +940,15 @@
           const logoutBtn = document.getElementById("logout-btn");
           if (logoutBtn && typeof handleAdminLogout === "function") {
             logoutBtn.addEventListener("click", handleAdminLogout);
-          } // Update admin info manually since scripts in innerHTML don't execute
+          }
+
+          // Update admin info manually since scripts in innerHTML don't execute
           updateSidebarAdminInfo();
 
           // Set active menu item
           setSidebarActiveMenuItem();
+
+          console.log("✅ Sidebar loaded successfully for role:", role);
         } catch (error) {
           console.error("Error loading sidebar:", error);
           showMessage("Impossible de charger la barre latérale.", "error");
@@ -1116,9 +1147,6 @@
                 <button class="btn btn-danger btn-sm" onclick="openConfirmDeleteModal('${
                   teacher.id
                 }')">Supprimer</button>
-                <button class="btn btn-primary btn-sm" onclick="viewSectionResponsables('${
-                  teacher.id
-                }')">Voir Sections</button>
               </div>
             </td>
           `;
@@ -1529,187 +1557,359 @@
         }
       }
 
-      // Add new function to fetch and display section responsables
+      // Optimized function to fetch and display section responsables with caching
+      let teacherSectionsCache = new Map();
+      let sectionsCache = null;
+
       async function viewSectionResponsables(teacherId) {
         try {
           // Show loading state
-          showMessage("Chargement des sections...", "info");
+          const loadingModal = createLoadingModal();
+          document.body.appendChild(loadingModal);
 
-          // Fetch all sections
-          const sections = await getSections();
-          if (!sections || !sections.length) {
-            showMessage("Aucune section trouvée", "warning");
-            return;
+          // First, try to get all available sections to use for lookups
+          let allSections = [];
+          try {
+            const sectionsResponse = await fetch(`${API_BASE_URL}/sections`, {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (sectionsResponse.ok) {
+              const sectionsData = await sectionsResponse.json();
+              if (Array.isArray(sectionsData)) {
+                allSections = sectionsData;
+              } else if (sectionsData && Array.isArray(sectionsData.data)) {
+                allSections = sectionsData.data;
+              }
+              console.log(
+                `Loaded ${allSections.length} sections for reference`
+              );
+            }
+          } catch (sectionsError) {
+            console.warn(
+              "Could not load sections for reference:",
+              sectionsError
+            );
           }
 
-          // Create modal content
-          const modalContent = document.createElement("div");
-          modalContent.className = "modal-content";
-          modalContent.innerHTML = `
-            <span class="close-modal">&times;</span>
-            <h2>Sections de l'enseignant</h2>
-            <div class="sections-list"></div>
-          `;
+          // Then fetch the teacher assignments
+          const response = await fetch(
+            `${API_BASE_URL}/enseignants/${teacherId}/sections-responsable`,
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
-          // Create modal
-          const modal = document.createElement("div");
-          modal.className = "modal";
-          modal.appendChild(modalContent);
-          document.body.appendChild(modal);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
 
-          // Add styles for the sections list
-          const style = document.createElement("style");
-          style.textContent = `
-            .sections-list {
-              max-height: 400px;
-              overflow-y: auto;
-              padding: 1rem;
-            }
-            .section-item {
-              background: #f8f9fa;
-              border-radius: 8px;
-              padding: 1rem;
-              margin-bottom: 1rem;
-            }
-            .section-header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 0.5rem;
-            }
-            .section-title {
-              font-weight: 600;
-              color: var(--primary-color);
-            }
-            .section-code {
-              color: #666;
-              font-size: 0.9rem;
-            }
-            .section-info {
-              display: flex;
-              gap: 1rem;
-              margin-bottom: 0.5rem;
-              color: #666;
-              font-size: 0.9rem;
-            }
-            .section-info span {
-              background: #e9ecef;
-              padding: 0.25rem 0.5rem;
-              border-radius: 4px;
-            }
-            .teacher-role {
-              margin-top: 0.5rem;
-              padding: 0.5rem;
-              background: white;
-              border-radius: 4px;
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-            }
-            .role-badge {
-              background: var(--primary-color);
-              color: white;
-              padding: 0.25rem 0.5rem;
-              border-radius: 4px;
-              font-size: 0.8rem;
-              text-transform: uppercase;
-            }
-            .role-title {
-              font-weight: 500;
-              color: #666;
-            }
-          `;
-          document.head.appendChild(style);
+          const teacherSections = await response.json();
+          console.log("API response for teacher sections:", teacherSections);
 
-          // Process each section
-          const sectionsList = modalContent.querySelector(".sections-list");
-          for (const section of sections) {
-            try {
-              const response = await fetch(
-                `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SECTIONS.BY_ID(
-                  section.id
-                )}/responsables`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${
-                      localStorage.getItem("admin_token") ||
-                      sessionStorage.getItem("admin_token")
-                    }`,
-                  },
-                }
-              );
+          // Format the response data - handle multiple possible response formats
+          let formattedSections = [];
 
-              if (response.ok) {
-                const responsables = await response.json();
+          // Add debug log to see what format the API returned
+          console.log(
+            "Raw teacher sections data structure:",
+            JSON.stringify(teacherSections, null, 2)
+          );
 
-                // Find this teacher's role in this section
-                const teacherRole = responsables.find(
-                  (r) => r.enseignantId === parseInt(teacherId)
+          if (Array.isArray(teacherSections)) {
+            formattedSections = teacherSections.map((resp) => {
+              // Handle different possible response formats
+              if (resp.section) {
+                // Format where section is already a property
+                return {
+                  section: resp.section,
+                  role: resp.role || "enseignant",
+                  assignedAt:
+                    resp.createdAt ||
+                    resp.assignedAt ||
+                    new Date().toISOString(),
+                };
+              } else if (resp.sectionId) {
+                // Try to find the section in our allSections array
+                const foundSection = allSections.find(
+                  (s) => s.id === resp.sectionId
                 );
 
-                if (teacherRole) {
-                  const sectionItem = document.createElement("div");
-                  sectionItem.className = "section-item";
-
-                  const roleTitle = {
-                    filiere: "Responsable de Filière",
-                    section: "Responsable de Section",
-                    td: "Responsable des TD",
-                    tp: "Responsable des TP",
-                  }[teacherRole.role];
-
-                  sectionItem.innerHTML = `
-                    <div class="section-header">
-                      <div>
-                        <div class="section-title">${section.name}</div>
-                        <div class="section-code">${section.code}</div>
-                      </div>
-                    </div>
-                    <div class="section-info">
-                      <span>Niveau: ${section.level}</span>
-                      <span>Spécialité: ${section.specialty}</span>
-                      <span>Capacité: ${
-                        section.capacity || "Non définie"
-                      }</span>
-                    </div>
-                    <div class="teacher-role">
-                      <span class="role-badge">${teacherRole.role.toUpperCase()}</span>
-                      <span class="role-title">${roleTitle}</span>
-                    </div>
-                  `;
-
-                  sectionsList.appendChild(sectionItem);
+                if (foundSection) {
+                  return {
+                    section: foundSection,
+                    role: resp.role || "enseignant",
+                    assignedAt:
+                      resp.createdAt ||
+                      resp.assignedAt ||
+                      new Date().toISOString(),
+                  };
+                } else {
+                  // Fall back to the minimal section data
+                  return {
+                    section: {
+                      id: resp.sectionId,
+                      name:
+                        resp.sectionName ||
+                        `Section ${resp.sectionId.substring(0, 6)}...`,
+                      code: resp.sectionCode || "N/A",
+                      level: resp.level || "N/A",
+                      specialty: resp.specialty || "N/A",
+                    },
+                    role: resp.role || "enseignant",
+                    assignedAt:
+                      resp.createdAt ||
+                      resp.assignedAt ||
+                      new Date().toISOString(),
+                  };
                 }
+              } else {
+                // Unknown format - create a default
+                return {
+                  section: null,
+                  role: resp.role || "enseignant",
+                  assignedAt:
+                    resp.createdAt ||
+                    resp.assignedAt ||
+                    new Date().toISOString(),
+                };
               }
-            } catch (err) {
-              console.warn(
-                `Error getting responsables for section ${section.id}:`,
-                err
-              );
-            }
+            });
           }
 
-          // Add close functionality
-          const closeBtn = modalContent.querySelector(".close-modal");
-          closeBtn.onclick = () => {
-            document.body.removeChild(modal);
-            document.head.removeChild(style);
-          };
+          // Remove loading modal
+          document.body.removeChild(loadingModal);
 
-          // Show modal
-          modal.style.display = "block";
-
-          // Close on outside click
-          window.onclick = (event) => {
-            if (event.target === modal) {
-              document.body.removeChild(modal);
-              document.head.removeChild(style);
-            }
-          };
+          // Display sections in modal
+          displaySectionsModal(formattedSections, teacherId);
         } catch (error) {
           console.error("Error fetching section responsables:", error);
           showMessage("Erreur lors du chargement des sections", "error");
+          // Remove loading modal if it exists
+          const loadingModal = document.querySelector(".loading-modal");
+          if (loadingModal) {
+            document.body.removeChild(loadingModal);
+          }
         }
+      }
+
+      function createLoadingModal() {
+        const modal = document.createElement("div");
+        modal.className = "modal loading-modal";
+        modal.style.display = "block";
+        modal.innerHTML = `
+          <div class="modal-content" style="text-align: center; padding: 2rem;">
+            <div class="loading-spinner" style="margin: 0 auto 1rem auto; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p>Chargement des sections...</p>
+          </div>
+        `;
+        return modal;
+      }
+
+      function displaySectionsModal(teacherSections, teacherId) {
+        // Create modal content
+        const modalContent = document.createElement("div");
+        modalContent.className = "modal-content";
+        modalContent.innerHTML = `
+          <span class="close-modal">&times;</span>
+          <h2>Sections de l'enseignant (${teacherSections.length})</h2>
+          <div class="sections-list"></div>
+        `;
+
+        // Create modal
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // Add optimized styles
+        const style = document.createElement("style");
+        style.textContent = `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          .sections-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+          }
+          .section-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s ease;
+          }
+          .section-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          }
+          .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+          }
+          .section-title {
+            font-weight: 600;
+            color: var(--primary-color);
+          }
+          .section-code {
+            color: #666;
+            font-size: 0.9rem;
+          }
+          .section-info {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+          }
+          .section-info span {
+            background: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+          }
+          .teacher-role {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: space-between;
+          }
+          .role-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+          }
+          .role-title {
+            font-weight: 500;
+            color: #666;
+          }
+          .assigned-date {
+            font-size: 0.8rem;
+            color: #999;
+          }
+          .empty-sections {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+          }
+        `;
+        document.head.appendChild(style);
+
+        // Populate sections list
+        const sectionsList = modalContent.querySelector(".sections-list");
+
+        if (teacherSections.length === 0) {
+          sectionsList.innerHTML = `
+            <div class="empty-sections">
+              <i class="fas fa-users-slash" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <p>Cet enseignant n'est responsable d'aucune section</p>
+            </div>
+          `;
+        } else {
+          teacherSections.forEach(({ section, role, assignedAt }) => {
+            const sectionItem = document.createElement("div");
+            sectionItem.className = "section-item";
+
+            // Check if section exists, if not create a default object
+            if (!section) {
+              console.warn(
+                "Section data missing for teacher assignment, using default values"
+              );
+              section = {
+                name: "Section inconnue",
+                code: "N/A",
+                level: "N/A",
+                specialty: "N/A",
+                capacity: null,
+              };
+            }
+
+            // Clean up section properties (handle variations in property names)
+            const sectionName =
+              section.name || section.nom || "Section inconnue";
+            const sectionCode = section.code || "N/A";
+            const sectionLevel = section.level || section.niveau || "N/A";
+            const sectionSpecialty =
+              section.specialty || section.specialite || "N/A";
+            const sectionCapacity =
+              section.capacity || section.capacite || "Non définie";
+
+            const roleTitle =
+              {
+                filiere: "Responsable de Filière",
+                section: "Responsable de Section",
+                td: "Responsable des TD",
+                tp: "Responsable des TP",
+              }[role] || role;
+
+            const assignedDate = assignedAt
+              ? new Date(assignedAt).toLocaleDateString("fr-FR")
+              : "Date inconnue";
+
+            sectionItem.innerHTML = `
+              <div class="section-header">
+                <div>
+                  <div class="section-title">${sectionName}</div>
+                  <div class="section-code">${sectionCode}</div>
+                </div>
+              </div>
+              <div class="section-info">
+                <span>Niveau: ${sectionLevel}</span>
+                <span>Spécialité: ${sectionSpecialty}</span>
+                <span>Capacité: ${sectionCapacity}</span>
+              </div>
+              <div class="teacher-role">
+                <div>
+                  <span class="role-badge">${(role || "").toUpperCase()}</span>
+                  <span class="role-title">${roleTitle || "Rôle inconnu"}</span>
+                </div>
+                <div class="assigned-date">Assigné le ${assignedDate}</div>
+              </div>
+            `;
+
+            sectionsList.appendChild(sectionItem);
+          });
+        }
+
+        // Add close functionality
+        const closeBtn = modalContent.querySelector(".close-modal");
+        closeBtn.onclick = () => {
+          document.body.removeChild(modal);
+          document.head.removeChild(style);
+        };
+
+        // Show modal
+        modal.style.display = "block";
+
+        // Close on outside click
+        window.onclick = (event) => {
+          if (event.target === modal) {
+            document.body.removeChild(modal);
+            document.head.removeChild(style);
+          }
+        };
+      }
+
+      // Clear cache when needed
+      function clearTeacherSectionsCache() {
+        teacherSectionsCache.clear();
+        sectionsCache = null;
       }
 
       // Function to update admin info in the sidebar

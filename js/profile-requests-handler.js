@@ -127,58 +127,22 @@ function filterProfileRequests() {
  */
 function renderProfileRequests() {
   console.log("renderProfileRequests called");
-  console.log("filteredRequests length:", filteredRequests?.length);
-  console.log("requestsTableBody element:", requestsTableBody);
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredRequests.length);
+  const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredRequests.slice(startIndex, endIndex);
 
-  console.log("currentItems:", currentItems);
-
-  // Clear table
   requestsTableBody.innerHTML = "";
 
-  // Show 'no data' message if needed
-  if (filteredRequests.length === 0) {
-    requestsTableBody.innerHTML = `<tr><td colspan="6" class="no-data">Aucune demande ne correspond aux critères.</td></tr>`;
-    if (paginationElement) paginationElement.innerHTML = "";
-    return;
-  }
-
-  // Render each request row
   currentItems.forEach((request) => {
     const student = request.student || {};
-    const row = document.createElement("tr");
-
-    // Format date
-    const requestDate = request.createdAt
-      ? new Date(request.createdAt).toLocaleDateString("fr-FR")
-      : "-";
-
-    // Create status badge
-    let statusClass = "status-pending";
-    let statusText = "En attente";
-
-    if (request.status === "approved") {
-      statusClass = "status-approved";
-      statusText = "Approuvée";
-    } else if (request.status === "rejected") {
-      statusClass = "status-rejected";
-      statusText = "Rejetée";
-    } else if (request.status === "cancelled") {
-      statusClass = "status-rejected";
-      statusText = "Annulée";
-    }
-
-    // Get number of changes (fields changed in the request)
     const changesCount = request.changes
       ? Object.keys(request.changes).length
       : 0;
+    const requestDate = new Date(request.createdAt).toLocaleDateString();
+    const statusClass = getStatusClass(request.status);
+    const statusText = getStatusText(request.status);
 
-    // Create row HTML
+    const row = document.createElement("tr");
     row.innerHTML = `
       <td>
         <div class="user-info">
@@ -197,19 +161,33 @@ function renderProfileRequests() {
       <td>${changesCount} champ${changesCount > 1 ? "s" : ""}</td>
       <td>${requestDate}</td>
       <td><span class="request-status ${statusClass}">${statusText}</span></td>
-      <td>        <button class="btn btn-primary btn-sm" onclick="openRequestDetails('${
-        request.id
-      }')">Détails</button>
-      </td>    `;
+      <td>
+        <div class="action-buttons">
+          <button class="btn btn-primary btn-sm" onclick="openRequestDetails('${
+            request.id
+          }')">
+            <i class="fas fa-eye"></i> Détails
+          </button>
+          ${
+            request.status === "pending"
+              ? `
+            <button class="btn btn-success btn-sm" onclick="quickApprove('${request.id}', event)">
+              <i class="fas fa-check"></i> Approuver
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="quickReject('${request.id}', event)">
+              <i class="fas fa-times"></i> Rejeter
+            </button>
+          `
+              : ""
+          }
+        </div>
+      </td>
+    `;
 
-    console.log("Generated row for request ID:", request.id);
     requestsTableBody.appendChild(row);
   });
 
-  // Update pagination
-  if (paginationElement) {
-    updatePagination(totalPages);
-  }
+  updatePagination(Math.ceil(filteredRequests.length / itemsPerPage));
 }
 
 /**
@@ -418,6 +396,138 @@ function getCurrentAdminId() {
     localStorage.getItem("admin_id") ||
     null
   );
+}
+
+/**
+ * Quick approve function for profile requests
+ */
+async function quickApprove(requestId, event) {
+  if (!confirm("Êtes-vous sûr de vouloir approuver cette demande ?")) {
+    return;
+  }
+
+  try {
+    const request = allRequests.find((req) => req.id === requestId);
+    if (!request) {
+      showMessage("Demande introuvable", "error");
+      return;
+    }
+
+    // Show loading state
+    const button = event ? event.target.closest("button") : null;
+    let originalText = "";
+
+    if (button) {
+      originalText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+
+    // Update request status
+    const response = await apiCall(
+      `profile-requests/${requestId}/status`,
+      "PATCH",
+      {
+        status: "approved",
+        adminComment: "Demande approuvée rapidement",
+      }
+    );
+
+    if (!response || response.error) {
+      throw new Error(response?.message || "Échec de la mise à jour");
+    }
+
+    // Update local data
+    const index = allRequests.findIndex((req) => req.id === requestId);
+    if (index !== -1) {
+      allRequests[index] = {
+        ...allRequests[index],
+        status: "approved",
+        adminComment: "Demande approuvée rapidement",
+        processedById: getCurrentAdminId(),
+      };
+    }
+
+    // Update UI
+    updateStats();
+    filterProfileRequests();
+    showMessage("Demande approuvée avec succès", "success");
+  } catch (error) {
+    console.error("Error approving request:", error);
+    showMessage(`Erreur: ${error.message}`, "error");
+  } finally {
+    // Reset button state if we have one
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  }
+}
+
+/**
+ * Quick reject function for profile requests
+ */
+async function quickReject(requestId, event) {
+  if (!confirm("Êtes-vous sûr de vouloir rejeter cette demande ?")) {
+    return;
+  }
+
+  try {
+    const request = allRequests.find((req) => req.id === requestId);
+    if (!request) {
+      showMessage("Demande introuvable", "error");
+      return;
+    }
+
+    // Show loading state
+    const button = event ? event.target.closest("button") : null;
+    let originalText = "";
+
+    if (button) {
+      originalText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+
+    // Update request status
+    const response = await apiCall(
+      `profile-requests/${requestId}/status`,
+      "PATCH",
+      {
+        status: "rejected",
+        adminComment: "Demande rejetée rapidement",
+      }
+    );
+
+    if (!response || response.error) {
+      throw new Error(response?.message || "Échec de la mise à jour");
+    }
+
+    // Update local data
+    const index = allRequests.findIndex((req) => req.id === requestId);
+    if (index !== -1) {
+      allRequests[index] = {
+        ...allRequests[index],
+        status: "rejected",
+        adminComment: "Demande rejetée rapidement",
+        processedById: getCurrentAdminId(),
+      };
+    }
+
+    // Update UI
+    updateStats();
+    filterProfileRequests();
+    showMessage("Demande rejetée avec succès", "success");
+  } catch (error) {
+    console.error("Error rejecting request:", error);
+    showMessage(`Erreur: ${error.message}`, "error");
+  } finally {
+    // Reset button state if we have one
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  }
 }
 
 /**

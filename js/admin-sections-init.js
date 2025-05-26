@@ -31,27 +31,44 @@ async function fetchSections() {
     const level =
       levelFilter && levelFilter.value !== "all" ? levelFilter.value : null;
 
-    // Use API fetcher function
-    const response = await apiCall("sections");
-
-    if (response && response.success && Array.isArray(response.data)) {
-      allSections = response.data;
-
-      // Apply filters and render
-      filteredSections = [...allSections];
-      renderSections();
-      updatePagination();
-
-      // Dispatch event that sections are loaded (for filters to initialize)
-      document.dispatchEvent(new Event("sectionsLoaded"));
-
-      showMessage(
-        `${allSections.length} sections chargées avec succès`,
-        "success"
-      );
+    // Check if we have access to the section API from admin-sections.js
+    if (
+      window.sectionAPI &&
+      typeof window.sectionAPI.getSections === "function"
+    ) {
+      console.log("Using sectionAPI.getSections to fetch sections");
+      try {
+        allSections = await window.sectionAPI.getSections();
+      } catch (apiError) {
+        console.error("Error using sectionAPI:", apiError);
+        throw apiError;
+      }
     } else {
-      throw new Error("Format de réponse invalide");
+      // Fallback to direct API call
+      console.log("Using direct API call to fetch sections");
+      const response = await apiCall("sections");
+
+      if (response && response.success && Array.isArray(response.data)) {
+        allSections = response.data;
+      } else {
+        throw new Error("Format de réponse invalide");
+      }
     }
+
+    console.log(`Loaded ${allSections.length} sections`);
+
+    // Apply filters and render
+    filteredSections = [...allSections];
+    renderSections();
+    updatePagination();
+
+    // Dispatch event that sections are loaded (for filters to initialize)
+    document.dispatchEvent(new Event("sectionsLoaded"));
+
+    showMessage(
+      `${allSections.length} sections chargées avec succès`,
+      "success"
+    );
   } catch (error) {
     console.error("Error fetching sections:", error);
     showMessage(
@@ -107,6 +124,83 @@ function setupEventListeners() {
       if (modal) modal.style.display = "none";
     });
   });
+}
+
+/**
+ * Initialize the section management functionality
+ * This is called when the document is loaded
+ */
+function initializeSectionManagement() {
+  // Initialize table sorting
+  const tableHeaders = document.querySelectorAll(".data-table th[data-sort]");
+  if (tableHeaders) {
+    tableHeaders.forEach((header) => {
+      header.addEventListener("click", () => {
+        const sortField = header.getAttribute("data-sort");
+        if (sortField) {
+          sortSections(sortField);
+        }
+      });
+    });
+  }
+
+  // Initialize filters if they exist
+  const departmentFilter = document.getElementById("department-filter");
+  const levelFilter = document.getElementById("level-filter");
+  const specialtyFilter = document.getElementById("specialty-filter");
+  const searchFilter = document.getElementById("search-filter");
+
+  if (departmentFilter) {
+    departmentFilter.addEventListener("change", applyFilters);
+  }
+
+  if (levelFilter) {
+    levelFilter.addEventListener("change", applyFilters);
+  }
+
+  if (specialtyFilter) {
+    specialtyFilter.addEventListener("change", applyFilters);
+  }
+
+  if (searchFilter) {
+    searchFilter.addEventListener("input", applyFilters);
+  }
+
+  // Initialize action buttons
+  setupActionButtons();
+
+  console.log("Section management initialized successfully");
+}
+
+/**
+ * Setup action buttons for the section table
+ */
+function setupActionButtons() {
+  // This will be called when the table is rendered
+  // Action buttons are added dynamically when rendering the table
+}
+
+/**
+ * Apply filters to the sections data
+ */
+function applyFilters() {
+  // Implementation will vary based on your specific requirements
+  console.log("Applying filters to sections");
+
+  // Update the table with filtered data
+  renderSections();
+}
+
+/**
+ * Sort sections by the specified field
+ * @param {string} field - The field to sort by
+ */
+function sortSections(field) {
+  // Implementation depends on your data structure
+  console.log(`Sorting sections by ${field}`);
+
+  // Update the table with sorted data
+  renderSections();
 }
 
 /**
